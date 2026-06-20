@@ -4,7 +4,7 @@ import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiResult
 import androidx.lifecycle.viewModelScope
-import com.sdm3.parent.data.repository.AuthRepository
+import com.sdm3.parent.data.repository.AuthRepositoryContract
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,7 +29,7 @@ data class VerifikasiOtpUiState(
 ) : ScreenState
 
 class VerifikasiOtpViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepositoryContract
 ) : BaseViewModel<VerifikasiOtpUiState>(VerifikasiOtpUiState()) {
 
     private var countdownJob: Job? = null

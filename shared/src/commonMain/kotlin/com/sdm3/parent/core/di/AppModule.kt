@@ -4,6 +4,7 @@ import com.sdm3.parent.core.network.HttpClientProvider
 import com.sdm3.parent.core.notification.FcmTokenProvider
 import com.sdm3.parent.core.security.BiometricAuthenticator
 import com.sdm3.parent.core.security.CertificatePins
+import com.sdm3.parent.core.security.KVaultSecureStorage
 import com.sdm3.parent.core.security.SecureTokenManager
 import com.sdm3.parent.data.remote.api.ArticleApi
 import com.sdm3.parent.data.remote.api.AttendanceApi
@@ -52,7 +53,8 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val securityModule = module {
-    single { SecureTokenManager(kVault = get()) }
+    single { KVaultSecureStorage(kVault = get()) as com.sdm3.parent.core.security.SecureStorage }
+    single { SecureTokenManager(storage = get()) }
     single { BiometricAuthenticator() }
 }
 
@@ -87,7 +89,7 @@ val apiModule = module {
 }
 
 val repositoryModule = module {
-    single { AuthRepository(get()) }
+    single<com.sdm3.parent.data.repository.AuthRepositoryContract> { AuthRepository(get()) }
     single { StudentRepository(get()) }
     single { GradeRepository(get()) }
     single { AttendanceRepository(get()) }

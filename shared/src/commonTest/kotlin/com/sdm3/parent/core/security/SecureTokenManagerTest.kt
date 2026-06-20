@@ -4,33 +4,32 @@ import com.sdm3.parent.core.test.TestDispatcher
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class FakeKVault {
+class FakeSecureStorage : SecureStorage {
     private val store = mutableMapOf<String, Any>()
 
-    fun set(key: String, stringValue: String): Boolean {
-        store[key] = stringValue
+    override fun set(key: String, value: String): Boolean {
+        store[key] = value
         return true
     }
 
-    fun set(key: String, boolValue: Boolean): Boolean {
-        store[key] = boolValue
+    override fun set(key: String, value: Boolean): Boolean {
+        store[key] = value
         return true
     }
 
-    fun string(forKey: String): String? = store[forKey] as? String
+    override fun string(forKey: String): String? = store[forKey] as? String
 
-    fun bool(forKey: String): Boolean? = store[forKey] as? Boolean
+    override fun bool(forKey: String): Boolean? = store[forKey] as? Boolean
 
-    fun deleteObject(forKey: String): Boolean {
+    override fun deleteObject(forKey: String): Boolean {
         store.remove(forKey)
         return true
     }
 
-    fun clear(): Boolean {
+    override fun clear(): Boolean {
         store.clear()
         return true
     }
@@ -40,8 +39,8 @@ class SecureTokenManagerTest : TestDispatcher() {
 
     @Test
     fun saveAndRetrieveBearerToken() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         manager.saveBearerToken("test-bearer-token")
         val retrieved = manager.getBearerToken()
@@ -51,8 +50,8 @@ class SecureTokenManagerTest : TestDispatcher() {
 
     @Test
     fun saveAndRetrieveSelectedStudentId() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         manager.saveSelectedStudentId("student-123")
         val retrieved = manager.getSelectedStudentId()
@@ -62,8 +61,8 @@ class SecureTokenManagerTest : TestDispatcher() {
 
     @Test
     fun saveAndRetrieveFcmToken() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         manager.saveFcmToken("fcm-test-token")
         val retrieved = manager.getFcmToken()
@@ -73,8 +72,8 @@ class SecureTokenManagerTest : TestDispatcher() {
 
     @Test
     fun biometricEnabledDefaultsToFalse() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         val enabled = manager.isBiometricEnabled()
 
@@ -83,8 +82,8 @@ class SecureTokenManagerTest : TestDispatcher() {
 
     @Test
     fun setAndCheckBiometricEnabled() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         manager.setBiometricEnabled(true)
         assertTrue(manager.isBiometricEnabled())
@@ -95,8 +94,8 @@ class SecureTokenManagerTest : TestDispatcher() {
 
     @Test
     fun clearAllSecureDataRemovesAllTokens() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         manager.saveBearerToken("bearer")
         manager.saveFcmToken("fcm")
@@ -111,24 +110,24 @@ class SecureTokenManagerTest : TestDispatcher() {
 
     @Test
     fun getBearerTokenReturnsNullWhenNotSet() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         assertNull(manager.getBearerToken())
     }
 
     @Test
     fun getFcmTokenReturnsNullWhenNotSet() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         assertNull(manager.getFcmToken())
     }
 
     @Test
     fun overwriteBearerToken() {
-        val fakeVault = FakeKVault()
-        val manager = SecureTokenManager(fakeVault as com.liftric.kvault.KVault)
+        val storage = FakeSecureStorage()
+        val manager = SecureTokenManager(storage)
 
         manager.saveBearerToken("first-token")
         manager.saveBearerToken("second-token")

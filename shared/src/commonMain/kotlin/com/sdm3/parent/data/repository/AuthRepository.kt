@@ -5,7 +5,7 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.AuthApi
 import com.sdm3.parent.data.remote.dto.UserDto
 
-class AuthRepository(private val api: AuthApi) {
+class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
 
     suspend fun login(email: String, password: String): ApiResult<UserDto> {
         return try {

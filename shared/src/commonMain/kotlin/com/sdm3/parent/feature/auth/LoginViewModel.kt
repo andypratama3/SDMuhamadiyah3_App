@@ -4,7 +4,7 @@ import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.UserDto
-import com.sdm3.parent.data.repository.AuthRepository
+import com.sdm3.parent.data.repository.AuthRepositoryContract
 
 data class LoginUiState(
     val email: String = "",
@@ -17,7 +17,7 @@ data class LoginUiState(
 ) : ScreenState
 
 class LoginViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepositoryContract
 ) : BaseViewModel<LoginUiState>(LoginUiState()) {
 
     fun onEmailChanged(email: String) {

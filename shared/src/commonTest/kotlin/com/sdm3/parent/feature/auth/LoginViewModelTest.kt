@@ -1,21 +1,36 @@
 package com.sdm3.parent.feature.auth
 
-import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.test.TestDispatcher
 import com.sdm3.parent.data.remote.dto.UserDto
+import com.sdm3.parent.data.repository.AuthRepositoryContract
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
-class FakeAuthRepository {
+class FakeAuthRepository : AuthRepositoryContract {
     var loginResult: ApiResult<UserDto> = ApiResult.Success(
         UserDto(id = "1", name = "Test User", email = "test@example.com")
     )
 
-    suspend fun login(email: String, password: String): ApiResult<UserDto> = loginResult
+    override suspend fun login(email: String, password: String): ApiResult<UserDto> = loginResult
+
+    override suspend fun getAuthenticatedUser(): ApiResult<UserDto> = loginResult
+
+    override suspend fun isLoggedIn(): Boolean = loginResult is ApiResult.Success
+
+    override suspend fun logout() {}
+
+    override suspend fun requestOtp(email: String): ApiResult<String> =
+        ApiResult.Success("OTP sent")
+
+    override suspend fun verifyOtp(email: String, otp: String): ApiResult<String> =
+        ApiResult.Success("OTP verified")
+
+    override suspend fun resetPassword(
+        email: String, otp: String, password: String, passwordConfirmation: String
+    ): ApiResult<String> = ApiResult.Success("Password reset")
 }
 
 class LoginViewModelTest : TestDispatcher() {
@@ -23,7 +38,7 @@ class LoginViewModelTest : TestDispatcher() {
     @Test
     fun initialUiStateHasDefaultValues() {
         val repo = FakeAuthRepository()
-        val viewModel = LoginViewModel(repo as com.sdm3.parent.data.repository.AuthRepository)
+        val viewModel = LoginViewModel(repo)
 
         val state = viewModel.uiState.value
         assertEquals("", state.email)
@@ -37,7 +52,7 @@ class LoginViewModelTest : TestDispatcher() {
     @Test
     fun onEmailChangedUpdatesEmail() {
         val repo = FakeAuthRepository()
-        val viewModel = LoginViewModel(repo as com.sdm3.parent.data.repository.AuthRepository)
+        val viewModel = LoginViewModel(repo)
 
         viewModel.onEmailChanged("test@example.com")
 
@@ -47,7 +62,7 @@ class LoginViewModelTest : TestDispatcher() {
     @Test
     fun onEmailChangedClearsErrorMessage() {
         val repo = FakeAuthRepository()
-        val viewModel = LoginViewModel(repo as com.sdm3.parent.data.repository.AuthRepository)
+        val viewModel = LoginViewModel(repo)
 
         viewModel.onEmailChanged("test@example.com")
 
@@ -57,7 +72,7 @@ class LoginViewModelTest : TestDispatcher() {
     @Test
     fun onPasswordChangedUpdatesPassword() {
         val repo = FakeAuthRepository()
-        val viewModel = LoginViewModel(repo as com.sdm3.parent.data.repository.AuthRepository)
+        val viewModel = LoginViewModel(repo)
 
         viewModel.onPasswordChanged("secret")
 
@@ -67,7 +82,7 @@ class LoginViewModelTest : TestDispatcher() {
     @Test
     fun onPasswordChangedClearsErrorMessage() {
         val repo = FakeAuthRepository()
-        val viewModel = LoginViewModel(repo as com.sdm3.parent.data.repository.AuthRepository)
+        val viewModel = LoginViewModel(repo)
 
         viewModel.onPasswordChanged("secret")
 
@@ -77,7 +92,7 @@ class LoginViewModelTest : TestDispatcher() {
     @Test
     fun loginWithBlankEmailShowsError() {
         val repo = FakeAuthRepository()
-        val viewModel = LoginViewModel(repo as com.sdm3.parent.data.repository.AuthRepository)
+        val viewModel = LoginViewModel(repo)
 
         viewModel.login()
 
@@ -88,7 +103,7 @@ class LoginViewModelTest : TestDispatcher() {
     @Test
     fun loginWithBlankPasswordShowsError() {
         val repo = FakeAuthRepository()
-        val viewModel = LoginViewModel(repo as com.sdm3.parent.data.repository.AuthRepository)
+        val viewModel = LoginViewModel(repo)
 
         viewModel.onEmailChanged("test@example.com")
         viewModel.login()
@@ -100,7 +115,7 @@ class LoginViewModelTest : TestDispatcher() {
     @Test
     fun clearErrorResetsErrorMessage() {
         val repo = FakeAuthRepository()
-        val viewModel = LoginViewModel(repo as com.sdm3.parent.data.repository.AuthRepository)
+        val viewModel = LoginViewModel(repo)
 
         viewModel.clearError()
 
