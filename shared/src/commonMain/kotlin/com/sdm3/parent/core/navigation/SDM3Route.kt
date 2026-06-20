@@ -18,9 +18,6 @@ sealed interface SDM3Route {
     data object Login : SDM3Route
 
     @Serializable
-    data object ForgotPasswordViaSchool : SDM3Route
-
-    @Serializable
     data class VerifikasiOtp(val email: String) : SDM3Route
 
     @Serializable
