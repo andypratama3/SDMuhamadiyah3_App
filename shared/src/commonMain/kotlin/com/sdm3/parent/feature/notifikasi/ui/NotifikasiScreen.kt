@@ -35,7 +35,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.sdm3.parent.feature.notifikasi.NotifikasiViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,7 +81,9 @@ private sealed class LazyNotifItem {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotifikasiScreen() {
+fun NotifikasiScreen(
+    viewModel: NotifikasiViewModel = koinViewModel()
+) {
     var selectedFilter by remember { mutableIntStateOf(0) }
 
     Scaffold(

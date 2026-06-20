@@ -7,7 +7,7 @@ import com.sdm3.parent.data.remote.dto.UserDto
 
 class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
 
-    suspend fun login(email: String, password: String): ApiResult<UserDto> {
+    override suspend fun login(email: String, password: String): ApiResult<UserDto> {
         return try {
             val result = api.login(email, password)
             when (result) {
@@ -19,7 +19,7 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
         }
     }
 
-    suspend fun getAuthenticatedUser(): ApiResult<UserDto> {
+    override suspend fun getAuthenticatedUser(): ApiResult<UserDto> {
         return try {
             api.getUser()
         } catch (e: Exception) {
@@ -27,7 +27,7 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
         }
     }
 
-    suspend fun isLoggedIn(): Boolean {
+    override suspend fun isLoggedIn(): Boolean {
         return try {
             val result = api.getUser()
             result is ApiResult.Success
@@ -36,13 +36,13 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
         }
     }
 
-    suspend fun logout() {
+    override suspend fun logout() {
         try {
             api.getCsrfCookie()
         } catch (_: Exception) { }
     }
 
-    suspend fun requestOtp(email: String): ApiResult<String> {
+    override suspend fun requestOtp(email: String): ApiResult<String> {
         return try {
             when (val result = api.requestOtp(email)) {
                 is ApiResult.Success -> ApiResult.Success(result.data.message)
@@ -53,7 +53,7 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
         }
     }
 
-    suspend fun verifyOtp(email: String, otp: String): ApiResult<String> {
+    override suspend fun verifyOtp(email: String, otp: String): ApiResult<String> {
         return try {
             when (val result = api.verifyOtp(email, otp)) {
                 is ApiResult.Success -> ApiResult.Success(result.data.message)
@@ -64,7 +64,7 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
         }
     }
 
-    suspend fun resetPassword(
+    override suspend fun resetPassword(
         email: String,
         otp: String,
         password: String,
