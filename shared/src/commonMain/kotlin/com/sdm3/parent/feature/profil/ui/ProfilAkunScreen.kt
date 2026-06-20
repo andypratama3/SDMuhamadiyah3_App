@@ -46,6 +46,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
 import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
@@ -57,10 +67,10 @@ import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 
 data class SettingsItem(
-    val title: String,
-    val emoji: String,
-    val trailing: String? = null,
-    val onClick: (() -> Unit)? = null
+    val label: String,
+    val icon: ImageVector,
+    val color: Color,
+    val onClick: () -> Unit
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,9 +115,11 @@ fun ProfilAkunScreen(
                             .background(Primary.copy(alpha = 0.1f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            "👤",
-                            modifier = Modifier.size(48.dp)
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = OnSurfaceVariant
                         )
                     }
                     Spacer(modifier = Modifier.width(Spacing.md))
@@ -205,36 +217,41 @@ fun ProfilAkunScreen(
             ) {
                 Column(modifier = Modifier.padding(Spacing.md)) {
                     SettingsItemRow(
-                        emoji = "🔔",
+                        icon = Icons.Default.Notifications,
                         title = "Notifikasi",
+                        color = Secondary,
                         trailing = null,
                         onClick = onNotifikasiSetting
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
                     SettingsItemRow(
-                        emoji = "🌐",
+                        icon = Icons.Default.Language,
                         title = "Bahasa",
+                        color = Primary,
                         trailing = "Bahasa Indonesia",
                         onClick = { }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
                     SettingsItemRow(
-                        emoji = "ℹ️",
+                        icon = Icons.Default.Info,
                         title = "Tentang Aplikasi",
+                        color = OnSurfaceVariant,
                         trailing = null,
                         onClick = { }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
                     SettingsItemRow(
-                        emoji = "🔒",
+                        icon = Icons.Default.Lock,
                         title = "Kebijakan Privasi",
+                        color = StatusDanger,
                         trailing = null,
                         onClick = { }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
                     SettingsItemRow(
-                        emoji = "💬",
+                        icon = Icons.Default.Chat,
                         title = "Hubungi Sekolah",
+                        color = Secondary,
                         trailing = null,
                         onClick = { }
                     )
@@ -269,7 +286,7 @@ fun ProfilAkunScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusDanger),
                 border = BorderStroke(1.dp, StatusDanger)
             ) {
-                Text("🚪")
+                Icon(Icons.Default.ExitToApp, contentDescription = null, tint = StatusDanger)
                 Spacer(modifier = Modifier.width(Spacing.sm))
                 Text("Keluar Akun", fontWeight = FontWeight.SemiBold)
             }
@@ -315,8 +332,9 @@ fun ProfilAkunScreen(
 
 @Composable
 private fun SettingsItemRow(
-    emoji: String,
+    icon: ImageVector,
     title: String,
+    color: Color,
     trailing: String?,
     onClick: () -> Unit
 ) {
@@ -327,9 +345,11 @@ private fun SettingsItemRow(
             .padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            emoji,
-            modifier = Modifier.size(24.dp)
+        Icon(
+            icon,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = color
         )
         Spacer(modifier = Modifier.width(Spacing.md))
         Text(

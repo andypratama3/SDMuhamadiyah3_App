@@ -33,6 +33,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material3.Icon
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -144,9 +150,11 @@ fun KegiatanProgramScreen(studentId: String) {
                                     .background(Secondary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    "⚽",
-                                    modifier = Modifier.size(28.dp)
+                                Icon(
+                                    Icons.Default.SportsSoccer,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(28.dp),
+                                    tint = Primary
                                 )
                             }
                             Spacer(modifier = Modifier.width(Spacing.md))
@@ -221,9 +229,11 @@ fun KegiatanProgramScreen(studentId: String) {
                                         .background(Primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
-                                        "📖",
-                                        modifier = Modifier.size(28.dp)
+                                    Icon(
+                                        Icons.Default.MenuBook,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(28.dp),
+                                        tint = Primary
                                     )
                                 }
                                 Spacer(modifier = Modifier.width(Spacing.md))

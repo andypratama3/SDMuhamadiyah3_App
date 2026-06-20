@@ -10,6 +10,10 @@ plugins {
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     androidLibrary {
         namespace = "com.sdm3.parent.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -42,6 +46,8 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
+            implementation(libs.compose.material.icons.core)
+            implementation(libs.compose.material.icons.extended)
 
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.runtime.compose)

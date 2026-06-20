@@ -43,6 +43,11 @@ import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
 import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Icon
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,9 +81,11 @@ fun DetailBuktiBayarScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    "✅",
-                    modifier = Modifier.size(80.dp)
+                Icon(
+                    Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(72.dp),
+                    tint = StatusSuccess
                 )
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 Text(
@@ -213,7 +220,7 @@ fun DetailBuktiBayarScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary)
             ) {
-                Text("⬇️")
+                Icon(Icons.Default.FileDownload, contentDescription = null)
                 Spacer(modifier = Modifier.width(Spacing.sm))
                 Text("Download PDF Bukti", fontWeight = FontWeight.SemiBold)
             }
@@ -225,7 +232,7 @@ fun DetailBuktiBayarScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("↗️")
+                Icon(Icons.Default.Share, contentDescription = null)
                 Spacer(modifier = Modifier.width(Spacing.sm))
                 Text("Bagikan")
             }

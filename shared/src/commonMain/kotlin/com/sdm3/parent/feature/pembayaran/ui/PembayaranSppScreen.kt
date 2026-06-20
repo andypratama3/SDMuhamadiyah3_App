@@ -49,6 +49,11 @@ import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusDanger
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
+import com.sdm3.parent.core.designsystem.theme.StatusWarning
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.HourglassEmpty
+import androidx.compose.material3.Icon
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 import com.sdm3.parent.core.designsystem.theme.TertiaryFixed
 
@@ -183,10 +188,21 @@ fun PembayaranSppScreen(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                if (payment.status == "success") "✅" else "⏳",
-                                modifier = Modifier.size(24.dp)
-                            )
+                            if (payment.status == "success") {
+                                Icon(
+                                    Icons.Default.CheckCircle,
+                                    contentDescription = "Lunas",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = StatusSuccess
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.HourglassEmpty,
+                                    contentDescription = "Pending",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = StatusWarning
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.width(Spacing.md))
                         Column(modifier = Modifier.weight(1f)) {

@@ -28,6 +28,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material3.Icon
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,15 +53,15 @@ import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 
 data class QuickNav(
     val title: String,
-    val emoji: String,
+    val icon: ImageVector,
     val color: Color
 )
 
 private val quickNavItems = listOf(
-    QuickNav("Nilai", "📊", Secondary),
-    QuickNav("Rapor", "📄", Primary),
-    QuickNav("Kehadiran", "📅", StatusWarning),
-    QuickNav("Kesehatan", "💊", SchoolGreenDark)
+    QuickNav("Nilai", Icons.Default.Assessment, Secondary),
+    QuickNav("Rapor", Icons.Default.Description, Primary),
+    QuickNav("Kehadiran", Icons.Default.DateRange, StatusWarning),
+    QuickNav("Kesehatan", Icons.Default.MedicalServices, SchoolGreenDark)
 )
 
 data class InfoItem(val label: String, val value: String)
@@ -70,7 +80,7 @@ fun DetailInfoAnakScreen(studentId: String) {
                 },
                 actions = {
                     IconButton(onClick = { }) {
-                        Text("↗️")
+                        Icon(Icons.Default.OpenInNew, contentDescription = null)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
@@ -279,7 +289,7 @@ private fun NavItemCard(nav: QuickNav, modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth().padding(Spacing.md),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(nav.emoji, modifier = Modifier.size(32.dp))
+            Icon(nav.icon, contentDescription = null, modifier = Modifier.size(28.dp), tint = nav.color)
             Spacer(modifier = Modifier.height(Spacing.sm))
             Text(
                 text = nav.title,

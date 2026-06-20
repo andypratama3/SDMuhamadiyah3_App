@@ -46,6 +46,15 @@ import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.SurfaceContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,7 +74,13 @@ fun PreviewRaporPdfScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("📄 Preview Rapor") },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(24.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Preview Rapor")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Text("←")
@@ -90,7 +105,7 @@ fun PreviewRaporPdfScreen(
             ) {
                 Column(modifier = Modifier.padding(Spacing.md)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("📄", modifier = Modifier.size(40.dp))
+                        Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(40.dp))
                         Spacer(modifier = Modifier.width(Spacing.md))
                         Column {
                             Text(
@@ -136,7 +151,7 @@ fun PreviewRaporPdfScreen(
                         modifier = Modifier.padding(Spacing.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("❌", modifier = Modifier.size(24.dp))
+                        Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(24.dp), tint = Error)
                         Spacer(modifier = Modifier.width(Spacing.sm))
                         Text(
                             text = error,
@@ -178,7 +193,7 @@ fun PreviewRaporPdfScreen(
                         modifier = Modifier.padding(Spacing.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("✅", modifier = Modifier.size(24.dp))
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(24.dp), tint = StatusSuccess)
                         Spacer(modifier = Modifier.width(Spacing.sm))
                         Text(
                             text = "PDF berhasil diunduh",
@@ -196,7 +211,7 @@ fun PreviewRaporPdfScreen(
                 enabled = !state.isDownloading && !state.isDownloaded,
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary)
             ) {
-                Text("📥")
+                Icon(Icons.Default.FileDownload, contentDescription = null)
                 Spacer(modifier = Modifier.width(Spacing.sm))
                 Text("Unduh PDF", fontWeight = FontWeight.SemiBold)
             }
@@ -206,7 +221,7 @@ fun PreviewRaporPdfScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("🔗")
+                Icon(Icons.Default.Link, contentDescription = null)
                 Spacer(modifier = Modifier.width(Spacing.sm))
                 Text("Bagikan")
             }
@@ -216,7 +231,7 @@ fun PreviewRaporPdfScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("🌐")
+                Icon(Icons.Default.Language, contentDescription = null)
                 Spacer(modifier = Modifier.width(Spacing.sm))
                 Text("Buka di Browser Eksternal")
             }
@@ -232,7 +247,7 @@ fun PreviewRaporPdfScreen(
                     modifier = Modifier.padding(Spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("🔄", modifier = Modifier.size(24.dp))
+                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(Spacing.sm))
                     Text(
                         text = if (state.isDownloaded) "Dokumen siap dibuka" else "Tekan tombol Unduh untuk memulai",

@@ -8,6 +8,7 @@ import com.sdm3.parent.App
 import com.sdm3.parent.core.di.allAppModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.compose.KoinApplication
+import org.koin.compose.koinConfiguration
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,10 +16,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            KoinApplication(application = {
-                androidContext(this@MainActivity)
-                modules(allAppModules)
-            }) {
+            KoinApplication(
+                config = koinConfiguration {
+                    androidContext(this@MainActivity)
+                    modules(allAppModules)
+                }
+            ) {
                 App()
             }
         }

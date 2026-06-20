@@ -18,6 +18,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -115,7 +120,7 @@ fun HalamanRaporScreen(studentId: String) {
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Secondary)
                             ) {
-                                Text("⬇️")
+                                Icon(Icons.Default.FileDownload, contentDescription = null, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(Spacing.sm))
                                 Text("Unduh PDF", fontWeight = FontWeight.SemiBold)
                             }
@@ -127,7 +132,7 @@ fun HalamanRaporScreen(studentId: String) {
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("👁️")
+                                Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(Spacing.sm))
                                 Text("Lihat Online")
                             }
@@ -137,9 +142,11 @@ fun HalamanRaporScreen(studentId: String) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    "✅",
-                                    modifier = Modifier.size(24.dp)
+                                Icon(
+                                    Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = StatusSuccess
                                 )
                                 Spacer(modifier = Modifier.width(Spacing.sm))
                                 Text(
@@ -194,7 +201,7 @@ fun HalamanRaporScreen(studentId: String) {
                             )
                         }
                         IconButton(onClick = { }) {
-                            Text("⬇️")
+                            Icon(Icons.Default.FileDownload, contentDescription = "Unduh rapor")
                         }
                     }
                 }

@@ -40,6 +40,10 @@ import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Icon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,9 +90,11 @@ fun ProsesPembayaranScreen(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            "📱",
-                            modifier = Modifier.size(36.dp)
+                        Icon(
+                            Icons.Default.Phone,
+                            contentDescription = null,
+                            modifier = Modifier.size(36.dp),
+                            tint = Primary
                         )
                     }
 
@@ -117,7 +123,7 @@ fun ProsesPembayaranScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("📋")
+                        Icon(Icons.Default.ContentCopy, contentDescription = null)
                         Spacer(modifier = Modifier.width(Spacing.sm))
                         Text("Salin Nomor VA")
                     }
@@ -185,9 +191,11 @@ fun ProsesPembayaranScreen(
                     .background(Color.White, RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    "📱",
-                    modifier = Modifier.size(160.dp)
+                Icon(
+                    Icons.Default.Phone,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = Primary
                 )
             }
 

@@ -35,6 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
 import com.sdm3.parent.core.designsystem.component.StatusChip
 import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
 import com.sdm3.parent.core.designsystem.theme.Primary
@@ -78,7 +81,7 @@ fun PengumumanSekolahScreen() {
                 },
                 actions = {
                     IconButton(onClick = { }) {
-                        Text("🔍")
+                        Icon(Icons.Default.Search, contentDescription = "Cari")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)

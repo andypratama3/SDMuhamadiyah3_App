@@ -40,19 +40,25 @@ import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.graphics.vector.ImageVector
 
 data class PaymentMethod(
     val id: String,
     val name: String,
-    val emoji: String,
+    val icon: ImageVector,
     val description: String
 )
 
 private val paymentMethods = listOf(
-    PaymentMethod("va_bca", "Virtual Account BCA", "🏦", "Transfer ke rekening BCA"),
-    PaymentMethod("va_bni", "Virtual Account BNI", "🏦", "Transfer ke rekening BNI"),
-    PaymentMethod("va_bsi", "Virtual Account BSI", "🏦", "Transfer ke rekening BSI"),
-    PaymentMethod("qris", "QRIS", "📱", "Scan QR dengan e-wallet"),
+    PaymentMethod("va_bca", "Virtual Account BCA", Icons.Default.AccountBalance, "Transfer ke rekening BCA"),
+    PaymentMethod("va_bni", "Virtual Account BNI", Icons.Default.AccountBalance, "Transfer ke rekening BNI"),
+    PaymentMethod("va_bsi", "Virtual Account BSI", Icons.Default.AccountBalance, "Transfer ke rekening BSI"),
+    PaymentMethod("qris", "QRIS", Icons.Default.QrCodeScanner, "Scan QR dengan e-wallet"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -158,9 +164,11 @@ fun PilihMetodeBayarScreen(
                                 .padding(Spacing.md),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                method.emoji,
-                                modifier = Modifier.size(32.dp)
+                            Icon(
+                                method.icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp),
+                                tint = Primary
                             )
                             Spacer(modifier = Modifier.width(Spacing.md))
                             Column(modifier = Modifier.weight(1f)) {
@@ -175,9 +183,9 @@ fun PilihMetodeBayarScreen(
                                     color = OnSurfaceVariant
                                 )
                             }
-                            Text(
-                                if (isSelected) "⭕" else "○",
-                                modifier = Modifier.size(20.dp)
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = { selectedMethod = method.id }
                             )
                         }
                     }

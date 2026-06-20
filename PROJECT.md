@@ -75,6 +75,7 @@ shared/
     │   │   │
     │   │   ├── designsystem/
     │   │   │   ├── component/
+    │   │   │   │   ├── IconText.kt              # Row with Icon + Text helper
     │   │   │   │   ├── SDM3BottomNavBar.kt     # Bottom nav with 5 tabs
     │   │   │   │   ├── Sdm3Button.kt           # Primary/secondary/outline buttons
     │   │   │   │   ├── Sdm3Card.kt             # Reusable card component
@@ -495,8 +496,14 @@ TOTAL                   81% (39/48)
 
 ## Key Decisions
 
-### Emoji Icons
-Material Icons (`material-icons-core`) not available at compose-multiplatform 1.11.1. All icons replaced with Unicode emoji (🏠 ⭐ 💳 📄 👤).
+### Material Icons
+All icons use `material-icons-core` + `material-icons-extended` from JetBrains Compose Multiplatform (`org.jetbrains.compose.material:material-icons-core`, `org.jetbrains.compose.material:material-icons-extended`). Replaced all emoji with proper `Icon(Icons.Default.*)` composable calls across 15 screens (68+ icon usages).
+
+### KoinApplication (Android)
+Uses `KoinApplication(config = koinConfiguration { androidContext() ... })` pattern (Koin 4.2.1 API, avoids deprecated lambda overload).
+
+### Compiler Flags
+`-Xexpect-actual-classes` added to suppress Beta warnings for expect/actual classes (`BiometricAuth`, `FcmTokenProvider`).
 
 ### No OTP Screen
 Deferred to Phase 9 Security. OTP-based forgot password flow not yet implemented.
@@ -544,7 +551,7 @@ SDK versions: `compileSdk = 36`, `minSdk = 24`, `targetSdk = 36`.
 | Platform (androidMain) | 4 |
 | Platform (iosMain) | 4 |
 | Navigation | 2 |
-| Design System | 9 |
+| Design System | 10 |
 | Domain Entities | 5 |
 | Tests | 5 |
 | CI/CD | 2 |

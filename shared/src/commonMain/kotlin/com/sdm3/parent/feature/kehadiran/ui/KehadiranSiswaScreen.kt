@@ -34,6 +34,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material3.Icon
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,15 +61,15 @@ import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 data class AttendanceSummary(
     val label: String,
     val count: Int,
-    val emoji: String,
+    val icon: ImageVector,
     val color: Color
 )
 
 private val summaryData = listOf(
-    AttendanceSummary("Hadir", 18, "✅", StatusSuccess),
-    AttendanceSummary("Sakit", 1, "🩺", StatusWarning),
-    AttendanceSummary("Izin", 0, "📅", Secondary),
-    AttendanceSummary("Alpa", 0, "❌", StatusDanger)
+    AttendanceSummary("Hadir", 18, Icons.Default.CheckCircle, StatusSuccess),
+    AttendanceSummary("Sakit", 1, Icons.Default.MedicalServices, StatusWarning),
+    AttendanceSummary("Izin", 0, Icons.Default.DateRange, Secondary),
+    AttendanceSummary("Alpa", 0, Icons.Default.Cancel, StatusDanger)
 )
 
 private val daysInMonth = listOf(
@@ -122,9 +131,11 @@ fun KehadiranSiswaScreen(studentId: String) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "📅",
-                            modifier = Modifier.size(28.dp)
+                        Icon(
+                            Icons.Default.DateRange,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = Primary
                         )
                         Spacer(modifier = Modifier.width(Spacing.sm))
                         Text(
@@ -134,9 +145,11 @@ fun KehadiranSiswaScreen(studentId: String) {
                             color = Primary
                         )
                     }
-                    Text(
-                        "🔽",
-                        modifier = Modifier.size(28.dp)
+                    Icon(
+                        Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = Primary
                     )
                 }
             }
@@ -171,9 +184,11 @@ fun KehadiranSiswaScreen(studentId: String) {
                             modifier = Modifier.padding(Spacing.md),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                item.emoji,
-                                modifier = Modifier.size(28.dp)
+                            Icon(
+                                item.icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp),
+                                tint = item.color
                             )
                             Spacer(modifier = Modifier.width(Spacing.sm))
                             Column {

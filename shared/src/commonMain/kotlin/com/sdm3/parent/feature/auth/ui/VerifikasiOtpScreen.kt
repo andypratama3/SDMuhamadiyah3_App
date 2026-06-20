@@ -42,6 +42,17 @@ import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.feature.auth.OtpStep
 import com.sdm3.parent.feature.auth.VerifikasiOtpViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Icon
+import com.sdm3.parent.core.designsystem.theme.Secondary
+import com.sdm3.parent.core.designsystem.theme.StatusDanger
 
 @Composable
 fun VerifikasiOtpScreen(
@@ -60,9 +71,11 @@ fun VerifikasiOtpScreen(
     ) {
         Spacer(modifier = Modifier.height(Spacing.xl))
 
-        Text(
-            text = "🔑",
-            fontSize = 48.sp
+        Icon(
+            imageVector = Icons.Default.Lock,
+            contentDescription = null,
+            modifier = Modifier.size(40.dp),
+            tint = Primary
         )
 
         Spacer(modifier = Modifier.height(Spacing.md))
@@ -93,8 +106,9 @@ fun VerifikasiOtpScreen(
             OtpStep.REQUEST_OTP -> {
                 Sdm3TextField(
                     value = state.email,
-                    onValueChange = { viewModel.updateOtpCode(it) },
-                    label = "📧 Email"
+                    onValueChange = { viewModel.setEmail(it) },
+                    label = "Email",
+                    leadingIcon = Icons.Default.Email
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
@@ -107,11 +121,11 @@ fun VerifikasiOtpScreen(
             }
 
             OtpStep.VERIFY_OTP -> {
-                Text(
-                    text = "📧 ${state.email}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = OnSurfaceVariant
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Email, contentDescription = null, tint = Secondary)
+                    Spacer(Modifier.width(8.dp))
+                    Text(state.email, style = MaterialTheme.typography.bodyLarge)
+                }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
 
@@ -123,11 +137,15 @@ fun VerifikasiOtpScreen(
                 Spacer(modifier = Modifier.height(Spacing.md))
 
                 if (state.countdownSeconds > 0) {
-                    Text(
-                        text = "⏱️ Kirim ulang dalam ${state.countdownSeconds} detik",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = OnSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Timer, contentDescription = null, modifier = Modifier.size(16.dp), tint = OnSurfaceVariant)
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = "Kirim ulang dalam ${state.countdownSeconds} detik",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = OnSurfaceVariant
+                        )
+                    }
                 } else {
                     TextButton(onClick = { viewModel.resendOtp() }) {
                         Text(
@@ -153,7 +171,8 @@ fun VerifikasiOtpScreen(
                 Sdm3TextField(
                     value = state.newPassword,
                     onValueChange = { viewModel.updateNewPassword(it) },
-                    label = "🔑 Password Baru",
+                    label = "Password Baru",
+                    leadingIcon = Icons.Default.Lock,
                     visualTransformation = if (state.isPasswordVisible)
                         VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
@@ -164,7 +183,8 @@ fun VerifikasiOtpScreen(
                 Sdm3TextField(
                     value = state.newPasswordConfirmation,
                     onValueChange = { viewModel.updateNewPasswordConfirmation(it) },
-                    label = "🔑 Konfirmasi Password",
+                    label = "Konfirmasi Password",
+                    leadingIcon = Icons.Default.Lock,
                     visualTransformation = if (state.isPasswordVisible)
                         VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
@@ -173,11 +193,19 @@ fun VerifikasiOtpScreen(
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 TextButton(onClick = { viewModel.togglePasswordVisibility() }) {
-                    Text(
-                        text = if (state.isPasswordVisible) "🙈 Sembunyikan" else "👁️ Tampilkan",
-                        color = OnSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (state.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = if (state.isPasswordVisible) "Sembunyikan" else "Tampilkan",
+                            color = OnSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
@@ -192,23 +220,20 @@ fun VerifikasiOtpScreen(
 
         state.errorMessage?.let {
             Spacer(modifier = Modifier.height(Spacing.sm))
-            Text(
-                text = "❌ $it",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(16.dp), tint = StatusDanger)
+                Spacer(Modifier.width(4.dp))
+                Text(it, color = StatusDanger, style = MaterialTheme.typography.bodyMedium)
+            }
         }
 
         state.resetSuccessMessage?.let {
             Spacer(modifier = Modifier.height(Spacing.md))
-            Text(
-                text = "✅ $it",
-                color = StatusSuccess,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp), tint = StatusSuccess)
+                Spacer(Modifier.width(4.dp))
+                Text(it, color = StatusSuccess, style = MaterialTheme.typography.bodyMedium)
+            }
             Spacer(modifier = Modifier.height(Spacing.lg))
             Sdm3Button(
                 text = "Kembali ke Login",

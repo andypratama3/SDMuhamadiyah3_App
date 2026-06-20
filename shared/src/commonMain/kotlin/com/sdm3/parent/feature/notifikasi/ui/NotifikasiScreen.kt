@@ -22,6 +22,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,16 +35,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
 import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.Secondary
@@ -89,8 +90,8 @@ fun NotifikasiScreen() {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
-                        Text("✅")
+                    IconButton(onClick = { viewModel.markAllRead() }) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = "Tandai semua dibaca")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
@@ -189,9 +190,11 @@ fun NotifikasiScreen() {
                                                 .background(typeColor.copy(alpha = 0.1f)),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(
-                                                "🔔",
-                                                modifier = Modifier.size(28.dp)
+                                            Icon(
+                                                Icons.Default.Notifications,
+                                                contentDescription = notif.type,
+                                                modifier = Modifier.size(28.dp),
+                                                tint = typeColor
                                             )
                                         }
                                         Spacer(modifier = Modifier.width(Spacing.md))
@@ -248,9 +251,11 @@ private fun EmptyNotifikasiState() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            "🔔",
-            modifier = Modifier.size(80.dp)
+        Icon(
+            Icons.Default.Notifications,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = OnSurfaceVariant
         )
         Spacer(modifier = Modifier.height(Spacing.md))
         Text(
@@ -260,7 +265,7 @@ private fun EmptyNotifikasiState() {
         )
         Spacer(modifier = Modifier.height(Spacing.sm))
         IconButton(onClick = { }) {
-            Text("🔄")
+            Icon(Icons.Default.Refresh, contentDescription = "Refresh")
         }
     }
 }

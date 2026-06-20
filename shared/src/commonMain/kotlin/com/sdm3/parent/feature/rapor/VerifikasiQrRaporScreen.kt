@@ -55,6 +55,15 @@ import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.SurfaceContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.HourglassEmpty
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +88,13 @@ fun VerifikasiQrRaporScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🔍 Verifikasi QR Rapor") },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(24.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Verifikasi QR Rapor")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Text("←")
@@ -120,7 +135,7 @@ fun VerifikasiQrRaporScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("📷", modifier = Modifier.size(64.dp))
+                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(64.dp))
                             Spacer(modifier = Modifier.height(Spacing.sm))
                             Text(
                                 text = "Arahkan kamera ke QR Code",
@@ -162,11 +177,11 @@ fun VerifikasiQrRaporScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary)
             ) {
                 if (state.isLoading) {
-                    Text("⏳")
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(Spacing.sm))
                     Text("Memverifikasi...", fontWeight = FontWeight.SemiBold)
                 } else {
-                    Text("🔍")
+                    Icon(Icons.Default.Search, contentDescription = null)
                     Spacer(modifier = Modifier.width(Spacing.sm))
                     Text("Verifikasi", fontWeight = FontWeight.SemiBold)
                 }
@@ -192,7 +207,7 @@ fun VerifikasiQrRaporScreen(
                                 modifier = Modifier.padding(Spacing.md),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("❌", modifier = Modifier.size(24.dp))
+                                Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(24.dp), tint = Error)
                                 Spacer(modifier = Modifier.width(Spacing.sm))
                                 Text(
                                     text = error,
@@ -212,9 +227,11 @@ fun VerifikasiQrRaporScreen(
                         ) {
                             Column(modifier = Modifier.padding(Spacing.lg)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = if (result.valid) "✅" else "❌",
-                                        modifier = Modifier.size(48.dp)
+                                    Icon(
+                                        imageVector = if (result.valid) Icons.Default.CheckCircle else Icons.Default.Clear,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(48.dp),
+                                        tint = if (result.valid) StatusSuccess else Error
                                     )
                                     Spacer(modifier = Modifier.width(Spacing.md))
                                     Column {
@@ -246,10 +263,33 @@ fun VerifikasiQrRaporScreen(
                                 result.nisn?.let {
                                     VerifInfoRow(label = "NISN", value = it)
                                 }
-                                VerifInfoRow(
-                                    label = "Status",
-                                    value = if (result.valid) "Sah ✅" else "Tidak Sah ❌"
-                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Status",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = OnSurfaceVariant
+                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = if (result.valid) Icons.Default.CheckCircle else Icons.Default.Clear,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                            tint = if (result.valid) StatusSuccess else Error
+                                        )
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(
+                                            text = if (result.valid) "Sah" else "Tidak Sah",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
+                                }
                             }
                         }
 
@@ -259,7 +299,7 @@ fun VerifikasiQrRaporScreen(
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = SurfaceContainer)
                         ) {
-                            Text("🔄")
+                            Icon(Icons.Default.Refresh, contentDescription = null)
                             Spacer(modifier = Modifier.width(Spacing.sm))
                             Text("Verifikasi Ulang")
                         }

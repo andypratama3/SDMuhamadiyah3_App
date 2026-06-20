@@ -35,8 +35,7 @@ class VerifikasiOtpViewModel(
     private var countdownJob: Job? = null
 
     fun setEmail(email: String) {
-        updateState { it.copy(email = email) }
-        requestOtp()
+        updateState { it.copy(email = email, errorMessage = null) }
     }
 
     fun updateOtpCode(code: String) {
