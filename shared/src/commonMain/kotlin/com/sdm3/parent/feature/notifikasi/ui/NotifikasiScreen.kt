@@ -97,7 +97,7 @@ fun NotifikasiScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.markAllRead() }) {
+                    IconButton(onClick = { viewModel.markAllAsRead() }) {
                         Icon(Icons.Default.CheckCircle, contentDescription = "Tandai semua dibaca")
                     }
                 },
