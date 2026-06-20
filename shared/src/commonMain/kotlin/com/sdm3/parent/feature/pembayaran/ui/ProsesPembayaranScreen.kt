@@ -41,6 +41,7 @@ import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Icon
@@ -57,7 +58,7 @@ fun ProsesPembayaranScreen(
                 title = { Text("Instruksi Pembayaran") },
                 navigationIcon = {
                     IconButton(onClick = { }) {
-                        Text("←")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)

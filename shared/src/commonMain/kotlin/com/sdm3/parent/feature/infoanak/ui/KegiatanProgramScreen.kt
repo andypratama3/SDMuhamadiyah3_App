@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material3.Icon
@@ -64,7 +65,7 @@ fun KegiatanProgramScreen(studentId: String) {
                 title = { Text("Kegiatan & Program") },
                 navigationIcon = {
                     IconButton(onClick = { }) {
-                        Text("←")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)

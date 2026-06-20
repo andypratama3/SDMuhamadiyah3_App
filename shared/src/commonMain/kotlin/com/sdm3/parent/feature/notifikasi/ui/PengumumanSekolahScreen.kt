@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import com.sdm3.parent.core.designsystem.component.StatusChip
@@ -76,7 +77,7 @@ fun PengumumanSekolahScreen() {
                 title = { Text("Pengumuman Sekolah") },
                 navigationIcon = {
                     IconButton(onClick = { }) {
-                        Text("←")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 actions = {
