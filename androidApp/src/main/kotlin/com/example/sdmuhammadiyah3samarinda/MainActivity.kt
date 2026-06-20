@@ -1,4 +1,4 @@
-package com.example.sdmuhammadiyah3samarinda
+package com.sdm3.parent
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
