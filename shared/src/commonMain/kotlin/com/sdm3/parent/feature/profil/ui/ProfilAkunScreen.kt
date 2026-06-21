@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -158,9 +159,10 @@ fun ProfilAkunScreen(
                         )
                     }
                     IconButton(onClick = { }) {
-                        Text(
-                            "›",
-                            modifier = Modifier.size(20.dp)
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = OnSurfaceVariant
                         )
                     }
                 }
@@ -175,47 +177,69 @@ fun ProfilAkunScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Column(modifier = Modifier.padding(Spacing.md)) {
-                    Text(
-                        text = "Data Anak",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Primary
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.sm))
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = Spacing.sm),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
+                        Text(
+                            text = "Data Anak",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Primary
+                        )
+                        Text(
+                            text = "Lihat Semua",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Secondary,
+                            modifier = Modifier.clickable { }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+
+                    val studentViewModel: com.sdm3.parent.feature.auth.PilihAnakViewModel = koinViewModel()
+                    val studentState by studentViewModel.uiState.collectAsState()
+
+                    LaunchedEffect(Unit) {
+                        studentViewModel.loadStudents()
+                    }
+
+                    studentState.students.forEach { student ->
+                        Row(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(Primary.copy(alpha = 0.1f)),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .padding(vertical = Spacing.sm),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "AF",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Primary
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(Primary.copy(alpha = 0.1f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = student.name.firstOrNull()?.toString()?.uppercase() ?: "",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Primary
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(Spacing.md))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = student.name,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = "Kelas ${student.className ?: "-"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = OnSurfaceVariant
+                                )
+                            }
+                            StatusChip(text = "Aktif", color = StatusSuccess)
                         }
-                        Spacer(modifier = Modifier.width(Spacing.md))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Ahmad Fathan",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "Kelas 4-A (Ibnu Sina)",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = OnSurfaceVariant
-                            )
-                        }
-                        StatusChip(text = "Aktif", color = StatusSuccess)
                     }
                 }
             }
@@ -378,9 +402,11 @@ private fun SettingsItemRow(
             )
             Spacer(modifier = Modifier.width(Spacing.sm))
         }
-        Text(
-            "›",
-            modifier = Modifier.size(16.dp)
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = OnSurfaceVariant.copy(alpha = 0.5f)
         )
     }
 }

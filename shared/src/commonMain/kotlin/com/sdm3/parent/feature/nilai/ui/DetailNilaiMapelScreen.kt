@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -121,6 +122,27 @@ fun DetailNilaiMapelScreen(
 
             item {
                 Text(
+                    text = "Komponen Nilai",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            item {
+                val sumatifScore = uiState.components.filter { it.componentType.lowercase() == "sumatif" }.mapNotNull { it.score }.average().let { if (it.isNaN()) 0.0 else it }
+                KomponenBar(komponen = "Sumatif", nilai = sumatifScore.toFloat(), max = 100f, bobot = "40%", warna = Primary)
+            }
+            item {
+                val formatifScore = uiState.components.filter { it.componentType.lowercase() == "formatif" }.mapNotNull { it.score }.average().let { if (it.isNaN()) 0.0 else it }
+                KomponenBar(komponen = "Formatif", nilai = formatifScore.toFloat(), max = 100f, bobot = "40%", warna = Secondary)
+            }
+            item {
+                val projekScore = uiState.components.filter { it.componentType.lowercase() == "projek" }.mapNotNull { it.score }.average().let { if (it.isNaN()) 0.0 else it }
+                KomponenBar(komponen = "Projek", nilai = projekScore.toFloat(), max = 100f, bobot = "20%", warna = StatusSuccess)
+            }
+
+            item {
+                Text(
                     text = "Tujuan Pembelajaran (TP)",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
@@ -199,7 +221,7 @@ private fun KomponenBar(komponen: String, nilai: Float, max: Float, bobot: Strin
     val progress = (nilai / max).coerceIn(0f, 1f)
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -208,7 +230,7 @@ private fun KomponenBar(komponen: String, nilai: Float, max: Float, bobot: Strin
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = komponen, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                Text(text = komponen, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                 Text(text = "${nilai.toInt()}/${max.toInt()} (Bobot $bobot)", style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant)
             }
             Spacer(modifier = Modifier.height(Spacing.sm))
@@ -216,7 +238,8 @@ private fun KomponenBar(komponen: String, nilai: Float, max: Float, bobot: Strin
                 progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp),
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp)),
                 color = warna,
                 trackColor = warna.copy(alpha = 0.15f)
             )

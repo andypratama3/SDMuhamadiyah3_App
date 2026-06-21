@@ -103,10 +103,10 @@ fun KehadiranSiswaScreen(
     }
 
     val summaryData = listOf(
-        AttendanceSummary("Hadir", uiState.summary?.present ?: 0, Icons.Default.CheckCircle, StatusSuccess),
-        AttendanceSummary("Sakit", uiState.summary?.sick ?: 0, Icons.Default.MedicalServices, StatusWarning),
-        AttendanceSummary("Izin", uiState.summary?.excused ?: 0, Icons.Default.DateRange, Secondary),
-        AttendanceSummary("Alpa", uiState.summary?.absent ?: 0, Icons.Default.Cancel, StatusDanger)
+        AttendanceSummary("Hadir", uiState.summary?.hadir ?: 0, Icons.Default.CheckCircle, StatusSuccess),
+        AttendanceSummary("Sakit", uiState.summary?.sakit ?: 0, Icons.Default.MedicalServices, StatusWarning),
+        AttendanceSummary("Izin", uiState.summary?.izin ?: 0, Icons.Default.DateRange, Secondary),
+        AttendanceSummary("Alpa", uiState.summary?.alpa ?: 0, Icons.Default.Cancel, StatusDanger)
     )
 
     Scaffold(

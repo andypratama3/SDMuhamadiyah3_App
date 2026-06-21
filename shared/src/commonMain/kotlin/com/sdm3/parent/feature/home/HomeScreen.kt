@@ -25,13 +25,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.Canvas
 import androidx.compose.material3.Text
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,6 +67,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showChildSelector by remember { mutableStateOf(false) }
 
     LaunchedEffect(studentId) {
         viewModel.loadDashboard(studentId)
@@ -69,7 +76,30 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("SDM3 Parent") },
+                title = {
+                    Column(
+                        modifier = Modifier.clickable { showChildSelector = true }
+                    ) {
+                        Text(
+                            text = "Halo, Orang Tua ${uiState.studentName}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = OnSurfaceVariant
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "SDM3 Parent",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = OnSurfaceVariant
+                            )
+                        }
+                    }
+                },
                 actions = {
                     IconButton(onClick = { navController.navigate(SDM3Route.Notifikasi) }) {
                         Icon(
@@ -114,12 +144,6 @@ fun HomeScreen(
                     .padding(Spacing.md)
             ) {
                 Text(
-                    text = "Halo, Orang Tua ${uiState.studentName}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = OnSurfaceVariant
-                )
-
-                Text(
                     text = "Pantau Perkembangan Ananda",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.SemiBold,
@@ -132,29 +156,38 @@ fun HomeScreen(
                 if (totalFee > 0) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(24.dp),
                         colors = CardDefaults.cardColors(containerColor = TertiaryFixed)
                     ) {
-                        Column(modifier = Modifier.padding(Spacing.md)) {
-                            Text(
-                                text = "TOTAL TAGIHAN AKTIF",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = OnSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(Spacing.sm))
-                            Text(
-                                text = "Rp$totalFee",
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.tertiary
-                            )
-                            uiState.activeFees.firstOrNull()?.dueDate?.let { dueDate ->
+                        Box {
+                            Canvas(modifier = Modifier.size(150.dp).align(Alignment.TopEnd).padding(Spacing.md)) {
+                                drawCircle(
+                                    color = Color.White.copy(alpha = 0.2f),
+                                    radius = size.minDimension / 1.5f
+                                )
+                            }
+                            Column(modifier = Modifier.padding(Spacing.lg)) {
+                                Text(
+                                    text = "TOTAL TAGIHAN AKTIF",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = OnSurfaceVariant,
+                                    fontWeight = FontWeight.Bold
+                                )
                                 Spacer(modifier = Modifier.height(Spacing.sm))
                                 Text(
-                                    text = "Jatuh tempo terdekat: $dueDate",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = OnSurfaceVariant
+                                    text = "Rp$totalFee",
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
+                                uiState.activeFees.firstOrNull()?.dueDate?.let { dueDate ->
+                                    Spacer(modifier = Modifier.height(Spacing.sm))
+                                    Text(
+                                        text = "Jatuh tempo terdekat: $dueDate",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = OnSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }
@@ -174,12 +207,14 @@ fun HomeScreen(
                 ) {
                     MenuCard(
                         title = "Nilai & Rapor",
+                        icon = Icons.Default.Assessment,
                         color = Primary,
                         modifier = Modifier.weight(1f),
                         onClick = { navController.navigate(SDM3Route.NilaiRapor(studentId, "ganjil")) }
                     )
                     MenuCard(
                         title = "Pembayaran SPP",
+                        icon = Icons.Default.Payments,
                         color = Secondary,
                         modifier = Modifier.weight(1f),
                         onClick = { navController.navigate(SDM3Route.PembayaranSpp(studentId)) }
@@ -194,13 +229,15 @@ fun HomeScreen(
                 ) {
                     MenuCard(
                         title = "Kehadiran",
+                        icon = Icons.Default.DateRange,
                         color = StatusWarning,
                         modifier = Modifier.weight(1f),
                         onClick = { navController.navigate(SDM3Route.KehadiranSiswa(studentId)) }
                     )
                     MenuCard(
                         title = "Info Anak",
-                        color = StatusSuccess,
+                        icon = Icons.Default.Person,
+                        color = SchoolGreenVibrant,
                         modifier = Modifier.weight(1f),
                         onClick = { navController.navigate(SDM3Route.DetailInfoAnak(studentId)) }
                     )
@@ -228,11 +265,96 @@ fun HomeScreen(
         }
         }
     }
+
+    if (showChildSelector) {
+        val sheetState = rememberModalBottomSheetState()
+        ModalBottomSheet(
+            onDismissRequest = { showChildSelector = false },
+            sheetState = sheetState,
+            dragHandle = { androidx.compose.material3.BottomSheetDefaults.DragHandle() }
+        ) {
+            ChildSelectorContent(
+                onChildSelected = { id ->
+                    showChildSelector = false
+                    navController.navigate(SDM3Route.Main(id)) {
+                        popUpTo<SDM3Route.Main> { inclusive = true }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ChildSelectorContent(
+    onChildSelected: (String) -> Unit,
+    viewModel: com.sdm3.parent.feature.auth.PilihAnakViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(Spacing.md)
+    ) {
+        Text(
+            text = "Pilih Anak",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = Spacing.md)
+        )
+
+        uiState.students.forEach { student ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Spacing.xs)
+                    .clickable { onChildSelected(student.id) },
+                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .background(Primary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = student.name.firstOrNull()?.toString()?.uppercase() ?: "",
+                            color = Primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(Spacing.md))
+                    Column {
+                        Text(
+                            text = student.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = "Kelas ${student.className ?: "-"}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = OnSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(Spacing.xl))
+    }
 }
 
 @Composable
 private fun MenuCard(
     title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     color: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
@@ -244,14 +366,21 @@ private fun MenuCard(
         colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f))
     ) {
         Column(
-            modifier = Modifier.padding(Spacing.md).height(48.dp),
+            modifier = Modifier.padding(Spacing.md).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
                 color = color,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )

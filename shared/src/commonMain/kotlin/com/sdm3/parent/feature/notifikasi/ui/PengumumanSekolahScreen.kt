@@ -163,7 +163,7 @@ fun PengumumanSekolahScreen(
                             verticalAlignment = Alignment.Top
                         ) {
                                 Card(
-                                    modifier = Modifier.size(80.dp, 64.dp),
+                                    modifier = Modifier.size(72.dp, 64.dp),
                                     shape = RoundedCornerShape(12.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = Primary.copy(alpha = 0.08f)
@@ -175,13 +175,13 @@ fun PengumumanSekolahScreen(
                                         verticalArrangement = Arrangement.Center
                                     ) {
                                         Text(
-                                            text = item.date.split(" ").first(),
-                                            style = MaterialTheme.typography.labelMedium,
+                                            text = item.publishedAt?.split("T")?.first()?.split("-")?.last() ?: "-",
+                                            style = MaterialTheme.typography.titleMedium,
                                             color = Primary,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
-                                            text = item.date.split(" ").last(),
+                                            text = item.publishedAt?.split("T")?.first()?.split("-")?.get(1) ?: "-",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = Primary
                                         )
