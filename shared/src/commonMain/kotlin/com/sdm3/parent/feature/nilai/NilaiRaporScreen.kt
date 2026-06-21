@@ -38,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -128,7 +129,10 @@ fun NilaiRaporScreen(
                         grades = uiState.grades,
                         onDetailMapel = onDetailMapel
                     )
-                    1 -> FormatifTab(studentId = studentId)
+                    1 -> FormatifTab(
+                        studentId = studentId,
+                        grades = uiState.grades
+                    )
                     2 -> ProjekTab(studentId = studentId)
                 }
             }
@@ -247,14 +251,19 @@ private fun SumatifTab(
 }
 
 @Composable
-private fun FormatifTab(studentId: String) {
-    val tpData = listOf(
-        TPItem("3.1", "Menjelaskan operasi hitung bilangan cacah", 85),
-        TPItem("3.2", "Menyelesaikan soal cerita penjumlahan", 90),
-        TPItem("3.3", "Mengidentifikasi sifat-sifat bangun datar", 78),
-        TPItem("3.4", "Menghitung keliling bangun datar", 72),
-        TPItem("3.5", "Menyelesaikan masalah kontekstual", 88)
-    )
+private fun FormatifTab(
+    studentId: String,
+    grades: List<com.sdm3.parent.data.remote.dto.GradeDto>,
+    viewModel: DetailNilaiMapelViewModel = org.koin.compose.viewmodel.koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var selectedSubjectId by remember { mutableStateOf(grades.firstOrNull()?.id ?: "") }
+
+    LaunchedEffect(selectedSubjectId) {
+        if (selectedSubjectId.isNotEmpty()) {
+            viewModel.loadComponents(studentId, selectedSubjectId)
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -264,7 +273,7 @@ private fun FormatifTab(studentId: String) {
     ) {
         item {
             Card(
-                colors = CardDefaults.cardColors(containerColor = SecondaryContainer),
+                colors = CardDefaults.cardColors(containerColor = SecondaryContainer.copy(alpha = 0.2f)),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
@@ -277,48 +286,71 @@ private fun FormatifTab(studentId: String) {
             Spacer(modifier = Modifier.height(Spacing.sm))
         }
 
-        items(tpData) { tp ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(SecondaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = tp.code,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Secondary
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(Spacing.md))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = tp.description,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(Spacing.sm))
-                    val tpColor = when {
-                        tp.score >= 90 -> StatusSuccess
-                        tp.score >= 75 -> StatusWarning
-                        else -> StatusDanger
-                    }
-                    StatusChip(
-                        text = "${tp.score}",
-                        color = tpColor
+        item {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                items(grades) { grade ->
+                    FilterChip(
+                        selected = selectedSubjectId == grade.id,
+                        onClick = { selectedSubjectId = grade.id },
+                        label = { Text(grade.subjectName) }
                     )
+                }
+            }
+            Spacer(modifier = Modifier.height(Spacing.sm))
+        }
+
+        if (uiState.isLoading) {
+            item {
+                Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Primary)
+                }
+            }
+        } else {
+            items(uiState.components) { tp ->
+            items(uiState.components) { tp ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(Spacing.md),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(SecondaryContainer.copy(alpha = 0.3f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = (tp.tpNumber ?: 1).toString(),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Secondary
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(Spacing.md))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = tp.tpName ?: "Tujuan Pembelajaran",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(Spacing.sm))
+                        val score = tp.score?.toInt() ?: 0
+                        val tpColor = when {
+                            score >= 90 -> StatusSuccess
+                            score >= 75 -> StatusWarning
+                            else -> StatusDanger
+                        }
+                        StatusChip(
+                            text = "$score",
+                            color = tpColor
+                        )
+                    }
                 }
             }
         }

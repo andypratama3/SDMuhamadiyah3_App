@@ -188,7 +188,7 @@ fun NotifikasiScreen(
                                     ) {
                                 Box(
                                     modifier = Modifier
-                                                .size(48.dp)
+                                                .size(44.dp)
                                         .clip(CircleShape)
                                         .background(typeColor.copy(alpha = 0.1f)),
                                     contentAlignment = Alignment.Center
@@ -196,7 +196,7 @@ fun NotifikasiScreen(
                                     Icon(
                                         Icons.Default.Notifications,
                                         contentDescription = notif.type,
-                                        modifier = Modifier.size(28.dp),
+                                                modifier = Modifier.size(24.dp),
                                         tint = typeColor
                                     )
                                 }
