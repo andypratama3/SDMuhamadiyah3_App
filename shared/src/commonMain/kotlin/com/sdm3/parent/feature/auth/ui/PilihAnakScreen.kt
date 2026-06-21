@@ -17,8 +17,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,31 +34,19 @@ import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.domain.entity.Student
+import com.sdm3.parent.feature.auth.PilihAnakViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun PilihAnakScreen(
-    onChildSelected: (String) -> Unit
+    onChildSelected: (String) -> Unit,
+    viewModel: PilihAnakViewModel = koinViewModel()
 ) {
-    val sampleChildren = listOf(
-        Student(
-            id = "1", userId = null, nisn = "0012345678", nis = null,
-            name = "Ahmad Fathan", className = "4-A (Ibnu Sina)",
-            classroomId = "c1", academicYear = "2025/2026",
-            gender = com.sdm3.parent.domain.entity.Gender.LakiLaki,
-            birthPlace = "Samarinda", birthDate = "2016-05-12",
-            photoUrl = null, status = com.sdm3.parent.domain.entity.StudentStatus.ACTIVE,
-            fatherName = null, motherName = null, parentPhone = null
-        ),
-        Student(
-            id = "2", userId = null, nisn = "0012345679", nis = null,
-            name = "Aisyah Zahra", className = "2-B (Al Farabi)",
-            classroomId = "c2", academicYear = "2025/2026",
-            gender = com.sdm3.parent.domain.entity.Gender.Perempuan,
-            birthPlace = "Samarinda", birthDate = "2018-03-20",
-            photoUrl = null, status = com.sdm3.parent.domain.entity.StudentStatus.ACTIVE,
-            fatherName = null, motherName = null, parentPhone = null
-        )
-    )
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadStudents()
+    }
 
     Column(
         modifier = Modifier
@@ -80,16 +72,25 @@ fun PilihAnakScreen(
 
         Spacer(modifier = Modifier.height(Spacing.lg))
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-        ) {
-            items(sampleChildren) { student ->
-                ChildCard(
-                    name = student.name,
-                    className = student.className,
-                    academicYear = student.academicYear,
-                    onClick = { onChildSelected(student.id) }
-                )
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                items(uiState.students) { student ->
+                    ChildCard(
+                        name = student.name,
+                        className = student.className,
+                        academicYear = student.academicYear,
+                        onClick = {
+                            viewModel.selectStudent(student.id)
+                            onChildSelected(student.id)
+                        }
+                    )
+                }
             }
         }
     }

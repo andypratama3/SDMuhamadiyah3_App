@@ -29,10 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,6 +44,8 @@ import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.StatusWarning
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.profil.PengaturanNotifikasiViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 data class NotifToggle(
     val label: String,
@@ -55,24 +55,25 @@ data class NotifToggle(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PengaturanNotifikasiScreen() {
-    var masterToggle by remember { mutableStateOf(true) }
-    var nilaiToggle by remember { mutableStateOf(true) }
-    var tagihanToggle by remember { mutableStateOf(true) }
-    var pengumumanToggle by remember { mutableStateOf(true) }
-    var kehadiranToggle by remember { mutableStateOf(true) }
-    var raporToggle by remember { mutableStateOf(false) }
+fun PengaturanNotifikasiScreen(
+    onBack: () -> Unit = {},
+    viewModel: PengaturanNotifikasiViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Pengaturan Notifikasi") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
@@ -95,53 +96,53 @@ fun PengaturanNotifikasiScreen() {
                     ToggleRow(
                         label = "Notifikasi Push",
                         enabled = true,
-                        isOn = masterToggle,
-                        onToggle = { masterToggle = it }
+                        isOn = uiState.pushEnabled,
+                        onToggle = { viewModel.togglePush() }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
 
                     ToggleRow(
                         label = "Nilai Baru",
-                        enabled = masterToggle,
-                        isOn = nilaiToggle,
-                        onToggle = { nilaiToggle = it }
+                        enabled = uiState.pushEnabled,
+                        isOn = uiState.nilaiNotif,
+                        onToggle = { viewModel.toggleNilai() }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
 
                     ToggleRow(
                         label = "Tagihan Baru",
-                        enabled = masterToggle,
-                        isOn = tagihanToggle,
-                        onToggle = { tagihanToggle = it }
+                        enabled = uiState.pushEnabled,
+                        isOn = uiState.tagihanNotif,
+                        onToggle = { viewModel.toggleTagihan() }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
 
                     ToggleRow(
                         label = "Pengumuman Sekolah",
-                        enabled = masterToggle,
-                        isOn = pengumumanToggle,
-                        onToggle = { pengumumanToggle = it }
+                        enabled = uiState.pushEnabled,
+                        isOn = uiState.pengumumanNotif,
+                        onToggle = { viewModel.togglePengumuman() }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
 
                     ToggleRow(
                         label = "Kehadiran",
-                        enabled = masterToggle,
-                        isOn = kehadiranToggle,
-                        onToggle = { kehadiranToggle = it }
+                        enabled = uiState.pushEnabled,
+                        isOn = uiState.kehadiranNotif,
+                        onToggle = { viewModel.toggleKehadiran() }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
 
                     ToggleRow(
                         label = "Rapor Tersedia",
-                        enabled = masterToggle,
-                        isOn = raporToggle,
-                        onToggle = { raporToggle = it }
+                        enabled = uiState.pushEnabled,
+                        isOn = uiState.raporNotif,
+                        onToggle = { viewModel.toggleRapor() }
                     )
                 }
             }

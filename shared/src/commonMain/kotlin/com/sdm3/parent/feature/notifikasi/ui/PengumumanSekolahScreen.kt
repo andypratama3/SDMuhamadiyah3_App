@@ -23,9 +23,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +49,8 @@ import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusWarning
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.notifikasi.PengumumanSekolahViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private val categoryFilters = listOf("Semua", "Umum", "Akademik", "Keuangan", "Kegiatan")
 
@@ -68,15 +73,23 @@ private val announcements = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PengumumanSekolahScreen() {
+fun PengumumanSekolahScreen(
+    onBack: () -> Unit = {},
+    viewModel: PengumumanSekolahViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
     var selectedCategory by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadArticles()
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Pengumuman Sekolah") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
@@ -85,10 +98,18 @@ fun PengumumanSekolahScreen() {
                         Icon(Icons.Default.Search, contentDescription = "Cari")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -120,8 +141,8 @@ fun PengumumanSekolahScreen() {
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            val filtered = if (selectedCategory == 0) announcements
-            else announcements.filter { it.category == categoryFilters[selectedCategory] }
+            val filtered = if (selectedCategory == 0) uiState.articles
+            else uiState.articles.filter { it.category == categoryFilters[selectedCategory].lowercase() }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -132,9 +153,10 @@ fun PengumumanSekolahScreen() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = Spacing.md),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        onClick = { /* Detail Pengumuman */ }
                     ) {
                         Row(
                             modifier = Modifier.padding(Spacing.md),
@@ -175,18 +197,19 @@ fun PengumumanSekolahScreen() {
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Spacer(modifier = Modifier.height(Spacing.sm))
-                                val chipColor = when (item.category) {
-                                    "Umum" -> Secondary
-                                    "Akademik" -> Primary
-                                    "Keuangan" -> StatusWarning
+                                val chipColor = when (item.category?.lowercase()) {
+                                    "umum" -> Secondary
+                                    "akademik" -> Primary
+                                    "keuangan" -> StatusWarning
                                     else -> Secondary
                                 }
-                                StatusChip(text = item.category, color = chipColor)
+                                StatusChip(text = item.category ?: "Umum", color = chipColor)
                             }
                         }
                     }
                 }
             }
+        }
         }
     }
 }

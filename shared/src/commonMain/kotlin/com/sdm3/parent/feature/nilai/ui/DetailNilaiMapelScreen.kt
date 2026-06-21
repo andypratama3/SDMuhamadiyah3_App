@@ -23,9 +23,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,25 +45,30 @@ import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.StatusWarning
 import com.sdm3.parent.core.designsystem.theme.StatusDanger
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.nilai.DetailNilaiMapelViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailNilaiMapelScreen(
     studentId: String,
     subjectId: String,
-    semester: String
+    semester: String,
+    onBack: () -> Unit = {},
+    viewModel: DetailNilaiMapelViewModel = koinViewModel()
 ) {
-    val subjectName = "Matematika"
-    val finalScore = 92
-    val predicate = "A"
-    val predicateDesc = "SANGAT BAIK"
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(studentId, subjectId) {
+        viewModel.loadComponents(studentId, subjectId)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(subjectName) },
+                title = { Text(uiState.subjectName) },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
@@ -67,6 +76,11 @@ fun DetailNilaiMapelScreen(
             )
         }
     ) { padding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,6 +98,9 @@ fun DetailNilaiMapelScreen(
                         modifier = Modifier.padding(Spacing.lg),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        val finalScore = uiState.components.firstOrNull()?.score ?: 0
+                        val predicate = uiState.components.firstOrNull()?.predicate ?: "-"
+                        val predicateDesc = uiState.components.firstOrNull()?.predicateDescription ?: ""
                         Text(
                             text = "$finalScore",
                             fontSize = 48.sp,
@@ -104,35 +121,13 @@ fun DetailNilaiMapelScreen(
 
             item {
                 Text(
-                    text = "Komponen Nilai",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            item { KomponenBar(komponen = "Sumatif", nilai = 90f, max = 100f, bobot = "40%", warna = Primary) }
-            item { KomponenBar(komponen = "Formatif", nilai = 88f, max = 100f, bobot = "40%", warna = Secondary) }
-            item { KomponenBar(komponen = "Projek", nilai = 95f, max = 100f, bobot = "20%", warna = StatusSuccess) }
-
-            item {
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                Text(
                     text = "Tujuan Pembelajaran (TP)",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
-            val tpList = listOf(
-                TPDetail("3.1", "Menjelaskan operasi hitung bilangan cacah", 95),
-                TPDetail("3.2", "Menyelesaikan soal cerita penjumlahan", 90),
-                TPDetail("3.3", "Mengidentifikasi sifat-sifat bangun datar", 78),
-                TPDetail("3.4", "Menghitung keliling bangun datar", 85),
-                TPDetail("3.5", "Menyelesaikan masalah kontekstual", 90),
-                TPDetail("3.6", "Menganalisis data sederhana", 82)
-            )
-
-            items(tpList) { tp ->
+            items(uiState.components) { tp ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),

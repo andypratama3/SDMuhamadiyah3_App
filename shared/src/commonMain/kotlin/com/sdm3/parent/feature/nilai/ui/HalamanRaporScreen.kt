@@ -29,9 +29,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,16 +48,28 @@ import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.rapor.HalamanRaporViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanRaporScreen(studentId: String) {
+fun HalamanRaporScreen(
+    studentId: String,
+    onBack: () -> Unit = {},
+    viewModel: HalamanRaporViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(studentId) {
+        viewModel.loadRaporInstances(studentId)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Rapor Resmi") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
@@ -61,6 +77,11 @@ fun HalamanRaporScreen(studentId: String) {
             )
         }
     ) { padding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -76,7 +97,7 @@ fun HalamanRaporScreen(studentId: String) {
                 )
             }
 
-            item {
+            items(uiState.raporInstances) { rapor ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -97,7 +118,7 @@ fun HalamanRaporScreen(studentId: String) {
                                     verticalArrangement = Arrangement.Center
                                 ) {
                                     Text(
-                                        text = "Sumatif 1 / 2025-2026",
+                                        text = rapor.title,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.SemiBold,
                                         color = SurfaceWhite
@@ -109,7 +130,7 @@ fun HalamanRaporScreen(studentId: String) {
 
                         Column(modifier = Modifier.padding(Spacing.md)) {
                             Text(
-                                text = "Disetujui: 15 Desember 2025",
+                                text = "Disetujui: ${rapor.createdAt}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = OnSurfaceVariant
                             )
@@ -156,53 +177,6 @@ fun HalamanRaporScreen(studentId: String) {
                                     color = OnSurfaceVariant
                                 )
                             }
-                        }
-                    }
-                }
-            }
-
-            item {
-                Text(
-                    text = "Riwayat Rapor",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            val raporHistory = listOf(
-                "Sumatif 1 / 2025-2026",
-                "Sumatif Tengah Semester / 2025-2026",
-                "Sumatif Akhir Semester / 2024-2025",
-                "Sumatif 2 / 2024-2025"
-            )
-
-            items(raporHistory) { rapor ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(Spacing.md),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = rapor,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "Tersedia",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = StatusSuccess
-                            )
-                        }
-                        IconButton(onClick = { }) {
-                            Icon(Icons.Default.FileDownload, contentDescription = "Unduh rapor")
                         }
                     }
                 }

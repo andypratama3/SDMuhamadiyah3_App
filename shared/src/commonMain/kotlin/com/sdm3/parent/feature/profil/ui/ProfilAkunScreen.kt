@@ -35,6 +35,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +67,8 @@ import com.sdm3.parent.core.designsystem.component.StatusChip
 import com.sdm3.parent.core.designsystem.theme.StatusDanger
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.profil.ProfilAkunViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 data class SettingsItem(
     val label: String,
@@ -78,15 +82,24 @@ data class SettingsItem(
 fun ProfilAkunScreen(
     onNotifikasiSetting: () -> Unit,
     onAccountDeletion: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    viewModel: ProfilAkunViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadProfile()
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Profil") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
@@ -126,7 +139,7 @@ fun ProfilAkunScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Bambang Suprapto",
+                                text = uiState.profile?.name ?: "User",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -139,7 +152,7 @@ fun ProfilAkunScreen(
                             )
                         }
                         Text(
-                            text = "0812-3456-7890",
+                            text = uiState.profile?.phone ?: "-",
                             style = MaterialTheme.typography.bodyMedium,
                             color = OnSurfaceVariant
                         )

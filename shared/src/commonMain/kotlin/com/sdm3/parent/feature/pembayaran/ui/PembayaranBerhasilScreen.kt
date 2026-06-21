@@ -18,9 +18,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +37,8 @@ import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
 import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
+import com.sdm3.parent.feature.pembayaran.PembayaranBerhasilViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
@@ -43,16 +49,31 @@ import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 fun PembayaranBerhasilScreen(
     paymentId: String,
     onLihatBukti: () -> Unit,
-    onKembali: () -> Unit
+    onKembali: () -> Unit,
+    viewModel: PembayaranBerhasilViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(paymentId) {
+        viewModel.loadTransaction(paymentId)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -96,11 +117,11 @@ fun PembayaranBerhasilScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(Spacing.md)) {
-                    DetailRow("Tagihan", "SPP Juli 2026")
-                    DetailRow("Jumlah", "Rp350.000")
-                    DetailRow("Metode", "Virtual Account BCA")
-                    DetailRow("Tanggal", "20 Juni 2026 14:30")
-                    DetailRow("ID Transaksi", "SDM3-20260620-XXX")
+                    DetailRow("Tagihan", uiState.paymentTitle.ifEmpty { "Pembayaran Sekolah" })
+                    DetailRow("Jumlah", "Rp${uiState.amount}")
+                    DetailRow("Metode", uiState.paymentMethod.ifEmpty { "-" })
+                    DetailRow("Tanggal", uiState.paidAt.ifEmpty { "-" })
+                    DetailRow("ID Transaksi", uiState.transactionId)
                 }
             }
 
@@ -124,6 +145,7 @@ fun PembayaranBerhasilScreen(
             ) {
                 Text("Kembali ke Beranda")
             }
+        }
         }
     }
 }
