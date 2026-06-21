@@ -23,9 +23,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +43,8 @@ import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.pembayaran.PilihMetodeBayarViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBalance
@@ -66,29 +71,45 @@ private val paymentMethods = listOf(
 @Composable
 fun PilihMetodeBayarScreen(
     studentFeeId: String,
-    onLanjutkan: (String) -> Unit
+    onBack: () -> Unit = {},
+    onLanjutkan: (String) -> Unit,
+    viewModel: PilihMetodeBayarViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var selectedMethod by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(studentFeeId) {
+        viewModel.loadFeeDetail(studentFeeId)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Detail Tagihan & Pilih Metode") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = Spacing.md)
         ) {
+            uiState.fee?.let { fee ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -97,7 +118,7 @@ fun PilihMetodeBayarScreen(
             ) {
                 Column(modifier = Modifier.padding(Spacing.md)) {
                     Text(
-                        text = "SPP Juli 2026",
+                        text = fee.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -106,22 +127,8 @@ fun PilihMetodeBayarScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("SPP", color = OnSurfaceVariant)
-                        Text("Rp300.000")
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Iuran Gedung", color = OnSurfaceVariant)
-                        Text("Rp40.000")
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Biaya Admin", color = OnSurfaceVariant)
-                        Text("Rp10.000")
+                        Text("Tagihan", color = OnSurfaceVariant)
+                        Text("Rp${fee.amount}")
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
                     Row(
@@ -129,9 +136,10 @@ fun PilihMetodeBayarScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Total", fontWeight = FontWeight.Bold)
-                        Text("Rp350.000", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Primary)
+                        Text("Rp${fee.amount}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Primary)
                     }
                 }
+            }
             }
 
             Spacer(modifier = Modifier.height(Spacing.md))
@@ -194,16 +202,23 @@ fun PilihMetodeBayarScreen(
             }
 
             Button(
-                onClick = { selectedMethod?.let { onLanjutkan("pay_${it}") } },
+                onClick = {
+                    selectedMethod?.let { methodId ->
+                        viewModel.createPayment(methodId) { paymentId ->
+                            onLanjutkan(paymentId)
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = Spacing.md),
                 shape = RoundedCornerShape(12.dp),
-                enabled = selectedMethod != null,
+                enabled = selectedMethod != null && !uiState.isLoading,
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary)
             ) {
                 Text("Lanjutkan Pembayaran", fontWeight = FontWeight.SemiBold)
             }
+        }
         }
     }
 }

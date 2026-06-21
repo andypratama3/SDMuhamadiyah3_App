@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +30,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +49,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material3.Icon
+import com.sdm3.parent.feature.kehadiran.KehadiranSiswaViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -83,12 +90,24 @@ private val daysInMonth = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KehadiranSiswaScreen(studentId: String) {
-    val attendedDays = setOf(6, 7, 10, 11, 13, 14, 17, 18, 20, 21, 24, 25, 27, 28)
-    val sickDays = setOf(8)
-    val excusedDays = setOf<Int>()
-    val absentDays = setOf<Int>()
-    val today = 20
+fun KehadiranSiswaScreen(
+    studentId: String,
+    onBack: () -> Unit = {},
+    viewModel: KehadiranSiswaViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(studentId) {
+        viewModel.loadAttendances(studentId)
+        viewModel.loadSummary(studentId)
+    }
+
+    val summaryData = listOf(
+        AttendanceSummary("Hadir", uiState.summary?.present ?: 0, Icons.Default.CheckCircle, StatusSuccess),
+        AttendanceSummary("Sakit", uiState.summary?.sick ?: 0, Icons.Default.MedicalServices, StatusWarning),
+        AttendanceSummary("Izin", uiState.summary?.excused ?: 0, Icons.Default.DateRange, Secondary),
+        AttendanceSummary("Alpa", uiState.summary?.absent ?: 0, Icons.Default.Cancel, StatusDanger)
+    )
 
     Scaffold(
         topBar = {
@@ -97,28 +116,45 @@ fun KehadiranSiswaScreen(studentId: String) {
                     Column {
                         Text("Kehadiran")
                         Text(
-                            text = "Ahmad Fathan",
+                            text = "Monitoring Kehadiran Siswa",
                             style = MaterialTheme.typography.bodySmall,
                             color = OnSurfaceVariant
                         )
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.padding(padding)
+        ) {
+        if (uiState.isLoading && uiState.attendances.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(horizontal = Spacing.md)
                 .verticalScroll(rememberScrollState())
         ) {
+            val attendedDays = uiState.attendances.filter { it.status == "Hadir" }.mapNotNull { it.date.split("-").lastOrNull()?.toInt() }.toSet()
+            val sickDays = uiState.attendances.filter { it.status == "Sakit" }.mapNotNull { it.date.split("-").lastOrNull()?.toInt() }.toSet()
+            val excusedDays = uiState.attendances.filter { it.status == "Izin" }.mapNotNull { it.date.split("-").lastOrNull()?.toInt() }.toSet()
+            val absentDays = uiState.attendances.filter { it.status == "Alpa" }.mapNotNull { it.date.split("-").lastOrNull()?.toInt() }.toSet()
+            val today = 0 // Needs proper date handling
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -171,7 +207,8 @@ fun KehadiranSiswaScreen(studentId: String) {
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                modifier = Modifier.height(200.dp),
+                modifier = Modifier.height(220.dp),
+                userScrollEnabled = false,
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
@@ -274,6 +311,7 @@ fun KehadiranSiswaScreen(studentId: String) {
                                                         if (day == today) Primary.copy(alpha = 0.15f)
                                                         else color.copy(alpha = 0.2f)
                                                     )
+                                                    .clickable { /* Detail for day */ }
                                             } else Modifier.size(32.dp)
                                         ),
                                     contentAlignment = Alignment.Center
@@ -311,14 +349,13 @@ fun KehadiranSiswaScreen(studentId: String) {
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            val attendanceLog = listOf(
-                AttendanceLog("Senin, 20 Juni 2026", "Hadir", StatusSuccess),
-                AttendanceLog("Jumat, 17 Juni 2026", "Hadir", StatusSuccess),
-                AttendanceLog("Kamis, 16 Juni 2026", "Sakit", StatusWarning),
-                AttendanceLog("Rabu, 15 Juni 2026", "Hadir", StatusSuccess),
-            )
-
-            attendanceLog.forEach { log ->
+            uiState.attendances.forEach { attendance ->
+                val logColor = when (attendance.status) {
+                    "Hadir" -> StatusSuccess
+                    "Sakit" -> StatusWarning
+                    "Izin" -> Secondary
+                    else -> StatusDanger
+                }
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -335,14 +372,16 @@ fun KehadiranSiswaScreen(studentId: String) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = log.date,
+                            text = attendance.date,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
                         )
-                        StatusChip(text = log.status, color = log.color)
+                        StatusChip(text = attendance.status, color = logColor)
                     }
                 }
             }
+        }
+        }
         }
     }
 }

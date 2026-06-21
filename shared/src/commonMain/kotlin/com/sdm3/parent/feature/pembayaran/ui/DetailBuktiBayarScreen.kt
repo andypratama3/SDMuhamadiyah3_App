@@ -27,9 +27,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +47,8 @@ import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
 import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
+import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -54,21 +60,37 @@ import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailBuktiBayarScreen(
-    paymentId: String
+    paymentId: String,
+    onBack: () -> Unit = {},
+    viewModel: DetailBuktiBayarViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(paymentId) {
+        viewModel.loadPaymentDetail(paymentId)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("SDM3 Payment") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -76,6 +98,7 @@ fun DetailBuktiBayarScreen(
                 .padding(horizontal = Spacing.md)
                 .verticalScroll(rememberScrollState())
         ) {
+            uiState.payment?.let { payment ->
             Spacer(modifier = Modifier.height(Spacing.md))
 
             Column(
@@ -117,31 +140,29 @@ fun DetailBuktiBayarScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "SDM3-20260620-XXX",
+                            text = payment.id,
                             style = MaterialTheme.typography.bodySmall,
                             color = OnSurfaceVariant
                         )
-                        StatusChip(text = "Berhasil", color = StatusSuccess)
+                        StatusChip(text = payment.status.uppercase(), color = StatusSuccess)
                     }
 
                     Spacer(modifier = Modifier.height(Spacing.md))
 
                     Text(
-                        text = "20 Juni 2026 • 14:30 WITA",
+                        text = "${payment.createdAt}",
                         style = MaterialTheme.typography.bodySmall,
                         color = OnSurfaceVariant
                     )
                     Text(
-                        text = "Virtual Account BCA",
+                        text = payment.paymentMethod ?: "-",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.md))
 
-                    DetailRow("SPP Juli 2026", "Rp300.000")
-                    DetailRow("Iuran Gedung", "Rp40.000")
-                    DetailRow("Biaya Admin", "Rp10.000")
+                    DetailRow(payment.feeName ?: "Tagihan", "Rp${payment.amount}")
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.md))
 
@@ -155,7 +176,7 @@ fun DetailBuktiBayarScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Rp350.000",
+                            text = "Rp${payment.amount}",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = SchoolGreenDark
@@ -239,6 +260,8 @@ fun DetailBuktiBayarScreen(
             }
 
             Spacer(modifier = Modifier.height(Spacing.md))
+            }
+        }
         }
     }
 }

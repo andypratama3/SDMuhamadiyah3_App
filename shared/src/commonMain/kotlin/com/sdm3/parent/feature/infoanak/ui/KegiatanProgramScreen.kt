@@ -23,9 +23,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -52,26 +55,45 @@ import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.StatusWarning
 import com.sdm3.parent.core.designsystem.theme.SurfaceContainerLow
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.kegiatan.KegiatanProgramViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KegiatanProgramScreen(studentId: String) {
+fun KegiatanProgramScreen(
+    studentId: String,
+    onBack: () -> Unit = {},
+    viewModel: KegiatanProgramViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Ekstrakurikuler", "Program Unggulan")
+
+    LaunchedEffect(studentId) {
+        viewModel.loadActivities(studentId)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Kegiatan & Program") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -127,14 +149,29 @@ fun KegiatanProgramScreen(studentId: String) {
             }
 
             if (selectedTab == 0) {
-                val ekskulList = listOf(
-                    EkskulItem("Futsal", "Coach Ahmad", "A", "Ananda menunjukkan peningkatan signifikan dalam kerjasama tim."),
-                    EkskulItem("Tahfiz Quran", "Ustadz Hafidz", "B+", "Hafalan juz 30: 15 surat telah dikuasai dengan baik."),
-                    EkskulItem("Seni Tari", "Ibu Dewi", "A", "Kreatif dan percaya diri saat tampil."),
-                    EkskulItem("Pramuka", "Kak Rudi", "B", "Perlu ditingkatkan kedisiplinannya.")
-                )
+                if (uiState.extracurriculars.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(Spacing.xl),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.SportsSoccer,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = OnSurfaceVariant.copy(alpha = 0.3f)
+                            )
+                            Spacer(Modifier.height(Spacing.md))
+                            Text(
+                                "Belum ada data ekstrakurikuler",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = OnSurfaceVariant
+                            )
+                        }
+                    }
+                }
 
-                items(ekskulList) { ekskul ->
+                items(uiState.extracurriculars) { ekskul ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -170,16 +207,16 @@ fun KegiatanProgramScreen(studentId: String) {
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.SemiBold
                                     )
-                                    StatusChip(text = ekskul.grade, color = StatusSuccess)
+                                    StatusChip(text = ekskul.schedule ?: "-", color = StatusSuccess)
                                 }
                                 Text(
-                                    text = ekskul.coach,
+                                    text = ekskul.teacherName ?: "Pembina",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = OnSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(Spacing.sm))
                                 Text(
-                                    text = "\"${ekskul.note}\"",
+                                    text = "\"${ekskul.description ?: "Belum ada catatan"}\"",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Primary,
                                     fontWeight = FontWeight.Medium

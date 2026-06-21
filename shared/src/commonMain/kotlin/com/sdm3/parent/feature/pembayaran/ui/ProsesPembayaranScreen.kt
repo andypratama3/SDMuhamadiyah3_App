@@ -25,9 +25,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +44,8 @@ import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.Secondary
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.pembayaran.ProsesPembayaranViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
@@ -50,21 +56,37 @@ import androidx.compose.material3.Icon
 @Composable
 fun ProsesPembayaranScreen(
     paymentId: String,
-    onPembayaranBerhasil: () -> Unit
+    onBack: () -> Unit = {},
+    onPembayaranBerhasil: () -> Unit,
+    viewModel: ProsesPembayaranViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(paymentId) {
+        viewModel.loadPaymentDetail(paymentId)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Instruksi Pembayaran") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -72,6 +94,7 @@ fun ProsesPembayaranScreen(
                 .padding(horizontal = Spacing.md)
                 .verticalScroll(rememberScrollState())
         ) {
+            uiState.payment?.let { payment ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -140,7 +163,7 @@ fun ProsesPembayaranScreen(
             )
 
             Text(
-                text = "Rp350.000",
+                text = "Rp${payment.amount}",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Primary
@@ -222,6 +245,8 @@ fun ProsesPembayaranScreen(
             }
 
             Spacer(modifier = Modifier.height(Spacing.lg))
+            }
+        }
         }
     }
 }

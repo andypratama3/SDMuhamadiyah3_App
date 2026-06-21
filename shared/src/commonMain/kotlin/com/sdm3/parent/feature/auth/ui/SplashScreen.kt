@@ -28,11 +28,14 @@ import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
 import com.sdm3.parent.core.navigation.SDM3Route
+import com.sdm3.parent.core.security.SecureTokenManager
 import kotlinx.coroutines.delay
+import org.koin.compose.koinInject
 
 @Composable
 fun SplashScreen(
-    onNavigate: (SDM3Route) -> Unit
+    onNavigate: (SDM3Route) -> Unit,
+    secureTokenManager: SecureTokenManager = koinInject()
 ) {
     var startAnimation by remember { mutableStateOf(false) }
     val scaleAnim by animateFloatAsState(
@@ -47,7 +50,17 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         startAnimation = true
         delay(2500)
-        onNavigate(SDM3Route.Onboarding)
+        val token = secureTokenManager.getBearerToken()
+        if (token != null) {
+            val studentId = secureTokenManager.getSelectedStudentId()
+            if (studentId != null) {
+                onNavigate(SDM3Route.Main(studentId))
+            } else {
+                onNavigate(SDM3Route.PilihAnak)
+            }
+        } else {
+            onNavigate(SDM3Route.Onboarding)
+        }
     }
 
     Box(

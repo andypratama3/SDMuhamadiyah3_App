@@ -13,6 +13,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,22 +29,37 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.Sdm3TextField
 import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
 import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
 import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.feature.auth.LoginViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onForgotPassword: (String) -> Unit
+    onForgotPassword: (String) -> Unit,
+    viewModel: LoginViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(uiState.isLoggedIn) {
+        if (uiState.isLoggedIn) {
+            onLoginSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -81,28 +98,40 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(Spacing.lg))
 
         Sdm3TextField(
-            value = email,
-            onValueChange = { email = it; error = null },
+            value = uiState.email,
+            onValueChange = { viewModel.onEmailChanged(it) },
             label = "Email",
+            leadingIcon = Icons.Default.Email,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
-            )
+            ),
+            isError = uiState.errorMessage != null
         )
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
         Sdm3TextField(
-            value = password,
-            onValueChange = { password = it; error = null },
+            value = uiState.password,
+            onValueChange = { viewModel.onPasswordChanged(it) },
             label = "Password",
+            leadingIcon = Icons.Default.Lock,
+            trailingIcon = {
+                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                    Icon(
+                        imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = if (isPasswordVisible) "Sembunyikan" else "Tampilkan"
+                    )
+                }
+            },
             visualTransformation = if (isPasswordVisible)
                 VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
-            )
+            ),
+            isError = uiState.errorMessage != null
         )
 
-        error?.let {
+        uiState.errorMessage?.let {
             Spacer(modifier = Modifier.height(Spacing.sm))
             Text(
                 text = it,
@@ -116,14 +145,9 @@ fun LoginScreen(
         Sdm3Button(
             text = "Masuk",
             onClick = {
-                if (email.isBlank() || password.isBlank()) {
-                    error = "Email dan password harus diisi"
-                    return@Sdm3Button
-                }
-                isLoading = true
-                onLoginSuccess()
+                viewModel.login()
             },
-            isLoading = isLoading
+            isLoading = uiState.isLoading
         )
 
         Spacer(modifier = Modifier.height(Spacing.md))

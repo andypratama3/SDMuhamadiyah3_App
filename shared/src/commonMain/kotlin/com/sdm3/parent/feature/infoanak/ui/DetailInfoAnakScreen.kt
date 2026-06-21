@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +42,8 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.Icon
+import com.sdm3.parent.feature.infoanak.DetailInfoAnakViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,27 +61,42 @@ import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
 data class QuickNav(
     val title: String,
     val icon: ImageVector,
-    val color: Color
-)
-
-private val quickNavItems = listOf(
-    QuickNav("Nilai", Icons.Default.Assessment, Secondary),
-    QuickNav("Rapor", Icons.Default.Description, Primary),
-    QuickNav("Kehadiran", Icons.Default.DateRange, StatusWarning),
-    QuickNav("Kesehatan", Icons.Default.MedicalServices, SchoolGreenDark)
+    val color: Color,
+    val onClick: () -> Unit
 )
 
 data class InfoItem(val label: String, val value: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailInfoAnakScreen(studentId: String) {
+fun DetailInfoAnakScreen(
+    studentId: String,
+    onBack: () -> Unit = {},
+    onNavigateToNilai: () -> Unit = {},
+    onNavigateToRapor: () -> Unit = {},
+    onNavigateToKehadiran: () -> Unit = {},
+    onNavigateToKegiatan: () -> Unit = {},
+    viewModel: DetailInfoAnakViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(studentId) {
+        viewModel.loadStudentDetail(studentId)
+    }
+
+    val quickNavItems = listOf(
+        QuickNav("Nilai", Icons.Default.Assessment, Secondary, onNavigateToNilai),
+        QuickNav("Rapor", Icons.Default.Description, Primary, onNavigateToRapor),
+        QuickNav("Kehadiran", Icons.Default.DateRange, StatusWarning, onNavigateToKehadiran),
+        QuickNav("Kegiatan", Icons.Default.MedicalServices, SchoolGreenDark, onNavigateToKegiatan)
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Detail Anak") },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
@@ -84,107 +105,116 @@ fun DetailInfoAnakScreen(studentId: String) {
                         Icon(Icons.Default.OpenInNew, contentDescription = null)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = Spacing.md),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-        ) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(Spacing.lg),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(96.dp)
-                                .clip(CircleShape)
-                                .background(Primary.copy(alpha = 0.1f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "AF",
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Primary
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(Spacing.md))
-
-                        Text(
-                            text = "Ahmad Fathan",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = "Kelas 4-A (Ibnu Sina)",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Secondary
-                        )
-
-                        Spacer(modifier = Modifier.height(Spacing.sm))
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-                        ) {
-                            StatusChip(text = "NISN: 0012345678", color = Primary)
-                            StatusChip(text = "Aktif", color = StatusSuccess)
-                        }
-                    }
-                }
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Primary)
             }
-
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                ) {
-                    Column(modifier = Modifier.padding(Spacing.md)) {
-                        val infoItems = listOf(
-                            InfoItem("Tempat Lahir", "Samarinda"),
-                            InfoItem("Tanggal Lahir", "15 Januari 2015"),
-                            InfoItem("Jenis Kelamin", "Laki-laki"),
-                            InfoItem("Wali Kelas", "Ibu Siti Rahmawati, S.Pd."),
-                            InfoItem("ID Pelajar", "SDM3-2025-00123")
-                        )
-
-                        infoItems.forEach { item ->
-                            Row(
+        } else if (uiState.student != null) {
+            val student = uiState.student!!
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(Spacing.lg),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 6.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .size(96.dp)
+                                    .clip(CircleShape)
+                                    .background(Primary.copy(alpha = 0.1f)),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = item.label,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = OnSurfaceVariant
+                                    text = student.name.firstOrNull()?.toString()?.uppercase() ?: "",
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Primary
                                 )
-                                Text(
-                                    text = item.value,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium
-                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(Spacing.md))
+
+                            Text(
+                                text = student.name,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "Kelas ${student.className ?: "-"}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Secondary
+                            )
+
+                            Spacer(modifier = Modifier.height(Spacing.sm))
+
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                            ) {
+                                StatusChip(text = "NISN: ${student.nisn ?: "-"}", color = Primary)
+                                StatusChip(text = "Aktif", color = StatusSuccess)
                             }
                         }
                     }
                 }
-            }
+
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(Spacing.md)) {
+                            val infoItems = listOf(
+                                InfoItem("Tempat Lahir", student.birthPlace ?: "-"),
+                                InfoItem("Tanggal Lahir", student.birthDate ?: "-"),
+                                InfoItem("Jenis Kelamin", student.gender ?: "-"),
+                                InfoItem("Wali Kelas", "Informasi Wali Kelas"),
+                                InfoItem("ID Pelajar", student.nis ?: "-")
+                            )
+
+                            infoItems.forEach { item ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = item.label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = OnSurfaceVariant
+                                    )
+                                    Text(
+                                        text = item.value,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
 
             item {
                 Text(
@@ -283,8 +313,9 @@ fun DetailInfoAnakScreen(studentId: String) {
 private fun NavItemCard(nav: QuickNav, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
+        onClick = nav.onClick,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = nav.color)
+        colors = CardDefaults.cardColors(containerColor = nav.color.copy(alpha = 0.1f))
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(Spacing.md),
@@ -295,7 +326,7 @@ private fun NavItemCard(nav: QuickNav, modifier: Modifier = Modifier) {
             Text(
                 text = nav.title,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 color = nav.color
             )
         }

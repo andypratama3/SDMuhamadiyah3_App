@@ -31,18 +31,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.StatusChip
 import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
 import com.sdm3.parent.core.designsystem.theme.Primary
@@ -62,41 +67,72 @@ fun NilaiRaporScreen(
     studentId: String,
     semester: String,
     onBack: (() -> Unit)? = null,
-    onDetailMapel: ((subjectId: String) -> Unit)? = null
+    onDetailMapel: ((subjectId: String) -> Unit)? = null,
+    viewModel: NilaiRaporViewModel = org.koin.compose.viewmodel.koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(studentId, semester) {
+        viewModel.loadGrades(studentId, semester)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Nilai & Rapor") },
                 navigationIcon = {
-                    if (onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
-                        }
+                    IconButton(onClick = { onBack?.invoke() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = SurfaceWhite
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         }
     ) { padding ->
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.padding(padding)
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
         ) {
             TabRow(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            when (selectedTab) {
-                0 -> SumatifTab(studentId = studentId, semester = semester, onDetailMapel = onDetailMapel)
-                1 -> FormatifTab(studentId = studentId)
-                2 -> ProjekTab(studentId = studentId)
+            if (uiState.isLoading && uiState.grades.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Primary)
+                }
+            } else if (uiState.errorMessage != null && uiState.grades.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(Spacing.md),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(text = uiState.errorMessage ?: "Terjadi kesalahan", color = Color.Red)
+                    Spacer(modifier = Modifier.height(Spacing.md))
+                    Sdm3Button(text = "Coba Lagi", onClick = { viewModel.refresh() })
+                }
+            } else {
+                when (selectedTab) {
+                    0 -> SumatifTab(
+                        studentId = studentId,
+                        semester = semester,
+                        grades = uiState.grades,
+                        onDetailMapel = onDetailMapel
+                    )
+                    1 -> FormatifTab(studentId = studentId)
+                    2 -> ProjekTab(studentId = studentId)
+                }
             }
+        }
         }
     }
 }
@@ -138,20 +174,10 @@ private fun TabRow(selectedTab: Int, onTabSelected: (Int) -> Unit) {
 private fun SumatifTab(
     studentId: String,
     semester: String,
+    grades: List<com.sdm3.parent.data.remote.dto.GradeDto>,
     onDetailMapel: ((subjectId: String) -> Unit)?
 ) {
-    val subjects = listOf(
-        SubjectGrade("Matematika", 92, "A", "SANGAT BAIK", "1"),
-        SubjectGrade("Bahasa Indonesia", 88, "B+", "BAIK", "2"),
-        SubjectGrade("IPA", 95, "A", "SANGAT BAIK", "3"),
-        SubjectGrade("IPS", 78, "B", "CUKUP", "4"),
-        SubjectGrade("Pend. Agama", 90, "A", "SANGAT BAIK", "5"),
-        SubjectGrade("PJOK", 85, "B+", "BAIK", "6"),
-        SubjectGrade("Seni Budaya", 82, "B", "BAIK", "7"),
-        SubjectGrade("Bahasa Inggris", 76, "B", "CUKUP", "8")
-    )
-
-    val avgScore = subjects.map { it.score }.average().toInt()
+    val avgScore = if (grades.isNotEmpty()) grades.map { it.score }.average().toInt() else 0
 
     Column(
         modifier = Modifier
@@ -197,12 +223,24 @@ private fun SumatifTab(
 
         Spacer(modifier = Modifier.height(Spacing.sm))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            items(subjects) { subject ->
-                SubjectCard(
-                    subject = subject,
-                    onClick = { onDetailMapel?.invoke(subject.id) }
-                )
+        if (grades.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Belum ada data nilai", color = OnSurfaceVariant)
+            }
+        } else {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                items(grades) { grade ->
+                    SubjectCard(
+                        subject = SubjectGrade(
+                            name = grade.subjectName,
+                            score = grade.score,
+                            predicate = grade.predicate ?: "-",
+                            description = grade.description ?: "",
+                            id = grade.id
+                        ),
+                        onClick = { onDetailMapel?.invoke(grade.id) }
+                    )
+                }
             }
         }
     }
