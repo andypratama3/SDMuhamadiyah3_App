@@ -1,8 +1,6 @@
 package com.sdm3.parent.feature.profil.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,61 +13,32 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
-import com.sdm3.parent.core.designsystem.theme.Primary
-import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
-import com.sdm3.parent.core.designsystem.theme.Secondary
-import com.sdm3.parent.core.designsystem.theme.Spacing
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.StatusChip
+import com.sdm3.parent.core.designsystem.theme.CardShape
+import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusDanger
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
-import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
-import com.sdm3.parent.feature.profil.ProfilAkunViewModel
-import org.koin.compose.viewmodel.koinViewModel
 
 data class SettingsItem(
     val label: String,
@@ -83,24 +52,24 @@ data class SettingsItem(
 fun ProfilAkunScreen(
     onNotifikasiSetting: () -> Unit,
     onAccountDeletion: () -> Unit,
-    onLogout: () -> Unit,
-    viewModel: ProfilAkunViewModel = koinViewModel()
+    onLogout: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        viewModel.loadProfile()
-    }
+    val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
+        containerColor = colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Profil") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                title = {
+                    Text(
+                        "Profil Akun",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
@@ -108,61 +77,67 @@ fun ProfilAkunScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = Spacing.md)
+                .padding(horizontal = Spacing.lg)
                 .verticalScroll(rememberScrollState())
         ) {
-            Card(
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                shape = CardShape,
+                color = colorScheme.surface,
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(Spacing.lg),
+                        .padding(Spacing.xl),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                            .background(Primary.copy(alpha = 0.1f)),
-                        contentAlignment = Alignment.Center
+                    Surface(
+                        modifier = Modifier.size(72.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        color = colorScheme.primaryContainer
                     ) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = OnSurfaceVariant
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp),
+                                tint = colorScheme.primary
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.width(Spacing.md))
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = uiState.profile?.name ?: "User",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.SemiBold
+                                text = "Bambang Suprapto",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colorScheme.onSurface
                             )
                             Spacer(modifier = Modifier.width(Spacing.sm))
                             Box(
                                 modifier = Modifier
-                                    .size(16.dp)
-                                    .clip(CircleShape)
+                                    .size(12.dp)
+                                    .clip(RoundedCornerShape(6.dp))
                                     .background(StatusSuccess)
                             )
                         }
                         Text(
-                            text = uiState.profile?.phone ?: "-",
+                            text = "0812-3456-7890",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = OnSurfaceVariant
+                            color = colorScheme.onSurfaceVariant
                         )
                     }
                     IconButton(onClick = { }) {
                         Icon(
-                            imageVector = Icons.Default.ChevronRight,
-                            contentDescription = null,
-                            tint = OnSurfaceVariant
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = "Detail",
+                            modifier = Modifier.size(20.dp),
+                            tint = colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -170,113 +145,94 @@ fun ProfilAkunScreen(
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                shape = CardShape,
+                color = colorScheme.surface,
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp
             ) {
-                Column(modifier = Modifier.padding(Spacing.md)) {
+                Column(modifier = Modifier.padding(Spacing.lg)) {
+                    Text(
+                        text = "Data Anak",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.sm))
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.sm),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Data Anak",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Primary
-                        )
-                        Text(
-                            text = "Lihat Semua",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Secondary,
-                            modifier = Modifier.clickable { }
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(Spacing.sm))
-
-                    val studentViewModel: com.sdm3.parent.feature.auth.PilihAnakViewModel = koinViewModel()
-                    val studentState by studentViewModel.uiState.collectAsState()
-
-                    LaunchedEffect(Unit) {
-                        studentViewModel.loadStudents()
-                    }
-
-                    studentState.students.forEach { student ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = Spacing.sm),
-                            verticalAlignment = Alignment.CenterVertically
+                        Surface(
+                            modifier = Modifier.size(48.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            color = colorScheme.primaryContainer
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(Primary.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
+                            Box(contentAlignment = Alignment.Center) {
                                 Text(
-                                    text = student.name.firstOrNull()?.toString()?.uppercase() ?: "",
+                                    text = "AF",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = Primary
+                                    color = colorScheme.primary
                                 )
                             }
-                            Spacer(modifier = Modifier.width(Spacing.md))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = student.name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    text = "Kelas ${student.className ?: "-"}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = OnSurfaceVariant
-                                )
-                            }
-                            StatusChip(text = "Aktif", color = StatusSuccess)
                         }
+                        Spacer(modifier = Modifier.width(Spacing.md))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Ahmad Fathan",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Kelas 4-A (Ibnu Sina)",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colorScheme.onSurfaceVariant
+                            )
+                        }
+                        StatusChip(text = "Aktif", color = StatusSuccess)
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                shape = CardShape,
+                color = colorScheme.surface,
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp
             ) {
-                Column(modifier = Modifier.padding(Spacing.md)) {
+                Column(modifier = Modifier.padding(Spacing.sm)) {
                     SettingsItemRow(
                         icon = Icons.Default.Notifications,
                         title = "Notifikasi",
-                        color = Secondary,
+                        color = colorScheme.secondary,
                         trailing = null,
                         onClick = onNotifikasiSetting
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
                     SettingsItemRow(
                         icon = Icons.Default.Language,
                         title = "Bahasa",
-                        color = Primary,
+                        color = colorScheme.primary,
                         trailing = "Bahasa Indonesia",
                         onClick = { }
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
                     SettingsItemRow(
                         icon = Icons.Default.Info,
                         title = "Tentang Aplikasi",
-                        color = OnSurfaceVariant,
+                        color = colorScheme.onSurfaceVariant,
                         trailing = null,
                         onClick = { }
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
                     SettingsItemRow(
                         icon = Icons.Default.Lock,
                         title = "Kebijakan Privasi",
@@ -284,44 +240,44 @@ fun ProfilAkunScreen(
                         trailing = null,
                         onClick = { }
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
                     SettingsItemRow(
                         icon = Icons.Default.Chat,
                         title = "Hubungi Sekolah",
-                        color = Secondary,
+                        color = colorScheme.secondary,
                         trailing = null,
                         onClick = { }
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.sm))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = Spacing.sm),
+                            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Versi Aplikasi",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = OnSurfaceVariant
+                            color = colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = "1.0.0 (Build 1)",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = OnSurfaceVariant
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.md))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             OutlinedButton(
                 onClick = { showLogoutDialog = true },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusDanger),
-                border = BorderStroke(1.dp, StatusDanger)
+                border = androidx.compose.foundation.BorderStroke(1.5.dp, StatusDanger)
             ) {
                 Icon(Icons.Default.ExitToApp, contentDescription = null, tint = StatusDanger)
                 Spacer(modifier = Modifier.width(Spacing.sm))
@@ -331,14 +287,14 @@ fun ProfilAkunScreen(
             Spacer(modifier = Modifier.height(Spacing.md))
 
             Text(
-                text = "© 2026 SDM3 Parent Portal",
-                style = MaterialTheme.typography.bodySmall,
-                color = OnSurfaceVariant,
+                text = "2026 SDM3 Parent Portal",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
+            Spacer(modifier = Modifier.height(Spacing.xl))
         }
     }
 
@@ -360,7 +316,7 @@ fun ProfilAkunScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Batal", color = Secondary)
+                    Text("Batal", color = Color.White)
                 }
             }
         )
@@ -375,40 +331,48 @@ private fun SettingsItemRow(
     trailing: String?,
     onClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = Spacing.sm),
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = color
-        )
+        Surface(
+            modifier = Modifier.size(36.dp),
+            shape = RoundedCornerShape(10.dp),
+            color = color.copy(alpha = 0.1f)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = color
+                )
+            }
+        }
         Spacer(modifier = Modifier.width(Spacing.md))
         Text(
             text = title,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            color = colorScheme.onSurface
         )
         if (trailing != null) {
             Text(
                 text = trailing,
-                style = MaterialTheme.typography.bodySmall,
-                color = OnSurfaceVariant
+                style = MaterialTheme.typography.bodyMedium,
+                color = colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(Spacing.sm))
         }
         Icon(
-            imageVector = Icons.Default.ChevronRight,
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = OnSurfaceVariant.copy(alpha = 0.5f)
+            modifier = Modifier.size(18.dp),
+            tint = colorScheme.onSurfaceVariant
         )
     }
 }
-
-

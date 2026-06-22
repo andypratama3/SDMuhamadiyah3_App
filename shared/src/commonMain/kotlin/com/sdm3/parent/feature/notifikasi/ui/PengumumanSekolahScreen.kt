@@ -1,215 +1,189 @@
 package com.sdm3.parent.feature.notifikasi.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.animation.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import com.sdm3.parent.core.designsystem.component.StatusChip
-import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
-import com.sdm3.parent.core.designsystem.theme.Primary
-import com.sdm3.parent.core.designsystem.theme.Secondary
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.StatusWarning
-import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
-import com.sdm3.parent.feature.notifikasi.PengumumanSekolahViewModel
-import org.koin.compose.viewmodel.koinViewModel
-
-private val categoryFilters = listOf("Semua", "Umum", "Akademik", "Keuangan", "Kegiatan")
-
-data class AnnouncementItem(
-    val title: String,
-    val date: String,
-    val category: String,
-    val imageUrl: String? = null
-)
-
-private val announcements = listOf(
-    AnnouncementItem("Libur Hari Raya Idul Adha 1447 H", "18 Juni 2026", "Umum"),
-    AnnouncementItem("Rapor Sumatif 1 Telah Terbit", "15 Juni 2026", "Akademik"),
-    AnnouncementItem("Jadwal Pembayaran SPP Semester Baru", "10 Juni 2026", "Keuangan"),
-    AnnouncementItem("Pendaftaran Ekstrakurikuler 2026/2027", "5 Juni 2026", "Kegiatan"),
-    AnnouncementItem("Sosialisasi Program Tahfiz Quran", "1 Juni 2026", "Kegiatan"),
-    AnnouncementItem("Pemberitahuan Perubahan Seragam Sekolah", "28 Mei 2026", "Umum"),
-    AnnouncementItem("Jadwal Ujian Sumatif Semester Genap", "20 Mei 2026", "Akademik"),
-)
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PengumumanSekolahScreen(
-    onBack: () -> Unit = {},
-    viewModel: PengumumanSekolahViewModel = koinViewModel()
+    onBack: () -> Unit,
+    onDetailClick: (String) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
     var selectedCategory by remember { mutableIntStateOf(0) }
+    val colorScheme = MaterialTheme.colorScheme
+    var startAnimation by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.loadArticles()
+        startAnimation = true
     }
 
     Scaffold(
+        containerColor = colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Pengumuman Sekolah") },
+                title = {
+                    Text(
+                        text = "Info Sekolah",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = colorScheme.onSurface
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = { }) {
-                        Icon(Icons.Default.Search, contentDescription = "Cari")
+                        Icon(Icons.Outlined.Search, contentDescription = "Cari", tint = colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Primary)
-            }
-        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            LazyRow(
-                modifier = Modifier.padding(horizontal = Spacing.md),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            val categoryFilters = listOf("Semua", "Umum", "Akademik", "Keuangan", "Kegiatan")
+
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.md)
             ) {
-                items(categoryFilters.size) { index ->
-                    val isSelected = selectedCategory == index
-                    FilterChip(
-                        selected = isSelected,
+                categoryFilters.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        selected = selectedCategory == index,
                         onClick = { selectedCategory = index },
-                        label = {
-                            Text(
-                                categoryFilters[index],
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Secondary,
-                            selectedLabelColor = SurfaceWhite,
-                            containerColor = SurfaceWhite
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = categoryFilters.size
                         )
-                    )
+                    ) {
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (selectedCategory == index) FontWeight.SemiBold else FontWeight.Normal,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            val filtered = if (selectedCategory == 0) uiState.articles
-            else uiState.articles.filter { it.category == categoryFilters[selectedCategory].lowercase() }
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
             ) {
-                items(filtered) { item ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = Spacing.md),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                        onClick = { /* Detail Pengumuman */ }
+                val dummyAnnouncements = listOf(
+                    "Libur Hari Raya Idul Adha 1447 H",
+                    "Rapor Sumatif 1 Telah Terbit",
+                    "Jadwal Pembayaran SPP Semester Baru",
+                    "Pendaftaran Ekstrakurikuler 2026/2027",
+                    "Sosialisasi Program Tahfiz Quran"
+                )
+
+                itemsIndexed(dummyAnnouncements) { index, title ->
+                    AnimatedVisibility(
+                        visible = startAnimation,
+                        enter = fadeIn(androidx.compose.animation.core.tween(500, delayMillis = index * 100)) +
+                                slideInVertically(androidx.compose.animation.core.tween(500, delayMillis = index * 100)) { it / 4 }
                     ) {
-                        Row(
-                            modifier = Modifier.padding(Spacing.md),
-                            verticalAlignment = Alignment.Top
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onDetailClick("announcement_$index") },
+                            shape = CardShape,
+                            color = colorScheme.surface,
+                            tonalElevation = 1.dp,
+                            shadowElevation = 2.dp
                         ) {
-                                Card(
-                                    modifier = Modifier.size(72.dp, 64.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = Primary.copy(alpha = 0.08f)
-                                    )
+                            Row(
+                                modifier = Modifier.padding(Spacing.lg),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    modifier = Modifier.size(56.dp, 64.dp),
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = colorScheme.primaryContainer
                                 ) {
                                     Column(
-                                        modifier = Modifier.fillMaxSize().padding(Spacing.sm),
                                         horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.fillMaxSize()
                                     ) {
                                         Text(
-                                            text = item.publishedAt?.split("T")?.first()?.split("-")?.last() ?: "-",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = Primary,
-                                            fontWeight = FontWeight.Bold
+                                            text = "18",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.primary
                                         )
                                         Text(
-                                            text = item.publishedAt?.split("T")?.first()?.split("-")?.get(1) ?: "-",
+                                            text = "JUN",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = Primary
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = colorScheme.primary
                                         )
                                     }
                                 }
-                            Spacer(modifier = Modifier.width(Spacing.md))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = item.title,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Spacer(modifier = Modifier.height(Spacing.sm))
-                                val chipColor = when (item.category?.lowercase()) {
-                                    "umum" -> Secondary
-                                    "akademik" -> Primary
-                                    "keuangan" -> StatusWarning
-                                    else -> Secondary
+                                Spacer(modifier = Modifier.width(Spacing.md))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = title,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = colorScheme.onSurface,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(Spacing.xs))
+                                    Surface(
+                                        shape = RoundedCornerShape(100),
+                                        color = colorScheme.secondaryContainer
+                                    ) {
+                                        Text(
+                                            text = "Pengumuman Umum",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = colorScheme.onSecondaryContainer,
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                        )
+                                    }
                                 }
-                                StatusChip(text = item.category ?: "Umum", color = chipColor)
                             }
                         }
                     }
                 }
+
+                item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
             }
-        }
         }
     }
 }

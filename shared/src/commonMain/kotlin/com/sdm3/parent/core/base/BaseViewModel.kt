@@ -29,7 +29,13 @@ abstract class BaseViewModel<S : ScreenState>(initialState: S) : ViewModel() {
         val handler = CoroutineExceptionHandler { _, throwable ->
             onError?.invoke(throwable)
         }
-        viewModelScope.launch(handler) { block() }
+        viewModelScope.launch(handler) {
+            try {
+                block()
+            } catch (e: Exception) {
+                onError?.invoke(e)
+            }
+        }
     }
 
     protected fun ApiError.toUserMessage(): String = when (this) {

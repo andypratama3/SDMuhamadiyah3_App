@@ -2,64 +2,38 @@ package com.sdm3.parent.feature.rapor
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
-import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.RaporInstanceDto
-import com.sdm3.parent.data.repository.RaporRepository
+import kotlinx.coroutines.delay
 
 data class HalamanRaporUiState(
-    val studentId: String = "",
-    val raporInstances: List<RaporInstanceDto> = emptyList(),
     override val isLoading: Boolean = false,
     override val errorMessage: String? = null,
-    override val isEmpty: Boolean = true,
-    val downloadUrl: String? = null
+    override val isEmpty: Boolean = false,
+    val studentId: String = "",
+    val rapors: List<RaporInstanceDto> = emptyList()
 ) : ScreenState
 
-class HalamanRaporViewModel(
-    private val raporRepository: RaporRepository
-) : BaseViewModel<HalamanRaporUiState>(HalamanRaporUiState()) {
+class HalamanRaporViewModel : BaseViewModel<HalamanRaporUiState>(HalamanRaporUiState()) {
 
-    fun loadRaporInstances(studentId: String) {
-        launchSafely(
-            onError = { error ->
-                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Terjadi kesalahan") }
-            }
-        ) {
+    fun loadRapors(studentId: String) {
+        launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null, studentId = studentId) }
-            when (val result = raporRepository.getRaporInstances(studentId)) {
-                is ApiResult.Success -> {
-                    val instances = result.data
-                    updateState { it.copy(isLoading = false, raporInstances = instances, isEmpty = instances.isEmpty()) }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
+            delay(1000)
+            val dummyRapors = listOf(
+                RaporInstanceDto(id = "1", studentId = studentId, semester = "Ganjil (1)", academicYear = "2023 / 2024", status = "available", pdfUrl = "https://example.com/rapor.pdf"),
+                RaporInstanceDto(id = "2", studentId = studentId, semester = "Genap (2)", academicYear = "2022 / 2023", status = "available", pdfUrl = "https://example.com/rapor.pdf")
+            )
+            updateState {
+                it.copy(
+                    rapors = dummyRapors,
+                    isLoading = false,
+                    isEmpty = dummyRapors.isEmpty()
+                )
             }
         }
     }
 
-    fun downloadRapor(id: String) {
-        launchSafely(
-            onError = { error ->
-                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Terjadi kesalahan") }
-            }
-        ) {
-            updateState { it.copy(isLoading = true, errorMessage = null) }
-            when (val result = raporRepository.getDownloadUrl(id)) {
-                is ApiResult.Success<String> -> {
-                    updateState { it.copy(isLoading = false, downloadUrl = result.data) }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
-            }
-        }
-    }
-
-    fun refresh() {
-        val s = uiState.value
-        if (s.studentId.isNotEmpty()) {
-            loadRaporInstances(s.studentId)
-        }
+    fun refresh(studentId: String) {
+        loadRapors(studentId)
     }
 }

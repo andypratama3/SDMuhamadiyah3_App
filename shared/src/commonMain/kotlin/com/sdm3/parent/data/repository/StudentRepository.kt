@@ -5,19 +5,19 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.StudentApi
 import com.sdm3.parent.data.remote.dto.StudentDto
 
-class StudentRepository(private val api: StudentApi) {
+open class StudentRepository(private val api: StudentApi?) {
 
-    suspend fun getStudents(): ApiResult<List<StudentDto>> {
+    open suspend fun getStudents(): ApiResult<List<StudentDto>> {
         return try {
-            api.getStudents()
+            api?.getStudents() ?: ApiResult.Success(emptyList())
         } catch (e: Exception) {
             ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data siswa"))
         }
     }
 
-    suspend fun getStudentDetail(id: String): ApiResult<StudentDto> {
+    open suspend fun getStudentDetail(id: String): ApiResult<StudentDto> {
         return try {
-            api.getStudentDetail(id)
+            api?.getStudentDetail(id) ?: ApiResult.Error(ApiError.NotFound)
         } catch (e: Exception) {
             ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil detail siswa"))
         }

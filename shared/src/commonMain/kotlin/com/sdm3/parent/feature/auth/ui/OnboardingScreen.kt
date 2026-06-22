@@ -1,31 +1,26 @@
 package com.sdm3.parent.feature.auth.ui
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.sdm3.parent.core.designsystem.component.Sdm3Button
-import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
-import com.sdm3.parent.core.designsystem.theme.Primary
-import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 import kotlinx.coroutines.launch
 
 data class OnboardingPage(
@@ -36,15 +31,15 @@ data class OnboardingPage(
 private val onboardingPages = listOf(
     OnboardingPage(
         title = "Pantau Perkembangan Anak",
-        subtitle = "Lihat nilai, kehadiran, dan rapor anak Anda kapan saja"
+        subtitle = "Lihat nilai, kehadiran, dan rapor anak Anda kapan saja dengan mudah."
     ),
     OnboardingPage(
-        title = "Bayar SPP Lebih Mudah",
-        subtitle = "Pembayaran digital via transfer bank atau QRIS, tanpa antri"
+        title = "Bayar SPP Kapan Saja",
+        subtitle = "Tidak perlu antre. Bayar SPP, DPP, dan biaya sekolah lainnya dengan mudah via aplikasi."
     ),
     OnboardingPage(
-        title = "Selalu Up-to-Date",
-        subtitle = "Dapatkan pengumuman dan notifikasi langsung dari sekolah"
+        title = "Unduh & Verifikasi Rapor",
+        subtitle = "Rapor PDF resmi sekolah bisa diunduh kapan saja. Scan QR untuk verifikasi keaslian dokumen."
     )
 )
 
@@ -54,20 +49,29 @@ fun OnboardingScreen(
 ) {
     val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
     val scope = rememberCoroutineScope()
+    val colorScheme = MaterialTheme.colorScheme
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(colorScheme.background)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Spacing.md),
+                .statusBarsPadding()
+                .padding(horizontal = Spacing.lg, vertical = Spacing.md),
             horizontalArrangement = Arrangement.End
         ) {
-            TextButton(onClick = onComplete) {
-                Text("Skip")
+            TextButton(
+                onClick = onComplete
+            ) {
+                Text(
+                    text = "Lewati",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
             }
         }
 
@@ -79,23 +83,34 @@ fun OnboardingScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(Spacing.lg),
+                    .padding(horizontal = Spacing.xl),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(280.dp)
+                        .padding(Spacing.xl),
+                    contentAlignment = Alignment.Center
+                ) {
+                    OnboardingVisualPremium(page = page)
+                }
+
+                Spacer(modifier = Modifier.height(Spacing.xl))
+
                 Text(
                     text = data.title,
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
-                    color = Primary
+                    color = colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(Spacing.md))
+                Spacer(modifier = Modifier.height(Spacing.sm))
                 Text(
                     text = data.subtitle,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
-                    color = OnSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -103,34 +118,167 @@ fun OnboardingScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Spacing.md),
-            horizontalArrangement = Arrangement.Center
+                .padding(vertical = Spacing.lg),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             repeat(onboardingPages.size) { index ->
-                val color = if (pagerState.currentPage == index)
-                    Primary else OnSurfaceVariant
-                androidx.compose.foundation.Canvas(modifier = Modifier.padding(4.dp)) {
-                    drawCircle(color = color, radius = 6.dp.toPx())
-                }
+                val isSelected = pagerState.currentPage == index
+                val width by animateDpAsState(
+                    targetValue = if (isSelected) 32.dp else 8.dp,
+                    animationSpec = tween(durationMillis = 400)
+                )
+                val color = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.xxs)
+                        .size(width = width, height = 6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(color)
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(Spacing.sm))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
-        Sdm3Button(
-            text = if (pagerState.currentPage == onboardingPages.size - 1) "Mulai Sekarang" else "Lanjut",
-            onClick = {
-                if (pagerState.currentPage == onboardingPages.size - 1) {
-                    onComplete()
-                } else {
-                    scope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.xl)
+        ) {
+            val isLastPage = pagerState.currentPage == onboardingPages.size - 1
+            Sdm3Button(
+                text = if (isLastPage) "Mulai Sekarang" else "Lanjut",
+                onClick = {
+                    if (isLastPage) {
+                        onComplete()
+                    } else {
+                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                icon = Icons.AutoMirrored.Outlined.ArrowForward
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Spacing.lg))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = Spacing.xl),
+            contentAlignment = Alignment.Center
+        ) {
+            if (pagerState.currentPage < onboardingPages.size - 1) {
+                TextButton(onClick = onComplete) {
+                    Text(
+                        "Sudah punya akun? Masuk",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            } else {
+                Spacer(Modifier.height(Spacing.xxl))
+            }
+        }
+    }
+}
+
+@Composable
+private fun OnboardingVisualPremium(page: Int) {
+    val colorScheme = MaterialTheme.colorScheme
+    when (page) {
+        0 -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Surface(
+                    modifier = Modifier.size(160.dp),
+                    shape = CardShape,
+                    color = colorScheme.primaryContainer,
+                    tonalElevation = 4.dp,
+                    shadowElevation = 8.dp
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Outlined.Analytics,
+                            contentDescription = null,
+                            modifier = Modifier.size(72.dp),
+                            tint = colorScheme.primary
+                        )
                     }
                 }
-            },
-            modifier = Modifier.padding(Spacing.md)
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.sm))
+            }
+        }
+        1 -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Surface(
+                    modifier = Modifier.size(160.dp, 220.dp),
+                    shape = CardShape,
+                    color = colorScheme.secondaryContainer,
+                    tonalElevation = 4.dp,
+                    shadowElevation = 8.dp
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            Icons.Outlined.CheckCircle,
+                            contentDescription = null,
+                            tint = StatusSuccess,
+                            modifier = Modifier.size(64.dp)
+                        )
+                    }
+                }
+            }
+        }
+        2 -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Surface(
+                    modifier = Modifier.size(180.dp, 220.dp),
+                    shape = CardShape,
+                    color = colorScheme.surfaceVariant,
+                    tonalElevation = 4.dp,
+                    shadowElevation = 8.dp
+                ) {
+                    Column(Modifier.padding(Spacing.lg)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                modifier = Modifier.size(36.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                color = colorScheme.error.copy(alpha = 0.1f)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        Icons.Outlined.PictureAsPdf,
+                                        contentDescription = null,
+                                        tint = colorScheme.error,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Box(modifier = Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)).background(colorScheme.onSurface.copy(alpha = 0.1f)))
+                        }
+                        Spacer(Modifier.weight(1f))
+                        Surface(
+                            modifier = Modifier.size(72.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            color = colorScheme.primaryContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Outlined.QrCode2,
+                                    contentDescription = null,
+                                    tint = colorScheme.primary,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

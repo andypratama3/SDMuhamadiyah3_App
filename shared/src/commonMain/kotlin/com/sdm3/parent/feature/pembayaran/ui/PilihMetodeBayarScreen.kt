@@ -1,6 +1,8 @@
 package com.sdm3.parent.feature.pembayaran.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,45 +15,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
-import com.sdm3.parent.core.designsystem.theme.Primary
-import com.sdm3.parent.core.designsystem.theme.Secondary
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
-import com.sdm3.parent.feature.pembayaran.PilihMetodeBayarViewModel
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material3.Icon
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.sdm3.parent.core.designsystem.component.Sdm3Button
+import com.sdm3.parent.core.designsystem.theme.CardShape
+import com.sdm3.parent.core.designsystem.theme.Spacing
 
 data class PaymentMethod(
     val id: String,
@@ -71,85 +49,86 @@ private val paymentMethods = listOf(
 @Composable
 fun PilihMetodeBayarScreen(
     studentFeeId: String,
-    onBack: () -> Unit = {},
-    onLanjutkan: (String) -> Unit,
-    viewModel: PilihMetodeBayarViewModel = koinViewModel()
+    onBack: () -> Unit,
+    onLanjutkan: (String) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val colorScheme = MaterialTheme.colorScheme
     var selectedMethod by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(studentFeeId) {
-        viewModel.loadFeeDetail(studentFeeId)
-    }
-
     Scaffold(
+        containerColor = colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Detail Tagihan & Pilih Metode") },
+                title = {
+                    Text(
+                        text = "Pilih Metode Pembayaran",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Primary)
-            }
-        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = Spacing.md)
+                .padding(horizontal = Spacing.lg)
         ) {
-            uiState.fee?.let { fee ->
-            Card(
+            // Summary card
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                shape = CardShape,
+                color = colorScheme.surface,
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp
             ) {
-                Column(modifier = Modifier.padding(Spacing.md)) {
-                    Text(
-                        text = fee.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                Column(modifier = Modifier.padding(Spacing.xl)) {
+                    Text("SPP Juli 2026", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurface)
                     Spacer(modifier = Modifier.height(Spacing.sm))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Tagihan", color = OnSurfaceVariant)
-                        Text("Rp${fee.amount}")
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("SPP", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
+                        Text("Rp300.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Iuran Gedung", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
+                        Text("Rp40.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Biaya Admin", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
+                        Text("Rp10.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Total", fontWeight = FontWeight.Bold)
-                        Text("Rp${fee.amount}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Primary)
+                        Text(
+                            text = "Total",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Rp350.000",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary
+                        )
                     }
                 }
             }
-            }
 
             Spacer(modifier = Modifier.height(Spacing.md))
-
-            Text(
-                text = "Pilih Metode Pembayaran",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
+            Text("Pilih Metode Pembayaran", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurface)
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             LazyColumn(
@@ -158,67 +137,48 @@ fun PilihMetodeBayarScreen(
             ) {
                 items(paymentMethods) { method ->
                     val isSelected = selectedMethod == method.id
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected) Secondary.copy(alpha = 0.08f) else SurfaceWhite
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 2.dp else 1.dp),
-                        onClick = { selectedMethod = method.id }
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedMethod = method.id },
+                        shape = CardShape,
+                        color = if (isSelected) colorScheme.primaryContainer.copy(alpha = 0.5f) else colorScheme.surface,
+                        tonalElevation = if (isSelected) 0.dp else 1.dp,
+                        shadowElevation = if (isSelected) 0.dp else 1.dp
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(Spacing.md),
+                                .padding(Spacing.lg),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                method.icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp),
-                                tint = Primary
-                            )
+                            Surface(
+                                modifier = Modifier.size(44.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceVariant
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(method.icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = colorScheme.primary)
+                                }
+                            }
                             Spacer(modifier = Modifier.width(Spacing.md))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = method.name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    text = method.description,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = OnSurfaceVariant
-                                )
+                                Text(method.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium, color = colorScheme.onSurface)
+                                Text(method.description, style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
                             }
-                            RadioButton(
-                                selected = isSelected,
-                                onClick = { selectedMethod = method.id }
-                            )
+                            RadioButton(selected = isSelected, onClick = { selectedMethod = method.id })
                         }
                     }
                 }
             }
 
-            Button(
-                onClick = {
-                    selectedMethod?.let { methodId ->
-                        viewModel.createPayment(methodId) { paymentId ->
-                            onLanjutkan(paymentId)
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = Spacing.md),
-                shape = RoundedCornerShape(12.dp),
-                enabled = selectedMethod != null && !uiState.isLoading,
-                colors = ButtonDefaults.buttonColors(containerColor = Secondary)
-            ) {
-                Text("Lanjutkan Pembayaran", fontWeight = FontWeight.SemiBold)
-            }
-        }
+            Sdm3Button(
+                text = "Lanjutkan Pembayaran",
+                onClick = { selectedMethod?.let { onLanjutkan("pay_$it") } },
+                modifier = Modifier.padding(vertical = Spacing.md),
+                enabled = selectedMethod != null,
+                containerColor = colorScheme.primary
+            )
         }
     }
 }

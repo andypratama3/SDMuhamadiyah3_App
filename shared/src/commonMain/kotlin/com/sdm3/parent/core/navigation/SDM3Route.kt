@@ -73,6 +73,9 @@ sealed interface SDM3Route {
     data object PengumumanSekolah : SDM3Route
 
     @Serializable
+    data class DetailPengumuman(val announcementId: String) : SDM3Route
+
+    @Serializable
     data object ProfilAkun : SDM3Route
 
     @Serializable

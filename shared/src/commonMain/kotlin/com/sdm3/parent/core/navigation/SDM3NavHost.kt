@@ -1,8 +1,7 @@
 package com.sdm3.parent.core.navigation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,6 +28,7 @@ import com.sdm3.parent.feature.home.HomeScreen
 import com.sdm3.parent.feature.kehadiran.ui.KehadiranSiswaScreen
 import com.sdm3.parent.feature.nilai.NilaiRaporScreen
 import com.sdm3.parent.feature.nilai.ui.DetailNilaiMapelScreen
+import com.sdm3.parent.feature.notifikasi.ui.DetailPengumumanScreen
 import com.sdm3.parent.feature.notifikasi.ui.NotifikasiScreen
 import com.sdm3.parent.feature.notifikasi.ui.PengumumanSekolahScreen
 import com.sdm3.parent.feature.pembayaran.ui.DetailBuktiBayarScreen
@@ -41,38 +41,62 @@ import com.sdm3.parent.feature.profil.ui.ProfilAkunScreen
 import com.sdm3.parent.feature.infoanak.ui.DetailInfoAnakScreen
 import com.sdm3.parent.feature.infoanak.ui.KegiatanProgramScreen
 import com.sdm3.parent.feature.nilai.ui.HalamanRaporScreen
-import com.sdm3.parent.core.security.SecureTokenManager
 import com.sdm3.parent.feature.rapor.PreviewRaporPdfScreen
 import com.sdm3.parent.feature.rapor.VerifikasiQrRaporScreen
 
 @Composable
 fun SDM3NavHost(
     navController: NavHostController = rememberNavController(),
-    startDestination: SDM3Route = SDM3Route.Splash,
-    secureTokenManager: SecureTokenManager = org.koin.compose.koinInject()
+    startDestination: SDM3Route = SDM3Route.Splash
 ) {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRouteStr = navBackStackEntry?.destination?.route ?: ""
 
-    val bottomTabs = listOf("Home", "NilaiRapor", "PembayaranSpp", "HalamanRapor", "ProfilAkun", "Main")
-    val showBottomBar = bottomTabs.any { currentRouteStr.contains(it) }
+    val showBottomBar = when {
+        currentRouteStr.contains("Main") -> true
+        currentRouteStr.contains("Home") -> true
+        currentRouteStr.contains("NilaiRapor") -> true
+        currentRouteStr.contains("PembayaranSpp") -> true
+        currentRouteStr.contains("HalamanRapor") -> true
+        currentRouteStr.contains("ProfilAkun") -> true
+        else -> false
+    }
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 val currentTab = when {
-                    currentRouteStr.contains("Home") || currentRouteStr.contains("Main") -> SDM3BottomTab.Beranda
+                    currentRouteStr.contains("Home") -> SDM3BottomTab.Beranda
                     currentRouteStr.contains("NilaiRapor") -> SDM3BottomTab.Nilai
                     currentRouteStr.contains("PembayaranSpp") -> SDM3BottomTab.Bayar
                     currentRouteStr.contains("HalamanRapor") -> SDM3BottomTab.Rapor
                     currentRouteStr.contains("ProfilAkun") -> SDM3BottomTab.Profil
                     else -> null
                 }
+                val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
+                val savedStudentId = secureTokenManager.getSelectedStudentId() ?: ""
+                val argStudentId = try {
+                    when {
+                        currentRouteStr.contains("Home") -> navBackStackEntry?.toRoute<SDM3Route.Home>()?.studentId
+                        currentRouteStr.contains("Main") -> navBackStackEntry?.toRoute<SDM3Route.Main>()?.studentId
+                        currentRouteStr.contains("NilaiRapor") -> navBackStackEntry?.toRoute<SDM3Route.NilaiRapor>()?.studentId
+                        currentRouteStr.contains("PembayaranSpp") -> navBackStackEntry?.toRoute<SDM3Route.PembayaranSpp>()?.studentId
+                        currentRouteStr.contains("HalamanRapor") -> navBackStackEntry?.toRoute<SDM3Route.HalamanRapor>()?.studentId
+                        else -> null
+                    }
+                } catch (_: Exception) {
+                    null
+                }
+                val studentId = if (!argStudentId.isNullOrEmpty()) {
+                    secureTokenManager.saveSelectedStudentId(argStudentId)
+                    argStudentId
+                } else {
+                    savedStudentId
+                }
                 SDM3BottomNavBar(
                     currentTab = currentTab,
                     onTabSelected = { tab ->
-                        val studentId = secureTokenManager.getSelectedStudentId() ?: ""
                         val route: SDM3Route = when (tab) {
                             SDM3BottomTab.Beranda -> SDM3Route.Home(studentId)
                             SDM3BottomTab.Nilai -> SDM3Route.NilaiRapor(studentId, "ganjil")
@@ -81,7 +105,9 @@ fun SDM3NavHost(
                             SDM3BottomTab.Profil -> SDM3Route.ProfilAkun
                         }
                         navController.navigate(route) {
-                            popUpTo<SDM3Route.Main> { saveState = true }
+                            popUpTo<SDM3Route.Main> { 
+                                saveState = true
+                            }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -93,7 +119,11 @@ fun SDM3NavHost(
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding),
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 4 }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400)) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 4 }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400)) }
         ) {
 
             composable<SDM3Route.Splash> {
@@ -140,9 +170,12 @@ fun SDM3NavHost(
             }
 
             composable<SDM3Route.PilihAnak> {
+                val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
                 PilihAnakScreen(
                     onChildSelected = { studentId ->
-                        navController.navigate(SDM3Route.Main(studentId)) {
+                        val finalId = if (studentId == "guest_student") "student_1" else studentId
+                        secureTokenManager.saveSelectedStudentId(finalId)
+                        navController.navigate(SDM3Route.Main(finalId)) {
                             popUpTo<SDM3Route.PilihAnak> { inclusive = true }
                         }
                     }
@@ -205,10 +238,10 @@ fun SDM3NavHost(
                 val route = backStackEntry.toRoute<SDM3Route.PilihMetodeBayar>()
                 PilihMetodeBayarScreen(
                     studentFeeId = route.studentFeeId,
-                    onBack = { navController.popBackStack() },
                     onLanjutkan = { paymentId ->
                         navController.navigate(SDM3Route.ProsesPembayaran(paymentId))
-                    }
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
 
@@ -216,12 +249,12 @@ fun SDM3NavHost(
                 val route = backStackEntry.toRoute<SDM3Route.ProsesPembayaran>()
                 ProsesPembayaranScreen(
                     paymentId = route.paymentId,
-                    onBack = { navController.popBackStack() },
                     onPembayaranBerhasil = {
                         navController.navigate(SDM3Route.PembayaranBerhasil(route.paymentId)) {
                             popUpTo<SDM3Route.ProsesPembayaran> { inclusive = true }
                         }
-                    }
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
 
@@ -233,7 +266,9 @@ fun SDM3NavHost(
                         navController.navigate(SDM3Route.DetailBuktiBayar(route.paymentId))
                     },
                     onKembali = {
-                        navController.popBackStack()
+                        navController.navigate(SDM3Route.Main("")) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 )
             }
@@ -258,7 +293,13 @@ fun SDM3NavHost(
                 val route = backStackEntry.toRoute<SDM3Route.HalamanRapor>()
                 HalamanRaporScreen(
                     studentId = route.studentId,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onPreviewClick = { raporId, url ->
+                        navController.navigate(SDM3Route.PreviewRaporPdf(raporId, url))
+                    },
+                    onVerifikasiClick = { raporId ->
+                        navController.navigate(SDM3Route.VerifikasiQrRapor(raporId))
+                    }
                 )
             }
 
@@ -267,17 +308,8 @@ fun SDM3NavHost(
                 DetailInfoAnakScreen(
                     studentId = route.studentId,
                     onBack = { navController.popBackStack() },
-                    onNavigateToNilai = {
-                        navController.navigate(SDM3Route.NilaiRapor(route.studentId, "ganjil"))
-                    },
-                    onNavigateToRapor = {
-                        navController.navigate(SDM3Route.HalamanRapor(route.studentId))
-                    },
-                    onNavigateToKehadiran = {
-                        navController.navigate(SDM3Route.KehadiranSiswa(route.studentId))
-                    },
-                    onNavigateToKegiatan = {
-                        navController.navigate(SDM3Route.KegiatanProgram(route.studentId))
+                    onQuickNavClick = { targetRoute ->
+                        navController.navigate(targetRoute)
                     }
                 )
             }
@@ -291,11 +323,26 @@ fun SDM3NavHost(
             }
 
             composable<SDM3Route.Notifikasi> {
-                NotifikasiScreen(onBack = { navController.popBackStack() })
+                NotifikasiScreen(
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             composable<SDM3Route.PengumumanSekolah> {
-                PengumumanSekolahScreen(onBack = { navController.popBackStack() })
+                 PengumumanSekolahScreen(
+                    onBack = { navController.popBackStack() },
+                    onDetailClick = { id ->
+                        navController.navigate(SDM3Route.DetailPengumuman(id))
+                    }
+                )
+            }
+
+            composable<SDM3Route.DetailPengumuman> { backStackEntry ->
+                val route = backStackEntry.toRoute<SDM3Route.DetailPengumuman>()
+                DetailPengumumanScreen(
+                    announcementId = route.announcementId,
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             composable<SDM3Route.ProfilAkun> {
@@ -315,17 +362,19 @@ fun SDM3NavHost(
             }
 
             composable<SDM3Route.PengaturanNotifikasi> {
-                PengaturanNotifikasiScreen(onBack = { navController.popBackStack() })
+                PengaturanNotifikasiScreen(
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             composable<SDM3Route.AccountDeletion> {
                 AccountDeletionScreen(
-                    onBack = { navController.popBackStack() },
                     onDeletionRequestSubmitted = {
                         navController.navigate(SDM3Route.Login) {
                             popUpTo<SDM3Route.AccountDeletion> { inclusive = true }
                         }
-                    }
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
 

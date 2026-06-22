@@ -2,9 +2,8 @@ package com.sdm3.parent.feature.pembayaran
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
-import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.PaymentDto
-import com.sdm3.parent.data.repository.PaymentRepository
+import kotlinx.coroutines.delay
 
 data class DetailBuktiBayarUiState(
     override val isLoading: Boolean = false,
@@ -13,28 +12,23 @@ data class DetailBuktiBayarUiState(
     val payment: PaymentDto? = null
 ) : ScreenState
 
-class DetailBuktiBayarViewModel(
-    private val paymentRepository: PaymentRepository
-) : BaseViewModel<DetailBuktiBayarUiState>(DetailBuktiBayarUiState()) {
+class DetailBuktiBayarViewModel : BaseViewModel<DetailBuktiBayarUiState>(DetailBuktiBayarUiState()) {
 
     fun loadPaymentDetail(paymentId: String) {
-        updateState { it.copy(isLoading = true, errorMessage = null) }
         launchSafely {
-            when (val result = paymentRepository.getPayments("")) {
-                is ApiResult.Success -> {
-                    val payment = result.data.find { it.id == paymentId }
-                    updateState {
-                        it.copy(
-                            payment = payment,
-                            isLoading = false,
-                            isEmpty = payment == null
-                        )
-                    }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
-            }
+            updateState { it.copy(isLoading = true, errorMessage = null) }
+            delay(1000)
+            val dummyPayment = PaymentDto(
+                id = paymentId,
+                orderId = "SDM3-77291044",
+                grossAmount = 702500.0,
+                status = "success",
+                paymentType = "bank_transfer",
+                vaNumber = "8507 0812 3456 7890",
+                paidAt = "15 Juli 2024, 08:42",
+                createdAt = "15 Juli 2024, 08:30"
+            )
+            updateState { it.copy(payment = dummyPayment, isLoading = false) }
         }
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,50 +14,46 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Campaign
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.School
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.sdm3.parent.feature.notifikasi.NotifikasiViewModel
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
-import com.sdm3.parent.core.designsystem.theme.Primary
-import com.sdm3.parent.core.designsystem.theme.Secondary
+import com.sdm3.parent.core.designsystem.theme.CardShape
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.StatusSuccess
 import com.sdm3.parent.core.designsystem.theme.StatusWarning
-import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import com.sdm3.parent.feature.notifikasi.NotifikasiViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private val filterOptions = listOf("Semua", "Nilai", "Pembayaran", "Pengumuman")
 
@@ -84,190 +81,248 @@ private sealed class LazyNotifItem {
     data class Notif(val item: NotifItem) : LazyNotifItem()
 }
 
+private fun iconForType(type: String): ImageVector = when (type) {
+    "nilai" -> Icons.Outlined.School
+    "pembayaran" -> Icons.Outlined.CreditCard
+    "pengumuman" -> Icons.Outlined.Campaign
+    else -> Icons.Outlined.Notifications
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotifikasiScreen(
-    onBack: () -> Unit = {},
+    onBack: () -> Unit,
     viewModel: NotifikasiViewModel = koinViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
     var selectedFilter by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(Unit) {
-        viewModel.loadNotifications()
-    }
+    val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
+        containerColor = colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Notifikasi") },
+                title = {
+                    Text(
+                        "Notifikasi",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.onSurface)
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.markAllAsRead() }) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = "Tandai semua dibaca")
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            color = colorScheme.primaryContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Outlined.CheckCircle,
+                                    contentDescription = "Tandai semua dibaca",
+                                    tint = colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        PullToRefreshBox(
-            isRefreshing = uiState.isLoading,
-            onRefresh = { viewModel.loadNotifications() },
-            modifier = Modifier.padding(padding)
-        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(padding)
         ) {
-            LazyRow(
-                modifier = Modifier.padding(horizontal = Spacing.md),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            // Segmented control
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.lg)
             ) {
-                items(filterOptions.size) { index ->
-                    FilterChip(
+                filterOptions.forEachIndexed { index, label ->
+                    SegmentedButton(
                         selected = selectedFilter == index,
                         onClick = { selectedFilter = index },
-                        label = { Text(filterOptions[index]) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Secondary,
-                            selectedLabelColor = SurfaceWhite,
-                            containerColor = SurfaceWhite
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = filterOptions.size
                         )
-                    )
+                    ) {
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (selectedFilter == index) FontWeight.SemiBold else FontWeight.Normal,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Primary)
-                }
-            } else if (uiState.notifications.isEmpty()) {
+            val filteredNotifs = if (selectedFilter == 0) notifList
+            else notifList.filter { it.type == filterOptions[selectedFilter].lowercase() }
+
+            if (filteredNotifs.isEmpty()) {
                 EmptyNotifikasiState()
             } else {
-                val filteredNotifs = if (selectedFilter == 0) uiState.notifications
-                else uiState.notifications.filter { it.type == filterOptions[selectedFilter].lowercase() }
+                val lazyItems = buildList {
+                    var lastGroup = ""
+                    for (notif in filteredNotifs) {
+                        val dateGroup = when {
+                            notif.timestamp.contains("menit") || notif.timestamp.contains("jam") -> "Baru Ini"
+                            notif.timestamp.contains("Kemarin") -> "Kemarin"
+                            notif.timestamp.contains("hari") -> "Beberapa Hari Lalu"
+                            else -> "Lainnya"
+                        }
+                        if (dateGroup != lastGroup) {
+                            add(LazyNotifItem.Header(dateGroup))
+                            lastGroup = dateGroup
+                        }
+                        add(LazyNotifItem.Notif(notif))
+                    }
+                }
 
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = Spacing.lg),
                     verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
-                    items(filteredNotifs) { notif ->
-                        val typeColor = when (notif.type) {
-                            "nilai" -> Primary
-                            "pembayaran" -> Secondary
-                            "pengumuman" -> StatusWarning
-                            else -> StatusSuccess
-                        }
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = Spacing.md),
-                                    shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (notif.readAt != null) SurfaceWhite else Primary.copy(alpha = 0.03f)
-                            ),
-                            elevation = CardDefaults.cardElevation(
-                                defaultElevation = if (notif.readAt != null) 0.dp else 2.dp
-                            ),
-                            onClick = { viewModel.markAsRead(notif.id) }
-                        ) {
-                                    Row(
-                                        modifier = Modifier.padding(Spacing.md),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                Box(
-                                    modifier = Modifier
-                                                .size(44.dp)
-                                        .clip(CircleShape)
-                                        .background(typeColor.copy(alpha = 0.1f)),
-                                    contentAlignment = Alignment.Center
+                    items(lazyItems) { lazyItem ->
+                        when (lazyItem) {
+                            is LazyNotifItem.Header -> {
+                                Text(
+                                    text = lazyItem.title,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(vertical = Spacing.sm)
+                                )
+                            }
+                            is LazyNotifItem.Notif -> {
+                                val notif = lazyItem.item
+                                val typeColor = when (notif.type) {
+                                    "nilai" -> colorScheme.secondary
+                                    "pembayaran" -> colorScheme.error
+                                    "pengumuman" -> StatusWarning
+                                    else -> StatusSuccess
+                                }
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = CardShape,
+                                    color = if (!notif.isRead) colorScheme.primaryContainer.copy(alpha = 0.3f)
+                                           else colorScheme.surface,
+                                    tonalElevation = if (!notif.isRead) 0.dp else 1.dp,
+                                    shadowElevation = if (!notif.isRead) 0.dp else 1.dp
                                 ) {
-                                    Icon(
-                                        Icons.Default.Notifications,
-                                        contentDescription = notif.type,
-                                                modifier = Modifier.size(24.dp),
-                                        tint = typeColor
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(Spacing.md))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = notif.title,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = if (notif.readAt != null) FontWeight.Normal else FontWeight.SemiBold,
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                        Text(
-                                            text = notif.createdAt,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = OnSurfaceVariant
-                                        )
+                                    Row(modifier = Modifier.padding(Spacing.lg)) {
+                                        Surface(
+                                            modifier = Modifier.size(48.dp),
+                                            shape = RoundedCornerShape(14.dp),
+                                            color = typeColor.copy(alpha = 0.1f)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    iconForType(notif.type),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(24.dp),
+                                                    tint = typeColor
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.width(Spacing.md))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.Top
+                                            ) {
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(
+                                                        text = notif.title,
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                        fontWeight = if (!notif.isRead) FontWeight.SemiBold else FontWeight.Normal,
+                                                        color = colorScheme.onSurface
+                                                    )
+                                                }
+                                                Text(
+                                                    text = notif.timestamp,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(Spacing.xxs))
+                                            Text(
+                                                text = notif.body,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = colorScheme.onSurfaceVariant,
+                                                maxLines = 2,
+                                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                            )
+                                        }
+                                        if (!notif.isRead) {
+                                            Spacer(modifier = Modifier.width(Spacing.sm))
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(3.dp)
+                                                    .height(40.dp)
+                                                    .clip(RoundedCornerShape(2.dp))
+                                                    .background(typeColor)
+                                            )
+                                        }
                                     }
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = notif.content,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = if (notif.readAt != null) OnSurfaceVariant.copy(alpha = 0.7f) else OnSurfaceVariant,
-                                        maxLines = 2
-                                    )
-                                }
-                                if (notif.readAt == null) {
-                                    Spacer(modifier = Modifier.width(Spacing.sm))
-                                    Box(
-                                        modifier = Modifier
-                                            .size(8.dp)
-                                            .clip(CircleShape)
-                                            .background(Secondary)
-                                    )
                                 }
                             }
                         }
                     }
+                    item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
                 }
             }
-        }
         }
     }
 }
 
 @Composable
 private fun EmptyNotifikasiState() {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            Icons.Default.Notifications,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = OnSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(Spacing.md))
+        Surface(
+            modifier = Modifier.size(80.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = colorScheme.primaryContainer
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    Icons.Outlined.NotificationsNone,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = colorScheme.primary
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(Spacing.lg))
         Text(
             text = "Belum ada notifikasi",
-            style = MaterialTheme.typography.bodyLarge,
-            color = OnSurfaceVariant
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = colorScheme.onSurface
         )
-        Spacer(modifier = Modifier.height(Spacing.sm))
-        IconButton(onClick = { }) {
-            Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-        }
+        Text(
+            text = "Semua aktivitas akan muncul di sini",
+            style = MaterialTheme.typography.bodyMedium,
+            color = colorScheme.onSurfaceVariant
+        )
     }
 }

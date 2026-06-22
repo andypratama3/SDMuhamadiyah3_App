@@ -2,10 +2,8 @@ package com.sdm3.parent.feature.profil
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
-import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.StudentDto
-import com.sdm3.parent.data.repository.ProfileRepository
-import com.sdm3.parent.data.repository.StudentRepository
+import kotlinx.coroutines.delay
 
 data class ProfilAkunUiState(
     override val isLoading: Boolean = false,
@@ -20,44 +18,47 @@ data class ProfilAkunUiState(
     val editedPhone: String = ""
 ) : ScreenState
 
-class ProfilAkunViewModel(
-    private val profileRepository: ProfileRepository,
-    private val studentRepository: StudentRepository
-) : BaseViewModel<ProfilAkunUiState>(ProfilAkunUiState()) {
+class ProfilAkunViewModel : BaseViewModel<ProfilAkunUiState>(ProfilAkunUiState()) {
 
     fun loadProfile() {
-        updateState { it.copy(isLoading = true, errorMessage = null) }
         launchSafely {
-            when (val result = profileRepository.getProfile()) {
-                is ApiResult.Success -> {
-                    val dto = result.data
-                    updateState {
-                        it.copy(
-                            name = dto.name,
-                            phone = dto.phone.orEmpty(),
-                            email = dto.email,
-                            editedName = dto.name,
-                            editedPhone = dto.phone.orEmpty(),
-                            isLoading = false
-                        )
-                    }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
+            updateState { it.copy(isLoading = true, errorMessage = null) }
+            delay(800)
+            updateState {
+                it.copy(
+                    name = "Andy Pratama",
+                    phone = "081234567890",
+                    email = "andy.pratama@example.com",
+                    editedName = "Andy Pratama",
+                    editedPhone = "081234567890",
+                    isLoading = false
+                )
             }
         }
     }
 
     fun loadStudents() {
-        launchSafely {
-            when (val result = studentRepository.getStudents()) {
-                is ApiResult.Success -> {
-                    updateState { it.copy(students = result.data) }
-                }
-                is ApiResult.Error -> { }
-            }
-        }
+        val dummyStudents = listOf(
+            StudentDto(
+                id = "student_1",
+                name = "Ahmad Fathan",
+                nisn = "0012345678",
+                gender = "Laki-laki",
+                className = "4-A (Ibnu Sina)",
+                birthPlace = "Samarinda",
+                birthDate = "2015-01-15"
+            ),
+            StudentDto(
+                id = "student_2",
+                name = "Zahra Amira",
+                nisn = "0098765432",
+                gender = "Perempuan",
+                className = "2-B (Al-Khawarizmi)",
+                birthPlace = "Samarinda",
+                birthDate = "2017-05-20"
+            )
+        )
+        updateState { it.copy(students = dummyStudents) }
     }
 
     fun startEdit() {
@@ -82,22 +83,14 @@ class ProfilAkunViewModel(
         val s = uiState.value
         updateState { it.copy(isLoading = true, errorMessage = null) }
         launchSafely {
-            when (val result = profileRepository.updateProfile(s.editedName, s.editedPhone)) {
-                is ApiResult.Success -> {
-                    val dto = result.data
-                    updateState {
-                        it.copy(
-                            name = dto.name,
-                            phone = dto.phone.orEmpty(),
-                            email = dto.email,
-                            isEditing = false,
-                            isLoading = false
-                        )
-                    }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
+            delay(1000)
+            updateState {
+                it.copy(
+                    name = s.editedName,
+                    phone = s.editedPhone,
+                    isEditing = false,
+                    isLoading = false
+                )
             }
         }
     }

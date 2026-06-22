@@ -2,72 +2,55 @@ package com.sdm3.parent.feature.rapor
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
-import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.RaporVerifyResponse
-import com.sdm3.parent.data.repository.RaporRepository
+import kotlinx.coroutines.delay
 
 data class VerifikasiQrRaporUiState(
-    val raporId: String = "",
-    val qrInput: String = "",
-    val verifyResult: RaporVerifyResponse? = null,
-    val isVerified: Boolean = false,
-    val showResult: Boolean = false,
     override val isLoading: Boolean = false,
     override val errorMessage: String? = null,
-    override val isEmpty: Boolean = false
+    override val isEmpty: Boolean = false,
+    val qrInput: String = "",
+    val showResult: Boolean = false,
+    val verifyResult: RaporVerifyResponse? = null
 ) : ScreenState
 
-class VerifikasiQrRaporViewModel(
-    private val raporRepository: RaporRepository
-) : BaseViewModel<VerifikasiQrRaporUiState>(VerifikasiQrRaporUiState()) {
+class VerifikasiQrRaporViewModel : BaseViewModel<VerifikasiQrRaporUiState>(VerifikasiQrRaporUiState()) {
 
     fun init(raporId: String) {
-        updateState { it.copy(raporId = raporId) }
+        // Option to pre-fill if navigating from a specific rapor
+        updateState { it.copy(qrInput = raporId) }
     }
 
     fun updateQrInput(input: String) {
-        updateState { it.copy(qrInput = input) }
+        updateState { it.copy(qrInput = input, errorMessage = null) }
     }
 
     fun verify() {
-        val input = uiState.value.qrInput
-        if (input.isBlank()) {
-            updateState { it.copy(errorMessage = "Masukkan data QR terlebih dahulu") }
-            return
-        }
-        launchSafely(
-            onError = { error ->
-                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Gagal memverifikasi") }
-            }
-        ) {
+        launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null, showResult = false) }
-            when (val result = raporRepository.verifyQr(input)) {
-                is ApiResult.Success -> {
-                    val response = result.data
-                    updateState {
-                        it.copy(
-                            isLoading = false,
-                            isVerified = response.valid,
-                            verifyResult = response,
-                            showResult = true
+            delay(1500)
+            
+            // Dummy logic: if input contains "error", show error, else valid
+            if (uiState.value.qrInput.contains("error", ignoreCase = true)) {
+                updateState { it.copy(isLoading = false, errorMessage = "Kode verifikasi tidak valid atau tidak ditemukan.") }
+            } else {
+                updateState {
+                    it.copy(
+                        isLoading = false,
+                        showResult = true,
+                        verifyResult = RaporVerifyResponse(
+                            valid = true,
+                            message = "Dokumen ini sah secara digital melalui sistem SDM3 Parent Portal.",
+                            studentName = "Ahmad Zaki Al-Fatih",
+                            nisn = "0012345678"
                         )
-                    }
-                }
-                is ApiResult.Error -> {
-                    updateState {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = result.error.toUserMessage(),
-                            showResult = true,
-                            isVerified = false
-                        )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun reset() {
-        updateState { VerifikasiQrRaporUiState(raporId = uiState.value.raporId) }
+        updateState { VerifikasiQrRaporUiState() }
     }
 }

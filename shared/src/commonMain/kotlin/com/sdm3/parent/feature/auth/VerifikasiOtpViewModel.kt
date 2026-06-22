@@ -2,9 +2,7 @@ package com.sdm3.parent.feature.auth
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
-import com.sdm3.parent.core.network.ApiResult
 import androidx.lifecycle.viewModelScope
-import com.sdm3.parent.data.repository.AuthRepositoryContract
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -28,9 +26,7 @@ data class VerifikasiOtpUiState(
     override val isEmpty: Boolean = false
 ) : ScreenState
 
-class VerifikasiOtpViewModel(
-    private val authRepository: AuthRepositoryContract
-) : BaseViewModel<VerifikasiOtpUiState>(VerifikasiOtpUiState()) {
+class VerifikasiOtpViewModel : BaseViewModel<VerifikasiOtpUiState>(VerifikasiOtpUiState()) {
 
     private var countdownJob: Job? = null
 
@@ -64,22 +60,16 @@ class VerifikasiOtpViewModel(
         }
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null) }
-            when (val result = authRepository.requestOtp(state.email)) {
-                is ApiResult.Success -> {
-                    updateState {
-                        it.copy(
-                            isLoading = false,
-                            step = OtpStep.VERIFY_OTP,
-                            countdownSeconds = 60,
-                            canResend = false
-                        )
-                    }
-                    startCountdown()
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
+            delay(1000) // Dummy delay
+            updateState {
+                it.copy(
+                    isLoading = false,
+                    step = OtpStep.VERIFY_OTP,
+                    countdownSeconds = 60,
+                    canResend = false
+                )
             }
+            startCountdown()
         }
     }
 
@@ -91,15 +81,9 @@ class VerifikasiOtpViewModel(
         }
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null) }
-            when (val result = authRepository.verifyOtp(state.email, state.otpCode)) {
-                is ApiResult.Success -> {
-                    updateState {
-                        it.copy(isLoading = false, step = OtpStep.RESET_PASSWORD)
-                    }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
+            delay(1000) // Dummy delay
+            updateState {
+                it.copy(isLoading = false, step = OtpStep.RESET_PASSWORD)
             }
         }
     }
@@ -116,17 +100,9 @@ class VerifikasiOtpViewModel(
         }
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null) }
-            when (val result = authRepository.resetPassword(
-                state.email, state.otpCode, state.newPassword, state.newPasswordConfirmation
-            )) {
-                is ApiResult.Success -> {
-                    updateState {
-                        it.copy(isLoading = false, resetSuccessMessage = result.data)
-                    }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
+            delay(1000) // Dummy delay
+            updateState {
+                it.copy(isLoading = false, resetSuccessMessage = "Kata sandi berhasil diperbarui!")
             }
         }
     }

@@ -17,7 +17,7 @@ fun App() {
             color = MaterialTheme.colorScheme.background
         ) {
             SDM3NavHost(
-                startDestination = SDM3Route.Splash
+                startDestination = SDM3Route.Splash,
             )
         }
     }

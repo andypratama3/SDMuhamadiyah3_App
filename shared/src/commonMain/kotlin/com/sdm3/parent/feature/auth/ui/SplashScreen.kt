@@ -1,5 +1,7 @@
 package com.sdm3.parent.feature.auth.ui
 
+import androidx.compose.animation.core.EaseInOutQuart
+import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -9,7 +11,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,13 +24,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.designsystem.component.Sdm3Logo
 import com.sdm3.parent.core.designsystem.theme.Primary
-import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
+import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.core.security.SecureTokenManager
 import kotlinx.coroutines.delay
@@ -38,18 +45,22 @@ fun SplashScreen(
     secureTokenManager: SecureTokenManager = koinInject()
 ) {
     var startAnimation by remember { mutableStateOf(false) }
+
     val scaleAnim by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.5f,
-        animationSpec = tween(300)
+        targetValue = if (startAnimation) 1f else 0.3f,
+        animationSpec = tween(1200, easing = EaseOutBack),
+        label = "scale"
     )
     val alphaAnim by animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(300)
+        animationSpec = tween(1000, easing = EaseInOutQuart),
+        label = "alpha"
     )
 
     LaunchedEffect(Unit) {
+        delay(200)
         startAnimation = true
-        delay(2500)
+        delay(1800)
         val token = secureTokenManager.getBearerToken()
         if (token != null) {
             val studentId = secureTokenManager.getSelectedStudentId()
@@ -66,39 +77,82 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Primary),
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Primary, Primary.copy(alpha = 0.85f))
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
+        Box(
+            modifier = Modifier
+                .size(400.dp)
+                .graphicsLayer {
+                    alpha = 0.05f * alphaAnim
+                    scaleX = 1.2f
+                    scaleY = 1.2f
+                }
+                .background(Brush.radialGradient(listOf(Color.White, Color.Transparent)), RoundedCornerShape(200.dp))
+        )
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = Spacing.xl)
         ) {
             Box(
-                modifier = Modifier
-                    .size(96.dp)
-                    .scale(scaleAnim),
+                modifier = Modifier.size(200.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "SDM3",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .graphicsLayer {
+                            scaleX = alphaAnim * 0.5f + 0.5f
+                            scaleY = alphaAnim * 0.5f + 0.5f
+                            alpha = (1f - alphaAnim) * 0.3f
+                        }
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(Color.White)
+                )
+
+                Sdm3Logo(
+                    size = 100.dp,
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scaleX = scaleAnim
+                            scaleY = scaleAnim
+                            alpha = alphaAnim
+                        }
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "SDM3 Parent",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 28.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Portal Orang Tua Digital",
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                fontSize = 14.sp
-            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.graphicsLayer {
+                    alpha = alphaAnim
+                    translationY = (1f - alphaAnim) * 30f
+                }
+            ) {
+                Text(
+                    text = "SDM3 Parent Portal",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "SD Muhammadiyah 3 Samarinda",
+                    color = Color.White.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

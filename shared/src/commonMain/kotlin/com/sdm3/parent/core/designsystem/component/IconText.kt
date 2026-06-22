@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -20,7 +21,7 @@ fun IconText(
     text: String,
     modifier: Modifier = Modifier,
     tint: Color = Color.Unspecified,
-    iconSize: androidx.compose.ui.unit.Dp = 20.dp
+    iconSize: Dp = 18.dp
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(
@@ -29,7 +30,7 @@ fun IconText(
             modifier = Modifier.size(iconSize),
             tint = if (tint != Color.Unspecified) tint else MaterialTheme.colorScheme.onSurface
         )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(text = text)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = text, style = MaterialTheme.typography.bodyMedium)
     }
 }

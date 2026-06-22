@@ -2,8 +2,7 @@ package com.sdm3.parent.feature.pembayaran
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
-import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.repository.PaymentRepository
+import kotlinx.coroutines.delay
 
 enum class PaymentProcessStatus {
     WAITING_PAYMENT, PROCESSING, SUCCESS, FAILED
@@ -21,39 +20,26 @@ data class ProsesPembayaranUiState(
     val status: PaymentProcessStatus = PaymentProcessStatus.WAITING_PAYMENT
 ) : ScreenState
 
-class ProsesPembayaranViewModel(
-    private val paymentRepository: PaymentRepository
-) : BaseViewModel<ProsesPembayaranUiState>(ProsesPembayaranUiState()) {
+class ProsesPembayaranViewModel : BaseViewModel<ProsesPembayaranUiState>(ProsesPembayaranUiState()) {
 
     fun startPayment(snapTokenUrl: String, redirectUrl: String? = null, vaNumber: String = "", grossAmount: Double = 0.0, paymentMethod: String = "") {
         updateState {
             it.copy(
                 snapTokenUrl = snapTokenUrl,
                 redirectUrl = redirectUrl,
-                vaNumber = vaNumber,
-                grossAmount = grossAmount,
-                paymentMethod = paymentMethod,
+                vaNumber = "8507 0812 3456 7890",
+                grossAmount = 1250000.0,
+                paymentMethod = "Bank Syariah Indonesia",
                 status = PaymentProcessStatus.WAITING_PAYMENT
             )
         }
     }
 
     fun pollStatus(chargeId: String) {
-        updateState { it.copy(isLoading = true, status = PaymentProcessStatus.PROCESSING) }
         launchSafely {
-            when (val result = paymentRepository.checkPaymentStatus(chargeId)) {
-                is ApiResult.Success -> {
-                    val newStatus = when (result.data.status.uppercase()) {
-                        "SUCCESS", "SETTLEMENT" -> PaymentProcessStatus.SUCCESS
-                        "FAILED", "EXPIRED", "DENY" -> PaymentProcessStatus.FAILED
-                        else -> PaymentProcessStatus.PROCESSING
-                    }
-                    updateState { it.copy(isLoading = false, status = newStatus) }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.error.toUserMessage()) }
-                }
-            }
+            updateState { it.copy(isLoading = true, status = PaymentProcessStatus.PROCESSING) }
+            delay(2000)
+            updateState { it.copy(isLoading = false, status = PaymentProcessStatus.SUCCESS) }
         }
     }
 }

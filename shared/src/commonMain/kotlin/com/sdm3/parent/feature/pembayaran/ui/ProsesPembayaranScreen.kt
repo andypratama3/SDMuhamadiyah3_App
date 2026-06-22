@@ -1,183 +1,112 @@
 package com.sdm3.parent.feature.pembayaran.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
-import com.sdm3.parent.core.designsystem.theme.Primary
-import com.sdm3.parent.core.designsystem.theme.Secondary
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
-import com.sdm3.parent.feature.pembayaran.ProsesPembayaranViewModel
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.sdm3.parent.core.designsystem.component.Sdm3Button
+import com.sdm3.parent.core.designsystem.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProsesPembayaranScreen(
     paymentId: String,
-    onBack: () -> Unit = {},
-    onPembayaranBerhasil: () -> Unit,
-    viewModel: ProsesPembayaranViewModel = koinViewModel()
+    onBack: () -> Unit,
+    onPembayaranBerhasil: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(paymentId) {
-        viewModel.loadPaymentDetail(paymentId)
-    }
+    val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
+        containerColor = colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Instruksi Pembayaran") },
+                title = {
+                    Text(
+                        text = "Instruksi Pembayaran",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Primary)
-            }
-        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = Spacing.md)
-                .verticalScroll(rememberScrollState())
+                .padding(horizontal = Spacing.lg)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            uiState.payment?.let { payment ->
-            Card(
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                shape = CardShape,
+                color = colorScheme.surface,
+                tonalElevation = 2.dp,
+                shadowElevation = 6.dp
             ) {
                 Column(
                     modifier = Modifier.padding(Spacing.lg),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .background(
-                                Secondary.copy(alpha = 0.1f),
-                                RoundedCornerShape(16.dp)
-                            ),
-                        contentAlignment = Alignment.Center
+                    Surface(
+                        modifier = Modifier.size(64.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = colorScheme.secondaryContainer
                     ) {
-                        Icon(
-                            Icons.Default.Phone,
-                            contentDescription = null,
-                            modifier = Modifier.size(36.dp),
-                            tint = Primary
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(36.dp), tint = colorScheme.onSecondaryContainer)
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(Spacing.md))
 
-                    Text(
-                        text = "Nomor Virtual Account",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = OnSurfaceVariant
-                    )
-
+                    Text(text = "Nomor Virtual Account", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(Spacing.sm))
-
                     Text(
                         text = "9887 1234 5678 9012",
-                        fontSize = 24.sp,
+                        style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Primary,
-                        letterSpacing = 2.sp
+                        color = colorScheme.primary
                     )
 
                     Spacer(modifier = Modifier.height(Spacing.sm))
 
-                    Button(
+                    Sdm3Button(
+                        text = "Salin Nomor VA",
                         onClick = { },
-                        colors = ButtonDefaults.buttonColors(containerColor = Secondary),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = null)
-                        Spacer(modifier = Modifier.width(Spacing.sm))
-                        Text("Salin Nomor VA")
-                    }
+                        icon = Icons.Default.ContentCopy,
+                        containerColor = colorScheme.secondary
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
-
-            Text(
-                text = "Total Pembayaran",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Text(
-                text = "Rp${payment.amount}",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Primary
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.md))
-
-            Text(
-                text = "Cara Pembayaran",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-
             Spacer(modifier = Modifier.height(Spacing.sm))
+
+            Text(text = "Total Pembayaran", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(text = "Rp350.000", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+
+            Text(text = "Cara Pembayaran", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
 
             val steps = listOf(
                 "1. Buka aplikasi mobile banking BCA",
@@ -188,65 +117,54 @@ fun ProsesPembayaranScreen(
                 "6. Simpan bukti pembayaran"
             )
 
-            steps.forEach { step ->
-                Text(
-                    text = step,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    color = OnSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(Spacing.lg))
-
-            Text(
-                text = "Scan QRIS",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = OnSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .background(Color.White, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = CardShape,
+                color = colorScheme.surface,
+                tonalElevation = 1.dp,
+                shadowElevation = 1.dp
             ) {
-                Icon(
-                    Icons.Default.Phone,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = Primary
-                )
+                Column(modifier = Modifier.padding(Spacing.md)) {
+                    steps.forEach { step ->
+                        Text(
+                            text = step,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(vertical = Spacing.xs),
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.md))
+            Text(text = "Scan QRIS", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurfaceVariant)
+
+            Surface(
+                modifier = Modifier.fillMaxWidth().height(200.dp),
+                shape = CardShape,
+                color = colorScheme.surfaceVariant
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(64.dp), tint = colorScheme.primary)
+                }
+            }
 
             Text(
                 text = "Scan dengan aplikasi e-wallet atau mobile banking",
                 style = MaterialTheme.typography.bodySmall,
-                color = OnSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                color = colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
-
-            Button(
+            Sdm3Button(
+                text = "Saya Sudah Bayar",
                 onClick = onPembayaranBerhasil,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Secondary)
-            ) {
-                Text("Saya Sudah Bayar", fontWeight = FontWeight.SemiBold)
-            }
+                containerColor = colorScheme.secondary
+            )
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            }
-        }
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
         }
     }
 }
+
+private val CardShape = com.sdm3.parent.core.designsystem.theme.CardShape

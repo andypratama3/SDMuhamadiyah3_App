@@ -1,167 +1,137 @@
 package com.sdm3.parent.feature.pembayaran.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.sdm3.parent.core.designsystem.theme.OnSurfaceVariant
-import com.sdm3.parent.core.designsystem.theme.Primary
-import com.sdm3.parent.core.designsystem.theme.SchoolGreenDark
-import com.sdm3.parent.core.designsystem.theme.Secondary
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.StatusSuccess
-import com.sdm3.parent.feature.pembayaran.PembayaranBerhasilViewModel
-import org.koin.compose.viewmodel.koinViewModel
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Icon
-import com.sdm3.parent.core.designsystem.theme.SurfaceWhite
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.ReceiptLong
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PembayaranBerhasilScreen(
     paymentId: String,
     onLihatBukti: () -> Unit,
-    onKembali: () -> Unit,
-    viewModel: PembayaranBerhasilViewModel = koinViewModel()
+    onKembali: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(paymentId) {
-        viewModel.loadTransaction(paymentId)
-    }
+    val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
+        containerColor = colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Primary)
-            }
-        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(Spacing.lg),
+                .padding(horizontal = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                Icons.Default.CheckCircle,
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                tint = StatusSuccess
-            )
+            Surface(
+                modifier = Modifier.size(100.dp),
+                shape = RoundedCornerShape(32.dp),
+                color = StatusSuccess.copy(alpha = 0.1f),
+                tonalElevation = 0.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = StatusSuccess
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(Spacing.md))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             Text(
                 text = "Pembayaran Berhasil!",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Primary,
+                color = colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             Text(
-                text = "Terima kasih atas pembayaran Anda",
-                style = MaterialTheme.typography.bodyMedium,
-                color = OnSurfaceVariant,
+                text = "Transaksi telah divalidasi oleh sistem dan dana telah diterima sekolah.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                shape = CardShape,
+                color = colorScheme.surface,
+                tonalElevation = 1.dp,
+                shadowElevation = 1.dp
             ) {
-                Column(modifier = Modifier.padding(Spacing.md)) {
-                    DetailRow("Tagihan", uiState.paymentTitle.ifEmpty { "Pembayaran Sekolah" })
-                    DetailRow("Jumlah", "Rp${uiState.amount}")
-                    DetailRow("Metode", uiState.paymentMethod.ifEmpty { "-" })
-                    DetailRow("Tanggal", uiState.paidAt.ifEmpty { "-" })
-                    DetailRow("ID Transaksi", uiState.transactionId)
+                Column(modifier = Modifier.padding(Spacing.lg)) {
+                    SuccessRow("Item", "SPP JULI 2026")
+                    SuccessRow("Total Bayar", "Rp350.000")
+                    SuccessRow("Metode", "BCA Virtual Account")
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
-            Button(
+            Sdm3Button(
+                text = "Lihat Bukti Bayar",
                 onClick = onLihatBukti,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Secondary)
-            ) {
-                Text("Lihat Bukti Bayar", fontWeight = FontWeight.SemiBold)
-            }
+                icon = Icons.Outlined.ReceiptLong,
+                containerColor = colorScheme.secondary
+            )
 
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
-            OutlinedButton(
-                onClick = onKembali,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Kembali ke Beranda")
-            }
-        }
+            Sdm3OutlinedButton(
+                text = "Kembali ke Beranda",
+                onClick = onKembali
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
         }
     }
 }
 
 @Composable
-private fun DetailRow(label: String, value: String) {
-    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+private fun SuccessRow(label: String, value: String) {
+    val colorScheme = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = OnSurfaceVariant
+            style = MaterialTheme.typography.labelMedium,
+            color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Medium
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.SemiBold,
+            color = colorScheme.onSurface
         )
     }
 }
