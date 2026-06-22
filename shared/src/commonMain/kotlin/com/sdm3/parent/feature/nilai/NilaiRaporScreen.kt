@@ -9,16 +9,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import org.koin.compose.viewmodel.koinViewModel
@@ -163,6 +167,7 @@ private fun SumatifTabContent(
                         style = MaterialTheme.typography.labelMedium,
                         color = colorScheme.onPrimary.copy(alpha = 0.75f)
                     )
+                    Spacer(modifier = Modifier.height(Spacing.xxs))
                     Text(
                         text = "$avgScore",
                         style = MaterialTheme.typography.displayLarge,
@@ -179,58 +184,159 @@ private fun SumatifTabContent(
         }
 
         item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                StatMiniCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.Analytics,
+                    label = "Tertinggi",
+                    value = "${subjects.maxOf { it.score }}",
+                    color = StatusSuccess
+                )
+                StatMiniCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.TrendingUp,
+                    label = "Terendah",
+                    value = "${subjects.minOf { it.score }}",
+                    color = StatusWarning
+                )
+                StatMiniCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.CheckCircle,
+                    label = "Mapel",
+                    value = "${subjects.size}",
+                    color = colorScheme.primary
+                )
+            }
+        }
+
+        item {
             Text(
                 text = "Daftar Mata Pelajaran",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface,
-                modifier = Modifier.padding(top = Spacing.md)
+                modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs)
             )
         }
 
         items(subjects) { subject ->
-            val scoreColor = when {
-                subject.score >= 90 -> StatusSuccess
-                subject.score >= 75 -> StatusWarning
-                else -> StatusDanger
-            }
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onDetailMapel?.invoke(subject.id) },
-                shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 1.dp,
-                shadowElevation = 1.dp
-            ) {
-                Row(
-                    modifier = Modifier.padding(Spacing.lg),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = subject.name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(Spacing.xxs))
-                        StatusChip(
-                            text = "${subject.predicate} - ${subject.description}",
-                            color = scoreColor
-                        )
-                    }
-                    Text(
-                        text = "${subject.score}",
-                        style = MaterialTheme.typography.displayMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = scoreColor
-                    )
-                }
-            }
+            SubjectCard(
+                subject = subject,
+                onClick = { onDetailMapel?.invoke(subject.id) }
+            )
         }
 
         item { Spacer(Modifier.height(Spacing.xxxl)) }
+    }
+}
+
+@Composable
+private fun SubjectCard(
+    subject: SubjectGrade,
+    onClick: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val scoreColor = when {
+        subject.score >= 90 -> StatusSuccess
+        subject.score >= 75 -> StatusWarning
+        else -> StatusDanger
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = CardShape,
+        color = colorScheme.surface,
+        tonalElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(Spacing.xl),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = scoreColor.copy(alpha = 0.1f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Outlined.School,
+                        contentDescription = null,
+                        tint = scoreColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = subject.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(Spacing.xxs))
+                StatusChip(
+                    text = "${subject.predicate} - ${subject.description}",
+                    color = scoreColor
+                )
+            }
+            Spacer(modifier = Modifier.width(Spacing.md))
+            Text(
+                text = "${subject.score}",
+                style = MaterialTheme.typography.displayMedium,
+                fontWeight = FontWeight.Bold,
+                color = scoreColor
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatMiniCard(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    label: String,
+    value: String,
+    color: Color
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = colorScheme.surface,
+        tonalElevation = 0.dp
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(Spacing.md)
+        ) {
+            Surface(
+                modifier = Modifier.size(36.dp),
+                shape = RoundedCornerShape(10.dp),
+                color = color.copy(alpha = 0.1f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
+                }
+            }
+            Spacer(modifier = Modifier.height(Spacing.xs))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.onSurface
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -281,11 +387,10 @@ private fun FormatifTabContent(studentId: String) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = CardShape,
                 color = colorScheme.surface,
-                tonalElevation = 1.dp,
-                shadowElevation = 1.dp
+                tonalElevation = 0.dp
             ) {
                 Row(
-                    modifier = Modifier.padding(Spacing.lg),
+                    modifier = Modifier.padding(Spacing.xl),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
@@ -344,7 +449,7 @@ private fun ProjekTabContent(studentId: String) {
             Text(
                 text = "Projek Penguatan Profil Pelajar Pancasila (P5)",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface
             )
         }
@@ -353,10 +458,9 @@ private fun ProjekTabContent(studentId: String) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = CardShape,
                 color = colorScheme.surface,
-                tonalElevation = 1.dp,
-                shadowElevation = 1.dp
+                tonalElevation = 0.dp
             ) {
-                Column(modifier = Modifier.padding(Spacing.lg)) {
+                Column(modifier = Modifier.padding(Spacing.xl)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,

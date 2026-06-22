@@ -53,7 +53,7 @@ fun VerifikasiOtpScreen(
         Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         Surface(
-            modifier = Modifier.size(96.dp),
+            modifier = Modifier.size(88.dp),
             shape = RoundedCornerShape(28.dp),
             color = colorScheme.primaryContainer
         ) {
@@ -84,7 +84,7 @@ fun VerifikasiOtpScreen(
             color = colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(Spacing.xs))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Text(
             text = when (state.step) {
@@ -104,8 +104,7 @@ fun VerifikasiOtpScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = CardShape,
             color = colorScheme.surface,
-            tonalElevation = 1.dp,
-            shadowElevation = 2.dp
+            tonalElevation = 0.dp
         ) {
             Column(modifier = Modifier.padding(Spacing.xl)) {
                 when (state.step) {
@@ -284,7 +283,7 @@ private fun OtpDigitInput(
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(OtpBoxShape)
                         .background(
                             if (isFocused) colorScheme.primaryContainer
                             else colorScheme.surfaceVariant
@@ -292,16 +291,24 @@ private fun OtpDigitInput(
                         .border(
                             width = if (isFocused) 2.dp else 0.dp,
                             color = if (isFocused) colorScheme.primary else Color.Transparent,
-                            shape = RoundedCornerShape(14.dp)
+                            shape = OtpBoxShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = digit,
+                        text = if (digit.isNotEmpty()) "*" else "",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = if (isFocused) colorScheme.primary else colorScheme.onSurface
                     )
+                    if (digit.isNotEmpty()) {
+                        Text(
+                            text = digit,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isFocused) colorScheme.primary else colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }
@@ -309,7 +316,7 @@ private fun OtpDigitInput(
         Spacer(modifier = Modifier.height(Spacing.lg))
 
         Surface(
-            shape = RoundedCornerShape(100),
+            shape = ChipShape,
             color = colorScheme.surfaceVariant
         ) {
             Text(

@@ -1,8 +1,8 @@
 package com.sdm3.parent.feature.pembayaran.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarViewModel
+import androidx.compose.ui.draw.clip
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -81,9 +82,7 @@ fun DetailBuktiBayarScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = CardShape,
-                        color = colorScheme.surface,
-                        tonalElevation = 2.dp,
-                        shadowElevation = 4.dp
+                        color = colorScheme.surface
                     ) {
                         Column(
                             modifier = Modifier.padding(Spacing.xl),
@@ -91,7 +90,7 @@ fun DetailBuktiBayarScreen(
                         ) {
                             Surface(
                                 modifier = Modifier.size(64.dp),
-                                shape = RoundedCornerShape(20.dp),
+                                shape = SDM3Shapes.large,
                                 color = StatusSuccess.copy(alpha = 0.1f)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
@@ -129,60 +128,50 @@ fun DetailBuktiBayarScreen(
                     )
                     Spacer(modifier = Modifier.height(Spacing.md))
 
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = CardShape,
-                        color = colorScheme.surface,
-                        tonalElevation = 1.dp,
-                        shadowElevation = 1.dp
-                    ) {
-                        Column(modifier = Modifier.padding(Spacing.lg)) {
-                            ReceiptRow("Nomor Referensi", payment.id)
-                            ReceiptRow("Waktu Bayar", payment.createdAt ?: "-")
-                            ReceiptRow("Metode", payment.paymentType ?: "-")
+                    Sdm3Card {
+                        ReceiptRow("Nomor Referensi", payment.id)
+                        ReceiptRow("Waktu Bayar", payment.createdAt ?: "-")
+                        ReceiptRow("Metode", payment.paymentType ?: "-")
 
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = Spacing.md),
-                                color = colorScheme.outlineVariant
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = Spacing.md),
+                            color = colorScheme.outlineVariant
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Total Bayar",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colorScheme.onSurfaceVariant
                             )
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Total Bayar",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = "Rp${payment.grossAmount?.toInt() ?: 0}",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.primary
-                                )
-                            }
+                            Text(
+                                text = "Rp${payment.grossAmount?.toInt() ?: 0}",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary
+                            )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(Spacing.xl))
 
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = CardShape,
-                        color = colorScheme.surface,
-                        tonalElevation = 1.dp,
-                        shadowElevation = 1.dp
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(Spacing.md),
-                            verticalAlignment = Alignment.CenterVertically
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .level1Shadow(24.dp)
+                            .clip(CardShape)
+                            .background(colorScheme.surface, CardShape)
+                            .padding(Spacing.md),
+                        verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
                                 modifier = Modifier.size(48.dp),
-                                shape = RoundedCornerShape(14.dp),
+                                shape = SDM3Shapes.medium,
                                 color = colorScheme.primaryContainer
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
@@ -209,7 +198,6 @@ fun DetailBuktiBayarScreen(
                                 )
                             }
                         }
-                    }
 
                     Spacer(modifier = Modifier.height(Spacing.xxl))
 

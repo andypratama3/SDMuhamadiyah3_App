@@ -61,20 +61,13 @@ fun DetailInfoAnakScreen(
             contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)
         ) {
             item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 2.dp,
-                    shadowElevation = 4.dp
-                ) {
+                Sdm3ElevatedCard(padding = Spacing.xl) {
                     Column(
-                        modifier = Modifier.padding(Spacing.xl),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Surface(
                             modifier = Modifier.size(88.dp),
-                            shape = RoundedCornerShape(24.dp),
+                            shape = SDM3Shapes.large,
                             color = colorScheme.primaryContainer
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -121,19 +114,11 @@ fun DetailInfoAnakScreen(
                     modifier = Modifier.padding(top = Spacing.md)
                 )
                 Spacer(modifier = Modifier.height(Spacing.sm))
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 1.dp,
-                    shadowElevation = 1.dp
-                ) {
-                    Column(modifier = Modifier.padding(Spacing.lg)) {
-                        InfoRow("Tempat Lahir", "Samarinda")
-                        InfoRow("Tanggal Lahir", "15 Januari 2015")
-                        InfoRow("Wali Kelas", "Ibu Siti Rahmawati, S.Pd.")
-                        InfoRow("ID Pelajar", "SDM3-2025-00123")
-                    }
+                Sdm3Card {
+                    InfoRow("Tempat Lahir", "Samarinda")
+                    InfoRow("Tanggal Lahir", "15 Januari 2015")
+                    InfoRow("Wali Kelas", "Ibu Siti Rahmawati, S.Pd.")
+                    InfoRow("ID Pelajar", "SDM3-2025-00123")
                 }
             }
 
@@ -227,9 +212,7 @@ private fun QuickNavItem(
     Surface(
         modifier = modifier.clickable(onClick = onClick),
         shape = CardShape,
-        color = colorScheme.surface,
-        tonalElevation = 1.dp,
-        shadowElevation = 2.dp
+        color = colorScheme.surface
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -239,7 +222,7 @@ private fun QuickNavItem(
         ) {
             Surface(
                 modifier = Modifier.size(44.dp),
-                shape = RoundedCornerShape(14.dp),
+                                shape = SDM3Shapes.medium,
                 color = color.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {

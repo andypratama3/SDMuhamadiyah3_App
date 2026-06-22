@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.sdm3.parent.core.designsystem.component.Sdm3TextField
 import com.sdm3.parent.core.designsystem.component.StatusChip
 import com.sdm3.parent.core.designsystem.theme.CardShape
 import com.sdm3.parent.core.designsystem.theme.Primary
@@ -79,6 +80,7 @@ fun PilihAnakScreen(
         )
     )
 
+    var searchQuery by remember { mutableStateOf("") }
     var startAnimation by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { startAnimation = true }
 
@@ -92,7 +94,7 @@ fun PilihAnakScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.25f)
+                .height(200.dp)
                 .background(Brush.verticalGradient(listOf(Primary, Primary.copy(alpha = 0.85f))))
         )
 
@@ -146,7 +148,12 @@ fun PilihAnakScreen(
                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
                 item {
-                    Spacer(modifier = Modifier.height(Spacing.md))
+                    Sdm3TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = "Cari siswa...",
+                        leadingIcon = Icons.Outlined.Search
+                    )
                 }
 
                 itemsIndexed(sampleChildren) { index, student ->
@@ -163,17 +170,16 @@ fun PilihAnakScreen(
                             .clickable { onChildSelected(student.id) },
                         shape = CardShape,
                         color = colorScheme.surface,
-                        tonalElevation = 2.dp,
-                        shadowElevation = 4.dp
+                        tonalElevation = 0.dp
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(Spacing.lg),
+                                .padding(Spacing.xl),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
-                                modifier = Modifier.size(60.dp),
+                                modifier = Modifier.size(56.dp),
                                 shape = RoundedCornerShape(16.dp),
                                 color = colorScheme.primaryContainer
                             ) {
@@ -203,7 +209,7 @@ fun PilihAnakScreen(
                                     color = colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "TA ${student.academicYear}",
+                                    text = "NIS: ${student.nisn} · TA ${student.academicYear}",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                 )

@@ -30,7 +30,7 @@ data class OnboardingPage(
 
 private val onboardingPages = listOf(
     OnboardingPage(
-        title = "Pantau Perkembangan Anak",
+        title = "Pantau Perkembangan Anak Setiap Hari",
         subtitle = "Lihat nilai, kehadiran, dan rapor anak Anda kapan saja dengan mudah."
     ),
     OnboardingPage(
@@ -38,8 +38,8 @@ private val onboardingPages = listOf(
         subtitle = "Tidak perlu antre. Bayar SPP, DPP, dan biaya sekolah lainnya dengan mudah via aplikasi."
     ),
     OnboardingPage(
-        title = "Unduh & Verifikasi Rapor",
-        subtitle = "Rapor PDF resmi sekolah bisa diunduh kapan saja. Scan QR untuk verifikasi keaslian dokumen."
+        title = "Dapatkan Pengumuman Secara Real-time",
+        subtitle = "Terima notifikasi pengumuman sekolah langsung di ponsel Anda."
     )
 )
 
@@ -60,7 +60,7 @@ fun OnboardingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                .padding(horizontal = Spacing.xl, vertical = Spacing.md),
             horizontalArrangement = Arrangement.End
         ) {
             TextButton(
@@ -79,7 +79,6 @@ fun OnboardingScreen(
             state = pagerState,
             modifier = Modifier.weight(1f)
         ) { page ->
-            val data = onboardingPages[page]
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -89,28 +88,32 @@ fun OnboardingScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(280.dp)
-                        .padding(Spacing.xl),
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.4f),
                     contentAlignment = Alignment.Center
                 ) {
-                    OnboardingVisualPremium(page = page)
+                    OnboardingVisual(page = page)
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.xl))
 
                 Text(
-                    text = data.title,
+                    text = onboardingPages[page].title,
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface
+                    color = colorScheme.onSurface,
+                    maxLines = 2
                 )
+
                 Spacer(modifier = Modifier.height(Spacing.sm))
+
                 Text(
-                    text = data.subtitle,
+                    text = onboardingPages[page].subtitle,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
-                    color = colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant,
+                    maxLines = 3
                 )
             }
         }
@@ -118,6 +121,7 @@ fun OnboardingScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(48.dp)
                 .padding(vertical = Spacing.lg),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
@@ -128,13 +132,15 @@ fun OnboardingScreen(
                     targetValue = if (isSelected) 32.dp else 8.dp,
                     animationSpec = tween(durationMillis = 400)
                 )
-                val color = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
                 Box(
                     modifier = Modifier
                         .padding(horizontal = Spacing.xxs)
-                        .size(width = width, height = 6.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(color)
+                        .size(width = width, height = 8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(
+                            if (isSelected) colorScheme.primary
+                            else colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+                        )
                 )
             }
         }
@@ -186,13 +192,13 @@ fun OnboardingScreen(
 }
 
 @Composable
-private fun OnboardingVisualPremium(page: Int) {
+private fun OnboardingVisual(page: Int) {
     val colorScheme = MaterialTheme.colorScheme
     when (page) {
         0 -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Surface(
-                    modifier = Modifier.size(160.dp),
+                    modifier = Modifier.size(200.dp),
                     shape = CardShape,
                     color = colorScheme.primaryContainer,
                     tonalElevation = 4.dp,
@@ -202,7 +208,7 @@ private fun OnboardingVisualPremium(page: Int) {
                         Icon(
                             imageVector = Icons.Outlined.Analytics,
                             contentDescription = null,
-                            modifier = Modifier.size(72.dp),
+                            modifier = Modifier.size(80.dp),
                             tint = colorScheme.primary
                         )
                     }
@@ -212,7 +218,7 @@ private fun OnboardingVisualPremium(page: Int) {
         1 -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Surface(
-                    modifier = Modifier.size(160.dp, 220.dp),
+                    modifier = Modifier.size(200.dp, 240.dp),
                     shape = CardShape,
                     color = colorScheme.secondaryContainer,
                     tonalElevation = 4.dp,
@@ -227,7 +233,7 @@ private fun OnboardingVisualPremium(page: Int) {
                             Icons.Outlined.CheckCircle,
                             contentDescription = null,
                             tint = StatusSuccess,
-                            modifier = Modifier.size(64.dp)
+                            modifier = Modifier.size(80.dp)
                         )
                     }
                 }
@@ -236,7 +242,7 @@ private fun OnboardingVisualPremium(page: Int) {
         2 -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Surface(
-                    modifier = Modifier.size(180.dp, 220.dp),
+                    modifier = Modifier.size(200.dp, 240.dp),
                     shape = CardShape,
                     color = colorScheme.surfaceVariant,
                     tonalElevation = 4.dp,
@@ -245,34 +251,38 @@ private fun OnboardingVisualPremium(page: Int) {
                     Column(Modifier.padding(Spacing.lg)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Surface(
-                                modifier = Modifier.size(36.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                color = colorScheme.error.copy(alpha = 0.1f)
+                                modifier = Modifier.size(40.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                color = colorScheme.primary.copy(alpha = 0.1f)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        Icons.Outlined.PictureAsPdf,
+                                        Icons.Outlined.Notifications,
                                         contentDescription = null,
-                                        tint = colorScheme.error,
-                                        modifier = Modifier.size(20.dp)
+                                        tint = colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             }
-                            Spacer(Modifier.width(12.dp))
-                            Box(modifier = Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)).background(colorScheme.onSurface.copy(alpha = 0.1f)))
+                            Spacer(Modifier.width(Spacing.sm))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Box(modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(colorScheme.onSurface.copy(alpha = 0.1f)))
+                                Spacer(Modifier.height(4.dp))
+                                Box(modifier = Modifier.fillMaxWidth(0.6f).height(6.dp).clip(RoundedCornerShape(3.dp)).background(colorScheme.onSurface.copy(alpha = 0.06f)))
+                            }
                         }
                         Spacer(Modifier.weight(1f))
                         Surface(
-                            modifier = Modifier.size(72.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.size(80.dp),
+                            shape = RoundedCornerShape(16.dp),
                             color = colorScheme.primaryContainer
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    Icons.Outlined.QrCode2,
+                                    Icons.Outlined.Campaign,
                                     contentDescription = null,
                                     tint = colorScheme.primary,
-                                    modifier = Modifier.size(36.dp)
+                                    modifier = Modifier.size(40.dp)
                                 )
                             }
                         }

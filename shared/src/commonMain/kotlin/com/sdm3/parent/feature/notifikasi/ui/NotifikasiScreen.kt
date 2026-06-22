@@ -48,10 +48,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.theme.CardShape
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.StatusSuccess
-import com.sdm3.parent.core.designsystem.theme.StatusWarning
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.notifikasi.NotifikasiViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -117,8 +115,8 @@ fun NotifikasiScreen(
                 actions = {
                     IconButton(onClick = { viewModel.markAllAsRead() }) {
                         Surface(
-                            modifier = Modifier.size(40.dp),
-                            shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.size(40.dp),
+                                shape = SDM3Shapes.small,
                             color = colorScheme.primaryContainer
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -219,14 +217,12 @@ fun NotifikasiScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = CardShape,
                                     color = if (!notif.isRead) colorScheme.primaryContainer.copy(alpha = 0.3f)
-                                           else colorScheme.surface,
-                                    tonalElevation = if (!notif.isRead) 0.dp else 1.dp,
-                                    shadowElevation = if (!notif.isRead) 0.dp else 1.dp
+                                           else colorScheme.surface
                                 ) {
                                     Row(modifier = Modifier.padding(Spacing.lg)) {
                                         Surface(
                                             modifier = Modifier.size(48.dp),
-                                            shape = RoundedCornerShape(14.dp),
+                                            shape = SDM3Shapes.medium,
                                             color = typeColor.copy(alpha = 0.1f)
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
@@ -298,9 +294,9 @@ private fun EmptyNotifikasiState() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Surface(
-            modifier = Modifier.size(80.dp),
-            shape = RoundedCornerShape(24.dp),
+            Surface(
+                modifier = Modifier.size(80.dp),
+                shape = SDM3Shapes.large,
             color = colorScheme.primaryContainer
         ) {
             Box(contentAlignment = Alignment.Center) {

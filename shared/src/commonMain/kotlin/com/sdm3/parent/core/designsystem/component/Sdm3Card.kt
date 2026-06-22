@@ -1,5 +1,6 @@
 package com.sdm3.parent.core.designsystem.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import com.sdm3.parent.core.designsystem.theme.Spacing
 fun Sdm3Card(
     modifier: Modifier = Modifier,
     padding: Dp = Spacing.lg,
+    border: BorderStroke? = null,
     content: @Composable () -> Unit
 ) {
     Card(
@@ -26,6 +28,7 @@ fun Sdm3Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
+        border = border,
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(padding)) {
@@ -49,6 +52,28 @@ fun Sdm3ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp,
             pressedElevation = 4.dp
+        )
+    ) {
+        Column(modifier = Modifier.padding(padding)) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun Sdm3HeroCard(
+    modifier: Modifier = Modifier,
+    padding: Dp = Spacing.xl,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = CardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
         )
     ) {
         Column(modifier = Modifier.padding(padding)) {

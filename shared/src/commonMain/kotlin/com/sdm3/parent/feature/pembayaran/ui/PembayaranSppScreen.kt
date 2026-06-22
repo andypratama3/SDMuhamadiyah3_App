@@ -34,13 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.StatusChip
 import com.sdm3.parent.core.designsystem.component.statusColorForPayment
-import com.sdm3.parent.core.designsystem.theme.CardShape
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.StatusDanger
-import com.sdm3.parent.core.designsystem.theme.StatusSuccess
-import com.sdm3.parent.core.designsystem.theme.StatusWarning
-
-private val filterOptions = listOf("Semua", "Lunas", "Menunggu")
+import com.sdm3.parent.core.designsystem.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +44,6 @@ fun PembayaranSppScreen(
     onBayarSekarang: (String) -> Unit,
     onDetailBukti: (String) -> Unit
 ) {
-    var selectedFilter by remember { mutableIntStateOf(0) }
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -82,31 +75,32 @@ fun PembayaranSppScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             item {
-                ElevatedCard(
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.elevatedCardColors(containerColor = colorScheme.surface)
+                    shape = RoundedCornerShape(28.dp),
+                    color = colorScheme.surface,
+                    tonalElevation = 0.dp
                 ) {
                     Column {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .height(160.dp)
                                 .background(
                                     brush = Brush.horizontalGradient(
                                         colors = listOf(
                                             Color(0xFF0E7A39),
-                                            Color(0xFF1AA34A)
+                                            Color(0xFF138848)
                                         )
                                     ),
-                                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
                                 )
                                 .padding(Spacing.xl)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.Top
                             ) {
                                 Column {
                                     Text(
@@ -124,11 +118,11 @@ fun PembayaranSppScreen(
                                 }
                                 Surface(
                                     shape = RoundedCornerShape(100),
-                                    color = Color.White.copy(alpha = 0.2f)
+                                    color = StatusDanger.copy(alpha = 0.85f)
                                 ) {
                                     Text(
                                         text = "Belum Dibayar",
-                                        style = MaterialTheme.typography.labelMedium,
+                                        style = MaterialTheme.typography.labelSmall,
                                         color = Color.White,
                                         fontWeight = FontWeight.SemiBold,
                                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
@@ -144,17 +138,36 @@ fun PembayaranSppScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = colorScheme.onSurface
                             )
+                            Spacer(modifier = Modifier.height(Spacing.xxs))
                             Text(
                                 text = "Jatuh tempo: 15 Juli 2026",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = colorScheme.onSurfaceVariant
                             )
+
+                            Spacer(modifier = Modifier.height(Spacing.md))
+
+                            LinearProgressIndicator(
+                                progress = { 0.65f },
+                                modifier = Modifier.fillMaxWidth().height(8.dp),
+                                color = StatusSuccess,
+                                trackColor = StatusSuccess.copy(alpha = 0.15f)
+                            )
+
+                            Spacer(modifier = Modifier.height(Spacing.xxs))
+
+                            Text(
+                                text = "Terbayar 6 dari 12 bulan",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = colorScheme.onSurfaceVariant
+                            )
+
                             Spacer(modifier = Modifier.height(Spacing.lg))
+
                             Sdm3Button(
                                 text = "Bayar Sekarang",
                                 onClick = { onBayarSekarang("fee_123") },
-                                icon = Icons.Outlined.CreditCard,
-                                containerColor = colorScheme.primary
+                                icon = Icons.Outlined.CreditCard
                             )
                         }
                     }
@@ -165,23 +178,9 @@ fun PembayaranSppScreen(
                 Text(
                     text = "Riwayat Pembayaran",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = colorScheme.onSurface
                 )
-            }
-
-            item {
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    filterOptions.forEachIndexed { index, label ->
-                        SegmentedButton(
-                            selected = selectedFilter == index,
-                            onClick = { selectedFilter = index },
-                            shape = SegmentedButtonDefaults.itemShape(index, filterOptions.size)
-                        ) {
-                            Text(label, style = MaterialTheme.typography.labelLarge)
-                        }
-                    }
-                }
             }
 
             val history = listOf(
@@ -199,18 +198,17 @@ fun PembayaranSppScreen(
                         .clickable { onDetailBukti(payment.id) },
                     shape = CardShape,
                     color = colorScheme.surface,
-                    tonalElevation = 1.dp,
-                    shadowElevation = 1.dp
+                    tonalElevation = 0.dp
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(Spacing.lg),
+                            .padding(Spacing.xl),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
                             modifier = Modifier.size(48.dp),
-                            shape = RoundedCornerShape(14.dp),
+                            shape = RoundedCornerShape(16.dp),
                             color = if (payment.status == "success") StatusSuccess.copy(alpha = 0.1f)
                                    else StatusDanger.copy(alpha = 0.1f)
                         ) {
@@ -219,14 +217,14 @@ fun PembayaranSppScreen(
                                     Icon(
                                         Icons.Default.CheckCircle,
                                         contentDescription = "Lunas",
-                                        modifier = Modifier.size(22.dp),
+                                        modifier = Modifier.size(24.dp),
                                         tint = StatusSuccess
                                     )
                                 } else {
                                     Icon(
                                         Icons.Default.HourglassEmpty,
                                         contentDescription = "Pending",
-                                        modifier = Modifier.size(22.dp),
+                                        modifier = Modifier.size(24.dp),
                                         tint = StatusWarning
                                     )
                                 }
@@ -237,7 +235,7 @@ fun PembayaranSppScreen(
                             Text(
                                 text = payment.title,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colorScheme.onSurface
                             )
                             Text(
@@ -250,7 +248,7 @@ fun PembayaranSppScreen(
                             Text(
                                 text = "Rp${payment.amount}",
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.Bold,
                                 color = colorScheme.onSurface
                             )
                             StatusChip(

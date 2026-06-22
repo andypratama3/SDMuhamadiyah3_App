@@ -79,7 +79,7 @@ fun KegiatanProgramScreen(
             item {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = SDM3Shapes.small,
                     color = colorScheme.surfaceVariant
                 ) {
                     Row(
@@ -92,7 +92,7 @@ fun KegiatanProgramScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .then(
-                                        if (isSelected) Modifier.background(colorScheme.primary, RoundedCornerShape(10.dp))
+                                        if (isSelected) Modifier.background(colorScheme.primary, SDM3Shapes.small)
                                         else Modifier
                                     )
                                     .padding(vertical = Spacing.sm),
@@ -119,15 +119,9 @@ fun KegiatanProgramScreen(
                 )
 
                 items(ekskulList) { ekskul ->
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = CardShape,
-                        color = colorScheme.surface,
-                        tonalElevation = 1.dp,
-                        shadowElevation = 1.dp
-                    ) {
+                    Sdm3Card(padding = Spacing.md) {
                         Row(
-                            modifier = Modifier.padding(Spacing.md),
+                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.Top
                         ) {
                             Surface(
@@ -182,18 +176,11 @@ fun KegiatanProgramScreen(
                 )
 
                 items(programList) { program ->
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = CardShape,
-                        color = colorScheme.surface,
-                        tonalElevation = 1.dp,
-                        shadowElevation = 1.dp
-                    ) {
-                        Column(modifier = Modifier.padding(Spacing.md)) {
+                    Sdm3Card(padding = Spacing.md) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Surface(
                                     modifier = Modifier.size(48.dp),
-                                    shape = RoundedCornerShape(14.dp),
+                                shape = SDM3Shapes.medium,
                                     color = colorScheme.primaryContainer
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
@@ -254,15 +241,14 @@ fun KegiatanProgramScreen(
                             HorizontalDivider()
                             Spacer(modifier = Modifier.height(Spacing.sm))
 
-                            Text(
-                                text = "Terakhir: ${program.lastActivity}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colorScheme.onSurfaceVariant
-                            )
+                                Text(
+                                    text = "Terakhir: ${program.lastActivity}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = colorScheme.onSurfaceVariant
+                                )
                         }
                     }
                 }
-            }
 
             item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
         }

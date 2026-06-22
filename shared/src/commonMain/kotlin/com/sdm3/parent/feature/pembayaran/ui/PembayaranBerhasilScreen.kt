@@ -44,9 +44,8 @@ fun PembayaranBerhasilScreen(
         ) {
             Surface(
                 modifier = Modifier.size(100.dp),
-                shape = RoundedCornerShape(32.dp),
-                color = StatusSuccess.copy(alpha = 0.1f),
-                tonalElevation = 0.dp
+                shape = SDM3Shapes.extraLarge,
+                color = StatusSuccess.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -79,18 +78,10 @@ fun PembayaranBerhasilScreen(
 
             Spacer(modifier = Modifier.height(Spacing.xxl))
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 1.dp,
-                shadowElevation = 1.dp
-            ) {
-                Column(modifier = Modifier.padding(Spacing.lg)) {
-                    SuccessRow("Item", "SPP JULI 2026")
-                    SuccessRow("Total Bayar", "Rp350.000")
-                    SuccessRow("Metode", "BCA Virtual Account")
-                }
+            Sdm3Card {
+                SuccessRow("Item", "SPP JULI 2026")
+                SuccessRow("Total Bayar", "Rp350.000")
+                SuccessRow("Metode", "BCA Virtual Account")
             }
 
             Spacer(modifier = Modifier.height(Spacing.xxl))

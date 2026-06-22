@@ -73,20 +73,14 @@ fun AccountDeletionScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 1.dp,
-                    shadowElevation = 2.dp
-                ) {
+                Sdm3ElevatedCard(padding = Spacing.lg) {
                     Row(
-                        modifier = Modifier.padding(Spacing.lg),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.Top
                     ) {
                         Surface(
                             modifier = Modifier.size(48.dp),
-                            shape = RoundedCornerShape(14.dp),
+                            shape = SDM3Shapes.medium,
                             color = StatusDanger.copy(alpha = 0.1f)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -131,29 +125,21 @@ fun AccountDeletionScreen(
             }
 
             item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 1.dp,
-                    shadowElevation = 1.dp
-                ) {
-                    Column(modifier = Modifier.padding(Spacing.lg)) {
-                        Text(
-                            text = "Alasan Penghapusan",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(Spacing.sm))
-                        Sdm3TextField(
-                            value = uiState.reasonText,
-                            onValueChange = { uiState = uiState.copy(reasonText = it) },
-                            label = "Alasan (Opsional)",
-                            leadingIcon = Icons.Outlined.EditNote,
-                            singleLine = false
-                        )
-                    }
+                Sdm3Card(padding = Spacing.lg) {
+                    Text(
+                        text = "Alasan Penghapusan",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    Sdm3TextField(
+                        value = uiState.reasonText,
+                        onValueChange = { uiState = uiState.copy(reasonText = it) },
+                        label = "Alasan (Opsional)",
+                        leadingIcon = Icons.Outlined.EditNote,
+                        singleLine = false
+                    )
                 }
             }
 
@@ -184,7 +170,7 @@ fun AccountDeletionScreen(
     if (uiState.isConfirmDialogShown) {
         AlertDialog(
             onDismissRequest = { uiState = uiState.copy(isConfirmDialogShown = false) },
-            shape = RoundedCornerShape(28.dp),
+            shape = DialogShape,
             title = {
                 Text(
                     text = "Konfirmasi Penghapusan Akun",

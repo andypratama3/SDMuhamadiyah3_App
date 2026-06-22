@@ -121,9 +121,7 @@ fun PengumumanSekolahScreen(
                                 .fillMaxWidth()
                                 .clickable { onDetailClick("announcement_$index") },
                             shape = CardShape,
-                            color = colorScheme.surface,
-                            tonalElevation = 1.dp,
-                            shadowElevation = 2.dp
+                            color = colorScheme.surface
                         ) {
                             Row(
                                 modifier = Modifier.padding(Spacing.lg),
@@ -131,7 +129,7 @@ fun PengumumanSekolahScreen(
                             ) {
                                 Surface(
                                     modifier = Modifier.size(56.dp, 64.dp),
-                                    shape = RoundedCornerShape(14.dp),
+                                    shape = SDM3Shapes.medium,
                                     color = colorScheme.primaryContainer
                                 ) {
                                     Column(
@@ -165,7 +163,7 @@ fun PengumumanSekolahScreen(
                                     )
                                     Spacer(modifier = Modifier.height(Spacing.xs))
                                     Surface(
-                                        shape = RoundedCornerShape(100),
+                                        shape = ChipShape,
                                         color = colorScheme.secondaryContainer
                                     ) {
                                         Text(

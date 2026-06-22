@@ -29,12 +29,20 @@ fun Modifier.doubleBezel(
         shape = RoundedCornerShape(innerRadius)
     )
 
-fun Modifier.premiumShadow(
-    borderRadius: Dp = 24.dp,
-    elevation: Dp = 4.dp
+fun Modifier.level1Shadow(
+    borderRadius: Dp = 24.dp
 ): Modifier = this.shadow(
-    elevation = elevation,
+    elevation = 4.dp,
+    shape = RoundedCornerShape(borderRadius),
+    ambientColor = Color.Black.copy(alpha = 0.04f),
+    spotColor = Color.Black.copy(alpha = 0.08f)
+)
+
+fun Modifier.level2Shadow(
+    borderRadius: Dp = 28.dp
+): Modifier = this.shadow(
+    elevation = 8.dp,
     shape = RoundedCornerShape(borderRadius),
     ambientColor = Color.Black.copy(alpha = 0.06f),
-    spotColor = Color.Black.copy(alpha = 0.1f)
+    spotColor = Color.Black.copy(alpha = 0.12f)
 )

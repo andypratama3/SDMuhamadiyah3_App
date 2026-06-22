@@ -11,8 +11,13 @@ val Secondary = Color(0xFFF4B400)
 val OnSecondary = Color(0xFF000000)
 val SecondaryContainer = Color(0xFFFFF3C4)
 
+val Tertiary = Color(0xFF3B82F6)
+val OnTertiary = Color(0xFFFFFFFF)
+val TertiaryContainer = Color(0xFFDBEAFE)
+
 val Error = Color(0xFFEF4444)
 val OnError = Color(0xFFFFFFFF)
+val ErrorContainer = Color(0xFFFEE2E2)
 
 val Background = Color(0xFFF8FAF8)
 val OnBackground = Color(0xFF111827)
@@ -21,16 +26,21 @@ val OnSurface = Color(0xFF111827)
 val OnSurfaceVariant = Color(0xFF6B7280)
 val SurfaceVariant = Color(0xFFF5F7F6)
 
-val Border = Color(0xFFE6ECE8)
-val Divider = Color(0xFFEEF2EF)
+val Outline = Color(0xFFD7DED9)
+val OutlineVariant = Color(0xFFE8ECE9)
+val Divider = Color(0xFFE8ECE9)
 
 val TextPrimary = Color(0xFF111827)
 val TextSecondary = Color(0xFF6B7280)
 val TextTertiary = Color(0xFF9CA3AF)
+val Disabled = Color(0xFFD1D5DB)
 
 val StatusSuccess = Color(0xFF22C55E)
 val StatusWarning = Color(0xFFF59E0B)
 val StatusDanger = Color(0xFFEF4444)
+val OnSecondaryContainer = Color(0xFF4A3200)
+val OnErrorContainer = Color(0xFF410002)
+val Border = Color(0xFFBDBDBD)
 val StatusInfo = Color(0xFF3B82F6)
 
 val StatusSuccessBg = Color(0xFFDCFCE7)

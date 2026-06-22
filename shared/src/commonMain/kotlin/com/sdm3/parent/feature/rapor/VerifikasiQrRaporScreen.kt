@@ -31,12 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.component.Sdm3Button
-import com.sdm3.parent.core.designsystem.component.Sdm3OutlinedButton
-import com.sdm3.parent.core.designsystem.component.Sdm3TextField
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.StatusDanger
-import com.sdm3.parent.core.designsystem.theme.StatusSuccess
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,12 +82,8 @@ fun VerifikasiQrRaporScreen(
         ) {
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 1.dp,
-                shadowElevation = 2.dp
+            Sdm3ElevatedCard(
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(Spacing.lg),
@@ -100,8 +92,8 @@ fun VerifikasiQrRaporScreen(
                     Box(
                         modifier = Modifier
                             .size(200.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(2.dp, colorScheme.outline, RoundedCornerShape(16.dp)),
+                            .clip(SDM3Shapes.medium)
+                            .border(2.dp, colorScheme.outline, SDM3Shapes.medium),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -138,8 +130,7 @@ fun VerifikasiQrRaporScreen(
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = CardShape,
-                            color = StatusDanger.copy(alpha = 0.05f),
-                            tonalElevation = 0.dp
+                            color = StatusDanger.copy(alpha = 0.05f)
                         ) {
                             Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(24.dp), tint = StatusDanger)
@@ -151,14 +142,7 @@ fun VerifikasiQrRaporScreen(
 
                     val result = state.verifyResult
                     if (result != null) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = CardShape,
-                            color = colorScheme.surface,
-                            tonalElevation = 2.dp,
-                            shadowElevation = 4.dp
-                        ) {
-                            Column(modifier = Modifier.padding(Spacing.lg)) {
+                        Sdm3ElevatedCard(padding = Spacing.lg) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = if (result.valid) Icons.Default.CheckCircle else Icons.Default.Clear,
@@ -207,9 +191,8 @@ fun VerifikasiQrRaporScreen(
                                     }
                                 }
                             }
-                        }
 
-                        Sdm3OutlinedButton(text = "Verifikasi Ulang", onClick = { viewModel.reset() }, icon = Icons.Default.Refresh)
+                            Sdm3OutlinedButton(text = "Verifikasi Ulang", onClick = { viewModel.reset() }, icon = Icons.Default.Refresh)
                     }
                 }
             }
@@ -230,5 +213,3 @@ private fun VerifInfoRow(label: String, value: String) {
         Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
     }
 }
-
-private val CardShape = com.sdm3.parent.core.designsystem.theme.CardShape

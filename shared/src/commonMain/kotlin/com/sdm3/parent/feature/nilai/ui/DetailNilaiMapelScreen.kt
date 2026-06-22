@@ -1,13 +1,16 @@
 package com.sdm3.parent.feature.nilai.ui
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,7 +31,6 @@ fun DetailNilaiMapelScreen(
     val subjectName = "Matematika"
     val finalScore = 92
     val predicate = "A"
-    val predicateDesc = "Sangat Baik"
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -38,7 +40,7 @@ fun DetailNilaiMapelScreen(
                     Text(
                         text = subjectName,
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
                 },
@@ -61,11 +63,10 @@ fun DetailNilaiMapelScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = CardShape,
                     color = colorScheme.primary,
-                    tonalElevation = 0.dp,
-                    shadowElevation = 6.dp
+                    tonalElevation = 0.dp
                 ) {
                     Column(
-                        modifier = Modifier.padding(Spacing.lg),
+                        modifier = Modifier.padding(Spacing.xl),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
@@ -75,11 +76,11 @@ fun DetailNilaiMapelScreen(
                             color = colorScheme.onPrimary
                         )
                         Spacer(modifier = Modifier.height(Spacing.sm))
-                        StatusChip(text = "$predicate — $predicateDesc", color = colorScheme.onPrimary)
+                        StatusChip(text = "$predicate — Sangat Baik", color = colorScheme.onPrimary)
                         Spacer(modifier = Modifier.height(Spacing.xs))
                         Text(
                             text = "Semester $semester",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = colorScheme.onPrimary.copy(alpha = 0.8f)
                         )
                     }
@@ -87,7 +88,12 @@ fun DetailNilaiMapelScreen(
             }
 
             item {
-                Text("Komponen Nilai", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "Komponen Nilai",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onSurface
+                )
             }
 
             item { KomponenBar("Sumatif", 90f, 100f, "40%", colorScheme.primary) }
@@ -96,7 +102,12 @@ fun DetailNilaiMapelScreen(
 
             item {
                 Spacer(modifier = Modifier.height(Spacing.sm))
-                Text("Tujuan Pembelajaran (TP)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "Tujuan Pembelajaran (TP)",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onSurface
+                )
             }
 
             val tpList = listOf(
@@ -109,52 +120,88 @@ fun DetailNilaiMapelScreen(
             )
 
             items(tpList) { tp ->
+                var expanded by remember { mutableStateOf(false) }
+                val tpColor = when {
+                    tp.score >= 90 -> StatusSuccess
+                    tp.score >= 75 -> StatusWarning
+                    else -> StatusDanger
+                }
+
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { expanded = !expanded },
                     shape = CardShape,
                     color = colorScheme.surface,
-                    tonalElevation = 1.dp,
-                    shadowElevation = 1.dp
+                    tonalElevation = 0.dp
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(Spacing.md),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateContentSize()
+                            .padding(Spacing.md)
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(text = "TP ${tp.code}", style = MaterialTheme.typography.labelMedium, color = colorScheme.onSurfaceVariant)
-                            Text(text = tp.description, style = MaterialTheme.typography.bodyMedium)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "TP ${tp.code}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = tp.description,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            StatusChip(text = "${tp.score}", color = tpColor)
                         }
-                        Spacer(modifier = Modifier.width(Spacing.sm))
-                        val tpColor = when {
-                            tp.score >= 90 -> StatusSuccess
-                            tp.score >= 75 -> StatusWarning
-                            else -> StatusDanger
+                        if (expanded) {
+                            Spacer(modifier = Modifier.height(Spacing.sm))
+                            HorizontalDivider(color = colorScheme.outlineVariant)
+                            Spacer(modifier = Modifier.height(Spacing.sm))
+                            Text(
+                                text = "Ananda telah mencapai kompetensi yang diharapkan pada TP ini dengan baik. Perlu dipertahankan dan terus ditingkatkan.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colorScheme.onSurfaceVariant
+                            )
                         }
-                        StatusChip(text = "${tp.score}", color = tpColor)
                     }
                 }
             }
 
             item {
                 Spacer(modifier = Modifier.height(Spacing.sm))
-                Text("Catatan Guru", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "Catatan Guru",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onSurface
+                )
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 1.dp,
-                    shadowElevation = 1.dp
+                    color = StatusWarningBg
                 ) {
-                    Column(modifier = Modifier.padding(Spacing.md)) {
+                    Column(modifier = Modifier.padding(Spacing.xl)) {
+                        Icon(
+                            Icons.Outlined.FormatQuote,
+                            contentDescription = null,
+                            tint = StatusWarning,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.sm))
                         Text(
                             text = "Ananda menunjukkan pemahaman yang baik pada materi bilangan cacah. Perlu ditingkatkan pada soal cerita kontekstual.",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(modifier = Modifier.height(Spacing.sm))
                         Text(
                             text = "- Ibu Siti Rahmawati, S.Pd.",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.labelMedium,
                             color = colorScheme.onSurfaceVariant
                         )
                     }
@@ -173,18 +220,17 @@ private fun KomponenBar(komponen: String, nilai: Float, max: Float, bobot: Strin
         modifier = Modifier.fillMaxWidth(),
         shape = CardShape,
         color = colorScheme.surface,
-        tonalElevation = 1.dp,
-        shadowElevation = 1.dp
+        tonalElevation = 0.dp
     ) {
-        Column(modifier = Modifier.padding(Spacing.md)) {
+        Column(modifier = Modifier.padding(Spacing.xl)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(komponen, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Text("${nilai.toInt()}/${max.toInt()} (Bobot $bobot)", style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant)
+                Text("${nilai.toInt()}/${max.toInt()} (Bobot $bobot)", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
             }
             Spacer(modifier = Modifier.height(Spacing.sm))
             LinearProgressIndicator(
                 progress = { (nilai / max).coerceIn(0f, 1f) },
-                modifier = Modifier.fillMaxWidth().height(8.dp),
+                modifier = Modifier.fillMaxWidth().height(10.dp),
                 color = warna,
                 trackColor = warna.copy(alpha = 0.15f)
             )

@@ -1,7 +1,11 @@
 package com.sdm3.parent.core.designsystem.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -10,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.theme.*
 
@@ -37,7 +42,7 @@ fun StatusChip(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             color = color,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -51,7 +56,9 @@ fun statusColorForAttendance(status: String): Color = when (status.lowercase()) 
 }
 
 fun statusColorForPayment(status: String): Color = when (status.lowercase()) {
-    "lunas", "success" -> StatusSuccess
+    "lunas", "success", "paid" -> StatusSuccess
     "belum_bayar", "pending" -> StatusDanger
+    "expired" -> Disabled
+    "failed" -> StatusDanger
     else -> StatusWarning
 }

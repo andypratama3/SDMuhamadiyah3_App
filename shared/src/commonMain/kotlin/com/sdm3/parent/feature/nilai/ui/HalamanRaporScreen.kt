@@ -1,6 +1,7 @@
 package com.sdm3.parent.feature.nilai.ui
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -43,7 +44,7 @@ fun HalamanRaporScreen(
                     Text(
                         text = "Dokumen Rapor",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
                 },
@@ -89,18 +90,19 @@ fun HalamanRaporScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = CardShape,
                     color = colorScheme.surface,
-                    tonalElevation = 2.dp,
-                    shadowElevation = 4.dp
+                    tonalElevation = 0.dp
                 ) {
                     Column {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    brush = Brush.horizontalGradient(listOf(colorScheme.primary, colorScheme.primary.copy(alpha = 0.8f))),
+                                    brush = Brush.horizontalGradient(
+                                        listOf(colorScheme.primary, colorScheme.primary.copy(alpha = 0.8f))
+                                    ),
                                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                                 )
-                                .padding(Spacing.lg)
+                                .padding(Spacing.xl)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -120,7 +122,7 @@ fun HalamanRaporScreen(
                                     Spacer(modifier = Modifier.width(Spacing.md))
                                     Text(
                                         text = "Sumatif 1",
-                                        style = MaterialTheme.typography.titleMedium,
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.SemiBold,
                                         color = Color.White
                                     )
@@ -207,7 +209,7 @@ fun HalamanRaporScreen(
                 Text(
                     text = "Riwayat Rapor Sebelumnya",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = colorScheme.onSurface,
                     modifier = Modifier.padding(top = Spacing.md)
                 )
@@ -230,11 +232,10 @@ fun HalamanRaporScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = CardShape,
                         color = colorScheme.surface,
-                        tonalElevation = 1.dp,
-                        shadowElevation = 1.dp
+                        tonalElevation = 0.dp
                     ) {
                         Row(
-                            modifier = Modifier.padding(Spacing.lg),
+                            modifier = Modifier.padding(Spacing.xl),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
@@ -246,7 +247,7 @@ fun HalamanRaporScreen(
                                     Icon(Icons.Outlined.History, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(24.dp))
                                 }
                             }
-                            Spacer(modifier = Modifier.width(Spacing.lg))
+                            Spacer(modifier = Modifier.width(Spacing.md))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = rapor,

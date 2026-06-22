@@ -2,7 +2,6 @@ package com.sdm3.parent.feature.pembayaran.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -15,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.component.Sdm3Button
-import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,20 +57,13 @@ fun ProsesPembayaranScreen(
         ) {
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 2.dp,
-                shadowElevation = 6.dp
-            ) {
+            Sdm3ElevatedCard {
                 Column(
-                    modifier = Modifier.padding(Spacing.lg),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Surface(
                         modifier = Modifier.size(64.dp),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = SDM3Shapes.medium,
                         color = colorScheme.secondaryContainer
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -117,22 +109,14 @@ fun ProsesPembayaranScreen(
                 "6. Simpan bukti pembayaran"
             )
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 1.dp,
-                shadowElevation = 1.dp
-            ) {
-                Column(modifier = Modifier.padding(Spacing.md)) {
-                    steps.forEach { step ->
-                        Text(
-                            text = step,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(vertical = Spacing.xs),
-                            color = colorScheme.onSurfaceVariant
-                        )
-                    }
+            Sdm3Card(padding = Spacing.md) {
+                steps.forEach { step ->
+                    Text(
+                        text = step,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(vertical = Spacing.xs),
+                        color = colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
@@ -167,4 +151,3 @@ fun ProsesPembayaranScreen(
     }
 }
 
-private val CardShape = com.sdm3.parent.core.designsystem.theme.CardShape

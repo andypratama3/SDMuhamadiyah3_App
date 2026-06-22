@@ -26,10 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.component.Sdm3Button
-import com.sdm3.parent.core.designsystem.component.Sdm3OutlinedButton
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.StatusSuccess
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,14 +72,8 @@ fun PreviewRaporPdfScreen(
         ) {
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 2.dp,
-                shadowElevation = 2.dp
-            ) {
-                Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
+            Sdm3ElevatedCard(padding = Spacing.md) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(40.dp), tint = colorScheme.primary)
                     Spacer(modifier = Modifier.width(Spacing.md))
                     Column {
@@ -91,81 +83,12 @@ fun PreviewRaporPdfScreen(
                 }
             }
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 1.dp,
-                shadowElevation = 1.dp
-            ) {
-                Column(modifier = Modifier.padding(Spacing.md)) {
-                    Text("Informasi Dokumen", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                    Spacer(modifier = Modifier.height(Spacing.sm))
-                    InfoRow("ID Rapor", state.raporId)
-                    InfoRow("Status", "Tersedia")
-                    InfoRow("Format", "PDF")
-                }
-            }
-
-            state.errorMessage?.let { error ->
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    color = colorScheme.errorContainer
-                ) {
-                    Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(24.dp), tint = colorScheme.onErrorContainer)
-                        Spacer(modifier = Modifier.width(Spacing.sm))
-                        Text(error, style = MaterialTheme.typography.bodySmall, color = colorScheme.onErrorContainer)
-                    }
-                }
-            }
-
-            AnimatedVisibility(visible = state.isDownloading) {
-                Column {
-                    LinearProgressIndicator(
-                        progress = { state.downloadProgress },
-                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                        color = colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.sm))
-                    Text("Mengunduh...", style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-                }
-            }
-
-            AnimatedVisibility(visible = state.isDownloaded) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    color = StatusSuccess.copy(alpha = 0.1f)
-                ) {
-                    Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(24.dp), tint = StatusSuccess)
-                        Spacer(modifier = Modifier.width(Spacing.sm))
-                        Text("PDF berhasil diunduh", style = MaterialTheme.typography.bodyMedium, color = StatusSuccess)
-                    }
-                }
-            }
-
-            Sdm3Button(
-                text = "Unduh PDF",
-                onClick = { viewModel.download() },
-                enabled = !state.isDownloading && !state.isDownloaded,
-                icon = Icons.Default.FileDownload,
-                containerColor = colorScheme.secondary
-            )
-
-            Sdm3OutlinedButton(text = "Bagikan", onClick = { }, icon = Icons.Default.Link)
-            Sdm3OutlinedButton(text = "Buka di Browser", onClick = { }, icon = Icons.Default.Language)
-
             Spacer(modifier = Modifier.height(Spacing.lg))
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 1.dp,
-                shadowElevation = 1.dp
+                color = colorScheme.surface
             ) {
                 Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(24.dp), tint = colorScheme.onSurfaceVariant)
@@ -192,5 +115,3 @@ private fun InfoRow(label: String, value: String) {
         Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
     }
 }
-
-private val CardShape = com.sdm3.parent.core.designsystem.theme.CardShape

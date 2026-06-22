@@ -1,5 +1,7 @@
 package com.sdm3.parent.feature.notifikasi.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,9 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.theme.CardShape
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.StatusDanger
+import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 import org.jetbrains.compose.resources.painterResource
 import sdmuhammadiyah3samarinda.shared.generated.resources.Res
 import sdmuhammadiyah3samarinda.shared.generated.resources.compose_multiplatform
@@ -167,12 +169,8 @@ fun DetailPengumumanScreen(
                 Text("Lampiran Dokumen", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurface)
                 Spacer(Modifier.height(Spacing.md))
 
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 1.dp,
-                    shadowElevation = 1.dp
+                Sdm3Card(
+                    padding = Spacing.lg
                 ) {
                     Row(
                         modifier = Modifier.padding(Spacing.lg),
@@ -185,11 +183,10 @@ fun DetailPengumumanScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = colorScheme.secondary
-                        )
-                    }
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(Spacing.xxxl))
+            }
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
             }
         }
     }

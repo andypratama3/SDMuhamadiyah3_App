@@ -15,16 +15,21 @@ private val SDM3LightColorScheme = lightColorScheme(
     onSecondary = OnSecondary,
     secondaryContainer = SecondaryContainer,
     onSecondaryContainer = OnSecondaryContainer,
+    tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = TertiaryContainer,
     error = Error,
     onError = OnError,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnSecondaryContainer,
     background = Background,
     onBackground = OnBackground,
     surface = Surface,
     onSurface = OnSurface,
     onSurfaceVariant = OnSurfaceVariant,
     surfaceVariant = SurfaceVariant,
-    outline = Border,
-    outlineVariant = Divider
+    outline = Outline,
+    outlineVariant = OutlineVariant
 )
 
 private val SDM3DarkColorScheme = darkColorScheme(
@@ -35,16 +40,22 @@ private val SDM3DarkColorScheme = darkColorScheme(
     secondary = Secondary,
     onSecondary = OnSecondary,
     secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = OnSecondaryContainer,
+    tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = TertiaryContainer,
     error = Error,
     onError = OnError,
-    background = OnSurface,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnSecondaryContainer,
+    background = TextPrimary,
     onBackground = Surface,
-    surface = OnSurface,
+    surface = TextPrimary,
     onSurface = Surface,
     onSurfaceVariant = TextTertiary,
-    surfaceVariant = OnSurface.copy(alpha = 0.05f),
-    outline = OnSurface.copy(alpha = 0.2f),
-    outlineVariant = OnSurface.copy(alpha = 0.1f)
+    surfaceVariant = TextPrimary.copy(alpha = 0.05f),
+    outline = Surface.copy(alpha = 0.2f),
+    outlineVariant = Surface.copy(alpha = 0.1f)
 )
 
 @Composable

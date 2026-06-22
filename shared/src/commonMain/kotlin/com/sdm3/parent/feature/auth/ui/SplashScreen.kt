@@ -33,7 +33,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.Sdm3Logo
 import com.sdm3.parent.core.designsystem.theme.Primary
+import com.sdm3.parent.core.designsystem.theme.PrimaryContainer
 import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.core.designsystem.theme.TextPrimary
+import com.sdm3.parent.core.designsystem.theme.TextSecondary
+import com.sdm3.parent.core.designsystem.theme.TextTertiary
 import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.core.security.SecureTokenManager
 import kotlinx.coroutines.delay
@@ -47,20 +51,25 @@ fun SplashScreen(
     var startAnimation by remember { mutableStateOf(false) }
 
     val scaleAnim by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.3f,
-        animationSpec = tween(1200, easing = EaseOutBack),
+        targetValue = if (startAnimation) 1f else 0.85f,
+        animationSpec = tween(800, easing = EaseOutBack),
         label = "scale"
     )
     val alphaAnim by animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(1000, easing = EaseInOutQuart),
+        animationSpec = tween(600, easing = EaseInOutQuart),
         label = "alpha"
+    )
+    val subtitleAlpha by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(800, delayMillis = 300, easing = EaseInOutQuart),
+        label = "subtitleAlpha"
     )
 
     LaunchedEffect(Unit) {
-        delay(200)
+        delay(100)
         startAnimation = true
-        delay(1800)
+        delay(2000)
         val token = secureTokenManager.getBearerToken()
         if (token != null) {
             val studentId = secureTokenManager.getSelectedStudentId()
@@ -77,22 +86,21 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Primary, Primary.copy(alpha = 0.85f))
-                )
-            ),
+            .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
                 .size(400.dp)
                 .graphicsLayer {
-                    alpha = 0.05f * alphaAnim
+                    alpha = 0.06f * alphaAnim
                     scaleX = 1.2f
                     scaleY = 1.2f
                 }
-                .background(Brush.radialGradient(listOf(Color.White, Color.Transparent)), RoundedCornerShape(200.dp))
+                .background(
+                    Brush.radialGradient(listOf(Primary, Color.Transparent)),
+                    RoundedCornerShape(200.dp)
+                )
         )
 
         Column(
@@ -101,58 +109,68 @@ fun SplashScreen(
             modifier = Modifier.padding(horizontal = Spacing.xl)
         ) {
             Box(
-                modifier = Modifier.size(200.dp),
+                modifier = Modifier
+                    .size(120.dp)
+                    .graphicsLayer {
+                        scaleX = scaleAnim
+                        scaleY = scaleAnim
+                        alpha = alphaAnim
+                    }
+                    .clip(RoundedCornerShape(60.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White,
+                                PrimaryContainer
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .graphicsLayer {
-                            scaleX = alphaAnim * 0.5f + 0.5f
-                            scaleY = alphaAnim * 0.5f + 0.5f
-                            alpha = (1f - alphaAnim) * 0.3f
-                        }
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(Color.White)
-                )
-
                 Sdm3Logo(
-                    size = 100.dp,
+                    size = 80.dp,
                     modifier = Modifier
-                        .graphicsLayer {
-                            scaleX = scaleAnim
-                            scaleY = scaleAnim
-                            alpha = alphaAnim
-                        }
                 )
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.graphicsLayer {
-                    alpha = alphaAnim
-                    translationY = (1f - alphaAnim) * 30f
+                    alpha = subtitleAlpha
+                    translationY = (1f - subtitleAlpha) * 20f
                 }
             ) {
                 Text(
                     text = "SDM3 Parent Portal",
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineMedium,
+                    color = TextPrimary,
+                    style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
 
                 Text(
-                    text = "SD Muhammadiyah 3 Samarinda",
-                    color = Color.White.copy(alpha = 0.6f),
+                    text = "Portal Orang Tua",
+                    color = TextSecondary,
                     style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.xl))
+
+                Text(
+                    text = "v1.0.0",
+                    color = TextTertiary,
+                    style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center
                 )
             }
         }
     }
 }
+
+

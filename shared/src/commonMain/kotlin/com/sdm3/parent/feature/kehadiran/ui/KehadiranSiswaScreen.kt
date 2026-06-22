@@ -1,5 +1,6 @@
 package com.sdm3.parent.feature.kehadiran.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,7 +53,7 @@ fun KehadiranSiswaScreen(
                             color = colorScheme.primaryContainer
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Outlined.Person, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Outlined.EventAvailable, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp))
                             }
                         }
                         Spacer(Modifier.width(Spacing.sm))
@@ -64,7 +65,7 @@ fun KehadiranSiswaScreen(
                                 color = colorScheme.onSurface
                             )
                             Text(
-                                text = uiState.studentId.ifEmpty { "Ahmad Fathoni" },
+                                text = "Ahmad Fathan",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = colorScheme.onSurfaceVariant
                             )
@@ -93,9 +94,7 @@ fun KehadiranSiswaScreen(
         ) {
             item {
                 Surface(
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .clickable { },
+                    modifier = Modifier.wrapContentWidth().clickable { },
                     shape = RoundedCornerShape(12.dp),
                     color = colorScheme.surfaceVariant
                 ) {
@@ -118,6 +117,10 @@ fun KehadiranSiswaScreen(
             }
 
             item {
+                TodayAttendanceCard()
+            }
+
+            item {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                         SummaryCard(modifier = Modifier.weight(1f), label = "Hadir", count = "18", color = StatusSuccess, icon = Icons.Outlined.CheckCircle)
@@ -135,8 +138,7 @@ fun KehadiranSiswaScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = CardShape,
                     color = colorScheme.surface,
-                    tonalElevation = 1.dp,
-                    shadowElevation = 2.dp
+                    tonalElevation = 0.dp
                 ) {
                     Column(modifier = Modifier.padding(Spacing.lg)) {
                         Row(
@@ -145,9 +147,9 @@ fun KehadiranSiswaScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Ringkasan Bulan Ini",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
+                                text = "Kalender Bulanan",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
                                 color = colorScheme.onSurface
                             )
                             Row {
@@ -212,7 +214,7 @@ fun KehadiranSiswaScreen(
                 Text(
                     text = "Riwayat Harian",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = colorScheme.onSurface,
                     modifier = Modifier.padding(top = Spacing.md)
                 )
@@ -228,14 +230,52 @@ fun KehadiranSiswaScreen(
 }
 
 @Composable
+private fun TodayAttendanceCard() {
+    val colorScheme = MaterialTheme.colorScheme
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        color = StatusSuccess.copy(alpha = 0.1f),
+        tonalElevation = 0.dp
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.xl)
+        ) {
+            Icon(
+                Icons.Outlined.CheckCircle,
+                contentDescription = null,
+                tint = StatusSuccess,
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.height(Spacing.sm))
+            Text(
+                text = "Hadir",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = StatusSuccess
+            )
+            Spacer(modifier = Modifier.height(Spacing.xxs))
+            Text(
+                text = "Check in: 06:58 · Check out: 14:00",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 private fun SummaryCard(modifier: Modifier = Modifier, label: String, count: String, color: Color, icon: ImageVector) {
     val colorScheme = MaterialTheme.colorScheme
     Surface(
         modifier = modifier,
         shape = CardShape,
         color = colorScheme.surface,
-        tonalElevation = 1.dp,
-        shadowElevation = 1.dp
+        tonalElevation = 0.dp
     ) {
         Column(modifier = Modifier.padding(Spacing.md)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -275,8 +315,7 @@ private fun AttendanceLogRow(date: String, status: String, note: String, time: S
         modifier = Modifier.fillMaxWidth(),
         shape = CardShape,
         color = colorScheme.surface,
-        tonalElevation = 1.dp,
-        shadowElevation = 1.dp
+        tonalElevation = 0.dp
     ) {
         Row(
             modifier = Modifier.padding(Spacing.md),
