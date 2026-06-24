@@ -18,7 +18,7 @@ import com.sdm3.parent.core.designsystem.theme.Spacing
 @Composable
 fun Sdm3Card(
     modifier: Modifier = Modifier,
-    padding: Dp = Spacing.lg,
+    padding: Dp = Spacing.md,
     border: BorderStroke? = null,
     content: @Composable () -> Unit
 ) {
@@ -29,7 +29,7 @@ fun Sdm3Card(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         border = border,
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(padding)) {
             content()
@@ -40,7 +40,7 @@ fun Sdm3Card(
 @Composable
 fun Sdm3ElevatedCard(
     modifier: Modifier = Modifier,
-    padding: Dp = Spacing.lg,
+    padding: Dp = Spacing.md,
     content: @Composable () -> Unit
 ) {
     Card(
@@ -63,7 +63,7 @@ fun Sdm3ElevatedCard(
 @Composable
 fun Sdm3HeroCard(
     modifier: Modifier = Modifier,
-    padding: Dp = Spacing.xl,
+    padding: Dp = Spacing.lg,
     content: @Composable () -> Unit
 ) {
     Card(
@@ -73,8 +73,48 @@ fun Sdm3HeroCard(
             containerColor = MaterialTheme.colorScheme.primary
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
+            defaultElevation = 3.dp
         )
+    ) {
+        Column(modifier = Modifier.padding(padding)) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun Sdm3SurfaceCard(
+    modifier: Modifier = Modifier,
+    padding: Dp = Spacing.md,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = CardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.padding(padding)) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun Sdm3SubtleCard(
+    modifier: Modifier = Modifier,
+    padding: Dp = Spacing.md,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = CardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(padding)) {
             content()

@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
@@ -35,7 +36,7 @@ fun DetailInfoAnakScreen(
                 title = {
                     Text(
                         text = "Profil Peserta Didik",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
@@ -58,16 +59,16 @@ fun DetailInfoAnakScreen(
                 .fillMaxSize()
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)
+            contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
         ) {
             item {
-                Sdm3ElevatedCard(padding = Spacing.xl) {
+                Sdm3ElevatedCard(padding = Spacing.lg) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Surface(
                             modifier = Modifier.size(88.dp),
-                            shape = SDM3Shapes.large,
+                            shape = SDM3Shapes.medium,
                             color = colorScheme.primaryContainer
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -209,10 +210,11 @@ private fun QuickNavItem(
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Surface(
+    Card(
         modifier = modifier.clickable(onClick = onClick),
         shape = CardShape,
-        color = colorScheme.surface
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -222,7 +224,7 @@ private fun QuickNavItem(
         ) {
             Surface(
                 modifier = Modifier.size(44.dp),
-                                shape = SDM3Shapes.medium,
+                                shape = SDM3Shapes.small,
                 color = color.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -237,5 +239,17 @@ private fun QuickNavItem(
                 color = colorScheme.onSurface
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun DetailInfoAnakScreenPreview() {
+    SDM3Theme {
+        DetailInfoAnakScreen(
+            studentId = "",
+            onBack = {},
+            onQuickNavClick = {}
+        )
     }
 }

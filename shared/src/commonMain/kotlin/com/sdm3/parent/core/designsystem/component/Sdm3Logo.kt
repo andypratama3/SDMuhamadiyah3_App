@@ -27,92 +27,102 @@ import sdmuhammadiyah3samarinda.shared.generated.resources.logo_sd
 fun Sdm3Logo(
     size: Dp = 100.dp,
     modifier: Modifier = Modifier,
-    useTextFallback: Boolean = false
+    useTextFallback: Boolean = false,
+    showBackground: Boolean = true
 ) {
     Box(
         modifier = modifier.size(size),
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.4f),
-                            Color.White.copy(alpha = 0.1f),
-                            Color.White.copy(alpha = 0.3f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(size / 3f)
-                )
-                .padding(2.dp)
-                .background(
-                    color = Color.White.copy(alpha = 0.05f),
-                    shape = RoundedCornerShape(size / 3.2f)
-                )
-        )
-
-        Box(
-            modifier = Modifier
-                .size(size * 0.85f)
-                .clip(RoundedCornerShape(size / 4f))
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.25f),
-                            Color.White.copy(alpha = 0.15f)
-                        )
-                    )
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.4f),
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.2f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(size / 4f)
-                )
-        ) {
+        if (showBackground) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                if (useTextFallback) {
-                    Text(
-                        text = "SDM3",
-                        color = Color.Black.copy(alpha = 0.2f),
-                        fontSize = (size.value / 4.5f).sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp,
-                        modifier = Modifier
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.4f),
+                                Color.White.copy(alpha = 0.1f),
+                                Color.White.copy(alpha = 0.3f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(size / 3f)
                     )
-                    Text(
-                        text = "SDM3",
-                        color = Color.White,
-                        fontSize = (size.value / 4.5f).sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
+                    .padding(2.dp)
+                    .background(
+                        color = Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(size / 3.2f)
                     )
-                } else {
-                    Image(
-                        painter = painterResource(Res.drawable.logo_sd),
-                        contentDescription = "Logo SDM3",
-                        modifier = Modifier
-                            .size(size * 0.65f)
-                            .padding(4.dp)
-                    )
-                }
-            }
-        }
+            )
 
-        Box(
-            modifier = Modifier
-                .size(size / 2)
-                .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(100))
-        )
+            Box(
+                modifier = Modifier
+                    .size(size * 0.85f)
+                    .clip(RoundedCornerShape(size / 4f))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.25f),
+                                Color.White.copy(alpha = 0.15f)
+                            )
+                        )
+                    )
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.4f),
+                                Color.Transparent,
+                                Color.White.copy(alpha = 0.2f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(size / 4f)
+                    )
+            ) {
+                LogoContent(useTextFallback, size)
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(size / 2)
+                    .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(100))
+            )
+        } else {
+            LogoContent(useTextFallback, size)
+        }
+    }
+}
+
+@Composable
+private fun LogoContent(useTextFallback: Boolean, size: Dp) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (useTextFallback) {
+            Text(
+                text = "SDM3",
+                color = Color.Black.copy(alpha = 0.2f),
+                fontSize = (size.value / 4.5f).sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp,
+                modifier = Modifier
+            )
+            Text(
+                text = "SDM3",
+                color = Color.White,
+                fontSize = (size.value / 4.5f).sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+            )
+        } else {
+            Image(
+                painter = painterResource(Res.drawable.logo_sd),
+                contentDescription = "Logo SDM3",
+                modifier = Modifier
+                    .size(size)
+                    .padding(4.dp)
+            )
+        }
     }
 }

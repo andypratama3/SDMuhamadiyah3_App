@@ -4,10 +4,11 @@ import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.ExtracurricularApi
 import com.sdm3.parent.data.remote.dto.ExtracurricularDto
+import com.sdm3.parent.domain.repository.ExtracurricularRepositoryContract
 
-class ExtracurricularRepository(private val api: ExtracurricularApi) {
+class ExtracurricularRepository(private val api: ExtracurricularApi) : ExtracurricularRepositoryContract {
 
-    suspend fun getExtracurriculars(studentId: String): ApiResult<List<ExtracurricularDto>> {
+    override suspend fun getExtracurriculars(studentId: String): ApiResult<List<ExtracurricularDto>> {
         return try {
             api.getExtracurriculars(studentId)
         } catch (e: Exception) {

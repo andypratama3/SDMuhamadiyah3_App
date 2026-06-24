@@ -1,25 +1,29 @@
-package com.sdm3.parent.feature.nilai.ui
+package com.sdm3.parent.feature.rapor.ui
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,11 +33,14 @@ fun HalamanRaporScreen(
     onPreviewClick: (String, String) -> Unit,
     onVerifikasiClick: (String) -> Unit
 ) {
+    val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
-    var startAnimation by remember { mutableStateOf(false) }
+    var startAnimation by remember { mutableStateOf(isPreview) }
 
-    LaunchedEffect(Unit) {
-        startAnimation = true
+    if (!isPreview) {
+        LaunchedEffect(Unit) {
+            startAnimation = true
+        }
     }
 
     Scaffold(
@@ -43,8 +50,10 @@ fun HalamanRaporScreen(
                 title = {
                     Text(
                         text = "Dokumen Rapor",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.5).sp
+                        ),
                         color = colorScheme.onSurface
                     )
                 },
@@ -66,7 +75,7 @@ fun HalamanRaporScreen(
                 .fillMaxSize()
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)
+            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)
         ) {
             item {
                 Column {
@@ -86,11 +95,11 @@ fun HalamanRaporScreen(
             }
 
             item {
-                Surface(
+                Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 0.dp
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column {
                         Box(
@@ -113,10 +122,10 @@ fun HalamanRaporScreen(
                                     Surface(
                                         modifier = Modifier.size(40.dp),
                                         shape = RoundedCornerShape(12.dp),
-                                        color = Color.White.copy(alpha = 0.2f)
+                                        color = colorScheme.onPrimary.copy(alpha = 0.2f)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
-                                            Icon(Icons.Outlined.Description, contentDescription = null, tint = Color.White)
+                                            Icon(Icons.Outlined.Description, contentDescription = null, tint = colorScheme.onPrimary)
                                         }
                                     }
                                     Spacer(modifier = Modifier.width(Spacing.md))
@@ -124,7 +133,7 @@ fun HalamanRaporScreen(
                                         text = "Sumatif 1",
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color.White
+                                        color = colorScheme.onPrimary
                                     )
                                 }
                                 StatusChip(text = "Tersedia", color = StatusSuccess)
@@ -223,16 +232,12 @@ fun HalamanRaporScreen(
             )
 
             itemsIndexed(raporHistory) { index, rapor ->
-                AnimatedVisibility(
-                    visible = startAnimation,
-                    enter = fadeIn(androidx.compose.animation.core.tween(500, delayMillis = index * 100)) +
-                            slideInVertically(androidx.compose.animation.core.tween(500, delayMillis = index * 100)) { it / 3 }
-                ) {
-                    Surface(
+                MotionAnim(visible = startAnimation) {
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = CardShape,
-                        color = colorScheme.surface,
-                        tonalElevation = 0.dp
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Row(
                             modifier = Modifier.padding(Spacing.xl),
@@ -277,5 +282,13 @@ fun HalamanRaporScreen(
 
             item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun HalamanRaporScreenPreview() {
+    SDM3Theme {
+        HalamanRaporScreen(studentId = "", onBack = {}, onPreviewClick = { _, _ -> }, onVerifikasiClick = {})
     }
 }

@@ -17,6 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -27,11 +29,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.Sdm3TextField
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.auth.OtpStep
+import com.sdm3.parent.feature.auth.VerifikasiOtpUiState
 import com.sdm3.parent.feature.auth.VerifikasiOtpViewModel
 
 @Composable
@@ -39,7 +44,12 @@ fun VerifikasiOtpScreen(
     viewModel: VerifikasiOtpViewModel,
     onSuccess: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val isPreview = LocalInspectionMode.current
+    val state by if (isPreview) {
+        remember { mutableStateOf(VerifikasiOtpUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
     val colorScheme = MaterialTheme.colorScheme
 
     Column(
@@ -47,10 +57,11 @@ fun VerifikasiOtpScreen(
             .fillMaxSize()
             .background(colorScheme.background)
             .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
             .padding(horizontal = Spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(Spacing.xxxl))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         Surface(
             modifier = Modifier.size(88.dp),
@@ -100,11 +111,11 @@ fun VerifikasiOtpScreen(
 
         Spacer(modifier = Modifier.height(Spacing.xl))
 
-        Surface(
+        Card(
             modifier = Modifier.fillMaxWidth(),
             shape = CardShape,
-            color = colorScheme.surface,
-            tonalElevation = 0.dp
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column(modifier = Modifier.padding(Spacing.xl)) {
                 when (state.step) {
@@ -141,7 +152,7 @@ fun VerifikasiOtpScreen(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Outlined.Timer, contentDescription = null, modifier = Modifier.size(18.dp), tint = colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                                Icon(Icons.Outlined.Timer, contentDescription = null, modifier = Modifier.size(18.dp),                                 tint = colorScheme.onSurfaceVariant,)
                                 Spacer(Modifier.width(Spacing.sm))
                                 Text(
                                     text = "Kirim ulang dalam ${state.countdownSeconds}s",
@@ -154,7 +165,7 @@ fun VerifikasiOtpScreen(
                             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                 Text(
                                     text = "Kirim Ulang Kode OTP",
-                                    color = colorScheme.primary,
+                                    color = colorScheme.secondary,
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.SemiBold,
                                     modifier = Modifier
@@ -214,13 +225,14 @@ fun VerifikasiOtpScreen(
             }
         }
 
-        AnimatedVisibility(visible = state.errorMessage != null) {
-            Surface(
+        MotionAnim(visible = state.errorMessage != null) {
+            Card(
                 modifier = Modifier
                     .padding(top = Spacing.lg)
                     .fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = StatusDangerBg
+                shape = CardShape,
+                colors = CardDefaults.cardColors(containerColor = StatusDangerBg),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Row(
                     modifier = Modifier.padding(Spacing.md),
@@ -233,14 +245,15 @@ fun VerifikasiOtpScreen(
             }
         }
 
-        AnimatedVisibility(visible = state.resetSuccessMessage != null) {
+        MotionAnim(visible = state.resetSuccessMessage != null) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Surface(
+                Card(
                     modifier = Modifier
                         .padding(top = Spacing.lg)
                         .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = StatusSuccessBg
+                    shape = CardShape,
+                    colors = CardDefaults.cardColors(containerColor = StatusSuccessBg),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Row(
                         modifier = Modifier.padding(Spacing.md),
@@ -282,11 +295,11 @@ private fun OtpDigitInput(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(56.dp)
+                        .height(52.dp)
                         .clip(OtpBoxShape)
                         .background(
-                            if (isFocused) colorScheme.primaryContainer
-                            else colorScheme.surfaceVariant
+                            if (isFocused) colorScheme.primary.copy(alpha = 0.1f)
+                            else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         )
                         .border(
                             width = if (isFocused) 2.dp else 0.dp,
@@ -334,6 +347,17 @@ private fun OtpDigitInput(
             onValueChange = { onCodeChanged(it.filter { c -> c.isDigit() }.take(6)) },
             label = "",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun VerifikasiOtpScreenPreview() {
+    SDM3Theme {
+        VerifikasiOtpScreen(
+            viewModel = VerifikasiOtpViewModel(),
+            onSuccess = {}
         )
     }
 }

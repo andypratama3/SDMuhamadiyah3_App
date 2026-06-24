@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import androidx.compose.ui.tooling.preview.Preview
 
 data class AccountDeletionUiState(
     override val isLoading: Boolean = false,
@@ -69,7 +70,7 @@ fun AccountDeletionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             item {
@@ -194,7 +195,7 @@ fun AccountDeletionScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = StatusDanger)
                 ) {
-                    Text("Ya, Hapus", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text("Ya, Hapus", color = colorScheme.onError, fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
@@ -202,6 +203,17 @@ fun AccountDeletionScreen(
                     Text("Batal", color = colorScheme.primary, fontWeight = FontWeight.Medium)
                 }
             }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AccountDeletionScreenPreview() {
+    SDM3Theme {
+        AccountDeletionScreen(
+            onBack = {},
+            onDeletionRequestSubmitted = {}
         )
     }
 }

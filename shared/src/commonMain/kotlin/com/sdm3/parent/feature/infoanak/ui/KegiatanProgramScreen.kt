@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,10 +58,9 @@ fun KegiatanProgramScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = Spacing.lg),
+                .padding(padding),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            contentPadding = PaddingValues(vertical = Spacing.md)
+            contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
         ) {
             item {
                 Text(
@@ -185,7 +185,7 @@ fun KegiatanProgramScreen(
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
-                                            Icons.Default.MenuBook,
+                                            Icons.AutoMirrored.Filled.MenuBook,
                                             contentDescription = null,
                                             modifier = Modifier.size(28.dp),
                                             tint = colorScheme.primary
@@ -265,3 +265,14 @@ data class ProgramItem(
     val coach: String,
     val lastActivity: String
 )
+
+@Preview
+@Composable
+private fun KegiatanProgramScreenPreview() {
+    SDM3Theme {
+        KegiatanProgramScreen(
+            studentId = "",
+            onBack = {}
+        )
+    }
+}

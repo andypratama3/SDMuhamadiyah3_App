@@ -1,6 +1,5 @@
 package com.sdm3.parent.feature.pembayaran.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -9,15 +8,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarUiState
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarViewModel
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalInspectionMode
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,13 +33,20 @@ import androidx.compose.material.icons.outlined.Share
 fun DetailBuktiBayarScreen(
     paymentId: String,
     onBack: () -> Unit,
-    viewModel: DetailBuktiBayarViewModel = koinViewModel()
+    viewModel: DetailBuktiBayarViewModel? = if (LocalInspectionMode.current) null else koinViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val isPreview = viewModel == null
+    val uiState by if (isPreview) {
+        remember { mutableStateOf(DetailBuktiBayarUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
     val colorScheme = MaterialTheme.colorScheme
 
-    LaunchedEffect(paymentId) {
-        viewModel.loadPaymentDetail(paymentId)
+    if (!isPreview) {
+        LaunchedEffect(paymentId) {
+            viewModel.loadPaymentDetail(paymentId)
+        }
     }
 
     Scaffold(
@@ -77,12 +87,10 @@ fun DetailBuktiBayarScreen(
                     .padding(horizontal = Spacing.lg)
             ) {
                 uiState.payment?.let { payment ->
-                    Spacer(modifier = Modifier.height(Spacing.md))
-
-                    Surface(
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = CardShape,
-                        color = colorScheme.surface
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
                     ) {
                         Column(
                             modifier = Modifier.padding(Spacing.xl),
@@ -160,14 +168,14 @@ fun DetailBuktiBayarScreen(
 
                     Spacer(modifier = Modifier.height(Spacing.xl))
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .level1Shadow(24.dp)
-                            .clip(CardShape)
-                            .background(colorScheme.surface, CardShape)
-                            .padding(Spacing.md),
-                        verticalAlignment = Alignment.CenterVertically
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = CardShape,
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(Spacing.md),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
                                 modifier = Modifier.size(48.dp),
@@ -198,6 +206,7 @@ fun DetailBuktiBayarScreen(
                                 )
                             }
                         }
+                    }
 
                     Spacer(modifier = Modifier.height(Spacing.xxl))
 
@@ -243,6 +252,17 @@ private fun ReceiptRow(label: String, value: String) {
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
             color = colorScheme.onSurface
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DetailBuktiBayarScreenPreview() {
+    SDM3Theme {
+        DetailBuktiBayarScreen(
+            paymentId = "test",
+            onBack = {}
         )
     }
 }

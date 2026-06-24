@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
@@ -6,8 +8,6 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.sqlDelight)
 }
-
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 kotlin {
     compilerOptions {
@@ -37,6 +37,9 @@ kotlin {
             baseName = "Shared"
             isStatic = true
         }
+        iosTarget.compilations.getByName("main").compilerOptions.configure {
+            freeCompilerArgs.add("-Xbinary=bundleId=com.sdm3.parent")
+        }
     }
 
     sourceSets {
@@ -45,6 +48,8 @@ kotlin {
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
+            implementation(compose.preview)
+            implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.material.icons.core)
             implementation(libs.compose.material.icons.extended)
@@ -84,6 +89,9 @@ kotlin {
             implementation(libs.sqldelight.android)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.biometric)
+
+            // Note: debugImplementation is not supported in KMP androidMain source set with the new plugin
+            implementation(libs.compose.uiTooling)
         }
 
         iosMain.dependencies {
@@ -102,6 +110,7 @@ sqldelight {
     databases {
         create("SDM3Database") {
             packageName.set("com.sdm3.parent.cache")
+            srcDirs.setFrom("src/commonMain/sqldelight")
         }
     }
 }

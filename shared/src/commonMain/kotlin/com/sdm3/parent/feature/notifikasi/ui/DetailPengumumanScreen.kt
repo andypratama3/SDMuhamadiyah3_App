@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.painterResource
 import sdmuhammadiyah3samarinda.shared.generated.resources.Res
 import sdmuhammadiyah3samarinda.shared.generated.resources.compose_multiplatform
@@ -103,7 +104,7 @@ fun DetailPengumumanScreen(
                     Text(
                         "Penting",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color.White,
+                        color = colorScheme.onError,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
@@ -189,5 +190,13 @@ fun DetailPengumumanScreen(
             Spacer(modifier = Modifier.height(Spacing.xxxl))
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun DetailPengumumanScreenPreview() {
+    SDM3Theme {
+        DetailPengumumanScreen(announcementId = "", onBack = {})
     }
 }

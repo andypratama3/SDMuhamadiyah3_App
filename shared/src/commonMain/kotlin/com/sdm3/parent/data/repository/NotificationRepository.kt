@@ -4,10 +4,11 @@ import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.NotificationApi
 import com.sdm3.parent.data.remote.dto.NotificationDto
+import com.sdm3.parent.domain.repository.NotificationRepositoryContract
 
-class NotificationRepository(private val api: NotificationApi) {
+class NotificationRepository(private val api: NotificationApi) : NotificationRepositoryContract {
 
-    suspend fun getNotifications(): ApiResult<List<NotificationDto>> {
+    override suspend fun getNotifications(): ApiResult<List<NotificationDto>> {
         return try {
             api.getNotifications()
         } catch (e: Exception) {
@@ -15,7 +16,7 @@ class NotificationRepository(private val api: NotificationApi) {
         }
     }
 
-    suspend fun markAsRead(id: String): ApiResult<Unit> {
+    override suspend fun markAsRead(id: String): ApiResult<Unit> {
         return try {
             api.markAsRead(id)
         } catch (e: Exception) {

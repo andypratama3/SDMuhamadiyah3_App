@@ -28,13 +28,13 @@ fun StatusChip(
         modifier = modifier
             .clip(ChipShape)
             .background(color.copy(alpha = 0.1f))
-            .padding(horizontal = 14.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(6.dp)
+                .size(5.dp)
                 .clip(RoundedCornerShape(3.dp))
                 .background(color)
         )
@@ -42,7 +42,7 @@ fun StatusChip(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             color = color,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.Medium
         )
     }
 }

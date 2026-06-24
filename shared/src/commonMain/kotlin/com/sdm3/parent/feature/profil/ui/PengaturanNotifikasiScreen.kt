@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
@@ -59,12 +60,10 @@ fun PengaturanNotifikasiScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = Spacing.lg)
+                .padding(horizontal = Spacing.md)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(Spacing.md))
-
-            Sdm3Card(padding = Spacing.md) {
+            Sdm3Card(padding = Spacing.lg) {
                 ToggleRow(label = "Notifikasi Push", enabled = true, isOn = masterToggle, onToggle = { masterToggle = it })
                 HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
                 ToggleRow(label = "Nilai Baru", enabled = masterToggle, isOn = nilaiToggle, onToggle = { nilaiToggle = it })
@@ -82,6 +81,7 @@ fun PengaturanNotifikasiScreen(
             Text(
                 text = "Nonaktifkan notifikasi untuk jenis informasi yang tidak ingin Anda terima.",
                 style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
                 color = colorScheme.onSurfaceVariant
             )
         }
@@ -115,11 +115,19 @@ private fun ToggleRow(
             onCheckedChange = { if (enabled) onToggle(it) },
             enabled = enabled,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = colorScheme.surface,
+                checkedThumbColor = Color.White,
                 checkedTrackColor = colorScheme.secondary,
-                uncheckedThumbColor = colorScheme.surface,
+                uncheckedThumbColor = Color.White,
                 uncheckedTrackColor = colorScheme.outlineVariant
             )
         )
+    }
+}
+
+@Preview
+@Composable
+fun PengaturanNotifikasiScreenPreview() {
+    SDM3Theme {
+        PengaturanNotifikasiScreen(onBack = {})
     }
 }

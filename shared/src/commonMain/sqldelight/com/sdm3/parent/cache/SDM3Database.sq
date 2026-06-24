@@ -1,0 +1,8 @@
+-- Database schema for local caching
+
+CREATE TABLE Student (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    nisn TEXT NOT NULL,
+    class_name TEXT NOT NULL
+);

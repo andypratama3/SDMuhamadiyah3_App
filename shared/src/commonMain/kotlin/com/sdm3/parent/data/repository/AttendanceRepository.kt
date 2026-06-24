@@ -5,10 +5,11 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.AttendanceApi
 import com.sdm3.parent.data.remote.dto.AttendanceDto
 import com.sdm3.parent.data.remote.dto.AttendanceSummaryDto
+import com.sdm3.parent.domain.repository.AttendanceRepositoryContract
 
-class AttendanceRepository(private val api: AttendanceApi) {
+class AttendanceRepository(private val api: AttendanceApi) : AttendanceRepositoryContract {
 
-    suspend fun getAttendances(studentId: String, month: Int? = null, year: Int? = null): ApiResult<List<AttendanceDto>> {
+    override suspend fun getAttendances(studentId: String, month: Int?, year: Int?): ApiResult<List<AttendanceDto>> {
         return try {
             api.getAttendances(studentId, month, year)
         } catch (e: Exception) {
@@ -16,7 +17,7 @@ class AttendanceRepository(private val api: AttendanceApi) {
         }
     }
 
-    suspend fun getAttendanceSummary(studentId: String): ApiResult<AttendanceSummaryDto> {
+    override suspend fun getAttendanceSummary(studentId: String): ApiResult<AttendanceSummaryDto> {
         return try {
             api.getAttendanceSummary(studentId)
         } catch (e: Exception) {

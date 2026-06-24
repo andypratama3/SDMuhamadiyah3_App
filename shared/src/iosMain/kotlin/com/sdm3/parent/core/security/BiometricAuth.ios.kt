@@ -1,10 +1,16 @@
 package com.sdm3.parent.core.security
 
-import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCObjectVar
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.value
+import platform.Foundation.NSError
 import platform.LocalAuthentication.LAContext
 import platform.LocalAuthentication.LAPolicyDeviceOwnerAuthenticationWithBiometrics
+import kotlin.coroutines.resume
 
 actual class BiometricAuthenticator {
     @OptIn(ExperimentalForeignApi::class)
@@ -12,25 +18,32 @@ actual class BiometricAuthenticator {
         return suspendCancellableCoroutine { continuation ->
             val context = LAContext()
 
-            if (!context.canEvaluatePolicy(
+            val canEvaluate = memScoped {
+                val errorPtr = alloc<ObjCObjectVar<NSError?>>()
+                context.canEvaluatePolicy(
                     LAPolicyDeviceOwnerAuthenticationWithBiometrics,
-                    null
+                    errorPtr.ptr
                 )
-            ) {
-                continuation.resume(BiometricResult.NotAvailable)
+            }
+
+            if (!canEvaluate) {
+                if (continuation.isActive) {
+                    continuation.resume(BiometricResult.NotAvailable)
+                }
                 return@suspendCancellableCoroutine
             }
 
             context.evaluatePolicy(
-                LAPolicyDeviceOwnerAuthenticationWithBiometrics,
+                policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics,
                 localizedReason = reason
-            ) { success, error ->
-                if (success) {
-                    continuation.resume(BiometricResult.Success)
-                } else {
-                    val message = error?.localizedDescription
-                        ?: "Authentication failed"
-                    continuation.resume(BiometricResult.Error(message))
+            ) { success, authenticationError ->
+                if (continuation.isActive) {
+                    if (success) {
+                        continuation.resume(BiometricResult.Success)
+                    } else {
+                        val message = authenticationError?.localizedDescription ?: "Autentikasi gagal"
+                        continuation.resume(BiometricResult.Error(message))
+                    }
                 }
             }
         }

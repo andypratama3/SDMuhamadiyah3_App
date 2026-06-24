@@ -35,7 +35,7 @@ fun NetworkErrorDialog(
                 Icon(
                     Icons.Outlined.WifiOff,
                     contentDescription = null,
-                    tint = StatusWarning,
+                    tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -54,7 +54,7 @@ fun NetworkErrorDialog(
                 "Gagal terhubung ke server. Pastikan Anda memiliki koneksi internet yang stabil dan coba lagi.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                color = OnSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         confirmButton = {
@@ -62,7 +62,7 @@ fun NetworkErrorDialog(
                 onClick = onRetry,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Coba Lagi", fontWeight = FontWeight.SemiBold)
             }
@@ -72,7 +72,7 @@ fun NetworkErrorDialog(
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Nanti Saja", fontWeight = FontWeight.Medium, color = OnSurfaceVariant)
+                Text("Nanti Saja", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     )

@@ -1,4 +1,4 @@
-package com.sdm3.parent.feature.kegiatan
+package com.sdm3.parent.feature.infoanak
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState

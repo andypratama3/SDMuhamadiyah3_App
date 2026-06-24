@@ -2,9 +2,7 @@ package com.sdm3.parent.core.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,9 +22,9 @@ import com.sdm3.parent.feature.auth.ui.SplashScreen
 import com.sdm3.parent.feature.auth.ui.VerifikasiOtpScreen
 import com.sdm3.parent.feature.auth.VerifikasiOtpViewModel
 import org.koin.compose.viewmodel.koinViewModel
-import com.sdm3.parent.feature.home.HomeScreen
+import com.sdm3.parent.feature.home.ui.HomeScreen
 import com.sdm3.parent.feature.kehadiran.ui.KehadiranSiswaScreen
-import com.sdm3.parent.feature.nilai.NilaiRaporScreen
+import com.sdm3.parent.feature.nilai.ui.NilaiRaporScreen
 import com.sdm3.parent.feature.nilai.ui.DetailNilaiMapelScreen
 import com.sdm3.parent.feature.notifikasi.ui.DetailPengumumanScreen
 import com.sdm3.parent.feature.notifikasi.ui.NotifikasiScreen
@@ -40,9 +38,9 @@ import com.sdm3.parent.feature.profil.ui.PengaturanNotifikasiScreen
 import com.sdm3.parent.feature.profil.ui.ProfilAkunScreen
 import com.sdm3.parent.feature.infoanak.ui.DetailInfoAnakScreen
 import com.sdm3.parent.feature.infoanak.ui.KegiatanProgramScreen
-import com.sdm3.parent.feature.nilai.ui.HalamanRaporScreen
-import com.sdm3.parent.feature.rapor.PreviewRaporPdfScreen
-import com.sdm3.parent.feature.rapor.VerifikasiQrRaporScreen
+import com.sdm3.parent.feature.rapor.ui.HalamanRaporScreen
+import com.sdm3.parent.feature.rapor.ui.PreviewRaporPdfScreen
+import com.sdm3.parent.feature.rapor.ui.VerifikasiQrRaporScreen
 
 @Composable
 fun SDM3NavHost(
@@ -114,12 +112,13 @@ fun SDM3NavHost(
                     }
                 )
             }
-        }
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(padding),
+            modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
             enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },
             exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 4 }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400)) },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 4 }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },

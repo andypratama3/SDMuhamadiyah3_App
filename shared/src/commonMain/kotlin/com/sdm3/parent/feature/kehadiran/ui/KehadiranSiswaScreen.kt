@@ -13,13 +13,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalInspectionMode
+import com.sdm3.parent.feature.kehadiran.KehadiranSiswaUiState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
@@ -31,14 +36,21 @@ import org.koin.compose.viewmodel.koinViewModel
 fun KehadiranSiswaScreen(
     studentId: String,
     onBack: () -> Unit,
-    viewModel: KehadiranSiswaViewModel = koinViewModel()
+    viewModel: KehadiranSiswaViewModel? = if (LocalInspectionMode.current) null else koinViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val isPreview = viewModel == null
+    val uiState by if (isPreview) {
+        remember { mutableStateOf(KehadiranSiswaUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
     val colorScheme = MaterialTheme.colorScheme
 
-    LaunchedEffect(studentId) {
-        viewModel.loadAttendances(studentId)
-        viewModel.loadSummary(studentId)
+    if (!isPreview) {
+        LaunchedEffect(studentId) {
+            viewModel.loadAttendances(studentId)
+            viewModel.loadSummary(studentId)
+        }
     }
 
     Scaffold(
@@ -60,7 +72,7 @@ fun KehadiranSiswaScreen(
                         Column {
                             Text(
                                 "Kehadiran",
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = colorScheme.onSurface
                             )
@@ -89,56 +101,63 @@ fun KehadiranSiswaScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            item {
-                Surface(
-                    modifier = Modifier.wrapContentWidth().clickable { },
-                    shape = RoundedCornerShape(12.dp),
-                    color = colorScheme.surfaceVariant
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(Spacing.sm))
-                        Text(
-                            text = "Oktober 2023",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = colorScheme.onSurface
-                        )
-                        Spacer(Modifier.width(Spacing.sm))
-                        Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null, tint = colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
-                    }
-                }
-            }
-
             item {
                 TodayAttendanceCard()
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                        SummaryCard(modifier = Modifier.weight(1f), label = "Hadir", count = "18", color = StatusSuccess, icon = Icons.Outlined.CheckCircle)
-                        SummaryCard(modifier = Modifier.weight(1f), label = "Sakit", count = "1", color = StatusWarning, icon = Icons.Outlined.MedicalServices)
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                        SummaryCard(modifier = Modifier.weight(1f), label = "Izin", count = "2", color = colorScheme.secondary, icon = Icons.Outlined.EventAvailable)
-                        SummaryCard(modifier = Modifier.weight(1f), label = "Alpa", count = "0", color = StatusDanger, icon = Icons.Outlined.Cancel)
-                    }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    SummaryCard(
+                        modifier = Modifier.weight(1f),
+                        label = "Hadir",
+                        count = "18",
+                        color = StatusSuccess,
+                        icon = Icons.Outlined.CheckCircle
+                    )
+                    SummaryCard(
+                        modifier = Modifier.weight(1f),
+                        label = "Sakit",
+                        count = "1",
+                        color = StatusWarning,
+                        icon = Icons.Outlined.MedicalServices
+                    )
                 }
             }
 
             item {
-                Surface(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 0.dp
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    SummaryCard(
+                        modifier = Modifier.weight(1f),
+                        label = "Izin",
+                        count = "2",
+                        color = colorScheme.secondary,
+                        icon = Icons.Outlined.EventAvailable
+                    )
+                    SummaryCard(
+                        modifier = Modifier.weight(1f),
+                        label = "Alpa",
+                        count = "0",
+                        color = StatusDanger,
+                        icon = Icons.Outlined.Cancel
+                    )
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = SDM3Shapes.medium,
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column(modifier = Modifier.padding(Spacing.lg)) {
                         Row(
@@ -148,14 +167,29 @@ fun KehadiranSiswaScreen(
                         ) {
                             Text(
                                 text = "Kalender Bulanan",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colorScheme.onSurface
                             )
-                            Row {
-                                Icon(Icons.Outlined.ChevronLeft, contentDescription = null, tint = colorScheme.onSurfaceVariant)
-                                Spacer(Modifier.width(Spacing.md))
-                                Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.onSurfaceVariant)
+                            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                                Surface(
+                                    modifier = Modifier.size(32.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = colorScheme.surfaceVariant
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Outlined.ChevronLeft, contentDescription = null, tint = colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                                    }
+                                }
+                                Surface(
+                                    modifier = Modifier.size(32.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = colorScheme.surfaceVariant
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                                    }
+                                }
                             }
                         }
 
@@ -187,23 +221,44 @@ fun KehadiranSiswaScreen(
                                             .aspectRatio(1f),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        if (day == 9) {
-                                            Box(modifier = Modifier.fillMaxSize(0.8f).clip(RoundedCornerShape(8.dp)).background(colorScheme.primary.copy(alpha = 0.1f)))
-                                        }
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(
-                                                text = "$day",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = if (day == 9) FontWeight.SemiBold else FontWeight.Medium,
-                                                color = if (day == 7) StatusDanger else if (day == 9) colorScheme.primary else colorScheme.onSurface
-                                            )
-                                            if (listOf(1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13).contains(day)) {
-                                                Box(modifier = Modifier.size(4.dp).clip(RoundedCornerShape(2.dp)).background(StatusSuccess))
+                                        val isToday = day == 9
+                                        if (isToday) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize(0.85f)
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(colorScheme.primary.copy(alpha = 0.1f)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                DayContent(day, isToday, colorScheme)
                                             }
+                                        } else {
+                                            DayContent(day, false, colorScheme)
                                         }
                                     }
                                 }
-                                if (row.size < 7) { repeat(7 - row.size) { Spacer(Modifier.weight(1f)) } }
+                                if (row.size < 7) {
+                                    repeat(7 - row.size) { Spacer(Modifier.weight(1f)) }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(Spacing.md))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            listOf("Hadir" to StatusSuccess, "Sakit" to StatusWarning, "Izin" to colorScheme.secondary, "Alpa" to StatusDanger).forEach { (label, color) ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(color))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }
@@ -211,11 +266,8 @@ fun KehadiranSiswaScreen(
             }
 
             item {
-                Text(
-                    text = "Riwayat Harian",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface,
+                SectionHeader(
+                    title = "Riwayat Harian",
                     modifier = Modifier.padding(top = Spacing.md)
                 )
             }
@@ -230,14 +282,30 @@ fun KehadiranSiswaScreen(
 }
 
 @Composable
+private fun DayContent(day: Int, isToday: Boolean, colorScheme: androidx.compose.material3.ColorScheme) {
+    val presentDays = listOf(1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13)
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "$day",
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
+            color = if (day == 7) StatusDanger else if (isToday) colorScheme.primary else colorScheme.onSurface
+        )
+        if (presentDays.contains(day)) {
+            Box(modifier = Modifier.size(4.dp).clip(RoundedCornerShape(2.dp)).background(StatusSuccess))
+        }
+    }
+}
+
+@Composable
 private fun TodayAttendanceCard() {
     val colorScheme = MaterialTheme.colorScheme
 
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        color = StatusSuccess.copy(alpha = 0.1f),
-        tonalElevation = 0.dp
+        shape = CardShape,
+        colors = CardDefaults.cardColors(containerColor = StatusSuccess.copy(alpha = 0.08f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -249,18 +317,18 @@ private fun TodayAttendanceCard() {
                 Icons.Outlined.CheckCircle,
                 contentDescription = null,
                 tint = StatusSuccess,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(44.dp)
             )
             Spacer(modifier = Modifier.height(Spacing.sm))
             Text(
                 text = "Hadir",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = StatusSuccess
             )
             Spacer(modifier = Modifier.height(Spacing.xxs))
             Text(
-                text = "Check in: 06:58 · Check out: 14:00",
+                text = "Check in: 06:58 \u00B7 Check out: 14:00",
                 style = MaterialTheme.typography.bodyMedium,
                 color = colorScheme.onSurfaceVariant
             )
@@ -271,14 +339,18 @@ private fun TodayAttendanceCard() {
 @Composable
 private fun SummaryCard(modifier: Modifier = Modifier, label: String, count: String, color: Color, icon: ImageVector) {
     val colorScheme = MaterialTheme.colorScheme
-    Surface(
+    Card(
         modifier = modifier,
-        shape = CardShape,
-        color = colorScheme.surface,
-        tonalElevation = 0.dp
+        shape = SDM3Shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(Spacing.md)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelMedium,
@@ -286,7 +358,7 @@ private fun SummaryCard(modifier: Modifier = Modifier, label: String, count: Str
                 )
                 Surface(
                     modifier = Modifier.size(28.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = SDM3Shapes.extraSmall,
                     color = color.copy(alpha = 0.1f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -296,7 +368,7 @@ private fun SummaryCard(modifier: Modifier = Modifier, label: String, count: Str
             }
             Spacer(Modifier.height(Spacing.sm))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(count, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = colorScheme.onSurface)
+                Text(count, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = colorScheme.onSurface)
                 Spacer(Modifier.width(Spacing.xxs))
                 Text(
                     text = "Hari",
@@ -311,11 +383,11 @@ private fun SummaryCard(modifier: Modifier = Modifier, label: String, count: Str
 @Composable
 private fun AttendanceLogRow(date: String, status: String, note: String, time: String, color: Color, icon: ImageVector) {
     val colorScheme = MaterialTheme.colorScheme
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth(),
         shape = CardShape,
-        color = colorScheme.surface,
-        tonalElevation = 0.dp
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier.padding(Spacing.md),
@@ -323,7 +395,7 @@ private fun AttendanceLogRow(date: String, status: String, note: String, time: S
         ) {
             Surface(
                 modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(14.dp),
+                shape = SDM3Shapes.small,
                 color = color.copy(alpha = 0.08f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -352,5 +424,16 @@ private fun AttendanceLogRow(date: String, status: String, note: String, time: S
             }
             Text(time, style = MaterialTheme.typography.labelSmall, color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
         }
+    }
+}
+
+@Preview
+@Composable
+private fun KehadiranSiswaScreenPreview() {
+    SDM3Theme {
+        KehadiranSiswaScreen(
+            studentId = "",
+            onBack = {}
+        )
     }
 }

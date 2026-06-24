@@ -13,15 +13,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalDensity
 
 fun Modifier.shimmerEffect(): Modifier = composed {
+    val isPreview = LocalInspectionMode.current
+
+    if (isPreview) {
+        val baseColor = MaterialTheme.colorScheme.surfaceVariant
+        return@composed background(color = baseColor)
+    }
+
+    val density = LocalDensity.current
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateAnim by transition.animateFloat(
         initialValue = 0f,
-        targetValue = 1000f,
+        targetValue = 200f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Reverse
         ),
         label = "shimmerTranslate"
     )

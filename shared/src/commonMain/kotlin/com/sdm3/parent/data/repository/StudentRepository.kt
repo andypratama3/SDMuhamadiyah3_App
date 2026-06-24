@@ -4,10 +4,11 @@ import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.StudentApi
 import com.sdm3.parent.data.remote.dto.StudentDto
+import com.sdm3.parent.domain.repository.StudentRepositoryContract
 
-open class StudentRepository(private val api: StudentApi?) {
+open class StudentRepository(private val api: StudentApi?) : StudentRepositoryContract {
 
-    open suspend fun getStudents(): ApiResult<List<StudentDto>> {
+    override suspend fun getStudents(): ApiResult<List<StudentDto>> {
         return try {
             api?.getStudents() ?: ApiResult.Success(emptyList())
         } catch (e: Exception) {
@@ -15,7 +16,7 @@ open class StudentRepository(private val api: StudentApi?) {
         }
     }
 
-    open suspend fun getStudentDetail(id: String): ApiResult<StudentDto> {
+    override suspend fun getStudentDetail(id: String): ApiResult<StudentDto> {
         return try {
             api?.getStudentDetail(id) ?: ApiResult.Error(ApiError.NotFound)
         } catch (e: Exception) {

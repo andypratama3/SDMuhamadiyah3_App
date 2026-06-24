@@ -12,6 +12,12 @@ val SDM3Shapes = Shapes(
     extraLarge = RoundedCornerShape(32.dp)
 )
 
+// Convenience aliases matching Material3 sizing vocabulary
+val SmallShape = SDM3Shapes.small      // 12.dp
+val MediumShape = SDM3Shapes.medium    // 16.dp
+val LargeShape = SDM3Shapes.large      // 24.dp
+
+// Existing custom shapes
 val CardShape = RoundedCornerShape(24.dp)
 val ButtonShape = RoundedCornerShape(18.dp)
 val InputShape = RoundedCornerShape(18.dp)

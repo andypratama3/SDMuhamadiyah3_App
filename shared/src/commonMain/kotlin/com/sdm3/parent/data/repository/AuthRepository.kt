@@ -4,6 +4,7 @@ import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.AuthApi
 import com.sdm3.parent.data.remote.dto.UserDto
+import com.sdm3.parent.domain.repository.AuthRepositoryContract
 
 class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
 

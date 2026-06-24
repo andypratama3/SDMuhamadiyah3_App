@@ -9,12 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.ReceiptLong
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,7 +90,7 @@ fun PembayaranBerhasilScreen(
             Sdm3Button(
                 text = "Lihat Bukti Bayar",
                 onClick = onLihatBukti,
-                icon = Icons.Outlined.ReceiptLong,
+                icon = Icons.AutoMirrored.Outlined.ReceiptLong,
                 containerColor = colorScheme.secondary
             )
 
@@ -123,6 +124,18 @@ private fun SuccessRow(label: String, value: String) {
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
             color = colorScheme.onSurface
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PembayaranBerhasilScreenPreview() {
+    SDM3Theme {
+        PembayaranBerhasilScreen(
+            paymentId = "test",
+            onLihatBukti = {},
+            onKembali = {}
         )
     }
 }

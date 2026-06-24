@@ -1,6 +1,7 @@
-package com.sdm3.parent.feature.nilai
+package com.sdm3.parent.feature.nilai.ui
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,11 +10,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Analytics
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.TrendingUp
+import androidx.compose.material.icons.automirrored.outlined.TrendingDown
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,9 +22,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.feature.nilai.NilaiRaporViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.ui.tooling.preview.Preview
 
 private val tabLabels = listOf("Sumatif", "Formatif", "Projek")
 
@@ -36,13 +39,15 @@ fun NilaiRaporScreen(
     semester: String,
     onBack: (() -> Unit)? = null,
     onDetailMapel: ((subjectId: String) -> Unit)? = null,
-    viewModel: NilaiRaporViewModel = koinViewModel()
+    viewModel: NilaiRaporViewModel? = if (LocalInspectionMode.current) null else koinViewModel()
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val colorScheme = MaterialTheme.colorScheme
 
-    LaunchedEffect(studentId) {
-        viewModel.loadGrades(studentId, semester)
+    if (!LocalInspectionMode.current) {
+        LaunchedEffect(studentId) {
+            viewModel?.loadGrades(studentId, semester)
+        }
     }
 
     Scaffold(
@@ -50,18 +55,33 @@ fun NilaiRaporScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(
-                            text = "Nilai & Rapor",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Semester $semester",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onSurfaceVariant
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            modifier = Modifier.size(42.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            color = colorScheme.primary.copy(alpha = 0.08f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Outlined.Analytics, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(22.dp))
+                            }
+                        }
+                        Spacer(Modifier.width(Spacing.md))
+                        Column {
+                            Text(
+                                text = "Nilai & Rapor",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = (-0.5).sp
+                                ),
+                                color = colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Semester $semester",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
@@ -84,7 +104,7 @@ fun NilaiRaporScreen(
                 modifier = Modifier
                     .padding(horizontal = Spacing.lg, vertical = Spacing.md)
                     .fillMaxWidth(),
-                shape = RoundedCornerShape(100),
+                shape = ChipShape,
                 color = colorScheme.surfaceVariant
             ) {
                 Row(modifier = Modifier.padding(4.dp)) {
@@ -94,7 +114,7 @@ fun NilaiRaporScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(44.dp)
-                                .clip(RoundedCornerShape(100))
+                                .clip(ChipShape)
                                 .background(if (isSelected) colorScheme.surface else Color.Transparent)
                                 .clickable { selectedTab = index },
                             contentAlignment = Alignment.Center
@@ -103,7 +123,7 @@ fun NilaiRaporScreen(
                                 text = label,
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                color = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -113,7 +133,7 @@ fun NilaiRaporScreen(
             AnimatedContent(
                 targetState = selectedTab,
                 transitionSpec = {
-                    fadeIn() togetherWith fadeOut()
+                    fadeIn(tween(250)) togetherWith fadeOut(tween(250))
                 },
                 label = "tabContent"
             ) { targetTab ->
@@ -149,17 +169,17 @@ private fun SumatifTabContent(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
-        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)
+        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
     ) {
         item {
-            Surface(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = CardShape,
-                color = colorScheme.primary,
-                tonalElevation = 0.dp
+                colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(Spacing.xl),
+                    modifier = Modifier.padding(Spacing.lg),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -175,7 +195,7 @@ private fun SumatifTabContent(
                         color = colorScheme.onPrimary
                     )
                     Text(
-                        text = "Semester $semester",
+                        text = "Dari ${subjects.size} mata pelajaran",
                         style = MaterialTheme.typography.bodyMedium,
                         color = colorScheme.onPrimary.copy(alpha = 0.6f)
                     )
@@ -190,14 +210,14 @@ private fun SumatifTabContent(
             ) {
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.Analytics,
+                    icon = Icons.AutoMirrored.Outlined.TrendingUp,
                     label = "Tertinggi",
                     value = "${subjects.maxOf { it.score }}",
                     color = StatusSuccess
                 )
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.TrendingUp,
+                    icon = Icons.AutoMirrored.Outlined.TrendingDown,
                     label = "Terendah",
                     value = "${subjects.minOf { it.score }}",
                     color = StatusWarning
@@ -213,12 +233,9 @@ private fun SumatifTabContent(
         }
 
         item {
-            Text(
-                text = "Daftar Mata Pelajaran",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurface,
-                modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs)
+            SectionHeader(
+                title = "Daftar Mata Pelajaran",
+                modifier = Modifier.padding(top = Spacing.sm)
             )
         }
 
@@ -245,21 +262,21 @@ private fun SubjectCard(
         else -> StatusDanger
     }
 
-    Surface(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = CardShape,
-        color = colorScheme.surface,
-        tonalElevation = 0.dp
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
-            modifier = Modifier.padding(Spacing.xl),
+            modifier = Modifier.padding(Spacing.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
                 modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(16.dp),
+                shape = SDM3Shapes.small,
                 color = scoreColor.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -275,7 +292,7 @@ private fun SubjectCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = subject.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = colorScheme.onSurface
                 )
@@ -288,7 +305,7 @@ private fun SubjectCard(
             Spacer(modifier = Modifier.width(Spacing.md))
             Text(
                 text = "${subject.score}",
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
                 color = scoreColor
             )
@@ -305,11 +322,11 @@ private fun StatMiniCard(
     color: Color
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Surface(
+    Card(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = colorScheme.surface,
-        tonalElevation = 0.dp
+        shape = SDM3Shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -317,7 +334,7 @@ private fun StatMiniCard(
         ) {
             Surface(
                 modifier = Modifier.size(36.dp),
-                shape = RoundedCornerShape(10.dp),
+                shape = SDM3Shapes.extraSmall,
                 color = color.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -354,13 +371,14 @@ private fun FormatifTabContent(studentId: String) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
-        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)
+        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
     ) {
         item {
-            Surface(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = CardShape,
-                color = colorScheme.secondaryContainer
+                colors = CardDefaults.cardColors(containerColor = colorScheme.secondaryContainer),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Row(
                     modifier = Modifier.padding(Spacing.lg),
@@ -383,19 +401,19 @@ private fun FormatifTabContent(studentId: String) {
                 tp.score >= 75 -> StatusWarning
                 else -> StatusDanger
             }
-            Surface(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 0.dp
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(Spacing.xl),
+                    modifier = Modifier.padding(Spacing.lg),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
                         modifier = Modifier.size(44.dp),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = SDM3Shapes.small,
                         color = colorScheme.secondary.copy(alpha = 0.1f)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -443,24 +461,22 @@ private fun ProjekTabContent(studentId: String) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
-        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)
+        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
     ) {
         item {
-            Text(
-                text = "Projek Penguatan Profil Pelajar Pancasila (P5)",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurface
+            SectionHeader(
+                title = "Projek Penguatan Profil Pelajar Pancasila (P5)",
+                modifier = Modifier.padding(top = Spacing.sm)
             )
         }
         items(proyek) { proyekItem ->
-            Surface(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 0.dp
+                shape = SDM3Shapes.medium,
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
-                Column(modifier = Modifier.padding(Spacing.xl)) {
+                Column(modifier = Modifier.padding(Spacing.lg)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -468,7 +484,7 @@ private fun ProjekTabContent(studentId: String) {
                     ) {
                         Text(
                             text = proyekItem.tema,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
@@ -503,3 +519,16 @@ data class SubjectGrade(
 data class TPItem(val code: String, val description: String, val score: Int)
 
 data class ProjekItem(val tema: String, val deskripsi: String, val nilai: Int, val predikat: String)
+
+@Preview
+@Composable
+private fun NilaiRaporScreenPreview() {
+    SDM3Theme {
+        NilaiRaporScreen(
+            studentId = "",
+            semester = "ganjil",
+            onBack = {},
+            onDetailMapel = {}
+        )
+    }
+}

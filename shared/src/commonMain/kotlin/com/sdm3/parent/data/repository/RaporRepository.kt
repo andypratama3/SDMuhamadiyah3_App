@@ -5,10 +5,11 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.RaporApi
 import com.sdm3.parent.data.remote.dto.RaporInstanceDto
 import com.sdm3.parent.data.remote.dto.RaporVerifyResponse
+import com.sdm3.parent.domain.repository.RaporRepositoryContract
 
-class RaporRepository(private val api: RaporApi) {
+class RaporRepository(private val api: RaporApi) : RaporRepositoryContract {
 
-    suspend fun getRaporInstances(studentId: String): ApiResult<List<RaporInstanceDto>> {
+    override suspend fun getRaporInstances(studentId: String): ApiResult<List<RaporInstanceDto>> {
         return try {
             api.getRaporInstances(studentId)
         } catch (e: Exception) {
@@ -16,7 +17,7 @@ class RaporRepository(private val api: RaporApi) {
         }
     }
 
-    suspend fun getDownloadUrl(id: String): ApiResult<String> {
+    override suspend fun getDownloadUrl(id: String): ApiResult<String> {
         return try {
             api.getDownloadUrl(id)
         } catch (e: Exception) {
@@ -24,7 +25,7 @@ class RaporRepository(private val api: RaporApi) {
         }
     }
 
-    suspend fun verifyQr(qrData: String): ApiResult<RaporVerifyResponse> {
+    override suspend fun verifyQr(qrData: String): ApiResult<RaporVerifyResponse> {
         return try {
             api.verifyQr(qrData)
         } catch (e: Exception) {

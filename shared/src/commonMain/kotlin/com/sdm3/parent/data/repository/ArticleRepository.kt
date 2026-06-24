@@ -4,10 +4,11 @@ import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.ArticleApi
 import com.sdm3.parent.data.remote.dto.ArticleDto
+import com.sdm3.parent.domain.repository.ArticleRepositoryContract
 
-class ArticleRepository(private val api: ArticleApi) {
+class ArticleRepository(private val api: ArticleApi) : ArticleRepositoryContract {
 
-    suspend fun getArticles(): ApiResult<List<ArticleDto>> {
+    override suspend fun getArticles(): ApiResult<List<ArticleDto>> {
         return try {
             api.getArticles()
         } catch (e: Exception) {

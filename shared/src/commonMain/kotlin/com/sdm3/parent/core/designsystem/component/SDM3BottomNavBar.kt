@@ -1,41 +1,35 @@
 package com.sdm3.parent.core.designsystem.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
-
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.NavBarShape
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.navigation.SDM3BottomTab
@@ -47,11 +41,11 @@ data class BottomNavItem(
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem("Beranda", SDM3BottomTab.Beranda, Icons.Default.Home),
-    BottomNavItem("Nilai", SDM3BottomTab.Nilai, Icons.Default.School),
-    BottomNavItem("Bayar", SDM3BottomTab.Bayar, Icons.Default.CreditCard),
-    BottomNavItem("Rapor", SDM3BottomTab.Rapor, Icons.Default.Description),
-    BottomNavItem("Profil", SDM3BottomTab.Profil, Icons.Default.AccountCircle)
+    BottomNavItem("Beranda", SDM3BottomTab.Beranda, Icons.Outlined.Home),
+    BottomNavItem("Nilai", SDM3BottomTab.Nilai, Icons.Outlined.School),
+    BottomNavItem("Bayar", SDM3BottomTab.Bayar, Icons.Outlined.CreditCard),
+    BottomNavItem("Rapor", SDM3BottomTab.Rapor, Icons.Outlined.Description),
+    BottomNavItem("Profil", SDM3BottomTab.Profil, Icons.Outlined.AccountCircle)
 )
 
 @Composable
@@ -62,72 +56,92 @@ fun SDM3BottomNavBar(
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-    Row(
+    // Floating Island Navigation (2026 Trend)
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm)
-            .graphicsLayer {
-                shadowElevation = 8f
-                shape = NavBarShape
-                clip = true
-                ambientShadowColor = Color.Black.copy(alpha = 0.06f)
-                spotShadowColor = Color.Black.copy(alpha = 0.1f)
-            }
-            .background(
-                color = colorScheme.surface.copy(alpha = 0.92f),
-                shape = NavBarShape
-            )
-            .drawBehind {
-                drawRoundRect(
-                    color = Color.White.copy(alpha = 0.5f),
-                    cornerRadius = CornerRadius(28.dp.toPx())
-                )
-            }
-            .padding(horizontal = Spacing.xs, vertical = Spacing.xs),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = Spacing.md, vertical = Spacing.md),
+        contentAlignment = Alignment.Center
     ) {
-        bottomNavItems.forEach { item ->
-            val selected = currentTab == item.tab
-            val iconColor by animateColorAsState(
-                targetValue = if (selected) colorScheme.primary
-                             else colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                animationSpec = tween(200),
-                label = "iconColor"
+        Surface(
+            modifier = Modifier
+                .wrapContentWidth()
+                .height(64.dp)
+                .graphicsLayer {
+                    shadowElevation = 6f
+                    shape = RoundedCornerShape(24.dp)
+                    clip = true
+                    ambientShadowColor = Color.Black.copy(alpha = 0.04f)
+                    spotShadowColor = Color.Black.copy(alpha = 0.04f)
+                },
+            color = colorScheme.surface.copy(alpha = 0.98f),
+            shape = RoundedCornerShape(24.dp),
+            border = androidx.compose.foundation.BorderStroke(
+                width = 1.dp,
+                color = colorScheme.outlineVariant.copy(alpha = 0.4f)
             )
-            val bgColor by animateColorAsState(
-                targetValue = if (selected) colorScheme.primaryContainer
-                             else Color.Transparent,
-                animationSpec = tween(200),
-                label = "bgColor"
-            )
-
-            Surface(
-                onClick = { onTabSelected(item.tab) },
-                shape = RoundedCornerShape(16.dp),
-                color = bgColor,
-                modifier = Modifier.height(48.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .fillMaxHeight(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = if (selected) Spacing.md else Spacing.xs),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        modifier = Modifier.size(22.dp),
-                        tint = iconColor
+                bottomNavItems.forEach { item ->
+                    val selected = currentTab == item.tab
+                    
+                    val contentColor by animateColorAsState(
+                        targetValue = if (selected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        animationSpec = tween(300)
                     )
-                    if (selected) {
-                        Text(
-                            text = item.label,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = iconColor
-                        )
+
+                    Box(
+                        modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .animateContentSize(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                            )
+                            .background(
+                                if (selected) colorScheme.primary.copy(alpha = 0.08f)
+                                else Color.Transparent
+                            )
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { onTabSelected(item.tab) }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = if (selected) 16.dp else 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                modifier = Modifier.size(24.dp),
+                                tint = contentColor
+                            )
+                            
+                            if (selected) {
+                                Text(
+                                    text = item.label,
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 0.2.sp
+                                    ),
+                                    color = contentColor,
+                                    maxLines = 1
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -15,9 +15,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
@@ -28,12 +30,15 @@ fun PengumumanSekolahScreen(
     onBack: () -> Unit,
     onDetailClick: (String) -> Unit
 ) {
+    val isPreview = LocalInspectionMode.current
     var selectedCategory by remember { mutableIntStateOf(0) }
     val colorScheme = MaterialTheme.colorScheme
-    var startAnimation by remember { mutableStateOf(false) }
+    var startAnimation by remember { mutableStateOf(isPreview) }
 
-    LaunchedEffect(Unit) {
-        startAnimation = true
+    if (!isPreview) {
+        LaunchedEffect(Unit) {
+            startAnimation = true
+        }
     }
 
     Scaffold(
@@ -100,7 +105,7 @@ fun PengumumanSekolahScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
+                contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)
             ) {
                 val dummyAnnouncements = listOf(
                     "Libur Hari Raya Idul Adha 1447 H",
@@ -111,17 +116,14 @@ fun PengumumanSekolahScreen(
                 )
 
                 itemsIndexed(dummyAnnouncements) { index, title ->
-                    AnimatedVisibility(
-                        visible = startAnimation,
-                        enter = fadeIn(androidx.compose.animation.core.tween(500, delayMillis = index * 100)) +
-                                slideInVertically(androidx.compose.animation.core.tween(500, delayMillis = index * 100)) { it / 4 }
-                    ) {
-                        Surface(
+                    MotionAnim(visible = startAnimation) {
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onDetailClick("announcement_$index") },
                             shape = CardShape,
-                            color = colorScheme.surface
+                            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
                             Row(
                                 modifier = Modifier.padding(Spacing.lg),
@@ -183,5 +185,13 @@ fun PengumumanSekolahScreen(
                 item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PengumumanSekolahScreenPreview() {
+    SDM3Theme {
+        PengumumanSekolahScreen(onBack = {}, onDetailClick = {})
     }
 }

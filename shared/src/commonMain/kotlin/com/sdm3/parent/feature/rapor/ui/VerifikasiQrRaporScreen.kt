@@ -1,8 +1,6 @@
-package com.sdm3.parent.feature.rapor
+package com.sdm3.parent.feature.rapor.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.border
@@ -23,34 +21,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.feature.rapor.VerifikasiQrRaporUiState
+import com.sdm3.parent.feature.rapor.VerifikasiQrRaporViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerifikasiQrRaporScreen(
     raporId: String,
-    viewModel: VerifikasiQrRaporViewModel,
+    viewModel: VerifikasiQrRaporViewModel? = if (LocalInspectionMode.current) null else koinInject(),
     onBack: () -> Unit
 ) {
+    val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
-    val state by viewModel.uiState.collectAsState()
+    val state by if (isPreview) {
+        remember { mutableStateOf(VerifikasiQrRaporUiState()) }
+    } else {
+        val vm = viewModel ?: return Text("")
+        vm.uiState.collectAsState()
+    }
 
-    LaunchedEffect(raporId) { viewModel.init(raporId) }
-
-    val resultAlpha by animateFloatAsState(
-        targetValue = if (state.showResult) 1f else 0f,
-        animationSpec = tween(durationMillis = 400),
-        label = "resultAlpha"
-    )
+    if (!isPreview) {
+        LaunchedEffect(raporId) { viewModel?.init(raporId) }
+    }
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -80,8 +86,6 @@ fun VerifikasiQrRaporScreen(
                 .padding(horizontal = Spacing.lg),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
             Sdm3ElevatedCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -107,37 +111,35 @@ fun VerifikasiQrRaporScreen(
 
             Text("Atau masukkan data QR secara manual", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
 
-            Sdm3TextField(value = state.qrInput, onValueChange = { viewModel.updateQrInput(it) }, label = "Data QR Code", leadingIcon = Icons.Outlined.QrCode2)
+            Sdm3TextField(value = state.qrInput, onValueChange = { if (!isPreview) viewModel?.updateQrInput(it) }, label = "Data QR Code", leadingIcon = Icons.Outlined.QrCode2)
 
             Sdm3Button(
                 text = "Verifikasi",
-                onClick = { viewModel.verify() },
+                onClick = { viewModel?.verify() },
                 isLoading = state.isLoading,
                 enabled = !state.isLoading && state.qrInput.isNotBlank(),
                 containerColor = colorScheme.secondary,
                 icon = Icons.Default.Search
             )
 
-            AnimatedVisibility(
-                visible = state.showResult,
-                enter = fadeIn(animationSpec = tween(400)) + scaleIn(animationSpec = tween(400))
-            ) {
+            MotionAnim(visible = state.showResult) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().alpha(resultAlpha),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
                     state.errorMessage?.let { error ->
-                        Surface(
+                        Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = CardShape,
-                            color = StatusDanger.copy(alpha = 0.05f)
+                            colors = CardDefaults.cardColors(containerColor = StatusDanger.copy(alpha = 0.05f)),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
                             Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(24.dp), tint = StatusDanger)
                                 Spacer(modifier = Modifier.width(Spacing.sm))
                                 Text(error, style = MaterialTheme.typography.bodySmall, color = StatusDanger)
-                            }
-                        }
+    }
+}
                     }
 
                     val result = state.verifyResult
@@ -192,7 +194,7 @@ fun VerifikasiQrRaporScreen(
                                 }
                             }
 
-                            Sdm3OutlinedButton(text = "Verifikasi Ulang", onClick = { viewModel.reset() }, icon = Icons.Default.Refresh)
+                            Sdm3OutlinedButton(text = "Verifikasi Ulang", onClick = { viewModel?.reset() }, icon = Icons.Default.Refresh)
                     }
                 }
             }
@@ -211,5 +213,13 @@ private fun VerifInfoRow(label: String, value: String) {
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
         Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+    }
+}
+
+@Preview
+@Composable
+private fun VerifikasiQrRaporScreenPreview() {
+    SDM3Theme {
+        VerifikasiQrRaporScreen(raporId = "", onBack = {})
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val SDM3LightColorScheme = lightColorScheme(
     primary = Primary,
@@ -21,25 +22,36 @@ private val SDM3LightColorScheme = lightColorScheme(
     error = Error,
     onError = OnError,
     errorContainer = ErrorContainer,
-    onErrorContainer = OnSecondaryContainer,
+    onErrorContainer = OnErrorContainer,
     background = Background,
     onBackground = OnBackground,
     surface = Surface,
     onSurface = OnSurface,
-    onSurfaceVariant = OnSurfaceVariant,
     surfaceVariant = SurfaceVariant,
+    onSurfaceVariant = OnSurfaceVariant,
     outline = Outline,
-    outlineVariant = OutlineVariant
+    outlineVariant = OutlineVariant,
+    surfaceTint = Primary,
+    inverseSurface = InverseSurface,
+    inverseOnSurface = InverseOnSurface,
+    inversePrimary = InversePrimary,
+    scrim = Scrim,
+    surfaceContainerLow = SurfaceContainerLow,
+    surfaceContainer = SurfaceContainer,
+    surfaceContainerHigh = SurfaceContainerHigh,
+    surfaceContainerHighest = SurfaceContainerHighest,
+    surfaceDim = SurfaceContainerDim,
+    surfaceBright = Surface
 )
 
 private val SDM3DarkColorScheme = darkColorScheme(
-    primary = Primary.copy(alpha = 0.85f),
+    primary = Primary,
     onPrimary = OnPrimary,
-    primaryContainer = OnPrimaryContainer,
-    onPrimaryContainer = PrimaryContainer,
+    primaryContainer = Primary.copy(alpha = 0.6f),
+    onPrimaryContainer = OnPrimaryContainer,
     secondary = Secondary,
     onSecondary = OnSecondary,
-    secondaryContainer = SecondaryContainer,
+    secondaryContainer = Secondary.copy(alpha = 0.3f),
     onSecondaryContainer = OnSecondaryContainer,
     tertiary = Tertiary,
     onTertiary = OnTertiary,
@@ -47,15 +59,26 @@ private val SDM3DarkColorScheme = darkColorScheme(
     error = Error,
     onError = OnError,
     errorContainer = ErrorContainer,
-    onErrorContainer = OnSecondaryContainer,
-    background = TextPrimary,
-    onBackground = Surface,
-    surface = TextPrimary,
-    onSurface = Surface,
-    onSurfaceVariant = TextTertiary,
-    surfaceVariant = TextPrimary.copy(alpha = 0.05f),
-    outline = Surface.copy(alpha = 0.2f),
-    outlineVariant = Surface.copy(alpha = 0.1f)
+    onErrorContainer = OnErrorContainer,
+    background = Color(0xFF0F172A),
+    onBackground = Color(0xFFE5E7EB),
+    surface = Color(0xFF1E2937),
+    onSurface = Color(0xFFE5E7EB),
+    surfaceVariant = Color(0xFF334155),
+    onSurfaceVariant = Color(0xFF9CA3AF),
+    outline = Color(0xFF4B5563),
+    outlineVariant = Color(0xFF374151),
+    surfaceTint = Primary,
+    inverseSurface = Background,
+    inverseOnSurface = OnBackground,
+    inversePrimary = PrimaryContainer,
+    scrim = Scrim,
+    surfaceContainerLow = Color(0xFF1A2535),
+    surfaceContainer = Color(0xFF1E2937),
+    surfaceContainerHigh = Color(0xFF253040),
+    surfaceContainerHighest = Color(0xFF2D3A4D),
+    surfaceDim = Color(0xFF0F172A),
+    surfaceBright = Color(0xFF2D3A4D)
 )
 
 @Composable

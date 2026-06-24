@@ -5,5 +5,5 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 actual fun platformModule(): Module = module {
-    single { KVault(serviceName = "SDM3ParentPortal", accessGroup = null) }
+    single { KVault() }
 }

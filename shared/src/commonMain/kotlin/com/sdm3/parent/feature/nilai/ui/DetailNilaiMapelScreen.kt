@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,16 +55,15 @@ fun DetailNilaiMapelScreen(
         }
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = Spacing.lg),
+            modifier = Modifier.fillMaxSize().padding(padding),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            contentPadding = PaddingValues(vertical = Spacing.md)
+            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)
         ) {
             item {
-                Surface(
+                Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = CardShape,
-                    color = colorScheme.primary,
-                    tonalElevation = 0.dp
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
                 ) {
                     Column(
                         modifier = Modifier.padding(Spacing.xl),
@@ -76,7 +76,7 @@ fun DetailNilaiMapelScreen(
                             color = colorScheme.onPrimary
                         )
                         Spacer(modifier = Modifier.height(Spacing.sm))
-                        StatusChip(text = "$predicate — Sangat Baik", color = colorScheme.onPrimary)
+                        StatusChip(text = "$predicate \u2014 Sangat Baik", color = colorScheme.onPrimary)
                         Spacer(modifier = Modifier.height(Spacing.xs))
                         Text(
                             text = "Semester $semester",
@@ -88,11 +88,9 @@ fun DetailNilaiMapelScreen(
             }
 
             item {
-                Text(
-                    "Komponen Nilai",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface
+                SectionHeader(
+                    title = "Komponen Nilai",
+                    modifier = Modifier.padding(top = Spacing.md)
                 )
             }
 
@@ -101,12 +99,9 @@ fun DetailNilaiMapelScreen(
             item { KomponenBar("Projek", 95f, 100f, "20%", StatusSuccess) }
 
             item {
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                Text(
-                    "Tujuan Pembelajaran (TP)",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface
+                SectionHeader(
+                    title = "Tujuan Pembelajaran (TP)",
+                    modifier = Modifier.padding(top = Spacing.md)
                 )
             }
 
@@ -127,13 +122,13 @@ fun DetailNilaiMapelScreen(
                     else -> StatusDanger
                 }
 
-                Surface(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { expanded = !expanded },
-                    shape = CardShape,
-                    color = colorScheme.surface,
-                    tonalElevation = 0.dp
+                    shape = SDM3Shapes.medium,
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(
                         modifier = Modifier
@@ -174,19 +169,17 @@ fun DetailNilaiMapelScreen(
 
             item {
                 Spacer(modifier = Modifier.height(Spacing.sm))
-                Text(
-                    "Catatan Guru",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface
+                SectionHeader(
+                    title = "Catatan Guru",
+                    modifier = Modifier.padding(bottom = Spacing.sm)
                 )
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                Surface(
+                Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = CardShape,
-                    color = StatusWarningBg
+                    colors = CardDefaults.cardColors(containerColor = StatusWarning.copy(alpha = 0.08f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Column(modifier = Modifier.padding(Spacing.xl)) {
+                    Column(modifier = Modifier.padding(Spacing.lg)) {
                         Icon(
                             Icons.Outlined.FormatQuote,
                             contentDescription = null,
@@ -216,13 +209,13 @@ fun DetailNilaiMapelScreen(
 @Composable
 private fun KomponenBar(komponen: String, nilai: Float, max: Float, bobot: String, warna: Color) {
     val colorScheme = MaterialTheme.colorScheme
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = CardShape,
-        color = colorScheme.surface,
-        tonalElevation = 0.dp
+        shape = SDM3Shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(modifier = Modifier.padding(Spacing.xl)) {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(komponen, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 Text("${nilai.toInt()}/${max.toInt()} (Bobot $bobot)", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
@@ -239,3 +232,16 @@ private fun KomponenBar(komponen: String, nilai: Float, max: Float, bobot: Strin
 }
 
 data class TPDetail(val code: String, val description: String, val score: Int)
+
+@Preview
+@Composable
+private fun DetailNilaiMapelScreenPreview() {
+    SDM3Theme {
+        DetailNilaiMapelScreen(
+            studentId = "",
+            subjectId = "",
+            semester = "ganjil",
+            onBack = {}
+        )
+    }
+}

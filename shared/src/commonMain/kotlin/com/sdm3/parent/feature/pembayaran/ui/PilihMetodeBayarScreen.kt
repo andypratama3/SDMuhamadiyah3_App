@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
@@ -80,40 +81,39 @@ fun PilihMetodeBayarScreen(
                 .padding(padding)
                 .padding(horizontal = Spacing.lg)
         ) {
-            // Summary card
-            Sdm3ElevatedCard(padding = Spacing.xl) {
+            Sdm3ElevatedCard(padding = Spacing.lg) {
                 Text("SPP Juli 2026", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurface)
-                    Spacer(modifier = Modifier.height(Spacing.sm))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("SPP", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
-                        Text("Rp300.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Iuran Gedung", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
-                        Text("Rp40.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Biaya Admin", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
-                        Text("Rp10.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Total",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "Rp350.000",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary
-                        )
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("SPP", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
+                    Text("Rp300.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Iuran Gedung", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
+                    Text("Rp40.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Biaya Admin", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
+                    Text("Rp10.000", style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurface)
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Total",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "Rp350.000",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = colorScheme.primary
+                    )
                 }
             }
 
@@ -128,12 +128,15 @@ fun PilihMetodeBayarScreen(
                 ) {
                     items(paymentMethods) { method ->
                         val isSelected = selectedMethod == method.id
-                        Surface(
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { selectedMethod = method.id },
                             shape = CardShape,
-                            color = if (isSelected) colorScheme.primaryContainer.copy(alpha = 0.5f) else colorScheme.surface
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected) colorScheme.primaryContainer.copy(alpha = 0.3f) else colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -143,7 +146,7 @@ fun PilihMetodeBayarScreen(
                             ) {
                                 Surface(
                                     modifier = Modifier.size(44.dp),
-                                    shape = SDM3Shapes.small,
+                                    shape = SDM3Shapes.extraSmall,
                                     color = if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceVariant
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
@@ -167,10 +170,21 @@ fun PilihMetodeBayarScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(vertical = Spacing.md),
-                    enabled = selectedMethod != null,
-                    containerColor = colorScheme.primary
+                    enabled = selectedMethod != null
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PilihMetodeBayarScreenPreview() {
+    SDM3Theme {
+        PilihMetodeBayarScreen(
+            studentFeeId = "",
+            onBack = {},
+            onLanjutkan = {}
+        )
     }
 }

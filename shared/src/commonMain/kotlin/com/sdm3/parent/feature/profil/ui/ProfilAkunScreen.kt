@@ -2,23 +2,16 @@ package com.sdm3.parent.feature.profil.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,13 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.component.Sdm3Button
-import com.sdm3.parent.core.designsystem.component.StatusChip
-import com.sdm3.parent.core.designsystem.theme.CardShape
-import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.StatusDanger
-import com.sdm3.parent.core.designsystem.theme.StatusSuccess
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +43,7 @@ fun ProfilAkunScreen(
                 title = {
                     Text(
                         "Profil Akun",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
@@ -66,11 +56,9 @@ fun ProfilAkunScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = Spacing.lg)
+                .padding(horizontal = Spacing.md)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
             ProfileHeader()
 
             Spacer(modifier = Modifier.height(Spacing.md))
@@ -79,37 +67,63 @@ fun ProfilAkunScreen(
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
-            SettingsCard(
-                items = listOf(
-                    SettingsItem("Notifikasi", Icons.Default.Notifications, colorScheme.secondary, onNotifikasiSetting),
-                    SettingsItem("Bahasa", Icons.Default.Language, colorScheme.primary, { }),
-                    SettingsItem("Tentang Aplikasi", Icons.Default.Info, colorScheme.onSurfaceVariant, { }),
-                    SettingsItem("Kebijakan Privasi", Icons.Default.Lock, StatusDanger, { }),
-                    SettingsItem("Hubungi Sekolah", Icons.Default.Chat, colorScheme.secondary, { })
-                ),
-                trailing = "Bahasa Indonesia"
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = CardShape,
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(modifier = Modifier.padding(Spacing.sm)) {
+                    listOf(
+                        SettingsItem("Notifikasi", Icons.Outlined.Notifications, colorScheme.secondary, onNotifikasiSetting),
+                        SettingsItem("Bahasa", Icons.Outlined.Language, colorScheme.primary, { }),
+                        SettingsItem("Tentang Aplikasi", Icons.Outlined.Info, colorScheme.onSurfaceVariant, { }),
+                        SettingsItem("Kebijakan Privasi", Icons.Outlined.Lock, StatusDanger, { }),
+                        SettingsItem("Hubungi Sekolah", Icons.AutoMirrored.Outlined.Chat, colorScheme.secondary, { })
+                    ).forEachIndexed { index, item ->
+                        SettingsItemRow(item = item, trailing = if (index == 1) "Bahasa Indonesia" else null)
+                        if (index < 4) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = Spacing.lg),
+                                color = colorScheme.outlineVariant
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
-            Surface(
+            Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = CardShape,
-                color = colorScheme.surface,
-                tonalElevation = 0.dp
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = Spacing.xl, vertical = Spacing.md),
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Versi Aplikasi",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = SDM3Shapes.extraSmall,
+                            color = colorScheme.surfaceVariant
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Outlined.Info, contentDescription = null, tint = colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(Spacing.md))
+                        Text(
+                            text = "Versi Aplikasi",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
                     Text(
                         text = "1.0.0 (Build 1)",
                         style = MaterialTheme.typography.bodyMedium,
@@ -121,10 +135,10 @@ fun ProfilAkunScreen(
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             Sdm3Button(
-                text = "Keluar Akun",
+                text = "Keluar",
                 onClick = { showLogoutDialog = true },
                 containerColor = StatusDanger,
-                icon = Icons.Default.ExitToApp
+                icon = Icons.AutoMirrored.Filled.ExitToApp
             )
 
             Spacer(modifier = Modifier.height(Spacing.md))
@@ -132,7 +146,7 @@ fun ProfilAkunScreen(
             Text(
                 text = "2026 SDM3 Parent Portal",
                 style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.onSurfaceVariant,
+                color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
@@ -155,7 +169,7 @@ fun ProfilAkunScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = StatusDanger)
                 ) {
-                    Text("Keluar", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text("Keluar", color = colorScheme.onPrimary, fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
@@ -171,28 +185,28 @@ fun ProfilAkunScreen(
 private fun ProfileHeader() {
     val colorScheme = MaterialTheme.colorScheme
 
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth(),
         shape = CardShape,
-        color = colorScheme.surface,
-        tonalElevation = 0.dp
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Spacing.xl),
+                .padding(Spacing.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(72.dp),
-                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.size(68.dp),
+                shape = SDM3Shapes.medium,
                 color = colorScheme.primaryContainer
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Default.Person,
                         contentDescription = null,
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier.size(36.dp),
                         tint = colorScheme.primary
                     )
                 }
@@ -202,15 +216,15 @@ private fun ProfileHeader() {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "Bambang Suprapto",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
                     Box(
                         modifier = Modifier
-                            .size(12.dp)
-                            .clip(RoundedCornerShape(6.dp))
+                            .size(10.dp)
+                            .clip(RoundedCornerShape(5.dp))
                             .background(StatusSuccess)
                     )
                 }
@@ -229,7 +243,7 @@ private fun ProfileHeader() {
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = "Detail",
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(18.dp),
                     tint = colorScheme.onSurfaceVariant
                 )
             }
@@ -241,76 +255,59 @@ private fun ProfileHeader() {
 private fun StudentMiniCard() {
     val colorScheme = MaterialTheme.colorScheme
 
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth(),
         shape = CardShape,
-        color = colorScheme.surface,
-        tonalElevation = 0.dp
+        colors = CardDefaults.cardColors(containerColor = colorScheme.secondaryContainer),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(Spacing.xl)) {
-            Text(
-                text = "Data Anak",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    modifier = Modifier.size(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = colorScheme.primaryContainer
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = CardShape,
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(modifier = Modifier.padding(Spacing.lg)) {
+                Text(
+                    text = "Data Anak",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
+                    Surface(
+                        modifier = Modifier.size(56.dp),
+                        shape = SDM3Shapes.small,
+                        color = colorScheme.primaryContainer
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "AF",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(Spacing.md))
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "AF",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary
+                            text = "Ahmad Fathan",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Kelas 4-A (Ibnu Sina)",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colorScheme.onSurfaceVariant
                         )
                     }
-                }
-                Spacer(modifier = Modifier.width(Spacing.md))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Ahmad Fathan",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Kelas 4-A (Ibnu Sina)",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurfaceVariant
-                    )
-                }
-                StatusChip(text = "Aktif", color = StatusSuccess)
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsCard(
-    items: List<SettingsItem>,
-    trailing: String? = null
-) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = CardShape,
-        color = colorScheme.surface,
-        tonalElevation = 0.dp
-    ) {
-        Column(modifier = Modifier.padding(Spacing.sm)) {
-            items.forEachIndexed { index, item ->
-                SettingsItemRow(item = item, trailing = if (index == 1) trailing else null)
-                if (index < items.size - 1) {
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.lg))
+                    StatusChip(text = "Aktif", color = StatusSuccess)
                 }
             }
         }
@@ -332,7 +329,7 @@ private fun SettingsItemRow(
     ) {
         Surface(
             modifier = Modifier.size(36.dp),
-            shape = RoundedCornerShape(10.dp),
+            shape = SDM3Shapes.extraSmall,
             color = item.color.copy(alpha = 0.1f)
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -374,3 +371,11 @@ data class SettingsItem(
     val color: Color,
     val onClick: () -> Unit
 )
+
+@Preview
+@Composable
+private fun ProfilAkunScreenPreview() {
+    SDM3Theme {
+        ProfilAkunScreen(onNotifikasiSetting = {}, onAccountDeletion = {}, onLogout = {})
+    }
+}

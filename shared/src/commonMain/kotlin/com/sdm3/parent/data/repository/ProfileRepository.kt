@@ -4,10 +4,11 @@ import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.ProfileApi
 import com.sdm3.parent.data.remote.dto.ProfileDto
+import com.sdm3.parent.domain.repository.ProfileRepositoryContract
 
-class ProfileRepository(private val api: ProfileApi) {
+class ProfileRepository(private val api: ProfileApi) : ProfileRepositoryContract {
 
-    suspend fun getProfile(): ApiResult<ProfileDto> {
+    override suspend fun getProfile(): ApiResult<ProfileDto> {
         return try {
             api.getProfile()
         } catch (e: Exception) {
@@ -15,7 +16,7 @@ class ProfileRepository(private val api: ProfileApi) {
         }
     }
 
-    suspend fun updateProfile(name: String, phone: String?): ApiResult<ProfileDto> {
+    override suspend fun updateProfile(name: String, phone: String?): ApiResult<ProfileDto> {
         return try {
             api.updateProfile(name, phone)
         } catch (e: Exception) {

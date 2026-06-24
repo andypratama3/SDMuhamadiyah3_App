@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
@@ -55,8 +56,6 @@ fun ProsesPembayaranScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
             Sdm3ElevatedCard {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -77,7 +76,7 @@ fun ProsesPembayaranScreen(
                     Spacer(modifier = Modifier.height(Spacing.sm))
                     Text(
                         text = "9887 1234 5678 9012",
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.primary
                     )
@@ -88,15 +87,15 @@ fun ProsesPembayaranScreen(
                         text = "Salin Nomor VA",
                         onClick = { },
                         icon = Icons.Default.ContentCopy,
-                        containerColor = colorScheme.secondary
+                        containerColor = colorScheme.primary
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            Text(text = "Total Pembayaran", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text(text = "Rp350.000", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+            Text(text = "Total Pembayaran", style = MaterialTheme.typography.titleSmall)
+            Text(text = "Rp350.000", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.ExtraBold, color = colorScheme.primary)
 
             Text(text = "Cara Pembayaran", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
 
@@ -109,7 +108,7 @@ fun ProsesPembayaranScreen(
                 "6. Simpan bukti pembayaran"
             )
 
-            Sdm3Card(padding = Spacing.md) {
+            Sdm3Card(padding = Spacing.lg) {
                 steps.forEach { step ->
                     Text(
                         text = step,
@@ -120,11 +119,11 @@ fun ProsesPembayaranScreen(
                 }
             }
 
-            Text(text = "Scan QRIS", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurfaceVariant)
+            Text(text = "Scan QRIS", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurfaceVariant)
 
             Surface(
                 modifier = Modifier.fillMaxWidth().height(200.dp),
-                shape = CardShape,
+                shape = SDM3Shapes.medium,
                 color = colorScheme.surfaceVariant
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -143,7 +142,7 @@ fun ProsesPembayaranScreen(
             Sdm3Button(
                 text = "Saya Sudah Bayar",
                 onClick = onPembayaranBerhasil,
-                containerColor = colorScheme.secondary
+                containerColor = colorScheme.primary
             )
 
             Spacer(modifier = Modifier.height(Spacing.xxxl))
@@ -151,3 +150,14 @@ fun ProsesPembayaranScreen(
     }
 }
 
+@Preview
+@Composable
+private fun ProsesPembayaranScreenPreview() {
+    SDM3Theme {
+        ProsesPembayaranScreen(
+            paymentId = "",
+            onBack = {},
+            onPembayaranBerhasil = {}
+        )
+    }
+}

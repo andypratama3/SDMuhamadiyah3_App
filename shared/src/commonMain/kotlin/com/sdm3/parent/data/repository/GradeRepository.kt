@@ -5,10 +5,11 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.api.GradeApi
 import com.sdm3.parent.data.remote.dto.GradeComponentDto
 import com.sdm3.parent.data.remote.dto.GradeDto
+import com.sdm3.parent.domain.repository.GradeRepositoryContract
 
-class GradeRepository(private val api: GradeApi) {
+class GradeRepository(private val api: GradeApi) : GradeRepositoryContract {
 
-    suspend fun getGrades(studentId: String, semester: String? = null): ApiResult<List<GradeDto>> {
+    override suspend fun getGrades(studentId: String, semester: String?): ApiResult<List<GradeDto>> {
         return try {
             api.getGrades(studentId, semester)
         } catch (e: Exception) {
@@ -16,7 +17,7 @@ class GradeRepository(private val api: GradeApi) {
         }
     }
 
-    suspend fun getGradeComponents(studentId: String, subjectId: String): ApiResult<List<GradeComponentDto>> {
+    override suspend fun getGradeComponents(studentId: String, subjectId: String): ApiResult<List<GradeComponentDto>> {
         return try {
             api.getGradeComponents(studentId, subjectId)
         } catch (e: Exception) {

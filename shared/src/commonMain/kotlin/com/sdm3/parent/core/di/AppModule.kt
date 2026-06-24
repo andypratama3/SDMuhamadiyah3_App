@@ -29,12 +29,13 @@ import com.sdm3.parent.data.repository.PaymentRepository
 import com.sdm3.parent.data.repository.ProfileRepository
 import com.sdm3.parent.data.repository.RaporRepository
 import com.sdm3.parent.data.repository.StudentRepository
+import com.sdm3.parent.domain.repository.AuthRepositoryContract
 import com.sdm3.parent.feature.auth.LoginViewModel
 import com.sdm3.parent.feature.auth.PilihAnakViewModel
 import com.sdm3.parent.feature.auth.VerifikasiOtpViewModel
 import com.sdm3.parent.feature.home.HomeViewModel
 import com.sdm3.parent.feature.infoanak.DetailInfoAnakViewModel
-import com.sdm3.parent.feature.kegiatan.KegiatanProgramViewModel
+import com.sdm3.parent.feature.infoanak.KegiatanProgramViewModel
 import com.sdm3.parent.feature.notifikasi.NotifikasiViewModel
 import com.sdm3.parent.feature.notifikasi.PengumumanSekolahViewModel
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarViewModel
@@ -90,7 +91,7 @@ val apiModule = module {
 }
 
 val repositoryModule = module {
-    single<com.sdm3.parent.data.repository.AuthRepositoryContract> { AuthRepository(get()) }
+    single<AuthRepositoryContract> { AuthRepository(get()) }
     single { StudentRepository(get()) }
     single { GradeRepository(get()) }
     single { AttendanceRepository(get()) }
