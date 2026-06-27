@@ -2,7 +2,10 @@ package com.sdm3.parent.core.designsystem.component
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +19,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.ButtonShape
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
@@ -32,14 +36,15 @@ fun Sdm3Button(
     contentColor: Color = Color.Unspecified,
     content: @Composable (RowScope.() -> Unit)? = null
 ) {
-    val finalContainerColor = if (containerColor != Color.Unspecified) containerColor else MaterialTheme.colorScheme.primary
-    val finalContentColor = if (contentColor != Color.Unspecified) contentColor else MaterialTheme.colorScheme.onPrimary
+    // EduOcto Primary Action: Gold Container with Navy Text
+    val finalContainerColor = if (containerColor != Color.Unspecified) containerColor else MaterialTheme.colorScheme.secondary
+    val finalContentColor = if (contentColor != Color.Unspecified) contentColor else MaterialTheme.colorScheme.primary
 
     val isPreview = LocalInspectionMode.current
     val haptic = LocalHapticFeedback.current
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && !isPreview) 0.97f else 1f,
+        targetValue = if (isPressed && !isPreview) 0.96f else 1f,
         animationSpec = tween(150),
         label = "buttonScale",
         finishedListener = { _ -> if (!isPreview) isPressed = false }
@@ -53,7 +58,7 @@ fun Sdm3Button(
         },
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .height(56.dp) // Premium height
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -62,39 +67,55 @@ fun Sdm3Button(
         shape = ButtonShape,
         colors = ButtonDefaults.buttonColors(
             containerColor = finalContainerColor,
-            contentColor = finalContentColor
+            contentColor = finalContentColor,
+            disabledContainerColor = finalContainerColor.copy(alpha = 0.3f),
+            disabledContentColor = finalContentColor.copy(alpha = 0.5f)
         ),
         elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 6.dp
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
         ),
-        contentPadding = PaddingValues(horizontal = Spacing.lg)
+        contentPadding = PaddingValues(horizontal = if (icon != null) 8.dp else 24.dp)
     ) {
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
                 color = finalContentColor,
-                strokeWidth = 2.5.dp
+                strokeWidth = 3.dp
             )
         } else if (content != null) {
             content()
         } else {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                if (icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(Spacing.xs))
-                }
                 Text(
                     text = text,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.5.sp
+                    )
                 )
+                
+                if (icon != null) {
+                    Spacer(modifier = Modifier.width(12.dp))
+                    // EduOcto Island Icon Architecture
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .background(finalContentColor.copy(alpha = 0.1f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = finalContentColor
+                        )
+                    }
+                }
             }
         }
     }
@@ -110,8 +131,10 @@ fun Sdm3OutlinedButton(
     containerColor: Color = Color.Transparent,
     contentColor: Color = Color.Unspecified
 ) {
-    val finalContentColor = if (contentColor != Color.Unspecified) contentColor else MaterialTheme.colorScheme.primary
+    val colorScheme = MaterialTheme.colorScheme
+    val finalContentColor = if (contentColor != Color.Unspecified) contentColor else colorScheme.primary
     val haptic = LocalHapticFeedback.current
+    
     OutlinedButton(
         onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -119,31 +142,48 @@ fun Sdm3OutlinedButton(
         },
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp),
+            .height(56.dp),
         enabled = enabled,
         shape = ButtonShape,
-        border = androidx.compose.foundation.BorderStroke(
+        border = BorderStroke(
             1.5.dp,
-            MaterialTheme.colorScheme.outline
+            finalContentColor.copy(alpha = 0.2f)
         ),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = containerColor,
             contentColor = finalContentColor
         ),
-        contentPadding = PaddingValues(horizontal = Spacing.lg)
+        contentPadding = PaddingValues(horizontal = if (icon != null) 8.dp else 24.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            if (icon != null) {
-                Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(Spacing.xs))
-            }
             Text(
                 text = text,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
             )
+            
+            if (icon != null) {
+                Spacer(modifier = Modifier.width(12.dp))
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .background(finalContentColor.copy(alpha = 0.05f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon, 
+                        contentDescription = null, 
+                        modifier = Modifier.size(16.dp),
+                        tint = finalContentColor
+                    )
+                }
+            }
         }
     }
 }

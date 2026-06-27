@@ -1,9 +1,9 @@
 package com.sdm3.parent.feature.profil.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -16,13 +16,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 
@@ -39,142 +45,145 @@ fun ProfilAkunScreen(
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Profil Akun",
+                        "Konfigurasi Profil",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
+                        color = colorScheme.primary,
+                        letterSpacing = (-0.5).sp
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = Spacing.md)
-                .verticalScroll(rememberScrollState())
-        ) {
-            ProfileHeader()
-
-            Spacer(modifier = Modifier.height(Spacing.md))
-
-            StudentMiniCard()
-
-            Spacer(modifier = Modifier.height(Spacing.md))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Column(modifier = Modifier.padding(Spacing.sm)) {
-                    listOf(
-                        SettingsItem("Notifikasi", Icons.Outlined.Notifications, colorScheme.secondary, onNotifikasiSetting),
-                        SettingsItem("Bahasa", Icons.Outlined.Language, colorScheme.primary, { }),
-                        SettingsItem("Tentang Aplikasi", Icons.Outlined.Info, colorScheme.onSurfaceVariant, { }),
-                        SettingsItem("Kebijakan Privasi", Icons.Outlined.Lock, StatusDanger, { }),
-                        SettingsItem("Hubungi Sekolah", Icons.AutoMirrored.Outlined.Chat, colorScheme.secondary, { })
-                    ).forEachIndexed { index, item ->
-                        SettingsItemRow(item = item, trailing = if (index == 1) "Bahasa Indonesia" else null)
-                        if (index < 4) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = Spacing.lg),
-                                color = colorScheme.outlineVariant
-                            )
-                        }
-                    }
-                }
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Atmospheric Background Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
+                        center = Offset(size.width, size.height * 0.5f),
+                        radius = size.width
+                    )
+                )
             }
 
-            Spacer(modifier = Modifier.height(Spacing.md))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(36.dp),
-                            shape = SDM3Shapes.extraSmall,
-                            color = colorScheme.surfaceVariant
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Outlined.Info, contentDescription = null, tint = colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                ProfileHeader()
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                SectionHeader(title = "IDENTITAS AKADEMIK", modifier = Modifier.alpha(0.5f))
+                Spacer(modifier = Modifier.height(12.dp))
+                StudentMiniCard()
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                SectionHeader(title = "PENGATURAN SISTEM", modifier = Modifier.alpha(0.5f))
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Sdm3Card(padding = 8.dp) {
+                    Column {
+                        listOf(
+                            SettingsItem("Notifikasi Portal", Icons.Outlined.Notifications, colorScheme.primary, onNotifikasiSetting),
+                            SettingsItem("Preferensi Bahasa", Icons.Outlined.Language, colorScheme.primary, { }),
+                            SettingsItem("Pusat Bantuan", Icons.AutoMirrored.Outlined.Chat, colorScheme.primary, { }),
+                            SettingsItem("Kebijakan Privasi", Icons.Outlined.VerifiedUser, colorScheme.primary, { }),
+                            SettingsItem("Tentang EduOcto", Icons.Outlined.Info, colorScheme.primary, { })
+                        ).forEachIndexed { index, item ->
+                            SettingsItemRow(item = item, trailing = if (index == 1) "ID" else null)
+                            if (index < 4) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = colorScheme.primary.copy(alpha = 0.05f)
+                                )
                             }
                         }
-                        Spacer(modifier = Modifier.width(Spacing.md))
-                        Text(
-                            text = "Versi Aplikasi",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.onSurfaceVariant
-                        )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Sdm3Button(
+                    text = "Keluar Dari Sesi",
+                    onClick = { showLogoutDialog = true },
+                    containerColor = colorScheme.error,
+                    contentColor = colorScheme.onError,
+                    icon = Icons.AutoMirrored.Filled.ExitToApp,
+                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        text = "1.0.0 (Build 1)",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurfaceVariant
+                        text = "EDU OCTO PORTAL v1.0.2",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = colorScheme.primary.copy(alpha = 0.3f),
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = "Build 2026.04.12 • SDM3 Samarinda",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colorScheme.primary.copy(alpha = 0.2f)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(100.dp))
             }
-
-            Spacer(modifier = Modifier.height(Spacing.xl))
-
-            Sdm3Button(
-                text = "Keluar",
-                onClick = { showLogoutDialog = true },
-                containerColor = StatusDanger,
-                icon = Icons.AutoMirrored.Filled.ExitToApp
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.md))
-
-            Text(
-                text = "2026 SDM3 Parent Portal",
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.xl))
         }
     }
 
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            shape = CardShape,
-            title = { Text("Keluar Akun?", fontWeight = FontWeight.Bold) },
-            text = { Text("Anda akan keluar dari SDM3 Parent Portal. Apakah Anda yakin?") },
+            shape = RoundedCornerShape(24.dp),
+            containerColor = Color.White,
+            title = { 
+                Text(
+                    "Konfirmasi Keluar", 
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
+                ) 
+            },
+            text = { 
+                Text(
+                    "Anda akan mengakhiri sesi aktif pada perangkat ini. Perlu masuk kembali untuk akses portal.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colorScheme.onSurfaceVariant
+                ) 
+            },
             confirmButton = {
                 Button(
                     onClick = {
                         showLogoutDialog = false
                         onLogout()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = StatusDanger)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
                 ) {
-                    Text("Keluar", color = colorScheme.onPrimary, fontWeight = FontWeight.SemiBold)
+                    Text("Keluar", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Batal", fontWeight = FontWeight.Medium)
+                    Text("Batal", fontWeight = FontWeight.Bold, color = colorScheme.primary)
                 }
             }
         )
@@ -185,67 +194,66 @@ fun ProfilAkunScreen(
 private fun ProfileHeader() {
     val colorScheme = MaterialTheme.colorScheme
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
+    Sdm3Card(padding = 20.dp) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(68.dp),
-                shape = SDM3Shapes.medium,
-                color = colorScheme.primaryContainer
+                modifier = Modifier.size(70.dp),
+                shape = RoundedCornerShape(20.dp),
+                color = colorScheme.primary.copy(alpha = 0.05f),
+                border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Default.Person,
                         contentDescription = null,
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.size(40.dp),
                         tint = colorScheme.primary
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(Spacing.md))
+            Spacer(modifier = Modifier.width(20.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Bambang Suprapto",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.width(Spacing.sm))
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .background(StatusSuccess)
-                    )
-                }
+                Text(
+                    text = "Bambang Suprapto",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
+                )
                 Text(
                     text = "0812-3456-7890",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
-                Text(
-                    text = "bambang@email.com",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Surface(
+                    color = StatusSuccess.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = " TERVERIFIKASI ",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = StatusSuccess,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
             }
-            IconButton(onClick = { }) {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Detail",
-                    modifier = Modifier.size(18.dp),
-                    tint = colorScheme.onSurfaceVariant
-                )
+            Surface(
+                modifier = Modifier.size(36.dp),
+                shape = CircleShape,
+                color = colorScheme.primary.copy(alpha = 0.05f)
+            ) {
+                IconButton(onClick = { }) {
+                    Icon(
+                        Icons.Outlined.Edit,
+                        contentDescription = "Edit",
+                        modifier = Modifier.size(16.dp),
+                        tint = colorScheme.primary
+                    )
+                }
             }
         }
     }
@@ -255,60 +263,51 @@ private fun ProfileHeader() {
 private fun StudentMiniCard() {
     val colorScheme = MaterialTheme.colorScheme
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.secondaryContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Card(
+    Sdm3Card(padding = 16.dp) {
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            shape = CardShape,
-            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.padding(Spacing.lg)) {
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                color = colorScheme.primaryContainer,
+                border = BorderStroke(2.dp, Color.White)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "AF",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Data Anak",
+                    text = "Ahmad Fathan",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
+                )
+                Text(
+                    text = "Kelas 4-A (Ibnu Sina)",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        modifier = Modifier.size(56.dp),
-                        shape = SDM3Shapes.small,
-                        color = colorScheme.primaryContainer
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "AF",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(Spacing.md))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Ahmad Fathan",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Kelas 4-A (Ibnu Sina)",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.onSurfaceVariant
-                        )
-                    }
-                    StatusChip(text = "Aktif", color = StatusSuccess)
-                }
+            }
+            Surface(
+                color = colorScheme.secondary,
+                shape = RoundedCornerShape(6.dp)
+            ) {
+                Text(
+                    text = "AKTIF",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
             }
         }
     }
@@ -324,13 +323,13 @@ private fun SettingsItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = item.onClick)
-            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            modifier = Modifier.size(36.dp),
-            shape = SDM3Shapes.extraSmall,
-            color = item.color.copy(alpha = 0.1f)
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(12.dp),
+            color = item.color.copy(alpha = 0.05f)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -341,26 +340,28 @@ private fun SettingsItemRow(
                 )
             }
         }
-        Spacer(modifier = Modifier.width(Spacing.md))
+        Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = item.label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f),
-            color = colorScheme.onSurface
+            color = colorScheme.primary
         )
         if (trailing != null) {
             Text(
                 text = trailing,
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.primary.copy(alpha = 0.4f)
             )
-            Spacer(modifier = Modifier.width(Spacing.sm))
+            Spacer(modifier = Modifier.width(8.dp))
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             modifier = Modifier.size(18.dp),
-            tint = colorScheme.onSurfaceVariant
+            tint = colorScheme.primary.copy(alpha = 0.2f)
         )
     }
 }

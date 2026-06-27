@@ -1,6 +1,6 @@
 package com.sdm3.parent.feature.auth.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,9 +14,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
@@ -44,146 +48,178 @@ fun AccountDeletionScreen(
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "Hapus Akun",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorScheme.onSurface
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Penghapusan Akun",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
+                            letterSpacing = (-0.5).sp
+                        )
+                        Text(
+                            text = "KONFIGURASI PRIVASI",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = colorScheme.primary.copy(alpha = 0.4f),
+                            letterSpacing = 1.sp
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = colorScheme.onSurface
+                            tint = colorScheme.primary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-        ) {
-            item {
-                Sdm3ElevatedCard(padding = Spacing.lg) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Surface(
-                            modifier = Modifier.size(48.dp),
-                            shape = SDM3Shapes.medium,
-                            color = StatusDanger.copy(alpha = 0.1f)
+        Box(modifier = Modifier.fillMaxSize()) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.error, Color.Transparent),
+                        center = Offset(size.width, 0f),
+                        radius = size.width
+                    )
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    Sdm3Card(padding = 24.dp) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.Top
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Warning,
-                                    contentDescription = null,
-                                    tint = StatusDanger,
-                                    modifier = Modifier.size(24.dp)
+                            Surface(
+                                modifier = Modifier.size(52.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                color = colorScheme.error.copy(alpha = 0.05f)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Warning,
+                                        contentDescription = null,
+                                        tint = colorScheme.error,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(20.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Aturan Terminasi Akun",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.error
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Permintaan ini bersifat permanen untuk akses digital. Data akademik resmi tetap tersimpan pada database institusi sesuai regulasi kependidikan.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = colorScheme.primary.copy(alpha = 0.7f),
+                                    lineHeight = 22.sp
                                 )
                             }
                         }
+                    }
+                }
 
-                        Spacer(modifier = Modifier.width(Spacing.md))
+                item {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(bottom = 8.dp)
+                    ) {
+                        item { StatusChip(text = "Arsip Terjamin", color = colorScheme.primary) }
+                        item { StatusChip(text = "Proses 7 Hari", color = colorScheme.secondary) }
+                        item { StatusChip(text = "Final & Absolut", color = colorScheme.error) }
+                    }
+                }
 
-                        Column(modifier = Modifier.weight(1f)) {
+                item {
+                    SectionHeader(title = "Alasan Terminasi", modifier = Modifier.padding(top = 8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Sdm3Card(padding = 20.dp) {
+                        Sdm3TextField(
+                            value = uiState.reasonText,
+                            onValueChange = { uiState = uiState.copy(reasonText = it) },
+                            label = "JUSTIFIKASI PENGHAPUSAN",
+                            placeholder = "Tuliskan alasan Anda...",
+                            leadingIcon = Icons.Outlined.EditNote,
+                            singleLine = false,
+                            modifier = Modifier.height(120.dp)
+                        )
+                    }
+                }
+
+                if (uiState.errorMessage != null) {
+                    item {
+                        Surface(
+                            color = colorScheme.error.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Text(
-                                text = "Perhatian Penting!",
-                                style = MaterialTheme.typography.titleMedium,
+                                text = uiState.errorMessage!!,
+                                color = colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
-                                color = StatusDanger
-                            )
-                            Spacer(modifier = Modifier.height(Spacing.xs))
-                            Text(
-                                text = "Permintaan ini akan mengajukan penghapusan akun Anda beserta " +
-                                    "data pribadi yang terkait ke admin SD Muhammadiyah 3 Samarinda. " +
-                                    "Data akademik resmi (nilai, rapor, riwayat kehadiran) dan riwayat " +
-                                    "transaksi pembayaran akan tetap disimpan sesuai kewajiban arsip sekolah.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colorScheme.onSurfaceVariant
+                                modifier = Modifier.padding(12.dp)
                             )
                         }
                     }
                 }
-            }
 
-            item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    item { StatusChip(text = "Data Akademik Tetap Tersimpan", color = StatusWarning) }
-                    item { StatusChip(text = "Proses 3-7 Hari Kerja", color = StatusInfo) }
-                    item { StatusChip(text = "Tidak Dapat Dibatalkan", color = StatusDanger) }
-                }
-            }
-
-            item {
-                Sdm3Card(padding = Spacing.lg) {
-                    Text(
-                        text = "Alasan Penghapusan",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.sm))
-                    Sdm3TextField(
-                        value = uiState.reasonText,
-                        onValueChange = { uiState = uiState.copy(reasonText = it) },
-                        label = "Alasan (Opsional)",
-                        leadingIcon = Icons.Outlined.EditNote,
-                        singleLine = false
-                    )
-                }
-            }
-
-            if (uiState.errorMessage != null) {
                 item {
-                    Text(
-                        text = uiState.errorMessage!!,
-                        color = colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Sdm3Button(
+                        text = "Ajukan Terminasi Akun",
+                        onClick = { uiState = uiState.copy(isConfirmDialogShown = true) },
+                        isLoading = uiState.isLoading,
+                        containerColor = colorScheme.error,
+                        contentColor = Color.White,
+                        icon = Icons.Outlined.DeleteForever,
+                        modifier = Modifier.fillMaxWidth().height(56.dp)
                     )
                 }
-            }
 
-            item {
-                Sdm3Button(
-                    text = "Ajukan Penghapusan Akun",
-                    onClick = { uiState = uiState.copy(isConfirmDialogShown = true) },
-                    isLoading = uiState.isLoading,
-                    containerColor = StatusDanger,
-                    icon = Icons.Outlined.DeleteForever
-                )
+                item { Spacer(modifier = Modifier.height(100.dp)) }
             }
-
-            item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
         }
     }
 
     if (uiState.isConfirmDialogShown) {
         AlertDialog(
             onDismissRequest = { uiState = uiState.copy(isConfirmDialogShown = false) },
-            shape = DialogShape,
+            shape = RoundedCornerShape(24.dp),
+            containerColor = Color.White,
             title = {
                 Text(
-                    text = "Konfirmasi Penghapusan Akun",
+                    text = "Konfirmasi Mutlak",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
                 )
             },
             text = {
                 Text(
-                    text = "Apakah Anda yakin ingin mengajukan penghapusan akun? " +
-                        "Tindakan ini tidak dapat dibatalkan setelah diproses oleh sekolah.",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Tindakan ini akan mengakhiri seluruh hak akses digital Anda pada portal ini. Apakah Anda yakin?",
+                    style = MaterialTheme.typography.bodyLarge,
                     color = colorScheme.onSurfaceVariant
                 )
             },
@@ -193,14 +229,15 @@ fun AccountDeletionScreen(
                         uiState = uiState.copy(isConfirmDialogShown = false, isRequestSubmitted = true)
                         onDeletionRequestSubmitted()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = StatusDanger)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
                 ) {
-                    Text("Ya, Hapus", color = colorScheme.onError, fontWeight = FontWeight.SemiBold)
+                    Text("Ya, Hapus Akun", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { uiState = uiState.copy(isConfirmDialogShown = false) }) {
-                    Text("Batal", color = colorScheme.primary, fontWeight = FontWeight.Medium)
+                    Text("Batal", color = colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             }
         )

@@ -1,13 +1,13 @@
 package com.sdm3.parent.feature.rapor.ui
 
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,15 +17,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import com.sdm3.parent.core.designsystem.component.Sdm3ElevatedCard
-import com.sdm3.parent.core.designsystem.theme.CardShape
-import com.sdm3.parent.core.designsystem.theme.SDM3Theme
-import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.rapor.PreviewRaporPdfUiState
 import com.sdm3.parent.feature.rapor.PreviewRaporPdfViewModel
 import org.koin.compose.koinInject
@@ -43,8 +45,7 @@ fun PreviewRaporPdfScreen(
     val state by if (isPreview) {
         remember { mutableStateOf(PreviewRaporPdfUiState()) }
     } else {
-        val vm = viewModel ?: return Text("")
-        vm.uiState.collectAsState()
+        viewModel!!.uiState.collectAsState()
     }
 
     if (!isPreview) {
@@ -54,72 +55,122 @@ fun PreviewRaporPdfScreen(
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(24.dp), tint = colorScheme.onSurface)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Preview Rapor PDF", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurface)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Pratinjau Dokumen",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
+                            letterSpacing = (-0.5).sp
+                        )
+                        Text(
+                            text = "DOKUMEN PORTABEL PDF",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = colorScheme.primary.copy(alpha = 0.4f),
+                            letterSpacing = 1.sp
+                        )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.onSurface)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = colorScheme.primary
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.lg),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-        ) {
-            Sdm3ElevatedCard(padding = Spacing.md) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(40.dp), tint = colorScheme.primary)
-                    Spacer(modifier = Modifier.width(Spacing.md))
-                    Column {
-                        Text(state.fileName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        Text("Ukuran: ${state.fileSize}", style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant)
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Atmospheric Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
+                        center = Offset(size.width, 0f),
+                        radius = size.width
+                    )
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Sdm3Card(padding = 24.dp) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            modifier = Modifier.size(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            color = colorScheme.primary.copy(alpha = 0.05f)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(32.dp), tint = colorScheme.primary)
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(20.dp))
+                        Column {
+                            Text(
+                                text = state.fileName.ifEmpty { "Rapor_Digital_Siswa.pdf" },
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary
+                            )
+                            Text(
+                                text = "Ukuran: ${state.fileSize.ifEmpty { "1.2 MB" }}",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary.copy(alpha = 0.4f)
+                            )
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(24.dp), tint = colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.width(Spacing.sm))
-                    Text(
-                        text = if (state.isDownloaded) "Dokumen siap dibuka" else "Tekan tombol Unduh untuk memulai",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onSurfaceVariant
-                    )
+                Sdm3Card(padding = 20.dp) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (state.isDownloaded) Icons.Outlined.TaskAlt else Icons.Outlined.Sync,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = if (state.isDownloaded) StatusSuccess else colorScheme.primary.copy(alpha = 0.3f)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = if (state.isDownloaded) "Dokumen telah siap dibuka melalui PDF Viewer eksternal." else "Sedang menyinkronkan data dengan server institusi...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colorScheme.primary.copy(alpha = 0.7f),
+                            lineHeight = 22.sp
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Sdm3Button(
+                    text = "Buka Dokumen PDF",
+                    onClick = { },
+                    icon = Icons.Outlined.OpenInNew,
+                    enabled = state.isDownloaded,
+                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                )
+
+                Spacer(modifier = Modifier.height(100.dp))
             }
         }
-    }
-}
-@Composable
-private fun InfoRow(label: String, value: String) {
-    val colorScheme = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
     }
 }
 

@@ -42,6 +42,8 @@ import com.sdm3.parent.feature.rapor.ui.HalamanRaporScreen
 import com.sdm3.parent.feature.rapor.ui.PreviewRaporPdfScreen
 import com.sdm3.parent.feature.rapor.ui.VerifikasiQrRaporScreen
 
+private val PremiumEasing = androidx.compose.animation.core.CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
+
 @Composable
 fun SDM3NavHost(
     navController: NavHostController = rememberNavController(),
@@ -119,10 +121,30 @@ fun SDM3NavHost(
             navController = navController,
             startDestination = startDestination,
             modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 4 }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400)) },
-            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 4 }, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)) },
-            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400)) }
+            enterTransition = { 
+                slideInHorizontally(
+                    initialOffsetX = { it }, 
+                    animationSpec = tween(500, easing = PremiumEasing)
+                ) + fadeIn(animationSpec = tween(500)) 
+            },
+            exitTransition = { 
+                slideOutHorizontally(
+                    targetOffsetX = { -it / 4 }, 
+                    animationSpec = tween(500, easing = PremiumEasing)
+                ) + fadeOut(animationSpec = tween(500)) 
+            },
+            popEnterTransition = { 
+                slideInHorizontally(
+                    initialOffsetX = { -it / 4 }, 
+                    animationSpec = tween(500, easing = PremiumEasing)
+                ) + fadeIn(animationSpec = tween(500)) 
+            },
+            popExitTransition = { 
+                slideOutHorizontally(
+                    targetOffsetX = { it }, 
+                    animationSpec = tween(500, easing = PremiumEasing)
+                ) + fadeOut(animationSpec = tween(500)) 
+            }
         ) {
 
             composable<SDM3Route.Splash> {

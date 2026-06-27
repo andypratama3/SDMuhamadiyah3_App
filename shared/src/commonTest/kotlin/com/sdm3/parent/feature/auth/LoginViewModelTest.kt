@@ -3,7 +3,7 @@ package com.sdm3.parent.feature.auth
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.test.TestDispatcher
 import com.sdm3.parent.data.remote.dto.UserDto
-import com.sdm3.parent.data.repository.AuthRepositoryContract
+import com.sdm3.parent.domain.repository.AuthRepositoryContract
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

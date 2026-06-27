@@ -11,9 +11,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.graphics.Color
@@ -21,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 
@@ -44,13 +47,13 @@ fun PengumumanSekolahScreen(
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Info Sekolah",
-                        style = MaterialTheme.typography.headlineMedium,
+                        text = "Informasi Sekolah",
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
+                        color = colorScheme.primary
                     )
                 },
                 navigationIcon = {
@@ -58,54 +61,73 @@ fun PengumumanSekolahScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = colorScheme.onSurface
+                            tint = colorScheme.primary
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { }) {
-                        Icon(Icons.Outlined.Search, contentDescription = "Cari", tint = colorScheme.onSurface)
+                        Icon(Icons.Outlined.Search, contentDescription = "Cari", tint = colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
+        // Background Glow
+        Box(modifier = Modifier.fillMaxSize()) {
+            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
+                drawCircle(
+                    brush = androidx.compose.ui.graphics.Brush.radialGradient(
+                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
+                        center = androidx.compose.ui.geometry.Offset(size.width * 0.8f, 0f),
+                        radius = size.width
+                    )
+                )
+            }
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            val categoryFilters = listOf("Semua", "Umum", "Akademik", "Keuangan", "Kegiatan")
+            val categoryFilters = listOf("Semua", "Umum", "Akademik", "Kegiatan")
 
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.lg, vertical = Spacing.md)
+            ScrollableTabRow(
+                selectedTabIndex = selectedCategory,
+                containerColor = Color.Transparent,
+                contentColor = colorScheme.primary,
+                edgePadding = Spacing.lg,
+                divider = {},
+                indicator = { tabPositions ->
+                    TabRowDefaults.SecondaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(tabPositions[selectedCategory]),
+                        color = colorScheme.secondary
+                    )
+                }
             ) {
                 categoryFilters.forEachIndexed { index, label ->
-                    SegmentedButton(
+                    Tab(
                         selected = selectedCategory == index,
                         onClick = { selectedCategory = index },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = categoryFilters.size
-                        )
-                    ) {
-                        Text(
-                            label,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = if (selectedCategory == index) FontWeight.SemiBold else FontWeight.Normal,
-                            maxLines = 1
-                        )
-                    }
+                        text = {
+                            Text(
+                                label,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = if (selectedCategory == index) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        selectedContentColor = colorScheme.secondary,
+                        unselectedContentColor = colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)
+                contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)
             ) {
                 val dummyAnnouncements = listOf(
                     "Libur Hari Raya Idul Adha 1447 H",
@@ -116,66 +138,63 @@ fun PengumumanSekolahScreen(
                 )
 
                 itemsIndexed(dummyAnnouncements) { index, title ->
-                    MotionAnim(visible = startAnimation) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onDetailClick("announcement_$index") },
-                            shape = CardShape,
-                            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    Sdm3Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onDetailClick("announcement_$index") }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(Spacing.md),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.padding(Spacing.lg),
-                                verticalAlignment = Alignment.CenterVertically
+                            Surface(
+                                modifier = Modifier.size(52.dp, 60.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = colorScheme.primary.copy(alpha = 0.05f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
                             ) {
-                                Surface(
-                                    modifier = Modifier.size(56.dp, 64.dp),
-                                    shape = SDM3Shapes.medium,
-                                    color = colorScheme.primaryContainer
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxSize()
                                 ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                        Text(
-                                            text = "18",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = colorScheme.primary
-                                        )
-                                        Text(
-                                            text = "JUN",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = colorScheme.primary
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.width(Spacing.md))
-                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = title,
+                                        text = "18",
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = colorScheme.onSurface,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
                                     )
-                                    Spacer(modifier = Modifier.height(Spacing.xs))
-                                    Surface(
-                                        shape = ChipShape,
-                                        color = colorScheme.secondaryContainer
-                                    ) {
-                                        Text(
-                                            text = "Pengumuman Umum",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = colorScheme.onSecondaryContainer,
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                        )
-                                    }
+                                    Text(
+                                        text = "JUN",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(Spacing.md))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.primary,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.height(Spacing.xs))
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = colorScheme.secondary.copy(alpha = 0.1f)
+                                ) {
+                                    Text(
+                                        text = "PENGUMUMAN UMUM",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = colorScheme.secondary,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        letterSpacing = 0.5.sp
+                                    )
                                 }
                             }
                         }

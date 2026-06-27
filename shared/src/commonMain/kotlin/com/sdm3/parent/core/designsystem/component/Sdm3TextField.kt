@@ -1,6 +1,7 @@
 package com.sdm3.parent.core.designsystem.component
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -14,9 +15,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.theme.InputShape
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
 
@@ -26,6 +28,7 @@ fun Sdm3TextField(
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
+    placeholder: String? = null,
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     onTrailingIconClick: (() -> Unit)? = null,
@@ -41,7 +44,6 @@ fun Sdm3TextField(
     val haptic = LocalHapticFeedback.current
     val isPreview = LocalInspectionMode.current
 
-    // Smart Gesture: Vibration on error
     if (!isPreview) {
         LaunchedEffect(isError) {
             if (isError) {
@@ -52,53 +54,70 @@ fun Sdm3TextField(
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (isError) colorScheme.error else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            modifier = Modifier.padding(start = 0.dp, bottom = 6.dp)
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.5.sp,
+            color = if (isError) colorScheme.error else colorScheme.primary.copy(alpha = 0.6f),
+            modifier = Modifier.padding(start = 2.dp, bottom = 8.dp)
         )
 
+        // EduOcto Glassmorphic Input Architecture
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             enabled = enabled,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = InputShape,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(16.dp), // Mutlak 16px radius
+            placeholder = placeholder?.let {
+                {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    )
+                }
+            },
             leadingIcon = leadingIcon?.let {
                 {
-                    Icon(it, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Icon(
+                        imageVector = it,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = if (isError) colorScheme.error else colorScheme.primary.copy(alpha = 0.6f)
+                    )
                 }
             },
             trailingIcon = trailingIcon?.let {
                 {
                     if (onTrailingIconClick != null) {
                         IconButton(onClick = onTrailingIconClick) {
-                            Icon(it, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Icon(it, contentDescription = null, modifier = Modifier.size(22.dp))
                         }
                     } else {
-                        Icon(it, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Icon(it, contentDescription = null, modifier = Modifier.size(22.dp))
                     }
                 }
             },
             isError = isError,
-            visualTransformation = visualTransformation
-                ?: androidx.compose.ui.text.input.VisualTransformation.None,
+            visualTransformation = visualTransformation ?: androidx.compose.ui.text.input.VisualTransformation.None,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             singleLine = singleLine,
-            textStyle = MaterialTheme.typography.bodyLarge,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Medium,
+                color = colorScheme.primary
+            ),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = colorScheme.primary,
-                unfocusedBorderColor = colorScheme.outline.copy(alpha = 0.5f),
+                unfocusedBorderColor = Color.White.copy(alpha = 0.6f),
                 cursorColor = colorScheme.primary,
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                focusedLeadingIconColor = colorScheme.primary,
-                unfocusedLeadingIconColor = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.5f), // Semi-transparent white
+                focusedContainerColor = Color.White.copy(alpha = 0.8f),
                 errorBorderColor = colorScheme.error,
                 errorContainerColor = colorScheme.error.copy(alpha = 0.05f),
-                disabledBorderColor = colorScheme.outline.copy(alpha = 0.1f),
-                disabledContainerColor = colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                disabledBorderColor = Color.Transparent,
+                disabledContainerColor = colorScheme.surfaceVariant.copy(alpha = 0.3f)
             )
         )
 
@@ -107,7 +126,7 @@ fun Sdm3TextField(
                 text = errorMessage,
                 style = MaterialTheme.typography.labelSmall,
                 color = colorScheme.error,
-                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                modifier = Modifier.padding(start = 4.dp, top = 6.dp)
             )
         }
     }
@@ -117,9 +136,9 @@ fun Sdm3TextField(
 @Composable
 fun Sdm3TextFieldPreview() {
     SDM3Theme {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Sdm3TextField(value = "", onValueChange = {}, label = "Email", leadingIcon = Icons.Outlined.Email)
-            Sdm3TextField(value = "Input error", onValueChange = {}, label = "Password", isError = true, errorMessage = "Password salah")
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Sdm3TextField(value = "", onValueChange = {}, label = "Email Address", placeholder = "name@school.com", leadingIcon = Icons.Outlined.Email)
+            Sdm3TextField(value = "Invalid Password", onValueChange = {}, label = "Security Key", isError = true, errorMessage = "Authentication failed")
         }
     }
 }

@@ -2,10 +2,11 @@ package com.sdm3.parent.feature.rapor.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -14,8 +15,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -33,254 +36,281 @@ fun HalamanRaporScreen(
     onPreviewClick: (String, String) -> Unit,
     onVerifikasiClick: (String) -> Unit
 ) {
-    val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
-    var startAnimation by remember { mutableStateOf(isPreview) }
-
-    if (!isPreview) {
-        LaunchedEffect(Unit) {
-            startAnimation = true
-        }
-    }
 
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "Dokumen Rapor",
-                        style = MaterialTheme.typography.titleLarge.copy(
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Arsip Rapor Digital",
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
                             letterSpacing = (-0.5).sp
-                        ),
-                        color = colorScheme.onSurface
-                    )
+                        )
+                        Text(
+                            text = "DOKUMEN RESMI NEGARA",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = colorScheme.primary.copy(alpha = 0.4f),
+                            letterSpacing = 1.sp
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = colorScheme.onSurface
+                            tint = colorScheme.primary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)
-        ) {
-            item {
-                Column {
-                    Text(
-                        text = "Rapor Digital Resmi",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Atmospheric Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
+                        center = Offset(size.width, size.height * 0.1f),
+                        radius = size.width
                     )
-                    Text(
-                        text = "Tahun Ajaran 2025/2026 · Semester Ganjil",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                )
             }
 
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = CardShape,
-                    colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+            ) {
+                item {
                     Column {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        listOf(colorScheme.primary, colorScheme.primary.copy(alpha = 0.8f))
-                                    ),
-                                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                                )
-                                .padding(Spacing.xl)
+                        Surface(
+                            color = colorScheme.secondary.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(999.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Surface(
-                                        modifier = Modifier.size(40.dp),
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = colorScheme.onPrimary.copy(alpha = 0.2f)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(Icons.Outlined.Description, contentDescription = null, tint = colorScheme.onPrimary)
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.width(Spacing.md))
-                                    Text(
-                                        text = "Sumatif 1",
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = colorScheme.onPrimary
-                                    )
-                                }
-                                StatusChip(text = "Tersedia", color = StatusSuccess)
-                            }
+                            Text(
+                                text = " TAHUN AJARAN 2025/2026 ",
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp,
+                                color = colorScheme.secondary
+                            )
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Rapor Semester Ganjil",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
+                            letterSpacing = (-1).sp
+                        )
+                    }
+                }
 
-                        Column(modifier = Modifier.padding(Spacing.xl)) {
-                            Text(
-                                text = "Diterbitkan pada 15 Desember 2025",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colorScheme.onSurfaceVariant,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "Oleh: Wali Kelas SDM3 Samarinda",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-
-                            Spacer(modifier = Modifier.height(Spacing.xl))
-
-                            Sdm3Button(
-                                text = "Unduh Rapor PDF",
-                                onClick = { },
-                                icon = Icons.Outlined.FileDownload,
-                                containerColor = colorScheme.secondary
-                            )
-
-                            Spacer(modifier = Modifier.height(Spacing.md))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                            ) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    Sdm3OutlinedButton(
-                                        text = "Lihat",
-                                        onClick = { onPreviewClick("rapor_123", "https://example.com/rapor.pdf") },
-                                        icon = Icons.Outlined.Visibility
+                item {
+                    // EduOcto Featured Rapor Card
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
+                    ) {
+                        Column {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        brush = Brush.horizontalGradient(
+                                            listOf(colorScheme.primary, colorScheme.inversePrimary.copy(alpha = 0.8f))
+                                        )
                                     )
-                                }
-                                Box(modifier = Modifier.weight(1f)) {
-                                    Sdm3OutlinedButton(
-                                        text = "Verif",
-                                        onClick = { onVerifikasiClick("rapor_123") },
-                                        icon = Icons.Outlined.QrCode
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(Spacing.lg))
-
-                            Surface(
-                                shape = RoundedCornerShape(16.dp),
-                                color = StatusSuccess.copy(alpha = 0.05f)
+                                    .padding(24.dp)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(Spacing.md),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        Icons.Outlined.CheckCircle,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp),
-                                        tint = StatusSuccess
-                                    )
-                                    Spacer(modifier = Modifier.width(Spacing.sm))
-                                    Text(
-                                        text = "Tanda Tangan Elektronik Terverifikasi",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = StatusSuccess,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Surface(
+                                            modifier = Modifier.size(48.dp),
+                                            shape = RoundedCornerShape(14.dp),
+                                            color = Color.White.copy(alpha = 0.15f)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(Icons.Outlined.AutoStories, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Text(
+                                            text = "Sumatif Akhir",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
+                                    Surface(
+                                        shape = RoundedCornerShape(999.dp),
+                                        color = colorScheme.secondary
+                                    ) {
+                                        Text(
+                                            text = " TERBIT ",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = colorScheme.primary,
+                                            fontWeight = FontWeight.Black,
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Column(modifier = Modifier.padding(24.dp)) {
+                                Text(
+                                    text = "Dipublikasi pada 20 Desember 2025",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "Oleh: Wali Kelas • SDM3 Samarinda",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Spacer(modifier = Modifier.height(32.dp))
+
+                                Sdm3Button(
+                                    text = "Download PDF Dokumen",
+                                    onClick = { },
+                                    icon = Icons.Outlined.FileDownload,
+                                    containerColor = Color.White,
+                                    contentColor = colorScheme.primary,
+                                    modifier = Modifier.fillMaxWidth().height(54.dp)
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        Sdm3OutlinedButton(
+                                            text = "Pratinjau",
+                                            onClick = { onPreviewClick("rapor_123", "https://example.com/rapor.pdf") },
+                                            icon = Icons.Outlined.Visibility,
+                                            contentColor = Color.White
+                                        )
+                                    }
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        Sdm3OutlinedButton(
+                                            text = "Verifikasi",
+                                            onClick = { onVerifikasiClick("rapor_123") },
+                                            icon = Icons.Outlined.QrCodeScanner,
+                                            contentColor = Color.White
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color.White.copy(alpha = 0.08f)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Outlined.Verified,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                            tint = StatusSuccess
+                                        )
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Text(
+                                            text = "Digital Signature Terautentikasi",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            item {
-                Text(
-                    text = "Riwayat Rapor Sebelumnya",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface,
-                    modifier = Modifier.padding(top = Spacing.md)
+                item {
+                    SectionHeader(
+                        title = "Arsip Rapor",
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+
+                val raporHistory = listOf(
+                    "Tengah Semester Ganjil / 2025",
+                    "Akhir Semester Genap / 2024",
+                    "Tengah Semester Genap / 2024",
+                    "Akhir Semester Ganjil / 2023"
                 )
-            }
 
-            val raporHistory = listOf(
-                "Sumatif Tengah Semester / 2025-2026",
-                "Sumatif Akhir Semester / 2024-2025",
-                "Sumatif 2 / 2024-2025",
-                "Sumatif 1 / 2024-2025"
-            )
-
-            itemsIndexed(raporHistory) { index, rapor ->
-                MotionAnim(visible = startAnimation) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = CardShape,
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                    ) {
+                itemsIndexed(raporHistory) { index, rapor ->
+                    Sdm3Card(padding = 16.dp) {
                         Row(
-                            modifier = Modifier.padding(Spacing.xl),
+                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
                                 modifier = Modifier.size(48.dp),
-                                shape = RoundedCornerShape(14.dp),
-                                color = colorScheme.primaryContainer
+                                shape = RoundedCornerShape(12.dp),
+                                color = colorScheme.primary.copy(alpha = 0.05f)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Outlined.History, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(24.dp))
+                                    Icon(Icons.Outlined.History, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(22.dp))
                                 }
                             }
-                            Spacer(modifier = Modifier.width(Spacing.md))
+                            Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = rapor,
                                     style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = colorScheme.onSurface
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.primary
                                 )
                                 Text(
-                                    text = "Status: Tersimpan Permanen",
+                                    text = "Status: Terverifikasi Institusi",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = colorScheme.onSurfaceVariant
+                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                 )
                             }
                             Surface(
-                                modifier = Modifier.size(40.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = colorScheme.primaryContainer
+                                modifier = Modifier.size(36.dp),
+                                shape = CircleShape,
+                                color = colorScheme.primary.copy(alpha = 0.05f)
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Outlined.FileDownload, contentDescription = "Unduh", tint = colorScheme.primary, modifier = Modifier.size(20.dp))
+                                IconButton(onClick = { }) {
+                                    Icon(Icons.Outlined.FileDownload, contentDescription = "Unduh", tint = colorScheme.primary, modifier = Modifier.size(18.dp))
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
+                item { Spacer(modifier = Modifier.height(100.dp)) }
+            }
         }
     }
 }

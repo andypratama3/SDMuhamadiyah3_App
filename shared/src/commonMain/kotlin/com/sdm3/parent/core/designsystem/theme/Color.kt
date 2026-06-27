@@ -2,62 +2,82 @@ package com.sdm3.parent.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Primary = Color(0xFF0E7A39)
+// EduOcto - Academic Intelligence Color Palette
+val Primary = Color(0xFF001B3D) // Deep Navy
 val OnPrimary = Color(0xFFFFFFFF)
-val PrimaryContainer = Color(0xFFEAF7EF)
-val OnPrimaryContainer = Color(0xFF00391C)
+val PrimaryContainer = Color(0xFFD6E3FF)
+val OnPrimaryContainer = Color(0xFF001B3D)
 
-val Secondary = Color(0xFFF59E0B)
-val OnSecondary = Color(0xFF000000)
-val SecondaryContainer = Color(0xFFFFF3C4)
-val OnSecondaryContainer = Color(0xFF4A3200)
+val Secondary = Color(0xFFD4AF37) // Academic Gold
+val OnSecondary = Color(0xFFFFFFFF)
+val SecondaryContainer = Color(0xFFFED65B)
+val OnSecondaryContainer = Color(0xFF745C00)
 
-val Tertiary = Color(0xFF3B82F6)
+val Tertiary = Color(0xFF191C1D)
 val OnTertiary = Color(0xFFFFFFFF)
-val TertiaryContainer = Color(0xFFDBEAFE)
+val TertiaryContainer = Color(0xFFE1E3E4)
+val OnTertiaryContainer = Color(0xFF454748)
 
-val Error = Color(0xFFEF4444)
+val Error = Color(0xFFBA1A1A)
 val OnError = Color(0xFFFFFFFF)
-val ErrorContainer = Color(0xFFFEE2E2)
-val OnErrorContainer = Color(0xFF410002)
+val ErrorContainer = Color(0xFFFFDAD6)
+val OnErrorContainer = Color(0xFF93000A)
 
-val Background = Color(0xFFF8FAF8)
-val OnBackground = Color(0xFF111827)
-val Surface = Color(0xFFFFFFFF)
-val OnSurface = Color(0xFF111827)
+val Background = Color(0xFFF6FAFF)
+val OnBackground = Color(0xFF141D23)
+val Surface = Color(0xFFF6FAFF)
+val OnSurface = Color(0xFF141D23)
 
-val SurfaceTint = Primary
-val SurfaceVariant = Color(0xFFF5F7F6)
-val OnSurfaceVariant = Color(0xFF6B7280)
+val SurfaceTint = Color(0xFF495F84)
+val SurfaceVariant = Color(0xFFDBE4ED)
+val OnSurfaceVariant = Color(0xFF44474E)
 
-val SurfaceContainerLow = Color(0xFFFBFDFB)
-val SurfaceContainer = Color(0xFFF5F7F5)
-val SurfaceContainerHigh = Color(0xFFEEF1EF)
-val SurfaceContainerHighest = Color(0xFFE8ECE9)
-val SurfaceContainerDim = Color(0xFFE2E7E4)
+val SurfaceContainerLowest = Color(0xFFFFFFFF)
+val SurfaceContainerLow = Color(0xFFECF5FE)
+val SurfaceContainer = Color(0xFFE6EFF8)
+val SurfaceContainerHigh = Color(0xFFE0E9F2)
+val SurfaceContainerHighest = Color(0xFFDBE4ED)
+val SurfaceDim = Color(0xFFD2DBE4)
+val SurfaceBright = Color(0xFFF6FAFF)
 
-val InverseSurface = Color(0xFF1F2937)
-val InverseOnSurface = Color(0xFFF9FAFB)
-val InversePrimary = Primary
+val InverseSurface = Color(0xFF293138)
+val InverseOnSurface = Color(0xFFE9F2FB)
+val InversePrimary = Color(0xFFB1C7F2)
 
-val Outline = Color(0xFFD7DED9)
-val OutlineVariant = Color(0xFFE8ECE9)
-val Divider = Color(0xFFE8ECE9)
+val Outline = Color(0xFF74777F)
+val OutlineVariant = Color(0xFFC4C6CF)
+val Divider = Color(0xFFC4C6CF)
 
+// Fixed Variants
+val PrimaryFixed = Color(0xFFD6E3FF)
+val PrimaryFixedDim = Color(0xFFB1C7F2)
+val OnPrimaryFixed = Color(0xFF001B3D)
+val OnPrimaryFixedVariant = Color(0xFF31476B)
+
+val SecondaryFixed = Color(0xFFFFE088)
+val SecondaryFixedDim = Color(0xFFE9C349)
+val OnSecondaryFixed = Color(0xFF241A00)
+val OnSecondaryFixedVariant = Color(0xFF574500)
+
+val TertiaryFixed = Color(0xFFE1E3E4)
+val TertiaryFixedDim = Color(0xFFC5C7C8)
+val OnTertiaryFixed = Color(0xFF191C1D)
+val OnTertiaryFixedVariant = Color(0xFF454748)
+
+// Semantic Alias
 val TextPrimary = OnBackground
-val TextSecondary = Color(0xFF4B5563)
-val TextTertiary = Color(0xFF9CA3AF)
-val Disabled = Color(0xFFD1D5DB)
-val Border = Color(0xFFBDBDBD)
+val TextSecondary = OnSurfaceVariant
+val TextTertiary = Color(0xFF74777F)
+val Disabled = Color(0xFFC4C6CF)
+val Border = Outline
 
 val StatusSuccess = Color(0xFF16A34A)
 val StatusWarning = Color(0xFFF59E0B)
-val StatusDanger = Color(0xFFEF4444)
-val StatusInfo = Color(0xFF3B82F6)
-
-val StatusSuccessBg = Color(0xFFDCFCE7)
-val StatusWarningBg = Color(0xFFFEF3C7)
-val StatusDangerBg = Color(0xFFFEE2E2)
-val StatusInfoBg = Color(0xFFDBEAFE)
+val StatusDanger = Color(0xFFBA1A1A)
+val StatusInfo = Color(0xFF495F84)
 
 val Scrim = Color(0xFF000000).copy(alpha = 0.32f)
+
+// Glassmorphism Constants
+val GlassSurface = Color(0xFFFFFFFF).copy(alpha = 0.4f)
+val GlassOutline = Color(0xFFFFFFFF).copy(alpha = 0.2f)

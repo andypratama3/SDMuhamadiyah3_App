@@ -2,11 +2,11 @@ package com.sdm3.parent.feature.nilai.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,7 +17,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +34,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.tooling.preview.Preview
 
 private val tabLabels = listOf("Sumatif", "Formatif", "Projek")
+private val PremiumEasing = androidx.compose.animation.core.CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,35 +57,23 @@ fun NilaiRaporScreen(
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(42.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = colorScheme.primary.copy(alpha = 0.08f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Outlined.Analytics, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(22.dp))
-                            }
-                        }
-                        Spacer(Modifier.width(Spacing.md))
-                        Column {
-                            Text(
-                                text = "Nilai & Rapor",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = (-0.5).sp
-                                ),
-                                color = colorScheme.onSurface
-                            )
-                            Text(
-                                text = "Semester $semester",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-                        }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Analitik Akademik",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
+                            letterSpacing = (-0.5).sp
+                        )
+                        Text(
+                            text = "Semester $semester".uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary.copy(alpha = 0.4f),
+                            letterSpacing = 1.sp
+                        )
                     }
                 },
                 navigationIcon = {
@@ -90,7 +82,7 @@ fun NilaiRaporScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Kembali",
-                                tint = colorScheme.onSurface
+                                tint = colorScheme.primary
                             )
                         }
                     }
@@ -99,48 +91,63 @@ fun NilaiRaporScreen(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Surface(
-                modifier = Modifier
-                    .padding(horizontal = Spacing.lg, vertical = Spacing.md)
-                    .fillMaxWidth(),
-                shape = ChipShape,
-                color = colorScheme.surfaceVariant
-            ) {
-                Row(modifier = Modifier.padding(4.dp)) {
-                    tabLabels.forEachIndexed { index, label ->
-                        val isSelected = selectedTab == index
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(44.dp)
-                                .clip(ChipShape)
-                                .background(if (isSelected) colorScheme.surface else Color.Transparent)
-                                .clickable { selectedTab = index },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant
-                            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            // EduOcto Atmospheric Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
+                        center = Offset(size.width, 0f),
+                        radius = size.width
+                    )
+                )
+            }
+
+            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                // Editorial Tab Switcher
+                Surface(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color.White.copy(alpha = 0.5f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
+                ) {
+                    Row(modifier = Modifier.padding(6.dp)) {
+                        tabLabels.forEachIndexed { index, label ->
+                            val isSelected = selectedTab == index
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(42.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) colorScheme.primary else Color.Transparent)
+                                    .clickable { selectedTab = index },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) colorScheme.onPrimary else colorScheme.primary.copy(alpha = 0.6f)
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            AnimatedContent(
-                targetState = selectedTab,
-                transitionSpec = {
-                    fadeIn(tween(250)) togetherWith fadeOut(tween(250))
-                },
-                label = "tabContent"
-            ) { targetTab ->
-                when (targetTab) {
-                    0 -> SumatifTabContent(studentId, semester, onDetailMapel)
-                    1 -> FormatifTabContent(studentId)
-                    2 -> ProjekTabContent(studentId)
+                AnimatedContent(
+                    targetState = selectedTab,
+                    transitionSpec = {
+                        (fadeIn(tween(400, easing = PremiumEasing)) + scaleIn(initialScale = 0.95f)) togetherWith fadeOut(tween(300))
+                    },
+                    label = "tabContent"
+                ) { targetTab ->
+                    when (targetTab) {
+                        0 -> SumatifTabContent(studentId, semester, onDetailMapel)
+                        1 -> FormatifTabContent(studentId)
+                        2 -> ProjekTabContent(studentId)
+                    }
                 }
             }
         }
@@ -168,37 +175,60 @@ private fun SumatifTabContent(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
     ) {
         item {
+            // Hero Score Card (EduOcto Style)
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                shape = RoundedCornerShape(28.dp),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
             ) {
-                Column(
-                    modifier = Modifier.padding(Spacing.lg),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Rata-rata Nilai",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colorScheme.onPrimary.copy(alpha = 0.75f)
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.xxs))
-                    Text(
-                        text = "$avgScore",
-                        style = MaterialTheme.typography.displayLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onPrimary
-                    )
-                    Text(
-                        text = "Dari ${subjects.size} mata pelajaran",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onPrimary.copy(alpha = 0.6f)
-                    )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
+                    Canvas(modifier = Modifier.fillMaxWidth().height(160.dp).alpha(0.15f)) {
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(glowColor, Color.Transparent),
+                                center = Offset(size.width * 0.9f, 0f),
+                                radius = size.width
+                            )
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "RATA-RATA KOMPETENSI",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp,
+                            color = colorScheme.onPrimary.copy(alpha = 0.5f)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "$avgScore",
+                            style = MaterialTheme.typography.displayLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Surface(
+                            color = colorScheme.secondary,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = " PREDIKAT A ",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                color = colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -206,36 +236,29 @@ private fun SumatifTabContent(
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
                     icon = Icons.AutoMirrored.Outlined.TrendingUp,
-                    label = "Tertinggi",
+                    label = "TERTINGGI",
                     value = "${subjects.maxOf { it.score }}",
                     color = StatusSuccess
                 )
                 StatMiniCard(
                     modifier = Modifier.weight(1f),
                     icon = Icons.AutoMirrored.Outlined.TrendingDown,
-                    label = "Terendah",
+                    label = "TERENDAH",
                     value = "${subjects.minOf { it.score }}",
                     color = StatusWarning
-                )
-                StatMiniCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.CheckCircle,
-                    label = "Mapel",
-                    value = "${subjects.size}",
-                    color = colorScheme.primary
                 )
             }
         }
 
         item {
             SectionHeader(
-                title = "Daftar Mata Pelajaran",
-                modifier = Modifier.padding(top = Spacing.sm)
+                title = "Mata Pelajaran",
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
 
@@ -246,7 +269,7 @@ private fun SumatifTabContent(
             )
         }
 
-        item { Spacer(Modifier.height(Spacing.xxxl)) }
+        item { Spacer(Modifier.height(100.dp)) }
     }
 }
 
@@ -262,50 +285,56 @@ private fun SubjectCard(
         else -> StatusDanger
     }
 
-    Card(
+    Sdm3Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        padding = 16.dp
     ) {
         Row(
-            modifier = Modifier.padding(Spacing.lg),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = SDM3Shapes.small,
-                color = scoreColor.copy(alpha = 0.1f)
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = colorScheme.primary.copy(alpha = 0.05f),
+                border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        Icons.Outlined.School,
+                        Icons.Outlined.AutoStories,
                         contentDescription = null,
-                        tint = scoreColor,
+                        tint = colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(Spacing.md))
+            Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = subject.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorScheme.onSurface
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
                 )
-                Spacer(modifier = Modifier.height(Spacing.xxs))
-                StatusChip(
-                    text = "${subject.predicate} - ${subject.description}",
-                    color = scoreColor
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Surface(
+                    color = scoreColor.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = " ${subject.predicate} ",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = scoreColor,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                    )
+                }
             }
-            Spacer(modifier = Modifier.width(Spacing.md))
             Text(
                 text = "${subject.score}",
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = scoreColor
             )
@@ -322,36 +351,35 @@ private fun StatMiniCard(
     color: Color
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Card(
-        modifier = modifier,
-        shape = SDM3Shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    Sdm3Card(
+        modifier = modifier
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(Spacing.md)
+            modifier = Modifier.fillMaxWidth().padding(12.dp)
         ) {
             Surface(
-                modifier = Modifier.size(36.dp),
-                shape = SDM3Shapes.extraSmall,
+                modifier = Modifier.size(40.dp),
+                shape = CircleShape,
                 color = color.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
+                    Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(Spacing.xs))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurface
+                color = colorScheme.primary
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 0.5.sp,
+                color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
         }
     }
@@ -361,35 +389,31 @@ private fun StatMiniCard(
 private fun FormatifTabContent(studentId: String) {
     val colorScheme = MaterialTheme.colorScheme
     val tpData = listOf(
-        TPItem("3.1", "Menjelaskan operasi hitung bilangan cacah", 85),
-        TPItem("3.2", "Menyelesaikan soal cerita penjumlahan", 90),
-        TPItem("3.3", "Mengidentifikasi sifat-sifat bangun datar", 78),
-        TPItem("3.4", "Menghitung keliling bangun datar", 72),
-        TPItem("3.5", "Menyelesaikan masalah kontekstual", 88)
+        TPItem("TP 1.1", "Menjelaskan operasi hitung bilangan cacah", 85),
+        TPItem("TP 1.2", "Menyelesaikan soal cerita penjumlahan", 90),
+        TPItem("TP 2.1", "Mengidentifikasi sifat-sifat bangun datar", 78),
+        TPItem("TP 2.2", "Menghitung keliling bangun datar", 72),
+        TPItem("TP 3.1", "Menyelesaikan masalah kontekstual", 88)
     )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
     ) {
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                colors = CardDefaults.cardColors(containerColor = colorScheme.secondaryContainer),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            Sdm3Card {
                 Row(
-                    modifier = Modifier.padding(Spacing.lg),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    Icon(Icons.Outlined.Info, contentDescription = null, tint = colorScheme.secondary, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(Spacing.sm))
+                    Icon(Icons.Outlined.Info, contentDescription = null, tint = colorScheme.primary.copy(alpha = 0.4f), modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(12.dp))
                     Text(
-                        text = "Nilai Formatif mengukur ketercapaian per Tujuan Pembelajaran (TP) sebagai evaluasi harian berkelanjutan.",
+                        text = "Evaluasi berkelanjutan berdasarkan Tujuan Pembelajaran (TP) yang dicapai setiap pekan.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSecondaryContainer
+                        color = colorScheme.primary.copy(alpha = 0.6f),
+                        lineHeight = 20.sp
                     )
                 }
             }
@@ -401,40 +425,36 @@ private fun FormatifTabContent(studentId: String) {
                 tp.score >= 75 -> StatusWarning
                 else -> StatusDanger
             }
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = CardShape,
-                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
+            Sdm3Card {
                 Row(
-                    modifier = Modifier.padding(Spacing.lg),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
-                        modifier = Modifier.size(44.dp),
-                        shape = SDM3Shapes.small,
-                        color = colorScheme.secondary.copy(alpha = 0.1f)
+                        modifier = Modifier.size(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = colorScheme.primary.copy(alpha = 0.05f)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
                                 text = tp.code,
                                 style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colorScheme.secondary
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(Spacing.md))
+                    Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = tp.description,
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = colorScheme.onSurface
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
+                            maxLines = 2
                         )
                     }
-                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "${tp.score}",
                         style = MaterialTheme.typography.titleLarge,
@@ -445,7 +465,7 @@ private fun FormatifTabContent(studentId: String) {
             }
         }
 
-        item { Spacer(Modifier.height(Spacing.xxxl)) }
+        item { Spacer(Modifier.height(100.dp)) }
     }
 }
 
@@ -453,30 +473,25 @@ private fun FormatifTabContent(studentId: String) {
 private fun ProjekTabContent(studentId: String) {
     val colorScheme = MaterialTheme.colorScheme
     val proyek = listOf(
-        ProjekItem("Gaya Hidup Berkelanjutan", "Membuat poster daur ulang dari limbah rumah tangga", 88, "A"),
-        ProjekItem("Kearifan Lokal", "Pameran budaya daerah Kalimantan Timur", 92, "A"),
-        ProjekItem("Bangunlah Jiwa Raganya", "Senam pagi bersama dan kampanye anti-bullying", 85, "B+")
+        ProjekItem("Gaya Hidup Berkelanjutan", "Daur ulang limbah rumah tangga", 88, "A"),
+        ProjekItem("Kearifan Lokal", "Pameran budaya Kalimantan Timur", 92, "A"),
+        ProjekItem("Bangunlah Jiwa Raganya", "Kampanye anti-bullying", 85, "B+")
     )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-        contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
     ) {
         item {
             SectionHeader(
-                title = "Projek Penguatan Profil Pelajar Pancasila (P5)",
-                modifier = Modifier.padding(top = Spacing.sm)
+                title = "Projek Profil Pancasila (P5)",
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
         items(proyek) { proyekItem ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = SDM3Shapes.medium,
-                colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Column(modifier = Modifier.padding(Spacing.lg)) {
+            Sdm3Card {
+                Column(modifier = Modifier.padding(20.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -484,27 +499,49 @@ private fun ProjekTabContent(studentId: String) {
                     ) {
                         Text(
                             text = proyekItem.tema,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
                             modifier = Modifier.weight(1f)
                         )
-                        StatusChip(
-                            text = "${proyekItem.nilai} (${proyekItem.predikat})",
-                            color = StatusSuccess
-                        )
+                        Surface(
+                            color = StatusSuccess.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = " ${proyekItem.nilai} (${proyekItem.predikat}) ",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                color = StatusSuccess,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = proyekItem.deskripsi,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurfaceVariant
+                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        lineHeight = 22.sp
                     )
                 }
             }
         }
 
-        item { Spacer(Modifier.height(Spacing.xxxl)) }
+        item { Spacer(Modifier.height(100.dp)) }
+    }
+}
+
+@Preview
+@Composable
+private fun NilaiRaporScreenPreview() {
+    SDM3Theme {
+        NilaiRaporScreen(
+            studentId = "",
+            semester = "ganjil",
+            onBack = {},
+            onDetailMapel = {}
+        )
     }
 }
 
@@ -519,16 +556,3 @@ data class SubjectGrade(
 data class TPItem(val code: String, val description: String, val score: Int)
 
 data class ProjekItem(val tema: String, val deskripsi: String, val nilai: Int, val predikat: String)
-
-@Preview
-@Composable
-private fun NilaiRaporScreenPreview() {
-    SDM3Theme {
-        NilaiRaporScreen(
-            studentId = "",
-            semester = "ganjil",
-            onBack = {},
-            onDetailMapel = {}
-        )
-    }
-}

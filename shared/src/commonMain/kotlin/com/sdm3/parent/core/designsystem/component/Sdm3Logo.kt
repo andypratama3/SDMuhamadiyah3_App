@@ -3,8 +3,10 @@ package com.sdm3.parent.core.designsystem.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,9 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.painterResource
 import sdmuhammadiyah3samarinda.shared.generated.resources.Res
 import sdmuhammadiyah3samarinda.shared.generated.resources.logo_sd
+import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 
 @Composable
 fun Sdm3Logo(
@@ -123,6 +127,22 @@ private fun LogoContent(useTextFallback: Boolean, size: Dp) {
                     .size(size)
                     .padding(4.dp)
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun Sdm3LogoPreview() {
+    SDM3Theme(darkTheme = true) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color(0xFF001B3D)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                Sdm3Logo(size = 120.dp, showBackground = true)
+                Sdm3Logo(size = 80.dp, showBackground = false)
+            }
         }
     }
 }

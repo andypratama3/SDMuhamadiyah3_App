@@ -4,25 +4,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
+// EduOcto Shape System
 val SDM3Shapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(24.dp),
-    extraLarge = RoundedCornerShape(32.dp)
+    extraSmall = RoundedCornerShape(4.dp),  // sm
+    small = RoundedCornerShape(8.dp),       // DEFAULT
+    medium = RoundedCornerShape(12.dp),      // md
+    large = RoundedCornerShape(16.dp),       // lg (1rem) - Primary container radius
+    extraLarge = RoundedCornerShape(24.dp)   // xl
 )
 
-// Convenience aliases matching Material3 sizing vocabulary
-val SmallShape = SDM3Shapes.small      // 12.dp
-val MediumShape = SDM3Shapes.medium    // 16.dp
-val LargeShape = SDM3Shapes.large      // 24.dp
+// Convenience aliases
+val SmallShape = SDM3Shapes.small
+val MediumShape = SDM3Shapes.medium
+val LargeShape = SDM3Shapes.large
 
-// Existing custom shapes
-val CardShape = RoundedCornerShape(24.dp)
-val ButtonShape = RoundedCornerShape(18.dp)
-val InputShape = RoundedCornerShape(18.dp)
-val ChipShape = RoundedCornerShape(999.dp)
-val BottomSheetShape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-val DialogShape = RoundedCornerShape(28.dp)
-val NavBarShape = RoundedCornerShape(28.dp)
-val OtpBoxShape = RoundedCornerShape(16.dp)
+// EduOcto Specific Components
+val CardShape = RoundedCornerShape(16.dp)
+val ButtonShape = RoundedCornerShape(16.dp) // Interactive elements use same 16px radius
+val InputShape = RoundedCornerShape(16.dp)
+val ChipShape = RoundedCornerShape(999.dp) // Pill shape for metadata
+val BottomSheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+val DialogShape = RoundedCornerShape(24.dp)
+val NavBarShape = RoundedCornerShape(999.dp) // Quick Action Bar icons or floating nav
+val OtpBoxShape = RoundedCornerShape(12.dp)

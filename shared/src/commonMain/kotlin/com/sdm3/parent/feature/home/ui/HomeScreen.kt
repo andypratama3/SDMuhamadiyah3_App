@@ -1,28 +1,38 @@
 package com.sdm3.parent.feature.home.ui
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -32,19 +42,6 @@ import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.navigation.SDM3Route
 import androidx.compose.ui.tooling.preview.Preview
 import com.sdm3.parent.core.navigation.SDM3BottomTab
-
-private data class QuickNavData(
-    val title: String,
-    val icon: ImageVector,
-    val color: Color,
-    val route: (String) -> SDM3Route
-)
-
-private data class SubjectScore(
-    val mapel: String,
-    val score: Int,
-    val predicate: String
-)
 
 @Composable
 fun HomeScreen(
@@ -58,28 +55,6 @@ fun HomeScreen(
         LaunchedEffect(Unit) { visible = true }
     }
 
-    val quickNavItems = listOf(
-        QuickNavData("Nilai", Icons.Outlined.School, colorScheme.primary) {
-            SDM3Route.NilaiRapor(it, "ganjil")
-        },
-        QuickNavData("Kehadiran", Icons.Outlined.EventAvailable, StatusWarning) {
-            SDM3Route.KehadiranSiswa(it)
-        },
-        QuickNavData("Rapor", Icons.Outlined.Description, colorScheme.primary) {
-            SDM3Route.HalamanRapor(it)
-        },
-        QuickNavData("Info Anak", Icons.Outlined.ChildCare, StatusSuccess) {
-            SDM3Route.DetailInfoAnak(it)
-        }
-    )
-
-    val recentScores = listOf(
-        SubjectScore("Matematika", 92, "A"),
-        SubjectScore("B. Indonesia", 88, "B+"),
-        SubjectScore("IPA", 95, "A"),
-        SubjectScore("Pend. Agama", 90, "A")
-    )
-
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
@@ -90,255 +65,309 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            contentPadding = PaddingValues(bottom = 100.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xl)
         ) {
+            // 1. Greeting Section
             item {
-                MotionAnim(visible = visible) {
-                    StudentCard(
-                        studentId = studentId,
-                        onSwitchChild = { navController.navigate(SDM3Route.PilihAnak) }
-                    )
-                }
+                GreetingSection(name = "Ararya", info = "Senin, 23 Oktober 2023 • XI MIPA 1")
             }
 
+            // 2. Shortcut Favorit (Horizontal Cards)
             item {
-                MotionAnim(visible = visible) {
-                    ActivePaymentCard(
-                        studentId = studentId,
-                        navController = navController
-                    )
-                }
+                ShortcutFavoritSection()
             }
 
+            // 3. Layanan Sekolah (Grid 4x3)
             item {
-                MotionAnim(visible = visible) {
-                    SectionHeader(
-                        title = "Layanan Akademik",
-                        modifier = Modifier.padding(top = Spacing.sm)
-                    )
-                }
+                LayananSekolahSection()
             }
 
+            // 4. Pengumuman Card
             item {
-                MotionAnim(visible = visible) {
-                    val rows = quickNavItems.chunked(2)
-                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                        rows.forEach { rowItems ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                            ) {
-                                rowItems.forEach { nav ->
-                                    AcademicServiceCard(
-                                        modifier = Modifier.weight(1f),
-                                        nav = nav,
-                                        studentId = studentId,
-                                        navController = navController
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                PengumumanSection()
             }
 
+            // 5. Tabungan Sekolah (Dark Card)
             item {
-                MotionAnim(visible = visible) {
-                    SectionHeader(
-                        title = "Prestasi Terkini",
-                        actionLabel = "Lihat Semua",
-                        onActionClick = { navController.navigate(SDM3Route.NilaiRapor(studentId, "ganjil")) }
-                    )
-                }
+                TabunganSekolahSection(amount = "Rp 1.250.000")
             }
-
-            item {
-                MotionAnim(visible = visible) {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                        contentPadding = PaddingValues(end = Spacing.md)
-                    ) {
-                        items(recentScores) { subject ->
-                            GradeScoreCard(subject = subject)
-                        }
-                    }
-                }
-            }
-
-            item {
-                MotionAnim(visible = visible) {
-                    SectionHeader(
-                        title = "Pengumuman Sekolah",
-                        actionLabel = "Semua",
-                        onActionClick = { navController.navigate(SDM3Route.PengumumanSekolah) }
-                    )
-                }
-            }
-
-            item {
-                MotionAnim(visible = visible) {
-                    AnnouncementCard(navController = navController)
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
         }
     }
 }
 
 @Composable
-private fun HomeHeader(
-    navController: NavHostController
-) {
+private fun HomeHeader(navController: NavHostController) {
     val colorScheme = MaterialTheme.colorScheme
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Institutional Identity Chip
-        Surface(
-            modifier = Modifier.size(52.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = colorScheme.primary.copy(alpha = 0.08f),
-            border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = "OT",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-1).sp
-                    ),
-                    color = colorScheme.primary
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Institutional Identity (EduOcto Logo)
+            Sdm3Logo(
+                size = 32.dp,
+                showBackground = false
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "EduOcto",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.primary,
+                letterSpacing = (-0.5).sp
+            )
+        }
+
+        IconButton(onClick = {}) {
+            BadgedBox(
+                badge = {
+                    Badge(
+                        modifier = Modifier.size(8.dp),
+                        containerColor = colorScheme.error
+                    )
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "Notifikasi",
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
+    }
+}
 
-        Spacer(modifier = Modifier.width(Spacing.md))
+@Composable
+private fun GreetingSection(name: String, info: String) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Text(
+            text = "Halo, $name!",
+            style = MaterialTheme.typography.displayMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            letterSpacing = (-1).sp
+        )
+        Text(
+            text = info,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
 
-        Column(modifier = Modifier.weight(1f)) {
+@Composable
+private fun ShortcutFavoritSection() {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                text = "Selamat Pagi,",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    letterSpacing = 0.5.sp,
-                    fontWeight = FontWeight.Medium
-                ),
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                text = "Shortcut Favorit",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Bapak/Ibu Wali",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.5).sp
-                ),
-                color = colorScheme.onSurface,
-                maxLines = 1
+                text = "Edit",
+                style = MaterialTheme.typography.labelLarge,
+                color = StatusSuccess,
+                fontWeight = FontWeight.Bold
             )
         }
+        
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Precision Notification Island
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                ShortcutCard(
+                    title = "SPP & Biaya",
+                    icon = Icons.Outlined.AccountBalanceWallet,
+                    iconColor = StatusSuccess
+                )
+            }
+            item {
+                ShortcutCard(
+                    title = "E-Library",
+                    icon = Icons.Outlined.LocalLibrary,
+                    iconColor = MaterialTheme.colorScheme.primary
+                )
+            }
+            item {
+                ShortcutCard(
+                    title = "Absensi",
+                    icon = Icons.Outlined.QrCodeScanner,
+                    iconColor = MaterialTheme.colorScheme.secondary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShortcutCard(title: String, icon: ImageVector, iconColor: Color) {
+    Card(
+        modifier = Modifier.size(140.dp, 160.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Surface(
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = iconColor.copy(alpha = 0.1f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(28.dp))
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun LayananSekolahSection() {
+    val items = listOf(
+        Pair("PERPUS", Icons.Outlined.AutoStories),
+        Pair("KANTIN", Icons.Outlined.Restaurant),
+        Pair("EKSKUL", Icons.Outlined.SportsSoccer),
+        Pair("ALUMNI", Icons.Outlined.Groups),
+        Pair("EVENT", Icons.Outlined.CalendarMonth),
+        Pair("CS", Icons.Outlined.SupportAgent),
+        Pair("BEASISWA", Icons.Outlined.School),
+        Pair("KONSELING", Icons.Outlined.Psychology),
+        Pair("BUS", Icons.Outlined.DirectionsBus),
+        Pair("UKS", Icons.Outlined.MedicalServices),
+        Pair("HALL FAME", Icons.Outlined.MilitaryTech),
+        Pair("LAINNYA", Icons.Outlined.GridView)
+    )
+
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Text(
+            text = "Layanan Sekolah",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            color = Color.White,
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+        ) {
+            Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                items.chunked(4).forEach { rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        rowItems.forEach { (label, icon) ->
+                            ServiceItem(label, icon)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ServiceItem(label: String, icon: ImageVector) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(70.dp)
+    ) {
         Surface(
             modifier = Modifier.size(48.dp),
             shape = RoundedCornerShape(14.dp),
-            color = colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outlineVariant.copy(alpha = 0.5f))
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { /* Navigate to Notifications */ },
-                contentAlignment = Alignment.Center
-            ) {
-                BadgedBox(
-                    badge = {
-                        Badge(
-                            modifier = Modifier.size(8.dp),
-                            containerColor = StatusDanger
-                        )
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Notifications,
-                        contentDescription = "Notifikasi",
-                        tint = colorScheme.onSurface,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1
+        )
     }
 }
 
 @Composable
-private fun StudentCard(
-    studentId: String,
-    onSwitchChild: () -> Unit
-) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onSwitchChild() },
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg),
-            verticalAlignment = Alignment.CenterVertically
+private fun PengumumanSection() {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Sdm3Card(
+            modifier = Modifier.fillMaxWidth(),
+            padding = 20.dp
         ) {
-            Surface(
-                modifier = Modifier.size(62.dp),
-                shape = SDM3Shapes.medium,
-                color = colorScheme.primaryContainer
-            ) {
-                Box(contentAlignment = Alignment.Center) {
+            Column {
+                Surface(
+                    color = StatusSuccess.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(999.dp)
+                ) {
                     Text(
-                        text = "AF",
-                        style = MaterialTheme.typography.headlineMedium,
+                        text = "PENGUMUMAN",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = StatusSuccess,
                         fontWeight = FontWeight.Bold,
-                        color = colorScheme.primary
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        letterSpacing = 0.5.sp
                     )
                 }
-            }
-            Spacer(modifier = Modifier.width(Spacing.md))
-            Column(modifier = Modifier.weight(1f)) {
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Ahmad Fathan",
+                    text = "Ujian Tengah Semester dimulai dalam 5 hari.",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.primary
                 )
-                Text(
-                    text = "Kelas 4-A (Ibnu Sina)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "TA 2025/2026 \u00B7 NIS: 0012345678",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            }
-            Surface(
-                modifier = Modifier.size(38.dp),
-                shape = RoundedCornerShape(11.dp),
-                color = colorScheme.surfaceVariant
-            ) {
-                Box(contentAlignment = Alignment.Center) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Outlined.SwapHoriz,
-                        contentDescription = "Ganti Siswa",
-                        tint = colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        Icons.Outlined.AccessTime,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "20 Menit lalu",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -347,249 +376,54 @@ private fun StudentCard(
 }
 
 @Composable
-private fun ActivePaymentCard(
-    studentId: String,
-    navController: NavHostController
-) {
+private fun TabunganSekolahSection(amount: String) {
     val colorScheme = MaterialTheme.colorScheme
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                colorScheme.primary,
-                                Primary.copy(alpha = 0.85f)
-                            )
-                        ),
-                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
+    
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
+        ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                // Background Glow for Dark Card
+                Canvas(modifier = Modifier.fillMaxWidth().height(160.dp).alpha(0.15f)) {
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(glowColor, Color.Transparent),
+                            center = Offset(size.width * 0.9f, size.height * 0.2f),
+                            radius = size.width
+                        )
                     )
-                    .padding(Spacing.lg)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "Tagihan Aktif",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onPrimary.copy(alpha = 0.75f)
-                        )
-                        Spacer(modifier = Modifier.height(Spacing.xxs))
-                        Text(
-                            text = "SPP Juli 2026",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = colorScheme.onPrimary,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                    Surface(
-                        shape = RoundedCornerShape(100),
-                        color = colorScheme.onPrimary.copy(alpha = 0.2f)
+                }
+                
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(
+                        text = "Tabungan Sekolah",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White.copy(alpha = 0.6f),
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = amount,
+                        style = MaterialTheme.typography.displayMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    
+                    Button(
+                        onClick = {},
+                        modifier = Modifier.fillMaxWidth(0.35f).height(46.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = StatusSuccess)
                     ) {
-                        Text(
-                            text = "Belum Dibayar",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onPrimary,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
-                        )
+                        Text("Top Up", fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
-
-            Column(modifier = Modifier.padding(Spacing.lg)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Column {
-                        Text(
-                            text = "Rp350.000",
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Jatuh tempo: 15 Juli 2026",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.onSurfaceVariant
-                        )
-                    }
-                    LinearProgressIndicator(
-                        progress = { 0.5f },
-                        modifier = Modifier.width(60.dp).height(6.dp),
-                        color = StatusWarning,
-                        trackColor = StatusWarning.copy(alpha = 0.15f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(Spacing.md))
-
-                Sdm3Button(
-                    text = "Bayar Sekarang",
-                    onClick = {
-                        navController.navigate(SDM3Route.PilihMetodeBayar("FEE-001"))
-                    },
-                    icon = Icons.Outlined.CreditCard
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AcademicServiceCard(
-    modifier: Modifier = Modifier,
-    nav: QuickNavData,
-    studentId: String,
-    navController: NavHostController
-) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    Card(
-        modifier = modifier
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { navController.navigate(nav.route(studentId)) },
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.md)
-        ) {
-            Surface(
-                modifier = Modifier.size(50.dp),
-                shape = SDM3Shapes.small,
-                color = nav.color.copy(alpha = 0.1f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = nav.icon,
-                        contentDescription = null,
-                        tint = nav.color,
-                        modifier = Modifier.size(26.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Text(
-                text = nav.title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = colorScheme.onSurface,
-                maxLines = 1
-            )
-        }
-    }
-}
-
-@Composable
-private fun GradeScoreCard(subject: SubjectScore) {
-    val colorScheme = MaterialTheme.colorScheme
-    val scoreColor = when {
-        subject.score >= 90 -> StatusSuccess
-        subject.score >= 75 -> StatusWarning
-        else -> StatusDanger
-    }
-
-    Card(
-        modifier = Modifier.width(130.dp),
-        shape = SDM3Shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(Spacing.md)
-        ) {
-            Text(
-                text = "${subject.score}",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                color = scoreColor
-            )
-            Spacer(modifier = Modifier.height(Spacing.xxs))
-            Text(
-                text = subject.mapel,
-                style = MaterialTheme.typography.labelMedium,
-                color = colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1
-            )
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            StatusChip(text = subject.predicate, color = scoreColor)
-        }
-    }
-}
-
-@Composable
-private fun AnnouncementCard(navController: NavHostController) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { navController.navigate(SDM3Route.DetailPengumuman("ANN-001")) },
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(Spacing.lg),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(50.dp),
-                shape = SDM3Shapes.small,
-                color = colorScheme.primaryContainer
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Outlined.Campaign,
-                        contentDescription = null,
-                        tint = colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(Spacing.md))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Libur Akhir Semester",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorScheme.onSurface
-                )
-                Text(
-                    text = "Libur semester ganjil dimulai 20 Des 2025 \u2013 3 Jan 2026.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colorScheme.onSurfaceVariant,
-                    maxLines = 2
-                )
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Lihat Detail",
-                tint = colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
-            )
         }
     }
 }

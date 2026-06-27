@@ -1,8 +1,9 @@
 package com.sdm3.parent.feature.infoanak.ui
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -11,11 +12,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.navigation.SDM3Route
@@ -32,148 +39,180 @@ fun DetailInfoAnakScreen(
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "Profil Peserta Didik",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Profil Siswa",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary,
+                            letterSpacing = (-0.5).sp
+                        )
+                        Text(
+                            text = "IDENTITAS RESMI",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = colorScheme.primary.copy(alpha = 0.4f),
+                            letterSpacing = 1.sp
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = colorScheme.onSurface
+                            tint = colorScheme.primary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs)
-        ) {
-            item {
-                Sdm3ElevatedCard(padding = Spacing.lg) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Surface(
-                            modifier = Modifier.size(88.dp),
-                            shape = SDM3Shapes.medium,
-                            color = colorScheme.primaryContainer
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Atmospheric Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.5f), Color.Transparent),
+                        center = Offset(size.width, size.height * 0.2f),
+                        radius = size.width
+                    )
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+            ) {
+                item {
+                    Sdm3Card(padding = 24.dp) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
+                            Surface(
+                                modifier = Modifier.size(100.dp),
+                                shape = RoundedCornerShape(32.dp),
+                                color = colorScheme.primary.copy(alpha = 0.05f),
+                                border = BorderStroke(2.dp, Color.White)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "AF",
+                                        style = MaterialTheme.typography.displaySmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Text(
+                                text = "Ahmad Fathan",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Surface(
+                                color = colorScheme.secondary.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(999.dp)
+                            ) {
                                 Text(
-                                    text = "AF",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.primary
+                                    text = " KELAS 4-A • IBNU SINA ",
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.5.sp,
+                                    color = colorScheme.secondary
                                 )
                             }
-                        }
 
-                        Spacer(modifier = Modifier.height(Spacing.lg))
+                            Spacer(modifier = Modifier.height(20.dp))
 
-                        Text(
-                            text = "Ahmad Fathan",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Kelas 4-A - Ibnu Sina",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = colorScheme.secondary,
-                            fontWeight = FontWeight.Medium
-                        )
-
-                        Spacer(modifier = Modifier.height(Spacing.md))
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                            StatusChip(text = "NISN: 0012345678", color = colorScheme.primary)
-                            StatusChip(text = "Aktif", color = StatusSuccess)
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                StatusChip(text = "NISN: 0012345678", color = colorScheme.primary)
+                                StatusChip(text = "AKTIF", color = StatusSuccess)
+                            }
                         }
                     }
                 }
-            }
 
-            item {
-                Text(
-                    text = "Biodata Siswa",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorScheme.onSurface,
-                    modifier = Modifier.padding(top = Spacing.md)
-                )
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                Sdm3Card {
-                    InfoRow("Tempat Lahir", "Samarinda")
-                    InfoRow("Tanggal Lahir", "15 Januari 2015")
-                    InfoRow("Wali Kelas", "Ibu Siti Rahmawati, S.Pd.")
-                    InfoRow("ID Pelajar", "SDM3-2025-00123")
+                item {
+                    SectionHeader(
+                        title = "Biodata Institusi",
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Sdm3Card(padding = 16.dp) {
+                        Column {
+                            InfoRow("Tempat Lahir", "Samarinda")
+                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                            InfoRow("Tanggal Lahir", "15 Januari 2015")
+                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                            InfoRow("Wali Kelas", "Ibu Siti Rahmawati, S.Pd.")
+                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                            InfoRow("ID Portal", "SDM3-2025-00123")
+                        }
+                    }
                 }
-            }
 
-            item {
-                Text(
-                    text = "Navigasi Akademik",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorScheme.onSurface,
-                    modifier = Modifier.padding(top = Spacing.md)
-                )
-                Spacer(modifier = Modifier.height(Spacing.sm))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                ) {
-                    QuickNavItem(
-                        modifier = Modifier.weight(1f),
-                        title = "Nilai",
-                        icon = Icons.Outlined.Assessment,
-                        color = colorScheme.secondary,
-                        onClick = { onQuickNavClick(SDM3Route.NilaiRapor(studentId, "ganjil")) }
+                item {
+                    SectionHeader(
+                        title = "Eksplorasi Akademik",
+                        modifier = Modifier.padding(top = 8.dp)
                     )
-                    QuickNavItem(
-                        modifier = Modifier.weight(1f),
-                        title = "Rapor",
-                        icon = Icons.Outlined.Description,
-                        color = colorScheme.primary,
-                        onClick = { onQuickNavClick(SDM3Route.HalamanRapor(studentId)) }
-                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        QuickNavItem(
+                            modifier = Modifier.weight(1f),
+                            title = "Analitik Nilai",
+                            icon = Icons.Outlined.Assessment,
+                            color = colorScheme.primary,
+                            onClick = { onQuickNavClick(SDM3Route.NilaiRapor(studentId, "ganjil")) }
+                        )
+                        QuickNavItem(
+                            modifier = Modifier.weight(1f),
+                            title = "Rapor Digital",
+                            icon = Icons.Outlined.Description,
+                            color = colorScheme.primary,
+                            onClick = { onQuickNavClick(SDM3Route.HalamanRapor(studentId)) }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        QuickNavItem(
+                            modifier = Modifier.weight(1f),
+                            title = "Presensi",
+                            icon = Icons.Outlined.EventAvailable,
+                            color = colorScheme.primary,
+                            onClick = { onQuickNavClick(SDM3Route.KehadiranSiswa(studentId)) }
+                        )
+                        QuickNavItem(
+                            modifier = Modifier.weight(1f),
+                            title = "Administrasi",
+                            icon = Icons.Outlined.Payments,
+                            color = colorScheme.primary,
+                            onClick = { onQuickNavClick(SDM3Route.PembayaranSpp(studentId)) }
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(Spacing.md))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                ) {
-                    QuickNavItem(
-                        modifier = Modifier.weight(1f),
-                        title = "Hadir",
-                        icon = Icons.Outlined.EventAvailable,
-                        color = StatusWarning,
-                        onClick = { onQuickNavClick(SDM3Route.KehadiranSiswa(studentId)) }
-                    )
-                    QuickNavItem(
-                        modifier = Modifier.weight(1f),
-                        title = "SPP",
-                        icon = Icons.Outlined.Payments,
-                        color = colorScheme.error,
-                        onClick = { onQuickNavClick(SDM3Route.PembayaranSpp(studentId)) }
-                    )
-                }
-            }
 
-            item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
+                item { Spacer(modifier = Modifier.height(100.dp)) }
+            }
         }
     }
 }
@@ -182,21 +221,21 @@ fun DetailInfoAnakScreen(
 private fun InfoRow(label: String, value: String) {
     val colorScheme = MaterialTheme.colorScheme
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = colorScheme.onSurfaceVariant
+            color = colorScheme.primary.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Medium
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = colorScheme.onSurface
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.primary
         )
     }
 }
@@ -210,33 +249,31 @@ private fun QuickNavItem(
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Card(
+    Sdm3Card(
         modifier = modifier.clickable(onClick = onClick),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        padding = 20.dp
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Surface(
-                modifier = Modifier.size(44.dp),
-                                shape = SDM3Shapes.small,
-                color = color.copy(alpha = 0.1f)
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = color.copy(alpha = 0.05f),
+                border = BorderStroke(1.dp, color.copy(alpha = 0.1f))
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = colorScheme.onSurface
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.primary,
+                maxLines = 1
             )
         }
     }

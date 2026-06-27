@@ -1,17 +1,15 @@
 package com.sdm3.parent.feature.auth.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,8 +20,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -32,8 +34,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.component.Sdm3Button
-import com.sdm3.parent.core.designsystem.component.Sdm3TextField
+import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.auth.OtpStep
 import com.sdm3.parent.feature.auth.VerifikasiOtpUiState
@@ -52,227 +54,244 @@ fun VerifikasiOtpScreen(
     }
     val colorScheme = MaterialTheme.colorScheme
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .statusBarsPadding()
-            .padding(horizontal = Spacing.xl),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(Spacing.xl))
-
-        Surface(
-            modifier = Modifier.size(88.dp),
-            shape = RoundedCornerShape(28.dp),
-            color = colorScheme.primaryContainer
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = when(state.step) {
-                        OtpStep.REQUEST_OTP -> Icons.Outlined.Email
-                        OtpStep.VERIFY_OTP -> Icons.Outlined.Lock
-                        OtpStep.RESET_PASSWORD -> Icons.Outlined.CheckCircle
-                    },
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp),
-                    tint = colorScheme.primary
+        // Atmospheric Glow
+        Canvas(modifier = Modifier.fillMaxSize().alpha(0.3f)) {
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(colorScheme.primaryContainer, Color.Transparent),
+                    center = Offset(size.width, 0f),
+                    radius = size.width * 1.5f
                 )
-            }
+            )
         }
 
-        Spacer(modifier = Modifier.height(Spacing.xl))
-
-        Text(
-            text = when(state.step) {
-                OtpStep.REQUEST_OTP -> "Pemulihan Akun"
-                OtpStep.VERIFY_OTP -> "Verifikasi Kode"
-                OtpStep.RESET_PASSWORD -> "Kata Sandi Baru"
-            },
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.sm))
-
-        Text(
-            text = when (state.step) {
-                OtpStep.REQUEST_OTP -> "Masukkan email untuk menerima instruksi pemulihan."
-                OtpStep.VERIFY_OTP -> "Kami telah mengirimkan 6 digit kode keamanan ke email ${state.email}."
-                OtpStep.RESET_PASSWORD -> "Silakan buat kata sandi baru yang kuat untuk akun Anda."
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = Spacing.md)
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.xl))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = CardShape,
-            colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .statusBarsPadding()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(modifier = Modifier.padding(Spacing.xl)) {
-                when (state.step) {
-                    OtpStep.REQUEST_OTP -> {
-                        Sdm3TextField(
-                            value = state.email,
-                            onValueChange = { viewModel.setEmail(it) },
-                            label = "Alamat Email",
-                            leadingIcon = Icons.Outlined.Email,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-                        )
+            Spacer(modifier = Modifier.height(60.dp))
 
-                        Spacer(modifier = Modifier.height(Spacing.xl))
+            // Step Indicator Icon
+            Surface(
+                modifier = Modifier.size(90.dp),
+                shape = RoundedCornerShape(24.dp),
+                color = Color.White.copy(alpha = 0.5f),
+                border = BorderStroke(1.5.dp, Color.White.copy(alpha = 0.8f))
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = when(state.step) {
+                            OtpStep.REQUEST_OTP -> Icons.Outlined.Email
+                            OtpStep.VERIFY_OTP -> Icons.Outlined.Lock
+                            OtpStep.RESET_PASSWORD -> Icons.Outlined.CheckCircle
+                        },
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp),
+                        tint = colorScheme.primary
+                    )
+                }
+            }
 
-                        Sdm3Button(
-                            text = "Kirim Kode Verifikasi",
-                            onClick = { viewModel.requestOtp() },
-                            isLoading = state.isLoading
-                        )
-                    }
+            Spacer(modifier = Modifier.height(32.dp))
 
-                    OtpStep.VERIFY_OTP -> {
-                        OtpDigitInput(
-                            code = state.otpCode,
-                            onCodeChanged = { viewModel.updateOtpCode(it) },
-                            colorScheme = colorScheme
-                        )
+            Text(
+                text = when(state.step) {
+                    OtpStep.REQUEST_OTP -> "Akses Pemulihan"
+                    OtpStep.VERIFY_OTP -> "Verifikasi Akun"
+                    OtpStep.RESET_PASSWORD -> "Pembaruan Kunci"
+                },
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.primary,
+                letterSpacing = (-1).sp
+            )
 
-                        Spacer(modifier = Modifier.height(Spacing.xl))
+            Spacer(modifier = Modifier.height(12.dp))
 
-                        if (state.countdownSeconds > 0) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(Icons.Outlined.Timer, contentDescription = null, modifier = Modifier.size(18.dp),                                 tint = colorScheme.onSurfaceVariant,)
-                                Spacer(Modifier.width(Spacing.sm))
-                                Text(
-                                    text = "Kirim ulang dalam ${state.countdownSeconds}s",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = colorScheme.onSurfaceVariant,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        } else {
-                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = "Kirim Ulang Kode OTP",
-                                    color = colorScheme.secondary,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .clickable { viewModel.resendOtp() }
-                                        .padding(8.dp)
-                                )
-                            }
+            Text(
+                text = when (state.step) {
+                    OtpStep.REQUEST_OTP -> "Masukkan email institusi Anda untuk menerima kode pemulihan."
+                    OtpStep.VERIFY_OTP -> "Kami telah mengirimkan 6-digit kode keamanan ke email ${state.email}."
+                    OtpStep.RESET_PASSWORD -> "Silakan buat kunci akses baru yang kuat untuk keamanan akun Anda."
+                },
+                style = MaterialTheme.typography.bodyLarge,
+                color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center,
+                lineHeight = 24.sp,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Sdm3Card(
+                modifier = Modifier.fillMaxWidth(),
+                padding = 24.dp
+            ) {
+                Column {
+                    when (state.step) {
+                        OtpStep.REQUEST_OTP -> {
+                            Sdm3TextField(
+                                value = state.email,
+                                onValueChange = { viewModel.setEmail(it) },
+                                label = "Email Institusi",
+                                leadingIcon = Icons.Outlined.Email,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                            )
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Sdm3Button(
+                                text = "Kirim Instruksi",
+                                onClick = { viewModel.requestOtp() },
+                                isLoading = state.isLoading,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(Spacing.lg))
+                        OtpStep.VERIFY_OTP -> {
+                            OtpDigitInput(
+                                code = state.otpCode,
+                                onCodeChanged = { viewModel.updateOtpCode(it) },
+                                colorScheme = colorScheme
+                            )
 
-                        Sdm3Button(
-                            text = "Verifikasi Sekarang",
-                            onClick = { viewModel.verifyOtp() },
-                            isLoading = state.isLoading,
-                            enabled = state.otpCode.length == 6
-                        )
-                    }
+                            Spacer(modifier = Modifier.height(32.dp))
 
-                    OtpStep.RESET_PASSWORD -> {
-                        Sdm3TextField(
-                            value = state.newPassword,
-                            onValueChange = { viewModel.updateNewPassword(it) },
-                            label = "Kata Sandi Baru",
-                            leadingIcon = Icons.Outlined.Lock,
-                            trailingIcon = if (state.isPasswordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-                            onTrailingIconClick = { viewModel.togglePasswordVisibility() },
-                            visualTransformation = if (state.isPasswordVisible)
-                                VisualTransformation.None else PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                        )
+                            if (state.countdownSeconds > 0) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Outlined.Timer, contentDescription = null, modifier = Modifier.size(16.dp), tint = colorScheme.primary.copy(alpha = 0.4f))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = "Kirim ulang dalam ${state.countdownSeconds}d",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = colorScheme.primary.copy(alpha = 0.4f),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            } else {
+                                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "KIRIM ULANG KODE",
+                                        color = colorScheme.secondary,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Black,
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable { viewModel.resendOtp() }
+                                            .padding(12.dp),
+                                        letterSpacing = 1.sp
+                                    )
+                                }
+                            }
 
-                        Spacer(modifier = Modifier.height(Spacing.md))
+                            Spacer(modifier = Modifier.height(24.dp))
 
-                        Sdm3TextField(
-                            value = state.newPasswordConfirmation,
-                            onValueChange = { viewModel.updateNewPasswordConfirmation(it) },
-                            label = "Konfirmasi Kata Sandi",
-                            leadingIcon = Icons.Outlined.Lock,
-                            trailingIcon = if (state.isPasswordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-                            onTrailingIconClick = { viewModel.togglePasswordVisibility() },
-                            visualTransformation = if (state.isPasswordVisible)
-                                VisualTransformation.None else PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                        )
+                            Sdm3Button(
+                                text = "Verifikasi Kunci",
+                                onClick = { viewModel.verifyOtp() },
+                                isLoading = state.isLoading,
+                                enabled = state.otpCode.length == 6,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
 
-                        Spacer(modifier = Modifier.height(Spacing.xl))
+                        OtpStep.RESET_PASSWORD -> {
+                            Sdm3TextField(
+                                value = state.newPassword,
+                                onValueChange = { viewModel.updateNewPassword(it) },
+                                label = "Kunci Akses Baru",
+                                leadingIcon = Icons.Outlined.Lock,
+                                trailingIcon = if (state.isPasswordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                onTrailingIconClick = { viewModel.togglePasswordVisibility() },
+                                visualTransformation = if (state.isPasswordVisible)
+                                    VisualTransformation.None else PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                            )
 
-                        Sdm3Button(
-                            text = "Atur Ulang Sandi",
-                            onClick = { viewModel.resetPassword() },
-                            isLoading = state.isLoading
-                        )
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Sdm3TextField(
+                                value = state.newPasswordConfirmation,
+                                onValueChange = { viewModel.updateNewPasswordConfirmation(it) },
+                                label = "Konfirmasi Kunci",
+                                leadingIcon = Icons.Outlined.Lock,
+                                trailingIcon = if (state.isPasswordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                onTrailingIconClick = { viewModel.togglePasswordVisibility() },
+                                visualTransformation = if (state.isPasswordVisible)
+                                    VisualTransformation.None else PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                            )
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Sdm3Button(
+                                text = "Simpan Perubahan",
+                                onClick = { viewModel.resetPassword() },
+                                isLoading = state.isLoading,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        MotionAnim(visible = state.errorMessage != null) {
-            Card(
-                modifier = Modifier
-                    .padding(top = Spacing.lg)
-                    .fillMaxWidth(),
-                shape = CardShape,
-                colors = CardDefaults.cardColors(containerColor = StatusDangerBg),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = StatusDanger)
-                    Spacer(Modifier.width(Spacing.sm))
-                    Text(state.errorMessage ?: "", color = StatusDanger, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-
-        MotionAnim(visible = state.resetSuccessMessage != null) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Card(
-                    modifier = Modifier
-                        .padding(top = Spacing.lg)
-                        .fillMaxWidth(),
-                    shape = CardShape,
-                    colors = CardDefaults.cardColors(containerColor = StatusSuccessBg),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            AnimatedVisibility(visible = state.errorMessage != null) {
+                Surface(
+                    modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
+                    color = colorScheme.error.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(Spacing.md),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = StatusSuccess)
-                        Spacer(Modifier.width(Spacing.sm))
-                        Text(state.resetSuccessMessage ?: "", color = StatusSuccess, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = colorScheme.error, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text(state.errorMessage ?: "", color = colorScheme.error, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                     }
                 }
-                Spacer(modifier = Modifier.height(Spacing.xl))
-                Sdm3Button(
-                    text = "Kembali ke Login",
-                    onClick = onSuccess
-                )
             }
-        }
 
-        Spacer(modifier = Modifier.height(Spacing.xxxl))
+            AnimatedVisibility(visible = state.resetSuccessMessage != null) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 24.dp)) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = StatusSuccess.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = StatusSuccess, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(12.dp))
+                            Text(state.resetSuccessMessage ?: "", color = StatusSuccess, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Sdm3Button(
+                        text = "Kembali ke Login",
+                        onClick = onSuccess,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+        }
     }
 }
 
@@ -284,7 +303,7 @@ private fun OtpDigitInput(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -295,56 +314,41 @@ private fun OtpDigitInput(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(52.dp)
-                        .clip(OtpBoxShape)
+                        .height(60.dp)
+                        .clip(RoundedCornerShape(14.dp))
                         .background(
-                            if (isFocused) colorScheme.primary.copy(alpha = 0.1f)
-                            else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            if (isFocused) colorScheme.primary.copy(alpha = 0.05f)
+                            else Color.White.copy(alpha = 0.5f)
                         )
                         .border(
-                            width = if (isFocused) 2.dp else 0.dp,
-                            color = if (isFocused) colorScheme.primary else Color.Transparent,
-                            shape = OtpBoxShape
+                            width = if (isFocused) 2.dp else 1.dp,
+                            color = if (isFocused) colorScheme.primary else Color.White.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(14.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (digit.isNotEmpty()) "*" else "",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isFocused) colorScheme.primary else colorScheme.onSurface
-                    )
                     if (digit.isNotEmpty()) {
                         Text(
                             text = digit,
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
-                            color = if (isFocused) colorScheme.primary else colorScheme.onSurface
+                            color = colorScheme.primary
                         )
+                    } else if (isFocused) {
+                        Box(modifier = Modifier.size(2.dp, 24.dp).background(colorScheme.primary.copy(alpha = 0.4f)))
                     }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(Spacing.lg))
-
-        Surface(
-            shape = ChipShape,
-            color = colorScheme.surfaceVariant
-        ) {
-            Text(
-                text = "Masukkan kode rahasia 6-digit",
-                style = MaterialTheme.typography.labelMedium,
-                color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        }
     }
 
+    // Hidden input field for OTP
     Box(modifier = Modifier.size(1.dp).alpha(0f)) {
         Sdm3TextField(
             value = code,
-            onValueChange = { onCodeChanged(it.filter { c -> c.isDigit() }.take(6)) },
+            onValueChange = { 
+                if (it.length <= 6) onCodeChanged(it.filter { c -> c.isDigit() }) 
+            },
             label = "",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )

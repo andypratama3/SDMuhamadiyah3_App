@@ -27,6 +27,7 @@ import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.core.security.SecureTokenManager
 import kotlinx.coroutines.delay
+import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import sdmuhammadiyah3samarinda.shared.generated.resources.Res
@@ -127,41 +128,42 @@ private fun SplashContent(
         onAnimationFinished()
     }
 
-    // Menggunakan Deep Forest Background agar selaras dengan identitas Primary (Hijau)
-    val deepBrandBackground = Color(0xFF06140A)
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(deepBrandBackground),
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Primary, SurfaceTint.copy(alpha = 0.8f))
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
-        // Multi-Orb Animated Mesh Background
+        // Multi-Orb Animated Mesh Background (EduOcto Style)
         Canvas(modifier = Modifier.fillMaxSize().alpha(if (startAnimation) 1f else 0f)) {
             val canvasWidth = size.width
             val canvasHeight = size.height
-            val maxRadius = canvasWidth * 1.2f
+            val maxRadius = canvasWidth * 1.5f
 
-            // Orb 1: Primary Color (Hijau) bergerak horizontal & sedikit vertikal
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(Primary.copy(alpha = 0.25f), Color.Transparent),
-                    center = Offset(canvasWidth * phase1, canvasHeight * 0.3f),
-                    radius = maxRadius
-                ),
-                radius = maxRadius,
-                center = Offset(canvasWidth * phase1, canvasHeight * 0.3f)
-            )
-
-            // Orb 2: Secondary Color (Emas/Oranye) untuk aksen kontras yang elegan
+            // Orb 1: Academic Gold Glow
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(Secondary.copy(alpha = 0.15f), Color.Transparent),
-                    center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.7f),
-                    radius = maxRadius * 0.8f
+                    center = Offset(canvasWidth * phase1, canvasHeight * 0.2f),
+                    radius = maxRadius
                 ),
-                radius = maxRadius * 0.8f,
-                center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.7f)
+                radius = maxRadius,
+                center = Offset(canvasWidth * phase1, canvasHeight * 0.2f)
+            )
+
+            // Orb 2: Soft Navy Glow
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(SurfaceTint.copy(alpha = 0.1f), Color.Transparent),
+                    center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.8f),
+                    radius = maxRadius * 0.7f
+                ),
+                radius = maxRadius * 0.7f,
+                center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.8f)
             )
         }
 
@@ -170,7 +172,7 @@ private fun SplashContent(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(horizontal = Spacing.xxl)
         ) {
-            // Logo with 3D-like Tilt, Bloom & Shimmer
+            // Logo with Glassmorphic Glow
             Box(
                 modifier = Modifier
                     .graphicsLayer {
@@ -182,13 +184,13 @@ private fun SplashContent(
                     .blur(blurAnim),
                 contentAlignment = Alignment.Center
             ) {
-                // Outer Bloom membesar lebih dinamis
+                // Glassmorphic Outer Bloom
                 Box(
                     modifier = Modifier
-                        .size(logoSize * 2f)
+                        .size(logoSize * 1.8f)
                         .background(
                             Brush.radialGradient(
-                                listOf(Primary.copy(alpha = 0.2f * logoAlphaAnim), Color.Transparent)
+                                listOf(Color.White.copy(alpha = 0.1f * logoAlphaAnim), Color.Transparent)
                             )
                         )
                 )
@@ -201,49 +203,48 @@ private fun SplashContent(
 
             Spacer(modifier = Modifier.height(Spacing.xxxl))
 
-            // Typography Stack with Staggered Reveal
+            // Typography Stack with Inter-like Hierarchy
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.graphicsLayer {
                     alpha = textAlphaAnim
-                    translationY = (1f - textAlphaAnim) * 30f // Slide up halus
+                    translationY = (1f - textAlphaAnim) * 20f
                 }
             ) {
                 Text(
                     text = stringResource(Res.string.app_name),
                     color = Color.White,
-                    style = MaterialTheme.typography.displaySmall.copy(
+                    style = MaterialTheme.typography.displayMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = (-1.0).sp,
-                        lineHeight = 40.sp
+                        letterSpacing = (-1.0).sp
                     ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(0.9f)
+                    textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(Spacing.md))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
+                // Academic Gold Subtitle
                 Text(
                     text = stringResource(Res.string.splash_subtitle).uppercase(),
-                    color = Secondary.copy(alpha = 0.8f), // Menggunakan Secondary untuk aksen subtitle
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        letterSpacing = 5.sp,
-                        fontWeight = FontWeight.SemiBold
+                    color = Secondary,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        letterSpacing = 4.sp,
+                        fontWeight = FontWeight.Bold
                     ),
                     textAlign = TextAlign.Center
                 )
             }
         }
 
-        // Micro-Precision Progress Line (Center to Edge Expansion)
+        // Micro-Precision Progress Line (Academic Gold)
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 90.dp)
-                .width(140.dp)
-                .height(2.dp)
-                .clip(RoundedCornerShape(1.dp))
-                .background(Color.White.copy(alpha = 0.05f)),
+                .padding(bottom = 100.dp)
+                .width(160.dp)
+                .height(3.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color.White.copy(alpha = 0.1f)),
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -252,7 +253,7 @@ private fun SplashContent(
                     .fillMaxWidth(progressAnim)
                     .background(
                         Brush.horizontalGradient(
-                            colors = listOf(Color.Transparent, Primary, Color.Transparent)
+                            colors = listOf(Color.Transparent, Secondary, Color.Transparent)
                         )
                     )
             )
@@ -260,16 +261,24 @@ private fun SplashContent(
 
         // Institutional Footer
         Text(
-            text = "SISTEM INFORMASI MANAJEMEN TERPADU",
-            color = Color.White.copy(alpha = 0.3f),
+            text = "EDU OCTO • ACADEMIC INTELLIGENCE",
+            color = Color.White.copy(alpha = 0.4f),
             style = MaterialTheme.typography.labelSmall.copy(
                 letterSpacing = 2.sp,
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Bold
             ),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = Spacing.xl)
                 .graphicsLayer { alpha = textAlphaAnim }
         )
+    }
+}
+
+@Preview
+@Composable
+private fun SplashContentPreview() {
+    SDM3Theme {
+        SplashContent(onAnimationFinished = {})
     }
 }
