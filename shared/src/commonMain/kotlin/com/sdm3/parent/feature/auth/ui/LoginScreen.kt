@@ -37,27 +37,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.feature.auth.LoginEffect
+import com.sdm3.parent.feature.auth.LoginIntent
+import com.sdm3.parent.feature.auth.LoginViewModel
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 private val PremiumEasing = CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit,
     onForgotPassword: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val colorScheme = MaterialTheme.colorScheme
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
+
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
 
     val isPreview = LocalInspectionMode.current
     var startAnimation by remember { mutableStateOf(isPreview) }
@@ -65,20 +64,20 @@ fun LoginScreen(
         LaunchedEffect(Unit) { startAnimation = true }
     }
 
-    val handleLogin: () -> Unit = {
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        focusManager.clearFocus()
-        if (email.isBlank() || password.isBlank()) {
-            error = "Identitas dan kunci akses diperlukan"
-        } else {
-            isLoading = true
-            error = null
-            coroutineScope.launch {
-                delay(1500)
-                isLoading = false
-                onLoginSuccess()
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                LoginEffect.LoginSuccess -> {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onLoginSuccess()
+                }
             }
         }
+    }
+
+    val handleLogin: () -> Unit = {
+        focusManager.clearFocus()
+        viewModel.onIntent(LoginIntent.Login)
     }
 
     Box(
@@ -86,7 +85,6 @@ fun LoginScreen(
             .fillMaxSize()
             .background(colorScheme.background)
     ) {
-        // EduOcto Atmospheric Glows
         Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
             drawCircle(
                 brush = Brush.radialGradient(
@@ -114,7 +112,6 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(60.dp))
 
-            // Institutional Logo Stack
             Box(
                 modifier = Modifier
                     .graphicsLayer {
@@ -139,7 +136,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Editorial Header
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.graphicsLayer {
@@ -172,7 +168,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Glassmorphic Input Container
             Sdm3Card(
                 modifier = Modifier.graphicsLayer {
                     alpha = if (startAnimation) 1f else 0f
@@ -182,8 +177,8 @@ fun LoginScreen(
             ) {
                 Column {
                     Sdm3TextField(
-                        value = email,
-                        onValueChange = { email = it; error = null },
+                        value = uiState.email,
+                        onValueChange = { viewModel.onIntent(LoginIntent.EmailChanged(it)) },
                         label = "Email Institusi",
                         placeholder = "nama@sekolah.id",
                         leadingIcon = Icons.Outlined.Email,
@@ -196,8 +191,8 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Sdm3TextField(
-                        value = password,
-                        onValueChange = { password = it; error = null },
+                        value = uiState.password,
+                        onValueChange = { viewModel.onIntent(LoginIntent.PasswordChanged(it)) },
                         label = "Kunci Akses",
                         placeholder = "••••••••",
                         leadingIcon = Icons.Outlined.Lock,
@@ -216,7 +211,7 @@ fun LoginScreen(
                     )
 
                     AnimatedVisibility(
-                        visible = error != null,
+                        visible = uiState.errorMessage != null,
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
@@ -226,7 +221,7 @@ fun LoginScreen(
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
-                                text = error ?: "",
+                                text = uiState.errorMessage ?: "",
                                 color = colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
@@ -239,7 +234,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     TextButton(
-                        onClick = { onForgotPassword(email) },
+                        onClick = { onForgotPassword(uiState.email) },
                         modifier = Modifier.align(Alignment.End)
                     ) {
                         Text(
@@ -254,7 +249,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Primary Actions
             Column(
                 modifier = Modifier.graphicsLayer {
                     alpha = if (startAnimation) 1f else 0f
@@ -264,7 +258,7 @@ fun LoginScreen(
                 Sdm3Button(
                     text = "Masuk Ke Portal",
                     onClick = handleLogin,
-                    isLoading = isLoading,
+                    isLoading = uiState.isLoading,
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 )
 
@@ -281,13 +275,13 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "EduOcto v2.4.0 • Academic Intelligence",
+                text = "ProductSchool v2.4.0 • Academic Intelligence",
                 style = MaterialTheme.typography.labelSmall,
                 color = colorScheme.primary.copy(alpha = 0.3f),
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
-            
+
             Spacer(modifier = Modifier.height(20.dp))
         }
     }
@@ -297,6 +291,10 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     SDM3Theme {
-        LoginScreen(onLoginSuccess = {}, onForgotPassword = {})
+        LoginScreen(
+            viewModel = org.koin.compose.viewmodel.koinViewModel(),
+            onLoginSuccess = {},
+            onForgotPassword = {}
+        )
     }
 }

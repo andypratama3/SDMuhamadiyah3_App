@@ -62,7 +62,7 @@ fun Sdm3TextField(
             modifier = Modifier.padding(start = 2.dp, bottom = 8.dp)
         )
 
-        // EduOcto Glassmorphic Input Architecture
+        // ProductSchool Glassmorphic Input Architecture
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,

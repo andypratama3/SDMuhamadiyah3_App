@@ -8,6 +8,7 @@ val allAppModules: List<Module> = listOf(
     securityModule,
     notificationModule,
     networkModule,
+    databaseModule,
     apiModule,
     repositoryModule,
     viewModelModule

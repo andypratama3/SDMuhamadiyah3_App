@@ -1,12 +1,18 @@
 package com.sdm3.parent.data.repository
 
+import com.sdm3.parent.cache.CacheDataSource
+import com.sdm3.parent.core.di.DevMode
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.data.dummy.DummyDataProvider
 import com.sdm3.parent.data.remote.api.AuthApi
 import com.sdm3.parent.data.remote.dto.UserDto
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
 
-class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
+class AuthRepository(
+    private val api: AuthApi,
+    private val cache: CacheDataSource,
+) : AuthRepositoryContract {
 
     override suspend fun login(email: String, password: String): ApiResult<UserDto> {
         return try {
@@ -16,15 +22,27 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
                 is ApiResult.Error -> result
             }
         } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal login"))
+            if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyUser)
+            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal login"))
         }
     }
 
     override suspend fun getAuthenticatedUser(): ApiResult<UserDto> {
         return try {
-            api.getUser()
+            val result = api.getUser()
+            if (result is ApiResult.Success) {
+                val dto = result.data
+                cache.cacheProfile(
+                    com.sdm3.parent.data.remote.dto.ProfileDto(
+                        id = dto.id, name = dto.name, email = dto.email,
+                        phone = dto.phone, avatar = dto.avatar,
+                    )
+                )
+            }
+            result
         } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data user"))
+            if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyUser)
+            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data user"))
         }
     }
 
@@ -33,7 +51,7 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
             val result = api.getUser()
             result is ApiResult.Success
         } catch (_: Exception) {
-            false
+            DevMode.isEnabled || false
         }
     }
 
@@ -50,7 +68,8 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
                 is ApiResult.Error -> result
             }
         } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengirim OTP"))
+            if (DevMode.isEnabled) ApiResult.Success("Kode OTP telah dikirim ke email Anda")
+            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengirim OTP"))
         }
     }
 
@@ -61,7 +80,8 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
                 is ApiResult.Error -> result
             }
         } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal verifikasi OTP"))
+            if (DevMode.isEnabled) ApiResult.Success("OTP berhasil diverifikasi")
+            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal verifikasi OTP"))
         }
     }
 
@@ -77,7 +97,8 @@ class AuthRepository(private val api: AuthApi) : AuthRepositoryContract {
                 is ApiResult.Error -> result
             }
         } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal reset password"))
+            if (DevMode.isEnabled) ApiResult.Success("Password berhasil direset")
+            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal reset password"))
         }
     }
 }

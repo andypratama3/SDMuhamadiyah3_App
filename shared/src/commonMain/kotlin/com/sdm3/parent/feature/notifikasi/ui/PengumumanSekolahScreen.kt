@@ -94,15 +94,15 @@ fun PengumumanSekolahScreen(
         ) {
             val categoryFilters = listOf("Semua", "Umum", "Akademik", "Kegiatan")
 
-            ScrollableTabRow(
+            PrimaryScrollableTabRow(
                 selectedTabIndex = selectedCategory,
                 containerColor = Color.Transparent,
                 contentColor = colorScheme.primary,
                 edgePadding = Spacing.lg,
                 divider = {},
-                indicator = { tabPositions ->
+                indicator = {
                     TabRowDefaults.SecondaryIndicator(
-                        modifier = Modifier.tabIndicatorOffset(tabPositions[selectedCategory]),
+                        modifier = Modifier.tabIndicatorOffset(selectedTabIndex = selectedCategory),
                         color = colorScheme.secondary
                     )
                 }

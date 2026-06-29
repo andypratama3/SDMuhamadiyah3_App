@@ -36,7 +36,7 @@ fun Sdm3Button(
     contentColor: Color = Color.Unspecified,
     content: @Composable (RowScope.() -> Unit)? = null
 ) {
-    // EduOcto Primary Action: Gold Container with Navy Text
+    // ProductSchool Primary Action: Gold Container with Navy Text
     val finalContainerColor = if (containerColor != Color.Unspecified) containerColor else MaterialTheme.colorScheme.secondary
     val finalContentColor = if (contentColor != Color.Unspecified) contentColor else MaterialTheme.colorScheme.primary
 
@@ -101,7 +101,7 @@ fun Sdm3Button(
                 
                 if (icon != null) {
                     Spacer(modifier = Modifier.width(12.dp))
-                    // EduOcto Island Icon Architecture
+                    // ProductSchool Island Icon Architecture
                     Box(
                         modifier = Modifier
                             .size(32.dp)

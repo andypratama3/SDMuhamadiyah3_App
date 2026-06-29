@@ -133,12 +133,12 @@ private fun SplashContent(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Primary, SurfaceTint.copy(alpha = 0.8f))
+                    colors = listOf(Primary, Primary.copy(alpha = 0.15f).copy(alpha = 0.8f))
                 )
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Multi-Orb Animated Mesh Background (EduOcto Style)
+        // Multi-Orb Animated Mesh Background (ProductSchool Style)
         Canvas(modifier = Modifier.fillMaxSize().alpha(if (startAnimation) 1f else 0f)) {
             val canvasWidth = size.width
             val canvasHeight = size.height
@@ -158,7 +158,7 @@ private fun SplashContent(
             // Orb 2: Soft Navy Glow
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(SurfaceTint.copy(alpha = 0.1f), Color.Transparent),
+                    colors = listOf(Primary.copy(alpha = 0.15f).copy(alpha = 0.1f), Color.Transparent),
                     center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.8f),
                     radius = maxRadius * 0.7f
                 ),

@@ -22,6 +22,7 @@ import com.sdm3.parent.core.designsystem.theme.*
 
 @Composable
 fun NetworkErrorDialog(
+    message: String = "Sistem gagal menjangkau server. Pastikan koneksi Anda aktif dan coba kembali.",
     onRetry: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -62,7 +63,7 @@ fun NetworkErrorDialog(
         },
         text = {
             Text(
-                "Sistem gagal menjangkau server institusi. Pastikan otentikasi jaringan Anda aktif dan silakan coba kembali.",
+                message,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),

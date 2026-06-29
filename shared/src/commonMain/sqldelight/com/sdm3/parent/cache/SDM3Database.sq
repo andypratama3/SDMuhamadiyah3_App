@@ -1,8 +1,274 @@
--- Database schema for local caching
+-- Database schema for offline-first caching
 
-CREATE TABLE Student (
+CREATE TABLE StudentEntity (
     id TEXT NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
     nisn TEXT NOT NULL,
-    class_name TEXT NOT NULL
+    nis TEXT,
+    gender TEXT NOT NULL,
+    birth_place TEXT NOT NULL,
+    birth_date TEXT NOT NULL,
+    photo TEXT,
+    class_name TEXT,
+    spp INTEGER,
+    dpp INTEGER,
+    cached_at INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE TABLE AttendanceEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    date TEXT NOT NULL,
+    status TEXT NOT NULL,
+    notes TEXT,
+    month INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE AttendanceSummaryEntity (
+    student_id TEXT NOT NULL PRIMARY KEY,
+    hadir INTEGER NOT NULL DEFAULT 0,
+    sakit INTEGER NOT NULL DEFAULT 0,
+    izin INTEGER NOT NULL DEFAULT 0,
+    alpa INTEGER NOT NULL DEFAULT 0,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE GradeEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    subject_id TEXT NOT NULL,
+    subject_name TEXT NOT NULL,
+    score REAL,
+    predicate TEXT,
+    narrative TEXT,
+    semester TEXT NOT NULL,
+    student_id TEXT NOT NULL,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE GradeComponentEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    subject_id TEXT NOT NULL,
+    subject_name TEXT NOT NULL,
+    component_type TEXT NOT NULL,
+    component_subtype TEXT,
+    score REAL,
+    tp_name TEXT,
+    tp_number INTEGER,
+    student_id TEXT NOT NULL
+);
+
+CREATE TABLE GradeWeightEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    subject_id TEXT NOT NULL,
+    component_label TEXT NOT NULL,
+    percentage REAL NOT NULL,
+    kkm REAL NOT NULL
+);
+
+CREATE TABLE StudentFeeEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    payment_title_id TEXT NOT NULL,
+    payment_title_name TEXT NOT NULL,
+    amount REAL NOT NULL,
+    due_date TEXT,
+    status TEXT NOT NULL,
+    student_id TEXT NOT NULL,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE PaymentEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    order_id TEXT NOT NULL,
+    gross_amount REAL,
+    payment_type TEXT,
+    status TEXT NOT NULL,
+    va_number TEXT,
+    paid_at TEXT,
+    created_at TEXT,
+    student_id TEXT NOT NULL,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE NotificationEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    data_json TEXT,
+    read_at TEXT,
+    created_at TEXT,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE ArticleEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT,
+    image_url TEXT,
+    category TEXT,
+    published_at TEXT,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE ExtracurricularEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    schedule TEXT,
+    teacher_name TEXT,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE RaporInstanceEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    semester TEXT NOT NULL,
+    academic_year TEXT NOT NULL,
+    status TEXT NOT NULL,
+    pdf_url TEXT,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE ProfileEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    avatar_url TEXT,
+    cached_at INTEGER NOT NULL DEFAULT 0
+);
+
+-- Student queries
+getAllStudents:
+SELECT * FROM StudentEntity;
+
+getStudentById:
+SELECT * FROM StudentEntity WHERE id = ?;
+
+insertStudent:
+INSERT OR REPLACE INTO StudentEntity VALUES ?;
+
+deleteAllStudents:
+DELETE FROM StudentEntity;
+
+-- Attendance queries
+getAttendancesByStudentAndMonth:
+SELECT * FROM AttendanceEntity WHERE student_id = ? AND month = ? AND year = ? ORDER BY date ASC;
+
+insertAttendance:
+INSERT OR REPLACE INTO AttendanceEntity VALUES ?;
+
+deleteAttendancesByStudent:
+DELETE FROM AttendanceEntity WHERE student_id = ?;
+
+-- Attendance Summary queries
+getAttendanceSummary:
+SELECT * FROM AttendanceSummaryEntity WHERE student_id = ?;
+
+insertAttendanceSummary:
+INSERT OR REPLACE INTO AttendanceSummaryEntity VALUES ?;
+
+deleteAttendanceSummary:
+DELETE FROM AttendanceSummaryEntity WHERE student_id = ?;
+
+-- Grade queries
+getGradesByStudent:
+SELECT * FROM GradeEntity WHERE student_id = ?;
+
+getGradesByStudentAndSemester:
+SELECT * FROM GradeEntity WHERE student_id = ? AND semester = ?;
+
+insertGrade:
+INSERT OR REPLACE INTO GradeEntity VALUES ?;
+
+deleteGradesByStudent:
+DELETE FROM GradeEntity WHERE student_id = ?;
+
+-- Grade Component queries
+getGradeComponentsBySubject:
+SELECT * FROM GradeComponentEntity WHERE subject_id = ? AND student_id = ?;
+
+insertGradeComponent:
+INSERT OR REPLACE INTO GradeComponentEntity VALUES ?;
+
+deleteGradeComponentsByStudent:
+DELETE FROM GradeComponentEntity WHERE student_id = ?;
+
+-- Grade Weight queries
+getGradeWeightsBySubject:
+SELECT * FROM GradeWeightEntity WHERE subject_id = ?;
+
+insertGradeWeight:
+INSERT OR REPLACE INTO GradeWeightEntity VALUES ?;
+
+-- Fee queries
+getFeesByStudent:
+SELECT * FROM StudentFeeEntity WHERE student_id = ?;
+
+insertFee:
+INSERT OR REPLACE INTO StudentFeeEntity VALUES ?;
+
+deleteFeesByStudent:
+DELETE FROM StudentFeeEntity WHERE student_id = ?;
+
+-- Payment queries
+getPaymentsByStudent:
+SELECT * FROM PaymentEntity WHERE student_id = ? ORDER BY created_at DESC;
+
+insertPayment:
+INSERT OR REPLACE INTO PaymentEntity VALUES ?;
+
+deletePaymentsByStudent:
+DELETE FROM PaymentEntity WHERE student_id = ?;
+
+-- Notification queries
+getAllNotifications:
+SELECT * FROM NotificationEntity ORDER BY created_at DESC;
+
+insertNotification:
+INSERT OR REPLACE INTO NotificationEntity VALUES ?;
+
+deleteAllNotifications:
+DELETE FROM NotificationEntity;
+
+-- Article queries
+getAllArticles:
+SELECT * FROM ArticleEntity ORDER BY published_at DESC;
+
+insertArticle:
+INSERT OR REPLACE INTO ArticleEntity VALUES ?;
+
+deleteAllArticles:
+DELETE FROM ArticleEntity;
+
+-- Extracurricular queries
+getAllExtracurriculars:
+SELECT * FROM ExtracurricularEntity;
+
+insertExtracurricular:
+INSERT OR REPLACE INTO ExtracurricularEntity VALUES ?;
+
+deleteAllExtracurriculars:
+DELETE FROM ExtracurricularEntity;
+
+-- Rapor queries
+getRaporInstancesByStudent:
+SELECT * FROM RaporInstanceEntity WHERE student_id = ? ORDER BY academic_year DESC, semester DESC;
+
+insertRaporInstance:
+INSERT OR REPLACE INTO RaporInstanceEntity VALUES ?;
+
+deleteRaporByStudent:
+DELETE FROM RaporInstanceEntity WHERE student_id = ?;
+
+-- Profile queries
+getProfile:
+SELECT * FROM ProfileEntity WHERE id = ?;
+
+insertProfile:
+INSERT OR REPLACE INTO ProfileEntity VALUES ?;
+
+deleteProfile:
+DELETE FROM ProfileEntity WHERE id = ?;

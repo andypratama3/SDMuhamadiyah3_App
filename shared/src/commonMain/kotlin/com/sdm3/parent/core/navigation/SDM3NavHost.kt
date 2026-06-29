@@ -3,7 +3,6 @@ package com.sdm3.parent.core.navigation
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -13,8 +12,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.sdm3.parent.core.designsystem.component.SDM3BottomNavBar
+import com.sdm3.parent.core.designsystem.component.Sdm3AdaptiveLayout
 import com.sdm3.parent.feature.auth.ui.AccountDeletionScreen
+import com.sdm3.parent.feature.auth.LoginViewModel
 import com.sdm3.parent.feature.auth.ui.LoginScreen
 import com.sdm3.parent.feature.auth.ui.OnboardingScreen
 import com.sdm3.parent.feature.auth.ui.PilihAnakScreen
@@ -63,59 +63,54 @@ fun SDM3NavHost(
         else -> false
     }
 
-    Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                val currentTab = when {
-                    currentRouteStr.contains("Home") -> SDM3BottomTab.Beranda
-                    currentRouteStr.contains("NilaiRapor") -> SDM3BottomTab.Nilai
-                    currentRouteStr.contains("PembayaranSpp") -> SDM3BottomTab.Bayar
-                    currentRouteStr.contains("HalamanRapor") -> SDM3BottomTab.Rapor
-                    currentRouteStr.contains("ProfilAkun") -> SDM3BottomTab.Profil
-                    else -> null
-                }
-                val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
-                val savedStudentId = secureTokenManager.getSelectedStudentId() ?: ""
-                val argStudentId = try {
-                    when {
-                        currentRouteStr.contains("Home") -> navBackStackEntry?.toRoute<SDM3Route.Home>()?.studentId
-                        currentRouteStr.contains("Main") -> navBackStackEntry?.toRoute<SDM3Route.Main>()?.studentId
-                        currentRouteStr.contains("NilaiRapor") -> navBackStackEntry?.toRoute<SDM3Route.NilaiRapor>()?.studentId
-                        currentRouteStr.contains("PembayaranSpp") -> navBackStackEntry?.toRoute<SDM3Route.PembayaranSpp>()?.studentId
-                        currentRouteStr.contains("HalamanRapor") -> navBackStackEntry?.toRoute<SDM3Route.HalamanRapor>()?.studentId
-                        else -> null
-                    }
-                } catch (_: Exception) {
-                    null
-                }
-                val studentId = if (!argStudentId.isNullOrEmpty()) {
-                    secureTokenManager.saveSelectedStudentId(argStudentId)
-                    argStudentId
-                } else {
-                    savedStudentId
-                }
-                SDM3BottomNavBar(
-                    currentTab = currentTab,
-                    onTabSelected = { tab ->
-                        val route: SDM3Route = when (tab) {
-                            SDM3BottomTab.Beranda -> SDM3Route.Home(studentId)
-                            SDM3BottomTab.Nilai -> SDM3Route.NilaiRapor(studentId, "ganjil")
-                            SDM3BottomTab.Bayar -> SDM3Route.PembayaranSpp(studentId)
-                            SDM3BottomTab.Rapor -> SDM3Route.HalamanRapor(studentId)
-                            SDM3BottomTab.Profil -> SDM3Route.ProfilAkun
-                        }
-                        navController.navigate(route) {
-                            popUpTo<SDM3Route.Main> { 
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
+    val currentTab = when {
+        currentRouteStr.contains("Home") -> SDM3BottomTab.Beranda
+        currentRouteStr.contains("NilaiRapor") -> SDM3BottomTab.Nilai
+        currentRouteStr.contains("PembayaranSpp") -> SDM3BottomTab.Bayar
+        currentRouteStr.contains("HalamanRapor") -> SDM3BottomTab.Rapor
+        currentRouteStr.contains("ProfilAkun") -> SDM3BottomTab.Profil
+        else -> null
+    }
+    val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
+    val savedStudentId = secureTokenManager.getSelectedStudentId() ?: ""
+    val argStudentId = try {
+        when {
+            currentRouteStr.contains("Home") -> navBackStackEntry?.toRoute<SDM3Route.Home>()?.studentId
+            currentRouteStr.contains("Main") -> navBackStackEntry?.toRoute<SDM3Route.Main>()?.studentId
+            currentRouteStr.contains("NilaiRapor") -> navBackStackEntry?.toRoute<SDM3Route.NilaiRapor>()?.studentId
+            currentRouteStr.contains("PembayaranSpp") -> navBackStackEntry?.toRoute<SDM3Route.PembayaranSpp>()?.studentId
+            currentRouteStr.contains("HalamanRapor") -> navBackStackEntry?.toRoute<SDM3Route.HalamanRapor>()?.studentId
+            else -> null
+        }
+    } catch (_: Exception) {
+        null
+    }
+    val studentId = if (!argStudentId.isNullOrEmpty()) {
+        secureTokenManager.saveSelectedStudentId(argStudentId)
+        argStudentId
+    } else {
+        savedStudentId
+    }
+
+    Sdm3AdaptiveLayout(
+        selectedTab = currentTab,
+        showNav = showBottomBar,
+        onTabSelected = { tab ->
+            val route: SDM3Route = when (tab) {
+                SDM3BottomTab.Beranda -> SDM3Route.Home(studentId)
+                SDM3BottomTab.Nilai -> SDM3Route.NilaiRapor(studentId, "ganjil")
+                SDM3BottomTab.Bayar -> SDM3Route.PembayaranSpp(studentId)
+                SDM3BottomTab.Rapor -> SDM3Route.HalamanRapor(studentId)
+                SDM3BottomTab.Profil -> SDM3Route.ProfilAkun
             }
-        },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+            navController.navigate(route) {
+                popUpTo<SDM3Route.Main> {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
     ) { padding ->
         NavHost(
             navController = navController,
@@ -164,7 +159,9 @@ fun SDM3NavHost(
             }
 
             composable<SDM3Route.Login> {
+                val loginViewModel: LoginViewModel = koinViewModel()
                 LoginScreen(
+                    viewModel = loginViewModel,
                     onLoginSuccess = {
                         navController.navigate(SDM3Route.PilihAnak) {
                             popUpTo<SDM3Route.Login> { inclusive = true }

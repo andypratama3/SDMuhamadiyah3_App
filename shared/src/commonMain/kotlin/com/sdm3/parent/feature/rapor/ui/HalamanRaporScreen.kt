@@ -69,7 +69,7 @@ fun HalamanRaporScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
@@ -119,7 +119,7 @@ fun HalamanRaporScreen(
                 }
 
                 item {
-                    // EduOcto Featured Rapor Card
+                    // ProductSchool Featured Rapor Card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(28.dp),

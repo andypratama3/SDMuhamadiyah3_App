@@ -2,6 +2,7 @@ package com.sdm3.parent.core.designsystem.component
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,8 +10,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,29 +20,12 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import com.sdm3.parent.core.designsystem.theme.NavBarShape
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
-import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.navigation.SDM3BottomTab
-
-data class BottomNavItem(
-    val label: String,
-    val tab: SDM3BottomTab,
-    val icon: ImageVector
-)
-
-private val bottomNavItems = listOf(
-    BottomNavItem("Home", SDM3BottomTab.Beranda, Icons.Outlined.Home),
-    BottomNavItem("Schedule", SDM3BottomTab.Nilai, Icons.Outlined.CalendarMonth),
-    BottomNavItem("Scan", SDM3BottomTab.Bayar, Icons.Outlined.QrCodeScanner),
-    BottomNavItem("Grades", SDM3BottomTab.Rapor, Icons.Outlined.School),
-    BottomNavItem("Menu", SDM3BottomTab.Profil, Icons.Outlined.Menu)
-)
 
 @Composable
 fun SDM3BottomNavBar(
@@ -53,7 +35,7 @@ fun SDM3BottomNavBar(
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-    // EduOcto Floating Glass Navigation
+    // ProductSchool Floating Glass Navigation
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -89,7 +71,7 @@ fun SDM3BottomNavBar(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                bottomNavItems.forEach { item ->
+                navItems.forEach { item ->
                     val selected = currentTab == item.tab
                     
                     val contentColor by animateColorAsState(

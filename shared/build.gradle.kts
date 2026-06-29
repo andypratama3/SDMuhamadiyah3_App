@@ -36,6 +36,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
+            linkerOpts("-lsqlite3")
         }
         iosTarget.compilations.getByName("main").compilerOptions.configure {
             freeCompilerArgs.add("-Xbinary=bundleId=com.sdm3.parent")

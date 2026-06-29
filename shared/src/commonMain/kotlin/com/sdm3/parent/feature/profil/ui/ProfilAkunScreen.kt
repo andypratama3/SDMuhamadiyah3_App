@@ -55,7 +55,7 @@ fun ProfilAkunScreen(
                         letterSpacing = (-0.5).sp
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
@@ -100,7 +100,7 @@ fun ProfilAkunScreen(
                             SettingsItem("Preferensi Bahasa", Icons.Outlined.Language, colorScheme.primary, { }),
                             SettingsItem("Pusat Bantuan", Icons.AutoMirrored.Outlined.Chat, colorScheme.primary, { }),
                             SettingsItem("Kebijakan Privasi", Icons.Outlined.VerifiedUser, colorScheme.primary, { }),
-                            SettingsItem("Tentang EduOcto", Icons.Outlined.Info, colorScheme.primary, { })
+                            SettingsItem("Tentang ProductSchool", Icons.Outlined.Info, colorScheme.primary, { })
                         ).forEachIndexed { index, item ->
                             SettingsItemRow(item = item, trailing = if (index == 1) "ID" else null)
                             if (index < 4) {

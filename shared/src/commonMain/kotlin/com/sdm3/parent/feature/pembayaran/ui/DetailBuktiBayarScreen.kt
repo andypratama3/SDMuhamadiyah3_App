@@ -80,7 +80,7 @@ fun DetailBuktiBayarScreen(
             )
         }
     ) { padding ->
-        // EduOcto Background Glow
+        // ProductSchool Background Glow
         val glowColor = colorScheme.primaryContainer
         Box(modifier = Modifier.fillMaxSize()) {
             androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {

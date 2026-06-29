@@ -1,111 +1,106 @@
 package com.sdm3.parent.core.designsystem.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// In a real project, we would load Inter font family here.
-// For now, we use the default and prioritize the hierarchy spec.
-private val appFontFamily = FontFamily.Default
+data class ProductSchoolTypography(
+    val displayLarge: TextStyle,
+    val displayMedium: TextStyle,
+    val titleLarge: TextStyle,
+    val titleMedium: TextStyle,
+    val bodyLarge: TextStyle,
+    val bodyMedium: TextStyle,
+    val bodySmall: TextStyle,
+    val labelLarge: TextStyle,
+    val labelSmall: TextStyle,
+    val metadata: TextStyle,
+)
 
-val SDM3Typography = Typography(
+internal val baseTypography = ProductSchoolTypography(
     displayLarge = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 32.sp,
-        fontWeight = FontWeight.Bold,
-        lineHeight = 40.sp,
-        letterSpacing = (-0.64).sp // -0.02em * 32
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.Bold,
+        fontSize = 34.sp, lineHeight = 41.sp, letterSpacing = (-0.25).sp,
     ),
     displayMedium = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 28.sp,
-        fontWeight = FontWeight.Bold,
-        lineHeight = 36.sp,
-        letterSpacing = (-0.56).sp
-    ),
-    displaySmall = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 32.sp,
-        letterSpacing = (-0.24).sp // -0.01em * 24
-    ),
-    headlineLarge = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 28.sp,
-        fontWeight = FontWeight.Bold,
-        lineHeight = 36.sp
-    ),
-    headlineMedium = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 32.sp,
-        letterSpacing = (-0.24).sp
-    ),
-    headlineSmall = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 20.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 28.sp
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp, lineHeight = 35.sp, letterSpacing = (-0.2).sp,
     ),
     titleLarge = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 24.sp
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,
+        fontSize = 22.sp, lineHeight = 28.sp,
     ),
     titleMedium = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 22.sp
-    ),
-    titleSmall = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 20.sp
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp, lineHeight = 24.sp,
     ),
     bodyLarge = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Normal,
-        lineHeight = 24.sp
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
+        fontSize = 16.sp, lineHeight = 24.sp,
     ),
     bodyMedium = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Normal,
-        lineHeight = 20.sp
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
+        fontSize = 14.sp, lineHeight = 20.sp,
     ),
     bodySmall = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Normal,
-        lineHeight = 16.sp
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
+        fontSize = 13.sp, lineHeight = 18.sp,
     ),
     labelLarge = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 20.sp,
-        letterSpacing = 0.5.sp
-    ),
-    labelMedium = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 16.sp,
-        letterSpacing = 0.6.sp // 0.05em * 12
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium,
+        fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.1.sp,
     ),
     labelSmall = TextStyle(
-        fontFamily = appFontFamily,
-        fontSize = 10.sp,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 14.sp,
-        letterSpacing = 1.sp
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.Medium,
+        fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.2.sp,
+    ),
+    metadata = TextStyle(
+        fontFamily = FontFamily.Default, fontWeight = FontWeight.Normal,
+        fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.1.sp,
+    ),
+)
+
+@Composable
+fun productSchoolTypography(): ProductSchoolTypography {
+    val inter = interFontFamily
+    return baseTypography.copy(
+        displayLarge = baseTypography.displayLarge.copy(fontFamily = inter),
+        displayMedium = baseTypography.displayMedium.copy(fontFamily = inter),
+        titleLarge = baseTypography.titleLarge.copy(fontFamily = inter),
+        titleMedium = baseTypography.titleMedium.copy(fontFamily = inter),
+        bodyLarge = baseTypography.bodyLarge.copy(fontFamily = inter),
+        bodyMedium = baseTypography.bodyMedium.copy(fontFamily = inter),
+        bodySmall = baseTypography.bodySmall.copy(fontFamily = inter),
+        labelLarge = baseTypography.labelLarge.copy(fontFamily = inter),
+        labelSmall = baseTypography.labelSmall.copy(fontFamily = inter),
+        metadata = baseTypography.metadata.copy(fontFamily = inter),
     )
+}
+
+fun ProductSchoolTypography.toMaterialTypography() = Typography(
+    displayLarge = displayLarge,
+    displayMedium = displayMedium,
+    titleLarge = titleLarge,
+    titleMedium = titleMedium,
+    bodyLarge = bodyLarge,
+    bodyMedium = bodyMedium,
+    bodySmall = bodySmall,
+    labelLarge = labelLarge,
+    labelMedium = labelLarge,
+    labelSmall = labelSmall,
+)
+
+val SDM3Typography = Typography(
+    displayLarge = baseTypography.displayLarge,
+    displayMedium = baseTypography.displayMedium,
+    titleLarge = baseTypography.titleLarge,
+    titleMedium = baseTypography.titleMedium,
+    bodyLarge = baseTypography.bodyLarge,
+    bodyMedium = baseTypography.bodyMedium,
+    bodySmall = baseTypography.bodySmall,
+    labelLarge = baseTypography.labelLarge,
+    labelSmall = baseTypography.labelSmall,
 )

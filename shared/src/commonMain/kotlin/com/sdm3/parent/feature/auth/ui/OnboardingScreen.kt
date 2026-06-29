@@ -76,7 +76,7 @@ fun OnboardingScreen(
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // EduOcto Atmospheric Background
+            // ProductSchool Atmospheric Background
             Canvas(modifier = Modifier.fillMaxSize().alpha(0.3f)) {
                 drawCircle(
                     brush = Brush.radialGradient(

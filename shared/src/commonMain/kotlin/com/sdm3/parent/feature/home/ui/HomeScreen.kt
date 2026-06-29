@@ -42,62 +42,102 @@ import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.navigation.SDM3Route
 import androidx.compose.ui.tooling.preview.Preview
 import com.sdm3.parent.core.navigation.SDM3BottomTab
+import com.sdm3.parent.feature.home.HomeIntent
+import com.sdm3.parent.feature.home.HomeViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen(
     studentId: String,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: HomeViewModel = koinViewModel()
 ) {
+    val state by viewModel.uiState.collectAsState()
     val colorScheme = MaterialTheme.colorScheme
     val isPreview = LocalInspectionMode.current
-    var visible by remember { mutableStateOf(isPreview) }
-    if (!isPreview) {
-        LaunchedEffect(Unit) { visible = true }
+    
+    LaunchedEffect(studentId) {
+        if (!isPreview) {
+            viewModel.onIntent(HomeIntent.LoadDashboard(studentId))
+        }
     }
 
     Scaffold(
         containerColor = colorScheme.background,
         topBar = {
-            HomeHeader(navController = navController)
+            HomeHeader(
+                navController = navController,
+                onNotificationClick = { navController.navigate(SDM3Route.Notifikasi) }
+            )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(bottom = 100.dp),
-            verticalArrangement = Arrangement.spacedBy(Spacing.xl)
-        ) {
-            // 1. Greeting Section
-            item {
-                GreetingSection(name = "Ararya", info = "Senin, 23 Oktober 2023 • XI MIPA 1")
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 100.dp),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+            ) {
+                // 1. Greeting Section
+                item {
+                    GreetingSection(
+                        name = if (state.isLoading) "..." else state.studentName.split(" ").firstOrNull() ?: "Wali Murid",
+                        info = if (state.isLoading) "Memuat data..." else state.className
+                    )
+                }
+
+                // 2. Shortcut Favorit (Horizontal Cards)
+                item {
+                    ShortcutFavoritSection(
+                        onSppClick = { navController.navigate(SDM3Route.PembayaranSpp(studentId)) },
+                        onAbsensiClick = { navController.navigate(SDM3Route.KehadiranSiswa(studentId)) }
+                    )
+                }
+
+                // 3. Layanan Sekolah (Grid 4x3)
+                item {
+                    LayananSekolahSection(
+                        onEkskulClick = { navController.navigate(SDM3Route.KegiatanProgram(studentId)) }
+                    )
+                }
+
+                // 4. Pengumuman Card
+                item {
+                    val latestAnnouncement = state.announcements.firstOrNull()
+                    PengumumanSection(
+                        title = latestAnnouncement?.title ?: "Belum ada pengumuman baru",
+                        time = latestAnnouncement?.publishedAt ?: "-",
+                        onClick = {
+                            navController.navigate(SDM3Route.PengumumanSekolah)
+                        }
+                    )
+                }
+
+                // 5. Tabungan Sekolah (Dark Card)
+                item {
+                    TabunganSekolahSection(amount = "Rp 1.250.000")
+                }
             }
 
-            // 2. Shortcut Favorit (Horizontal Cards)
-            item {
-                ShortcutFavoritSection()
+            if (state.isLoading && state.isEmpty) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
-
-            // 3. Layanan Sekolah (Grid 4x3)
-            item {
-                LayananSekolahSection()
-            }
-
-            // 4. Pengumuman Card
-            item {
-                PengumumanSection()
-            }
-
-            // 5. Tabungan Sekolah (Dark Card)
-            item {
-                TabunganSekolahSection(amount = "Rp 1.250.000")
+            
+            state.errorMessage?.let { error ->
+                NetworkErrorDialog(
+                    message = error,
+                    onRetry = { viewModel.onIntent(HomeIntent.Refresh(studentId)) },
+                    onDismiss = { /* Handle dismiss if needed */ }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun HomeHeader(navController: NavHostController) {
+private fun HomeHeader(
+    navController: NavHostController,
+    onNotificationClick: () -> Unit
+) {
     val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
@@ -108,14 +148,14 @@ private fun HomeHeader(navController: NavHostController) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Institutional Identity (EduOcto Logo)
+            // Institutional Identity (ProductSchool Logo)
             Sdm3Logo(
-                size = 32.dp,
+                size = 40.dp,
                 showBackground = false
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = "EduOcto",
+                text = "SD Muhammadiyah 3 Samarinda",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
@@ -123,7 +163,7 @@ private fun HomeHeader(navController: NavHostController) {
             )
         }
 
-        IconButton(onClick = {}) {
+        IconButton(onClick = onNotificationClick) {
             BadgedBox(
                 badge = {
                     Badge(
@@ -163,7 +203,10 @@ private fun GreetingSection(name: String, info: String) {
 }
 
 @Composable
-private fun ShortcutFavoritSection() {
+private fun ShortcutFavoritSection(
+    onSppClick: () -> Unit,
+    onAbsensiClick: () -> Unit
+) {
     Column {
         Row(
             modifier = Modifier
@@ -196,21 +239,24 @@ private fun ShortcutFavoritSection() {
                 ShortcutCard(
                     title = "SPP & Biaya",
                     icon = Icons.Outlined.AccountBalanceWallet,
-                    iconColor = StatusSuccess
+                    iconColor = StatusSuccess,
+                    onClick = onSppClick
                 )
             }
             item {
                 ShortcutCard(
                     title = "E-Library",
                     icon = Icons.Outlined.LocalLibrary,
-                    iconColor = MaterialTheme.colorScheme.primary
+                    iconColor = MaterialTheme.colorScheme.primary,
+                    onClick = { /* TODO */ }
                 )
             }
             item {
                 ShortcutCard(
                     title = "Absensi",
                     icon = Icons.Outlined.QrCodeScanner,
-                    iconColor = MaterialTheme.colorScheme.secondary
+                    iconColor = MaterialTheme.colorScheme.secondary,
+                    onClick = onAbsensiClick
                 )
             }
         }
@@ -218,9 +264,16 @@ private fun ShortcutFavoritSection() {
 }
 
 @Composable
-private fun ShortcutCard(title: String, icon: ImageVector, iconColor: Color) {
+private fun ShortcutCard(
+    title: String,
+    icon: ImageVector,
+    iconColor: Color,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.size(140.dp, 160.dp),
+        modifier = Modifier
+            .size(140.dp, 160.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -252,20 +305,22 @@ private fun ShortcutCard(title: String, icon: ImageVector, iconColor: Color) {
 }
 
 @Composable
-private fun LayananSekolahSection() {
+private fun LayananSekolahSection(
+    onEkskulClick: () -> Unit
+) {
     val items = listOf(
-        Pair("PERPUS", Icons.Outlined.AutoStories),
-        Pair("KANTIN", Icons.Outlined.Restaurant),
-        Pair("EKSKUL", Icons.Outlined.SportsSoccer),
-        Pair("ALUMNI", Icons.Outlined.Groups),
-        Pair("EVENT", Icons.Outlined.CalendarMonth),
-        Pair("CS", Icons.Outlined.SupportAgent),
-        Pair("BEASISWA", Icons.Outlined.School),
-        Pair("KONSELING", Icons.Outlined.Psychology),
-        Pair("BUS", Icons.Outlined.DirectionsBus),
-        Pair("UKS", Icons.Outlined.MedicalServices),
-        Pair("HALL FAME", Icons.Outlined.MilitaryTech),
-        Pair("LAINNYA", Icons.Outlined.GridView)
+        Triple("PERPUS", Icons.Outlined.AutoStories, {}),
+        Triple("KANTIN", Icons.Outlined.Restaurant, {}),
+        Triple("EKSKUL", Icons.Outlined.SportsSoccer, onEkskulClick),
+        Triple("ALUMNI", Icons.Outlined.Groups, {}),
+        Triple("EVENT", Icons.Outlined.CalendarMonth, {}),
+        Triple("CS", Icons.Outlined.SupportAgent, {}),
+        Triple("BEASISWA", Icons.Outlined.School, {}),
+        Triple("KONSELING", Icons.Outlined.Psychology, {}),
+        Triple("BUS", Icons.Outlined.DirectionsBus, {}),
+        Triple("UKS", Icons.Outlined.MedicalServices, {}),
+        Triple("HALL FAME", Icons.Outlined.MilitaryTech, {}),
+        Triple("LAINNYA", Icons.Outlined.GridView, {})
     )
 
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -290,8 +345,8 @@ private fun LayananSekolahSection() {
                         modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        rowItems.forEach { (label, icon) ->
-                            ServiceItem(label, icon)
+                        rowItems.forEach { (label, icon, onClick) ->
+                            ServiceItem(label, icon, onClick)
                         }
                     }
                 }
@@ -301,10 +356,16 @@ private fun LayananSekolahSection() {
 }
 
 @Composable
-private fun ServiceItem(label: String, icon: ImageVector) {
+private fun ServiceItem(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(70.dp)
+        modifier = Modifier
+            .width(70.dp)
+            .clickable(onClick = onClick)
     ) {
         Surface(
             modifier = Modifier.size(48.dp),
@@ -328,10 +389,16 @@ private fun ServiceItem(label: String, icon: ImageVector) {
 }
 
 @Composable
-private fun PengumumanSection() {
+private fun PengumumanSection(
+    title: String,
+    time: String,
+    onClick: () -> Unit
+) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Sdm3Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
             padding = 20.dp
         ) {
             Column {
@@ -350,7 +417,7 @@ private fun PengumumanSection() {
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Ujian Tengah Semester dimulai dalam 5 hari.",
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -365,7 +432,7 @@ private fun PengumumanSection() {
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "20 Menit lalu",
+                        text = time,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -22,7 +22,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.designsystem.theme.SDM3Theme
+import com.sdm3.parent.core.designsystem.theme.StatusDanger
+import com.sdm3.parent.core.designsystem.theme.StatusSuccess
+import com.sdm3.parent.core.designsystem.theme.StatusWarning
 
 @Composable
 fun StatusChip(
@@ -54,22 +57,6 @@ fun StatusChip(
     }
 }
 
-fun statusColorForAttendance(status: String): Color = when (status.lowercase()) {
-    "hadir", "present" -> StatusSuccess
-    "sakit" -> StatusWarning
-    "izin", "excused" -> Color(0xFF001B3D) // Navy
-    "alpa", "absent" -> StatusDanger
-    else -> StatusWarning
-}
-
-fun statusColorForPayment(status: String): Color = when (status.lowercase()) {
-    "lunas", "success", "paid" -> StatusSuccess
-    "belum_bayar", "pending" -> StatusDanger
-    "expired" -> Disabled
-    "failed" -> StatusDanger
-    else -> StatusWarning
-}
-
 @Preview
 @Composable
 private fun StatusChipPreview() {
@@ -78,13 +65,13 @@ private fun StatusChipPreview() {
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            StatusChip(text = "Hadir", color = statusColorForAttendance("hadir"))
-            StatusChip(text = "Sakit", color = statusColorForAttendance("sakit"))
-            StatusChip(text = "Izin", color = statusColorForAttendance("izin"))
-            StatusChip(text = "Alpa", color = statusColorForAttendance("alpa"))
+            StatusChip(text = "Hadir", color = StatusSuccess)
+            StatusChip(text = "Sakit", color = StatusWarning)
+            StatusChip(text = "Izin", color = Color(0xFF001B3D))
+            StatusChip(text = "Alpa", color = StatusDanger)
             Spacer(modifier = Modifier.height(8.dp))
-            StatusChip(text = "Lunas", color = statusColorForPayment("lunas"))
-            StatusChip(text = "Pending", color = statusColorForPayment("pending"))
+            StatusChip(text = "Lunas", color = StatusSuccess)
+            StatusChip(text = "Pending", color = StatusDanger)
         }
     }
 }

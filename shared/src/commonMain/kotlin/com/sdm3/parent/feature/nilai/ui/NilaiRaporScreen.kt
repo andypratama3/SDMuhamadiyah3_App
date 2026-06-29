@@ -92,7 +92,7 @@ fun NilaiRaporScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // EduOcto Atmospheric Glow
+            // ProductSchool Atmospheric Glow
             Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -179,7 +179,7 @@ private fun SumatifTabContent(
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
     ) {
         item {
-            // Hero Score Card (EduOcto Style)
+            // Hero Score Card (ProductSchool Style)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),

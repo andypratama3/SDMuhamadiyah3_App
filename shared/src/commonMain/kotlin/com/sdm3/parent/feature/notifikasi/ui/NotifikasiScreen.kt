@@ -141,15 +141,15 @@ fun NotifikasiScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                ScrollableTabRow(
+                PrimaryScrollableTabRow(
                     selectedTabIndex = selectedFilter,
                     containerColor = Color.Transparent,
                     contentColor = colorScheme.primary,
                     edgePadding = 24.dp,
                     divider = {},
-                    indicator = { tabPositions ->
+                    indicator = {
                         TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedFilter]),
+                            modifier = Modifier.tabIndicatorOffset(selectedTabIndex = selectedFilter),
                             color = colorScheme.secondary
                         )
                     }

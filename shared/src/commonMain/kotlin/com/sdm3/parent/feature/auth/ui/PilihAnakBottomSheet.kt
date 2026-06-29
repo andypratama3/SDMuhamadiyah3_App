@@ -1,4 +1,4 @@
-package com.sdm3.parent.core.designsystem.component
+package com.sdm3.parent.feature.auth.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,13 +19,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import com.sdm3.parent.core.designsystem.component.Sdm3Card
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.data.remote.dto.StudentDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PilihAnakBottomSheet(
-    students: List<com.sdm3.parent.data.remote.dto.StudentDto>,
+    students: List<StudentDto>,
     selectedStudentId: String,
     onStudentSelected: (String) -> Unit,
     onDismiss: () -> Unit

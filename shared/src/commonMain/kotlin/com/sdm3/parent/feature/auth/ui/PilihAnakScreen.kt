@@ -81,7 +81,7 @@ fun PilihAnakScreen(
                     .padding(horizontal = Spacing.xl, vertical = Spacing.lg)
                     .navigationBarsPadding()
             ) {
-                // EduOcto Island Button Architecture (Glassmorphic)
+                // ProductSchool Island Button Architecture (Glassmorphic)
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -106,7 +106,7 @@ fun PilihAnakScreen(
             }
         }
     ) { padding ->
-        // Background Glow (EduOcto Style)
+        // Background Glow (ProductSchool Style)
         val glowColor = MaterialTheme.colorScheme.primaryContainer
         Box(modifier = Modifier.fillMaxSize()) {
             Canvas(modifier = Modifier.fillMaxSize().alpha(0.3f)) {
@@ -228,7 +228,7 @@ private fun StudentItem(
         label = "borderColor"
     )
 
-    // EduOcto Glass Card Architecture
+    // ProductSchool Glass Card Architecture
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -260,7 +260,7 @@ private fun StudentItem(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Photo Container with EduOcto Navy Border
+                // Photo Container with ProductSchool Navy Border
                 Box(
                     modifier = Modifier
                         .size(60.dp)

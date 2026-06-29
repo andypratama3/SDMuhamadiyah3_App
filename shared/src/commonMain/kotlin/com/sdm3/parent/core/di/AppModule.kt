@@ -7,6 +7,9 @@ import com.sdm3.parent.core.security.CertificatePins
 import com.sdm3.parent.core.security.KVaultSecureStorage
 import com.sdm3.parent.core.security.SecureStorage
 import com.sdm3.parent.core.security.SecureTokenManager
+import com.sdm3.parent.cache.CacheDataSource
+import com.sdm3.parent.cache.DatabaseDriverFactory
+import com.sdm3.parent.cache.SDM3Database
 import com.sdm3.parent.data.remote.api.ArticleApi
 import com.sdm3.parent.data.remote.api.AttendanceApi
 import com.sdm3.parent.data.remote.api.AuthApi
@@ -76,6 +79,11 @@ val configModule = module {
     single { SDM3Config() }
 }
 
+val databaseModule = module {
+    single { SDM3Database(get<DatabaseDriverFactory>().createDriver()) }
+    single { CacheDataSource(get()) }
+}
+
 val apiModule = module {
     single { AuthApi(get()) }
     single { StudentApi(get()) }
@@ -91,17 +99,17 @@ val apiModule = module {
 }
 
 val repositoryModule = module {
-    single<AuthRepositoryContract> { AuthRepository(get()) }
-    single { StudentRepository(get()) }
-    single { GradeRepository(get()) }
-    single { AttendanceRepository(get()) }
-    single { PaymentRepository(get()) }
-    single { NotificationRepository(get()) }
-    single { ArticleRepository(get()) }
-    single { RaporRepository(get()) }
-    single { DashboardRepository(get()) }
-    single { ProfileRepository(get()) }
-    single { ExtracurricularRepository(get()) }
+    single<AuthRepositoryContract> { AuthRepository(get(), get()) }
+    single { StudentRepository(get(), get()) }
+    single { GradeRepository(get(), get()) }
+    single { AttendanceRepository(get(), get()) }
+    single { PaymentRepository(get(), get()) }
+    single { NotificationRepository(get(), get()) }
+    single { ArticleRepository(get(), get()) }
+    single { RaporRepository(get(), get()) }
+    single { DashboardRepository(get(), get()) }
+    single { ProfileRepository(get(), get()) }
+    single { ExtracurricularRepository(get(), get()) }
 }
 
 val viewModelModule = module {
