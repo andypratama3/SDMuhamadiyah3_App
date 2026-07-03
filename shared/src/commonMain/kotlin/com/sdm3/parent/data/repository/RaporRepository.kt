@@ -1,10 +1,8 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.di.DevMode
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.dummy.DummyDataProvider
 import com.sdm3.parent.data.remote.api.RaporApi
 import com.sdm3.parent.data.remote.dto.RaporInstanceDto
 import com.sdm3.parent.data.remote.dto.RaporVerifyResponse
@@ -23,7 +21,6 @@ class RaporRepository(
         } catch (e: Exception) {
             val cached = cache.getRaporInstances(studentId)
             if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyRaporInstances)
             else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data rapor"))
         }
     }
@@ -32,8 +29,7 @@ class RaporRepository(
         return try {
             api.getDownloadUrl(id)
         } catch (e: Exception) {
-            if (DevMode.isEnabled) ApiResult.Success("https://admin.sdm3.sch.id/storage/rapor/$id")
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mendapatkan URL unduhan"))
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mendapatkan URL unduhan"))
         }
     }
 
@@ -41,8 +37,7 @@ class RaporRepository(
         return try {
             api.verifyQr(qrData)
         } catch (e: Exception) {
-            if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyRaporVerifyResponse)
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal memverifikasi QR"))
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal memverifikasi QR"))
         }
     }
 }

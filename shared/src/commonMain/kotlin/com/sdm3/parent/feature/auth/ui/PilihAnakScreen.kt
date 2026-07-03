@@ -51,9 +51,14 @@ private val PremiumEasing = CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
 @Composable
 fun PilihAnakScreen(
     onChildSelected: (String) -> Unit,
-    viewModel: PilihAnakViewModel? = if (LocalInspectionMode.current) null else koinViewModel()
+    viewModel: PilihAnakViewModel = koinViewModel()
 ) {
-    val uiState by if (viewModel != null) viewModel.uiState.collectAsState() else remember { mutableStateOf(null) }.let { derivedStateOf { it.value } }
+    val isPreview = LocalInspectionMode.current
+    val uiState by if (isPreview) {
+        remember { mutableStateOf(com.sdm3.parent.feature.auth.PilihAnakUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -94,9 +99,9 @@ fun PilihAnakScreen(
                         Sdm3Button(
                             text = "Lanjutkan Ke Dashboard",
                             onClick = {
-                                uiState?.selectedStudentId?.let { onChildSelected(it) }
+                                uiState.selectedStudentId?.let { onChildSelected(it) }
                             },
-                            enabled = uiState?.selectedStudentId != null && uiState?.isLoading == false,
+                            enabled = uiState.selectedStudentId != null && uiState.isLoading == false,
                             modifier = Modifier.fillMaxWidth(),
                             containerColor = MaterialTheme.colorScheme.secondary,
                             contentColor = MaterialTheme.colorScheme.primary // Navy text on Gold button
@@ -126,7 +131,7 @@ fun PilihAnakScreen(
                 .padding(padding)
         ) {
             when {
-                uiState?.isLoading == true -> {
+                uiState.isLoading == true -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
                         color = MaterialTheme.colorScheme.secondary,
@@ -134,15 +139,15 @@ fun PilihAnakScreen(
                     )
                 }
 
-                uiState?.errorMessage != null -> {
+                uiState.errorMessage != null -> {
                     ErrorState(
-                        message = uiState!!.errorMessage!!,
-                        onRetry = { viewModel?.loadStudents() }
+                        message = uiState.errorMessage!!,
+                        onRetry = { viewModel.loadStudents() }
                     )
                 }
 
                 else -> {
-                    val students = uiState?.students ?: emptyList()
+                    val students = uiState.students
 
                     if (students.isEmpty()) {
                         EmptyStudentState()
@@ -201,8 +206,8 @@ fun PilihAnakScreen(
                                 ) {
                                     StudentItem(
                                         student = student,
-                                        isSelected = uiState?.selectedStudentId == student.id,
-                                        onClick = { viewModel?.selectStudent(student.id) }
+                                        isSelected = uiState.selectedStudentId == student.id,
+                                        onClick = { viewModel.selectStudent(student.id) }
                                     )
                                 }
                             }
@@ -297,7 +302,7 @@ private fun StudentItem(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "NISN: ${student.nisn}",
+                        text = "NISN: ${student.nisn ?: "-"}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         letterSpacing = 0.2.sp

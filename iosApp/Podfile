@@ -1,0 +1,21 @@
+# Firebase Cloud Messaging for SDM3 Parent (iOS)
+# Setup:
+#   1. Download GoogleService-Info.plist from Firebase Console → iosApp/iosApp/
+#   2. cd iosApp && pod install
+#   3. Open iosApp.xcworkspace (not .xcodeproj)
+
+platform :ios, '15.0'
+use_frameworks!
+
+target 'iosApp' do
+  pod 'FirebaseCore'
+  pod 'FirebaseMessaging'
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+    end
+  end
+end

@@ -4,14 +4,14 @@ import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.test.TestDispatcher
 import com.sdm3.parent.data.remote.dto.StudentDto
-import com.sdm3.parent.data.repository.StudentRepository
+import com.sdm3.parent.domain.repository.StudentRepositoryContract
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class FakeStudentRepository : StudentRepository(api = null) {
+class FakeStudentRepository : StudentRepositoryContract {
     var studentsResult: ApiResult<List<StudentDto>> = ApiResult.Success(
         listOf(
             StudentDto(
@@ -27,6 +27,16 @@ class FakeStudentRepository : StudentRepository(api = null) {
     )
 
     override suspend fun getStudents(): ApiResult<List<StudentDto>> = studentsResult
+
+    override suspend fun getStudentDetail(id: String): ApiResult<StudentDto> =
+        when (val result = studentsResult) {
+            is ApiResult.Success -> {
+                val student = result.data.find { it.id == id }
+                if (student != null) ApiResult.Success(student)
+                else ApiResult.Error(ApiError.Unknown("Student not found"))
+            }
+            is ApiResult.Error -> result
+        }
 }
 
 class PilihAnakViewModelTest : TestDispatcher() {
@@ -36,7 +46,6 @@ class PilihAnakViewModelTest : TestDispatcher() {
         val repo = FakeStudentRepository()
         val viewModel = PilihAnakViewModel(repo)
 
-        // Run current to execute init block loadStudents() coroutine
         testDispatcher.scheduler.runCurrent()
 
         val state = viewModel.uiState.value
@@ -50,7 +59,7 @@ class PilihAnakViewModelTest : TestDispatcher() {
     @Test
     fun loadStudentsErrorUpdatesErrorMessage() {
         val repo = FakeStudentRepository()
-        repo.studentsResult = ApiResult.Error(ApiError.Unknown("Error fetching data"))
+        repo.studentsResult = ApiResult.Error(ApiError.Unknown(""))
         val viewModel = PilihAnakViewModel(repo)
 
         testDispatcher.scheduler.runCurrent()

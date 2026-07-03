@@ -2,8 +2,9 @@ package com.sdm3.parent.feature.pembayaran
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.PaymentDto
-import kotlinx.coroutines.delay
+import com.sdm3.parent.domain.repository.PaymentRepositoryContract
 
 data class DetailBuktiBayarUiState(
     override val isLoading: Boolean = false,
@@ -12,23 +13,23 @@ data class DetailBuktiBayarUiState(
     val payment: PaymentDto? = null
 ) : ScreenState
 
-class DetailBuktiBayarViewModel : BaseViewModel<DetailBuktiBayarUiState>(DetailBuktiBayarUiState()) {
+class DetailBuktiBayarViewModel(
+    private val paymentRepository: PaymentRepositoryContract
+) : BaseViewModel<DetailBuktiBayarUiState>(DetailBuktiBayarUiState()) {
 
     fun loadPaymentDetail(paymentId: String) {
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null) }
-            delay(1000)
-            val dummyPayment = PaymentDto(
-                id = paymentId,
-                orderId = "SDM3-77291044",
-                grossAmount = 702500.0,
-                status = "success",
-                paymentType = "bank_transfer",
-                vaNumber = "8507 0812 3456 7890",
-                paidAt = "15 Juli 2024, 08:42",
-                createdAt = "15 Juli 2024, 08:30"
-            )
-            updateState { it.copy(payment = dummyPayment, isLoading = false) }
+            when (val result = paymentRepository.getPaymentDetail(paymentId)) {
+                is ApiResult.Success -> {
+                    updateState { it.copy(payment = result.data, isLoading = false) }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
+            }
         }
     }
 }

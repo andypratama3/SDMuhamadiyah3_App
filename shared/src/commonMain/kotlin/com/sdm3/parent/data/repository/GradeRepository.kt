@@ -1,13 +1,12 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.di.DevMode
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.dummy.DummyDataProvider
 import com.sdm3.parent.data.remote.api.GradeApi
 import com.sdm3.parent.data.remote.dto.GradeComponentDto
 import com.sdm3.parent.data.remote.dto.GradeDto
+import com.sdm3.parent.data.remote.dto.TranscriptDto
 import com.sdm3.parent.domain.repository.GradeRepositoryContract
 
 class GradeRepository(
@@ -25,7 +24,6 @@ class GradeRepository(
             val cached = if (semesterFilter.isNotEmpty()) cache.getGradesBySemester(studentId, semesterFilter)
                           else cache.getGrades(studentId)
             if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyGrades)
             else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data nilai"))
         }
     }
@@ -38,8 +36,15 @@ class GradeRepository(
         } catch (e: Exception) {
             val cached = cache.getGradeComponents(subjectId, studentId)
             if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyGradeComponents)
             else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil komponen nilai"))
+        }
+    }
+
+    override suspend fun getTranscript(studentId: String): ApiResult<TranscriptDto> {
+        return try {
+            api.getTranscript(studentId)
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil transkrip nilai"))
         }
     }
 }

@@ -5,6 +5,6 @@ import com.sdm3.parent.data.remote.dto.AttendanceDto
 import com.sdm3.parent.data.remote.dto.AttendanceSummaryDto
 
 interface AttendanceRepositoryContract {
-    suspend fun getAttendances(studentId: String, month: Int? = null, year: Int? = null): ApiResult<List<AttendanceDto>>
+    suspend fun getAttendances(studentId: String? = null, month: Int? = null, year: Int? = null): ApiResult<List<AttendanceDto>>
     suspend fun getAttendanceSummary(studentId: String): ApiResult<AttendanceSummaryDto>
 }

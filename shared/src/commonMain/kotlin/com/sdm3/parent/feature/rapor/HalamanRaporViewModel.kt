@@ -2,8 +2,9 @@ package com.sdm3.parent.feature.rapor
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.RaporInstanceDto
-import kotlinx.coroutines.delay
+import com.sdm3.parent.domain.repository.RaporRepositoryContract
 
 data class HalamanRaporUiState(
     override val isLoading: Boolean = false,
@@ -13,22 +14,28 @@ data class HalamanRaporUiState(
     val rapors: List<RaporInstanceDto> = emptyList()
 ) : ScreenState
 
-class HalamanRaporViewModel : BaseViewModel<HalamanRaporUiState>(HalamanRaporUiState()) {
+class HalamanRaporViewModel(
+    private val raporRepository: RaporRepositoryContract
+) : BaseViewModel<HalamanRaporUiState>(HalamanRaporUiState()) {
 
     fun loadRapors(studentId: String) {
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null, studentId = studentId) }
-            delay(1000)
-            val dummyRapors = listOf(
-                RaporInstanceDto(id = "1", studentId = studentId, semester = "Ganjil (1)", academicYear = "2023 / 2024", status = "available", pdfUrl = "https://example.com/rapor.pdf"),
-                RaporInstanceDto(id = "2", studentId = studentId, semester = "Genap (2)", academicYear = "2022 / 2023", status = "available", pdfUrl = "https://example.com/rapor.pdf")
-            )
-            updateState {
-                it.copy(
-                    rapors = dummyRapors,
-                    isLoading = false,
-                    isEmpty = dummyRapors.isEmpty()
-                )
+            when (val result = raporRepository.getRaporInstances(studentId)) {
+                is ApiResult.Success -> {
+                    updateState {
+                        it.copy(
+                            rapors = result.data,
+                            isLoading = false,
+                            isEmpty = result.data.isEmpty()
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
             }
         }
     }

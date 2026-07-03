@@ -2,64 +2,72 @@ package com.sdm3.parent.feature.profil
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.domain.repository.SettingsRepositoryContract
 
 data class PengaturanNotifikasiUiState(
     override val isLoading: Boolean = false,
     override val errorMessage: String? = null,
     override val isEmpty: Boolean = false,
-    val pushEnabled: Boolean = true,
-    val emailEnabled: Boolean = false,
-    val smsEnabled: Boolean = false,
-    val nilaiNotif: Boolean = true,
-    val tagihanNotif: Boolean = true,
-    val pengumumanNotif: Boolean = true,
-    val kehadiranNotif: Boolean = true,
-    val raporNotif: Boolean = false
+    val settings: NotificationSettings = NotificationSettings()
 ) : ScreenState
 
-class PengaturanNotifikasiViewModel : BaseViewModel<PengaturanNotifikasiUiState>(PengaturanNotifikasiUiState()) {
+class PengaturanNotifikasiViewModel(
+    private val settingsRepository: SettingsRepositoryContract
+) : BaseViewModel<PengaturanNotifikasiUiState>(PengaturanNotifikasiUiState()) {
 
     fun loadSettings() {
-        updateState { it.copy(isLoading = true) }
-        // Would load from a settings repository/preferences
-        updateState { it.copy(isLoading = false) }
+        launchSafely(
+            onError = { error ->
+                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Gagal memuat pengaturan") }
+            }
+        ) {
+            updateState { it.copy(isLoading = true, errorMessage = null) }
+            val settings = settingsRepository.loadNotificationSettings()
+            updateState { it.copy(isLoading = false, settings = settings) }
+        }
     }
 
     fun saveSettings() {
-        updateState { it.copy(isLoading = true) }
-        // Would persist to a settings repository/preferences
-        updateState { it.copy(isLoading = false) }
+        launchSafely(
+            onError = { error ->
+                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Gagal menyimpan pengaturan") }
+            }
+        ) {
+            updateState { it.copy(isLoading = true, errorMessage = null) }
+            settingsRepository.saveNotificationSettings(uiState.value.settings)
+            updateState { it.copy(isLoading = false) }
+        }
     }
 
     fun togglePush() {
-        updateState { it.copy(pushEnabled = !it.pushEnabled) }
+        updateState { it.copy(settings = it.settings.copy(pushEnabled = !it.settings.pushEnabled)) }
     }
 
     fun toggleEmail() {
-        updateState { it.copy(emailEnabled = !it.emailEnabled) }
+        updateState { it.copy(settings = it.settings.copy(emailEnabled = !it.settings.emailEnabled)) }
     }
 
     fun toggleSms() {
-        updateState { it.copy(smsEnabled = !it.smsEnabled) }
+        updateState { it.copy(settings = it.settings.copy(smsEnabled = !it.settings.smsEnabled)) }
     }
 
     fun toggleNilai() {
-        updateState { it.copy(nilaiNotif = !it.nilaiNotif) }
+        updateState { it.copy(settings = it.settings.copy(nilaiNotif = !it.settings.nilaiNotif)) }
     }
 
     fun toggleTagihan() {
-        updateState { it.copy(tagihanNotif = !it.tagihanNotif) }
+        updateState { it.copy(settings = it.settings.copy(tagihanNotif = !it.settings.tagihanNotif)) }
     }
 
     fun togglePengumuman() {
-        updateState { it.copy(pengumumanNotif = !it.pengumumanNotif) }
+        updateState { it.copy(settings = it.settings.copy(pengumumanNotif = !it.settings.pengumumanNotif)) }
     }
 
     fun toggleKehadiran() {
-        updateState { it.copy(kehadiranNotif = !it.kehadiranNotif) }
+        updateState { it.copy(settings = it.settings.copy(kehadiranNotif = !it.settings.kehadiranNotif)) }
     }
 
     fun toggleRapor() {
-        updateState { it.copy(raporNotif = !it.raporNotif) }
+        updateState { it.copy(settings = it.settings.copy(raporNotif = !it.settings.raporNotif)) }
     }
 }

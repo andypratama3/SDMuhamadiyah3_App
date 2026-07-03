@@ -1,10 +1,9 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.di.DevMode
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.dummy.DummyDataProvider
+import com.sdm3.parent.core.security.SecureTokenManager
 import com.sdm3.parent.data.remote.api.AuthApi
 import com.sdm3.parent.data.remote.dto.UserDto
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
@@ -12,18 +11,21 @@ import com.sdm3.parent.domain.repository.AuthRepositoryContract
 class AuthRepository(
     private val api: AuthApi,
     private val cache: CacheDataSource,
+    private val secureTokenManager: SecureTokenManager,
 ) : AuthRepositoryContract {
 
     override suspend fun login(email: String, password: String): ApiResult<UserDto> {
         return try {
             val result = api.login(email, password)
             when (result) {
-                is ApiResult.Success -> ApiResult.Success(result.data.user)
+                is ApiResult.Success -> {
+                    secureTokenManager.saveBearerToken(result.data.token)
+                    ApiResult.Success(result.data.user)
+                }
                 is ApiResult.Error -> result
             }
         } catch (e: Exception) {
-            if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyUser)
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal login"))
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal login"))
         }
     }
 
@@ -41,8 +43,7 @@ class AuthRepository(
             }
             result
         } catch (e: Exception) {
-            if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyUser)
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data user"))
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data user"))
         }
     }
 
@@ -51,11 +52,29 @@ class AuthRepository(
             val result = api.getUser()
             result is ApiResult.Success
         } catch (_: Exception) {
-            DevMode.isEnabled || false
+            false
+        }
+    }
+
+    override suspend fun apiLogout(): ApiResult<Unit> {
+        return try {
+            api.logout()
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal logout"))
+        }
+    }
+
+    override suspend fun deleteAccount(reason: String): ApiResult<Unit> {
+        return try {
+            api.deleteAccount(reason)
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal menghapus akun"))
         }
     }
 
     override suspend fun logout() {
+        secureTokenManager.clearAllSecureData()
+        cache.clearAll()
         try {
             api.getCsrfCookie()
         } catch (_: Exception) { }
@@ -68,8 +87,7 @@ class AuthRepository(
                 is ApiResult.Error -> result
             }
         } catch (e: Exception) {
-            if (DevMode.isEnabled) ApiResult.Success("Kode OTP telah dikirim ke email Anda")
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengirim OTP"))
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengirim OTP"))
         }
     }
 
@@ -80,8 +98,7 @@ class AuthRepository(
                 is ApiResult.Error -> result
             }
         } catch (e: Exception) {
-            if (DevMode.isEnabled) ApiResult.Success("OTP berhasil diverifikasi")
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal verifikasi OTP"))
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal verifikasi OTP"))
         }
     }
 
@@ -97,8 +114,7 @@ class AuthRepository(
                 is ApiResult.Error -> result
             }
         } catch (e: Exception) {
-            if (DevMode.isEnabled) ApiResult.Success("Password berhasil direset")
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal reset password"))
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal reset password"))
         }
     }
 }

@@ -358,9 +358,22 @@ private fun OtpDigitInput(
 @Preview
 @Composable
 private fun VerifikasiOtpScreenPreview() {
+    val mockAuthRepo = remember {
+        object : com.sdm3.parent.domain.repository.AuthRepositoryContract {
+            override suspend fun login(email: String, password: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
+            override suspend fun getAuthenticatedUser() = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
+            override suspend fun apiLogout() = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
+            override suspend fun deleteAccount(reason: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
+            override suspend fun isLoggedIn() = false
+            override suspend fun logout() {}
+            override suspend fun requestOtp(email: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
+            override suspend fun verifyOtp(email: String, otp: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
+            override suspend fun resetPassword(email: String, otp: String, password: String, passwordConfirmation: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
+        }
+    }
     SDM3Theme {
         VerifikasiOtpScreen(
-            viewModel = VerifikasiOtpViewModel(),
+            viewModel = VerifikasiOtpViewModel(mockAuthRepo),
             onSuccess = {}
         )
     }

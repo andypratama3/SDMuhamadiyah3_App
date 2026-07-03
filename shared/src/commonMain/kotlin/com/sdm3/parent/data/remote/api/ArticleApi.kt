@@ -17,4 +17,22 @@ class ArticleApi(private val provider: HttpClientProvider) {
         provider.handleSessionExpiredIfNeeded(response)
         return response.toApiResult()
     }
+
+    suspend fun getArticleById(id: String): ApiResult<ArticleDto> {
+        val response = provider.client.get {
+            url(Endpoints.PARENT_ARTICLE_DETAIL.replace("{id}", id))
+            provider.applyAuthHeader(this)
+        }
+        provider.handleSessionExpiredIfNeeded(response)
+        return response.toApiResult()
+    }
+
+    suspend fun getArticleBySlug(slug: String): ApiResult<ArticleDto> {
+        val response = provider.client.get {
+            url(Endpoints.PARENT_ARTICLE_BY_SLUG.replace("{slug}", slug))
+            provider.applyAuthHeader(this)
+        }
+        provider.handleSessionExpiredIfNeeded(response)
+        return response.toApiResult()
+    }
 }

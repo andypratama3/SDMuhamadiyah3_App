@@ -177,6 +177,6 @@ class VerifikasiOtpViewModelTest : TestDispatcher() {
 
         testDispatcher.scheduler.runCurrent()
 
-        assertEquals("Password reset", viewModel.uiState.value.resetSuccessMessage)
+        assertEquals("Kata sandi berhasil diperbarui!", viewModel.uiState.value.resetSuccessMessage)
     }
 }

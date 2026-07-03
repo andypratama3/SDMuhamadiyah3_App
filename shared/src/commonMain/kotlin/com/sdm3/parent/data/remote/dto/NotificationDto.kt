@@ -7,9 +7,11 @@ import kotlinx.serialization.Serializable
 data class NotificationDto(
     val id: String,
     val type: String,
-    val title: String,
+    val title: String? = null,
     val message: String,
     val data: Map<String, String>? = null,
+    @SerialName("is_read")
+    val isRead: Boolean? = null,
     @SerialName("read_at")
     val readAt: String? = null,
     @SerialName("created_at")

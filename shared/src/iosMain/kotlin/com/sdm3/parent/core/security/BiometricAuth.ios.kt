@@ -12,9 +12,9 @@ import platform.LocalAuthentication.LAContext
 import platform.LocalAuthentication.LAPolicyDeviceOwnerAuthenticationWithBiometrics
 import kotlin.coroutines.resume
 
-actual class BiometricAuthenticator {
+actual class BiometricAuthenticator : BiometricAuthGate {
     @OptIn(ExperimentalForeignApi::class)
-    actual suspend fun authenticate(reason: String): BiometricResult {
+    actual override suspend fun authenticate(reason: String): BiometricResult {
         return suspendCancellableCoroutine { continuation ->
             val context = LAContext()
 

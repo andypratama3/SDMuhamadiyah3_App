@@ -31,7 +31,8 @@ data class GradeComponentDto(
     @SerialName("tp_name")
     val tpName: String? = null,
     @SerialName("tp_number")
-    val tpNumber: Int? = null
+    val tpNumber: Int? = null,
+    val catatan: String? = null
 )
 
 @Serializable

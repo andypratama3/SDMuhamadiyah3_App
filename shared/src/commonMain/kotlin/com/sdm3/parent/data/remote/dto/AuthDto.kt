@@ -8,7 +8,7 @@ data class LoginRequest(
     val email: String,
     val password: String,
     @SerialName("device_name")
-    val deviceName: String = "mobile"
+    val deviceName: String
 )
 
 @Serializable

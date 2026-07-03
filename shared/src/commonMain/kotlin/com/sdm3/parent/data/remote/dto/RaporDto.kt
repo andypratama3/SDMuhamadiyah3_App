@@ -9,11 +9,33 @@ data class RaporInstanceDto(
     @SerialName("student_id")
     val studentId: String,
     val semester: String,
+    @SerialName("semester_label")
+    val semesterLabel: String? = null,
     @SerialName("academic_year")
-    val academicYear: String,
+    val academicYear: String? = null,
     val status: String,
+    @SerialName("generated_pdf_url")
+    val generatedPdfUrl: String? = null,
+    @SerialName("verification_code")
+    val verificationCode: String? = null,
+    @SerialName("document_number")
+    val documentNumber: String? = null,
+    @SerialName("approved_at")
+    val approvedAt: String? = null,
+    @SerialName("generated_at")
+    val generatedAt: String? = null,
     @SerialName("pdf_url")
-    val pdfUrl: String? = null
+    val pdfUrl: String? = null,
+    @SerialName("academic_year_obj")
+    val academicYearObj: RaporAcademicYearDto? = null,
+    @SerialName("created_at")
+    val createdAt: String? = null
+)
+
+@Serializable
+data class RaporAcademicYearDto(
+    val id: String,
+    val name: String
 )
 
 @Serializable

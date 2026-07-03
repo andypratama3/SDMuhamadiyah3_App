@@ -24,8 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.Sdm3Logo
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.core.security.SecureTokenManager
+import com.sdm3.parent.domain.repository.AuthRepositoryContract
 import kotlinx.coroutines.delay
 import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.stringResource
@@ -37,15 +39,42 @@ import sdmuhammadiyah3samarinda.shared.generated.resources.splash_subtitle
 @Composable
 fun SplashScreen(
     onNavigate: (SDM3Route) -> Unit,
+    authRepository: AuthRepositoryContract? = if (LocalInspectionMode.current) null else koinInject(),
     secureTokenManager: SecureTokenManager? = if (LocalInspectionMode.current) null else koinInject()
 ) {
     SplashContent(
         onAnimationFinished = {
-            val studentId = secureTokenManager?.getSelectedStudentId()
-            if (studentId != null) {
-                onNavigate(SDM3Route.Main(studentId))
-            } else {
-                onNavigate(SDM3Route.Onboarding)
+            val tokenManager = secureTokenManager
+            val auth = authRepository
+            val token = tokenManager?.getBearerToken()
+            when {
+                token.isNullOrBlank() -> {
+                    if (tokenManager?.isOnboardingCompleted() == true) {
+                        onNavigate(SDM3Route.Login)
+                    } else {
+                        onNavigate(SDM3Route.Onboarding)
+                    }
+                }
+                auth != null && tokenManager != null -> {
+                    when (val result = auth.getAuthenticatedUser()) {
+                        is ApiResult.Success -> {
+                            val studentId = tokenManager.getSelectedStudentId()
+                            if (!studentId.isNullOrBlank()) {
+                                onNavigate(SDM3Route.Main(studentId))
+                            } else {
+                                onNavigate(SDM3Route.PilihAnak)
+                            }
+                        }
+                        is ApiResult.Error -> {
+                            auth.logout()
+                            onNavigate(
+                                if (tokenManager.isOnboardingCompleted()) SDM3Route.Login
+                                else SDM3Route.Onboarding
+                            )
+                        }
+                    }
+                }
+                else -> onNavigate(SDM3Route.Login)
             }
         }
     )

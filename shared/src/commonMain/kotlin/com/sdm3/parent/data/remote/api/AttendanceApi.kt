@@ -11,11 +11,11 @@ import io.ktor.client.request.url
 
 class AttendanceApi(private val provider: HttpClientProvider) {
 
-    suspend fun getAttendances(studentId: String, month: Int? = null, year: Int? = null): ApiResult<List<AttendanceDto>> {
+    suspend fun getAttendances(studentId: String? = null, month: Int? = null, year: Int? = null): ApiResult<List<AttendanceDto>> {
         val response = provider.client.get {
             url(Endpoints.PARENT_ATTENDANCES)
             provider.applyAuthHeader(this)
-            parameter("student_id", studentId)
+            studentId?.let { parameter("student_id", it) }
             month?.let { parameter("month", it) }
             year?.let { parameter("year", it) }
         }

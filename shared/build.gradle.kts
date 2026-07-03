@@ -90,6 +90,10 @@ kotlin {
             implementation(libs.sqldelight.android)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.biometric)
+            implementation(libs.zxing.android.embedded)
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.messaging)
+            implementation(libs.kotlinx.coroutines.play.services)
 
             // Note: debugImplementation is not supported in KMP androidMain source set with the new plugin
             implementation(libs.compose.uiTooling)

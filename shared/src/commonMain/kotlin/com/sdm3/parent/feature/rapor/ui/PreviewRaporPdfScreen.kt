@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -31,14 +32,22 @@ import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.rapor.PreviewRaporPdfUiState
 import com.sdm3.parent.feature.rapor.PreviewRaporPdfViewModel
-import org.koin.compose.koinInject
+import com.sdm3.parent.platform.PlatformActions
+import org.koin.compose.viewmodel.koinViewModel
+
+sealed class PreviewPdfUiState {
+    data object Loading : PreviewPdfUiState()
+    data object Empty : PreviewPdfUiState()
+    data class Error(val message: String) : PreviewPdfUiState()
+    data class Success(val isDownloaded: Boolean, val fileName: String, val fileSize: String) : PreviewPdfUiState()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewRaporPdfScreen(
     raporId: String,
     downloadUrl: String,
-    viewModel: PreviewRaporPdfViewModel? = if (LocalInspectionMode.current) null else koinInject(),
+    viewModel: PreviewRaporPdfViewModel = koinViewModel(),
     onBack: () -> Unit
 ) {
     val isPreview = LocalInspectionMode.current
@@ -46,11 +55,27 @@ fun PreviewRaporPdfScreen(
     val state by if (isPreview) {
         remember { mutableStateOf(PreviewRaporPdfUiState()) }
     } else {
-        viewModel!!.uiState.collectAsState()
+        viewModel.uiState.collectAsState()
     }
 
     if (!isPreview) {
-        LaunchedEffect(raporId, downloadUrl) { viewModel?.init(raporId, downloadUrl) }
+        LaunchedEffect(raporId, downloadUrl) {
+            viewModel.init(raporId, downloadUrl)
+            viewModel.download()
+        }
+    }
+
+    val uiState: PreviewPdfUiState = with(state) {
+        when {
+            isLoading -> PreviewPdfUiState.Loading
+            errorMessage != null -> PreviewPdfUiState.Error(errorMessage)
+            isEmpty -> PreviewPdfUiState.Empty
+            else -> PreviewPdfUiState.Success(
+                isDownloaded = isDownloaded,
+                fileName = fileName,
+                fileSize = fileSize
+            )
+        }
     }
 
     Scaffold(
@@ -89,7 +114,6 @@ fun PreviewRaporPdfScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Atmospheric Glow
             Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -100,76 +124,155 @@ fun PreviewRaporPdfScreen(
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Spacer(modifier = Modifier.height(12.dp))
+            when (val currentState = uiState) {
+                is PreviewPdfUiState.Loading -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(horizontal = 24.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .shimmerEffect()
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(72.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .shimmerEffect()
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .shimmerEffect()
+                        )
+                    }
+                }
 
-                Sdm3Card(padding = 24.dp) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = colorScheme.primary.copy(alpha = 0.05f)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(32.dp), tint = colorScheme.primary)
+                is PreviewPdfUiState.Empty -> {
+                    Sdm3EmptyState(
+                        title = "Dokumen Tidak Tersedia",
+                        message = "Dokumen PDF tidak ditemukan atau telah dihapus.",
+                        style = EmptyStateStyle.Neutral,
+                        action = {
+                            Sdm3Button(
+                                text = "Kembali",
+                                onClick = onBack,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                            )
+                        }
+                    )
+                }
+
+                is PreviewPdfUiState.Error -> {
+                    Sdm3ErrorState(
+                        title = "Gagal Memuat Dokumen",
+                        message = currentState.message,
+                        style = ErrorStateStyle.Generic,
+                        primaryAction = {
+                            Sdm3Button(
+                                text = "Coba Lagi",
+                                onClick = { viewModel.init(raporId, downloadUrl) },
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                            )
+                        },
+                        secondaryAction = {
+                            Sdm3OutlinedButton(
+                                text = "Kembali",
+                                onClick = onBack,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                            )
+                        }
+                    )
+                }
+
+                is PreviewPdfUiState.Success -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(horizontal = 24.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Sdm3Card(padding = 24.dp) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Surface(
+                                    modifier = Modifier.size(56.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = colorScheme.primary.copy(alpha = 0.05f)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(32.dp), tint = colorScheme.primary)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(20.dp))
+                                Column {
+                                    Text(
+                                        text = currentState.fileName.ifEmpty { "Rapor_Digital_Siswa.pdf" },
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "Ukuran: ${currentState.fileSize.ifEmpty { "1.2 MB" }}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary.copy(alpha = 0.4f)
+                                    )
+                                }
                             }
                         }
-                        Spacer(modifier = Modifier.width(20.dp))
-                        Column {
-                            Text(
-                                text = state.fileName.ifEmpty { "Rapor_Digital_Siswa.pdf" },
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary
-                            )
-                            Text(
-                                text = "Ukuran: ${state.fileSize.ifEmpty { "1.2 MB" }}",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary.copy(alpha = 0.4f)
-                            )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Sdm3Card(padding = 20.dp) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = if (currentState.isDownloaded) Icons.Outlined.TaskAlt else Icons.Outlined.Sync,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = if (currentState.isDownloaded) StatusSuccess else colorScheme.primary.copy(alpha = 0.3f)
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(
+                                    text = if (currentState.isDownloaded) "Dokumen telah siap dibuka melalui PDF Viewer eksternal." else "Sedang menyinkronkan data dengan server institusi...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = colorScheme.primary.copy(alpha = 0.7f),
+                                    lineHeight = 22.sp
+                                )
+                            }
                         }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Sdm3Button(
+                            text = "Buka Dokumen PDF",
+                            onClick = {
+                                val url = state.downloadUrl
+                                if (url.isNotBlank()) PlatformActions.openUrl(url)
+                            },
+                            icon = Icons.AutoMirrored.Outlined.OpenInNew,
+                            enabled = currentState.isDownloaded && state.downloadUrl.isNotBlank(),
+                            modifier = Modifier.fillMaxWidth().height(56.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(100.dp))
                     }
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Sdm3Card(padding = 20.dp) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = if (state.isDownloaded) Icons.Outlined.TaskAlt else Icons.Outlined.Sync,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = if (state.isDownloaded) StatusSuccess else colorScheme.primary.copy(alpha = 0.3f)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            text = if (state.isDownloaded) "Dokumen telah siap dibuka melalui PDF Viewer eksternal." else "Sedang menyinkronkan data dengan server institusi...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colorScheme.primary.copy(alpha = 0.7f),
-                            lineHeight = 22.sp
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Sdm3Button(
-                    text = "Buka Dokumen PDF",
-                    onClick = { },
-                    icon = Icons.AutoMirrored.Outlined.OpenInNew,
-                    enabled = state.isDownloaded,
-                    modifier = Modifier.fillMaxWidth().height(56.dp)
-                )
-
-                Spacer(modifier = Modifier.height(100.dp))
             }
         }
     }

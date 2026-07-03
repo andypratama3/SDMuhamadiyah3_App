@@ -2,7 +2,8 @@ package com.sdm3.parent.feature.pembayaran
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
-import kotlinx.coroutines.delay
+import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.domain.repository.PaymentRepositoryContract
 
 data class PembayaranBerhasilUiState(
     override val isLoading: Boolean = false,
@@ -16,21 +17,32 @@ data class PembayaranBerhasilUiState(
     val orderId: String = ""
 ) : ScreenState
 
-class PembayaranBerhasilViewModel : BaseViewModel<PembayaranBerhasilUiState>(PembayaranBerhasilUiState()) {
+class PembayaranBerhasilViewModel(
+    private val paymentRepository: PaymentRepositoryContract
+) : BaseViewModel<PembayaranBerhasilUiState>(PembayaranBerhasilUiState()) {
 
     fun loadTransaction(transactionId: String) {
         launchSafely {
-            updateState { it.copy(isLoading = true, transactionId = transactionId) }
-            delay(500)
-            updateState { 
-                it.copy(
-                    isLoading = false,
-                    paymentTitle = "SPP Juli 2026",
-                    amount = 350000L,
-                    paymentMethod = "BCA Virtual Account",
-                    paidAt = "20 Juni 2026, 14:30 WIB",
-                    orderId = "SDM3-TRX-2026-620-001"
-                ) 
+            updateState { it.copy(isLoading = true, errorMessage = null, transactionId = transactionId) }
+            when (val result = paymentRepository.getPaymentDetail(transactionId)) {
+                is ApiResult.Success -> {
+                    val p = result.data
+                    updateState {
+                        it.copy(
+                            isLoading = false,
+                            paymentTitle = p.paymentTitle?.name ?: "",
+                            amount = (p.grossAmount?.toLong() ?: 0),
+                            paymentMethod = p.paymentType ?: "",
+                            paidAt = p.paidAt ?: "",
+                            orderId = p.orderId
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
             }
         }
     }

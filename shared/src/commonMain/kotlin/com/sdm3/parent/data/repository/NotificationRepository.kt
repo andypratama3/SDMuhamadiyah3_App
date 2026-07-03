@@ -1,12 +1,11 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.di.DevMode
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.dummy.DummyDataProvider
 import com.sdm3.parent.data.remote.api.NotificationApi
 import com.sdm3.parent.data.remote.dto.NotificationDto
+import com.sdm3.parent.data.remote.dto.UnreadCountDto
 import com.sdm3.parent.domain.repository.NotificationRepositoryContract
 
 class NotificationRepository(
@@ -22,7 +21,6 @@ class NotificationRepository(
         } catch (e: Exception) {
             val cached = cache.getNotifications()
             if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyNotifications)
             else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil notifikasi"))
         }
     }
@@ -31,8 +29,23 @@ class NotificationRepository(
         return try {
             api.markAsRead(id)
         } catch (e: Exception) {
-            if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyNotificationMarkedAsRead(id))
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal menandai notifikasi"))
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal menandai notifikasi"))
+        }
+    }
+
+    override suspend fun markAllAsRead(): ApiResult<Unit> {
+        return try {
+            api.markAllAsRead()
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal menandai semua notifikasi"))
+        }
+    }
+
+    override suspend fun getUnreadCount(): ApiResult<UnreadCountDto> {
+        return try {
+            api.getUnreadCount()
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil jumlah notifikasi"))
         }
     }
 }

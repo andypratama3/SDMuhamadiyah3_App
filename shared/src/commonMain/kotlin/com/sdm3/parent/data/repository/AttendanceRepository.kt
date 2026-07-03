@@ -1,10 +1,8 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.di.DevMode
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.dummy.DummyDataProvider
 import com.sdm3.parent.data.remote.api.AttendanceApi
 import com.sdm3.parent.data.remote.dto.AttendanceDto
 import com.sdm3.parent.data.remote.dto.AttendanceSummaryDto
@@ -15,17 +13,15 @@ class AttendanceRepository(
     private val cache: CacheDataSource,
 ) : AttendanceRepositoryContract {
 
-    override suspend fun getAttendances(studentId: String, month: Int?, year: Int?): ApiResult<List<AttendanceDto>> {
-        val m = month ?: 2
-        val y = year ?: 2026
+    override suspend fun getAttendances(studentId: String?, month: Int?, year: Int?): ApiResult<List<AttendanceDto>> {
+        val safeStudentId = studentId ?: ""
         return try {
             val result = api.getAttendances(studentId, month, year)
-            if (result is ApiResult.Success) cache.cacheAttendances(studentId, m, y, result.data)
+            if (result is ApiResult.Success) cache.cacheAttendances(safeStudentId, month ?: 0, year ?: 0, result.data)
             result
         } catch (e: Exception) {
-            val cached = cache.getAttendances(studentId, m, y)
+            val cached = cache.getAttendances(safeStudentId, month ?: 0, year ?: 0)
             if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyAttendancesInMonth(m, y))
             else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data absensi"))
         }
     }
@@ -38,7 +34,6 @@ class AttendanceRepository(
         } catch (e: Exception) {
             val cached = cache.getAttendanceSummary(studentId)
             if (cached != null) ApiResult.Success(cached)
-            else if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyAttendanceSummary)
             else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil ringkasan absensi"))
         }
     }

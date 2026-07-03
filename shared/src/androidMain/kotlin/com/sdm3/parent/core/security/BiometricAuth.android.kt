@@ -11,8 +11,8 @@ object AndroidBiometricProvider {
     var activity: FragmentActivity? = null
 }
 
-actual class BiometricAuthenticator {
-    actual suspend fun authenticate(reason: String): BiometricResult {
+actual class BiometricAuthenticator : BiometricAuthGate {
+    actual override suspend fun authenticate(reason: String): BiometricResult {
         val activity = AndroidBiometricProvider.activity
             ?: return BiometricResult.NotAvailable
 

@@ -42,9 +42,18 @@ import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.navigation.SDM3Route
 import androidx.compose.ui.tooling.preview.Preview
 import com.sdm3.parent.core.navigation.SDM3BottomTab
+import com.sdm3.parent.feature.home.HomeEffect
 import com.sdm3.parent.feature.home.HomeIntent
 import com.sdm3.parent.feature.home.HomeViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import kotlinx.coroutines.launch
+
+sealed class HomeScreenUiState {
+    data object Loading : HomeScreenUiState()
+    data object Empty : HomeScreenUiState()
+    data class Error(val message: String) : HomeScreenUiState()
+    data object Success : HomeScreenUiState()
+}
 
 @Composable
 fun HomeScreen(
@@ -55,79 +64,136 @@ fun HomeScreen(
     val state by viewModel.uiState.collectAsState()
     val colorScheme = MaterialTheme.colorScheme
     val isPreview = LocalInspectionMode.current
-    
+
+    val errorMessage = state.errorMessage
+
+    val screenState = remember(state.isLoading, state.isEmpty, errorMessage, isPreview) {
+        if (isPreview) HomeScreenUiState.Success
+        else when {
+            state.isLoading && state.isEmpty -> HomeScreenUiState.Loading
+            errorMessage != null -> HomeScreenUiState.Error(errorMessage)
+            !state.isLoading && state.isEmpty -> HomeScreenUiState.Empty
+            else -> HomeScreenUiState.Success
+        }
+    }
+
     LaunchedEffect(studentId) {
         if (!isPreview) {
             viewModel.onIntent(HomeIntent.LoadDashboard(studentId))
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is HomeEffect.NavigateToLogin -> {
+                    navController.navigate(SDM3Route.Login) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
+        }
+    }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val showComingSoon: () -> Unit = {
+        scope.launch {
+            snackbarHostState.showSnackbar("Fitur ini akan segera hadir")
+        }
+    }
+
     Scaffold(
         containerColor = colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             HomeHeader(
                 navController = navController,
+                unreadCount = state.unreadNotificationCount,
                 onNotificationClick = { navController.navigate(SDM3Route.Notifikasi) }
             )
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 100.dp),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xl)
-            ) {
-                // 1. Greeting Section
-                item {
-                    GreetingSection(
-                        name = if (state.isLoading) "..." else state.studentName.split(" ").firstOrNull() ?: "Wali Murid",
-                        info = if (state.isLoading) "Memuat data..." else state.className
-                    )
+            when (screenState) {
+                is HomeScreenUiState.Loading -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 100.dp),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+                    ) {
+                        item { GreetingShimmer() }
+                        item { ShortcutFavoritShimmer() }
+                        item { LayananSekolahShimmer() }
+                        item { PengumumanShimmer() }
+                        item { TabunganSekolahShimmer() }
+                    }
                 }
-
-                // 2. Shortcut Favorit (Horizontal Cards)
-                item {
-                    ShortcutFavoritSection(
-                        onSppClick = { navController.navigate(SDM3Route.PembayaranSpp(studentId)) },
-                        onAbsensiClick = { navController.navigate(SDM3Route.KehadiranSiswa(studentId)) }
-                    )
-                }
-
-                // 3. Layanan Sekolah (Grid 4x3)
-                item {
-                    LayananSekolahSection(
-                        onEkskulClick = { navController.navigate(SDM3Route.KegiatanProgram(studentId)) }
-                    )
-                }
-
-                // 4. Pengumuman Card
-                item {
-                    val latestAnnouncement = state.announcements.firstOrNull()
-                    PengumumanSection(
-                        title = latestAnnouncement?.title ?: "Belum ada pengumuman baru",
-                        time = latestAnnouncement?.publishedAt ?: "-",
-                        onClick = {
-                            navController.navigate(SDM3Route.PengumumanSekolah)
+                is HomeScreenUiState.Error -> {
+                    Sdm3ErrorState(
+                        title = "Gagal Memuat Data",
+                        message = screenState.message,
+                        style = ErrorStateStyle.Generic,
+                        primaryAction = {
+                            Sdm3Button(
+                                text = "Coba Lagi",
+                                onClick = { viewModel.onIntent(HomeIntent.Refresh(studentId)) }
+                            )
                         }
                     )
                 }
-
-                // 5. Tabungan Sekolah (Dark Card)
-                item {
-                    TabunganSekolahSection(amount = "Rp 1.250.000")
+                is HomeScreenUiState.Empty -> {
+                    Sdm3EmptyState(
+                        title = "Belum Ada Data",
+                        message = "Data dashboard belum tersedia.",
+                        style = EmptyStateStyle.Neutral
+                    )
                 }
-            }
-
-            if (state.isLoading && state.isEmpty) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            
-            state.errorMessage?.let { error ->
-                NetworkErrorDialog(
-                    message = error,
-                    onRetry = { viewModel.onIntent(HomeIntent.Refresh(studentId)) },
-                    onDismiss = { /* Handle dismiss if needed */ }
-                )
+                is HomeScreenUiState.Success -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 100.dp),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+                    ) {
+                        item {
+                            GreetingSection(
+                                name = state.studentName.split(" ").firstOrNull() ?: "Wali Murid",
+                                info = state.className,
+                                onClick = { navController.navigate(SDM3Route.DetailInfoAnak(studentId)) }
+                            )
+                        }
+                        item {
+                            ShortcutFavoritSection(
+                                onSppClick = { navController.navigate(SDM3Route.PembayaranSpp(studentId)) },
+                                onAbsensiClick = { navController.navigate(SDM3Route.KehadiranSiswa(studentId)) },
+                                onELibraryClick = showComingSoon
+                            )
+                        }
+                        item {
+                            LayananSekolahSection(
+                                onEkskulClick = { navController.navigate(SDM3Route.KegiatanProgram(studentId)) },
+                                onComingSoonClick = showComingSoon
+                            )
+                        }
+                        item {
+                            val latestAnnouncement = state.announcements.firstOrNull()
+                            PengumumanSection(
+                                title = latestAnnouncement?.title ?: "Belum ada pengumuman baru",
+                                time = latestAnnouncement?.publishedAt ?: "-",
+                                onClick = {
+                                    navController.navigate(SDM3Route.PengumumanSekolah)
+                                }
+                            )
+                        }
+                        item {
+                            val totalActive = state.activeFees.sumOf { it.amount.toLong() }
+                            val formatted = totalActive.let { amt ->
+                                "Rp ${amt.toString().reversed().chunked(3).joinToString(".").reversed()}"
+                            }
+                            TabunganSekolahSection(amount = formatted, onTopUpClick = showComingSoon)
+                        }
+                    }
+                }
             }
         }
     }
@@ -136,6 +202,7 @@ fun HomeScreen(
 @Composable
 private fun HomeHeader(
     navController: NavHostController,
+    unreadCount: Int,
     onNotificationClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -147,8 +214,10 @@ private fun HomeHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            // Institutional Identity (ProductSchool Logo)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
             Sdm3Logo(
                 size = 40.dp,
                 showBackground = false
@@ -159,17 +228,21 @@ private fun HomeHeader(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
-                letterSpacing = (-0.5).sp
+                letterSpacing = (-0.5).sp,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
 
         IconButton(onClick = onNotificationClick) {
             BadgedBox(
                 badge = {
-                    Badge(
-                        modifier = Modifier.size(8.dp),
-                        containerColor = colorScheme.error
-                    )
+                    if (unreadCount > 0) {
+                        Badge(
+                            modifier = Modifier.size(8.dp),
+                            containerColor = colorScheme.error
+                        )
+                    }
                 }
             ) {
                 Icon(
@@ -184,8 +257,208 @@ private fun HomeHeader(
 }
 
 @Composable
-private fun GreetingSection(name: String, info: String) {
+private fun GreetingShimmer() {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.55f)
+                .height(36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .shimmerEffect()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.35f)
+                .height(18.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .shimmerEffect()
+        )
+    }
+}
+
+@Composable
+private fun ShortcutFavoritShimmer() {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.35f)
+                    .height(24.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .shimmerEffect()
+            )
+            Box(
+                modifier = Modifier
+                    .width(40.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .shimmerEffect()
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            repeat(3) {
+                Box(
+                    modifier = Modifier
+                        .size(140.dp, 160.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .shimmerEffect()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LayananSekolahShimmer() {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.4f)
+                .height(24.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .shimmerEffect()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            color = Color.White,
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+        ) {
+            Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                repeat(3) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        repeat(4) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.width(70.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .shimmerEffect()
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.6f)
+                                        .height(12.dp)
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .shimmerEffect()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PengumumanShimmer() {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Sdm3Card(
+            modifier = Modifier.fillMaxWidth(),
+            padding = 20.dp
+        ) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(22.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .shimmerEffect()
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(20.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .shimmerEffect()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .shimmerEffect()
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.3f)
+                            .height(14.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .shimmerEffect()
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabunganSekolahShimmer() {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.3f)
+                        .height(18.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .shimmerEffect()
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .shimmerEffect()
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.35f)
+                        .height(46.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .shimmerEffect()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GreetingSection(name: String, info: String, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .clickable(onClick = onClick)
+    ) {
         Text(
             text = "Halo, $name!",
             style = MaterialTheme.typography.displayMedium,
@@ -205,7 +478,8 @@ private fun GreetingSection(name: String, info: String) {
 @Composable
 private fun ShortcutFavoritSection(
     onSppClick: () -> Unit,
-    onAbsensiClick: () -> Unit
+    onAbsensiClick: () -> Unit,
+    onELibraryClick: () -> Unit
 ) {
     Column {
         Row(
@@ -228,7 +502,7 @@ private fun ShortcutFavoritSection(
                 fontWeight = FontWeight.Bold
             )
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyRow(
@@ -248,7 +522,7 @@ private fun ShortcutFavoritSection(
                     title = "E-Library",
                     icon = Icons.Outlined.LocalLibrary,
                     iconColor = MaterialTheme.colorScheme.primary,
-                    onClick = { /* TODO */ }
+                    onClick = onELibraryClick
                 )
             }
             item {
@@ -306,21 +580,22 @@ private fun ShortcutCard(
 
 @Composable
 private fun LayananSekolahSection(
-    onEkskulClick: () -> Unit
+    onEkskulClick: () -> Unit,
+    onComingSoonClick: () -> Unit
 ) {
     val items = listOf(
-        Triple("PERPUS", Icons.Outlined.AutoStories, {}),
-        Triple("KANTIN", Icons.Outlined.Restaurant, {}),
+        Triple("PERPUS", Icons.Outlined.AutoStories, onComingSoonClick),
+        Triple("KANTIN", Icons.Outlined.Restaurant, onComingSoonClick),
         Triple("EKSKUL", Icons.Outlined.SportsSoccer, onEkskulClick),
-        Triple("ALUMNI", Icons.Outlined.Groups, {}),
-        Triple("EVENT", Icons.Outlined.CalendarMonth, {}),
-        Triple("CS", Icons.Outlined.SupportAgent, {}),
-        Triple("BEASISWA", Icons.Outlined.School, {}),
-        Triple("KONSELING", Icons.Outlined.Psychology, {}),
-        Triple("BUS", Icons.Outlined.DirectionsBus, {}),
-        Triple("UKS", Icons.Outlined.MedicalServices, {}),
-        Triple("HALL FAME", Icons.Outlined.MilitaryTech, {}),
-        Triple("LAINNYA", Icons.Outlined.GridView, {})
+        Triple("ALUMNI", Icons.Outlined.Groups, onComingSoonClick),
+        Triple("EVENT", Icons.Outlined.CalendarMonth, onComingSoonClick),
+        Triple("CS", Icons.Outlined.SupportAgent, onComingSoonClick),
+        Triple("BEASISWA", Icons.Outlined.School, onComingSoonClick),
+        Triple("KONSELING", Icons.Outlined.Psychology, onComingSoonClick),
+        Triple("BUS", Icons.Outlined.DirectionsBus, onComingSoonClick),
+        Triple("UKS", Icons.Outlined.MedicalServices, onComingSoonClick),
+        Triple("HALL FAME", Icons.Outlined.MilitaryTech, onComingSoonClick),
+        Triple("LAINNYA", Icons.Outlined.GridView, onComingSoonClick)
     )
 
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -330,7 +605,7 @@ private fun LayananSekolahSection(
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Surface(
@@ -443,10 +718,10 @@ private fun PengumumanSection(
 }
 
 @Composable
-private fun TabunganSekolahSection(amount: String) {
+private fun TabunganSekolahSection(amount: String, onTopUpClick: () -> Unit) {
     val colorScheme = MaterialTheme.colorScheme
     val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
-    
+
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -454,7 +729,6 @@ private fun TabunganSekolahSection(amount: String) {
             colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
-                // Background Glow for Dark Card
                 Canvas(modifier = Modifier.fillMaxWidth().height(160.dp).alpha(0.15f)) {
                     drawCircle(
                         brush = Brush.radialGradient(
@@ -464,7 +738,7 @@ private fun TabunganSekolahSection(amount: String) {
                         )
                     )
                 }
-                
+
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
                         text = "Tabungan Sekolah",
@@ -480,9 +754,9 @@ private fun TabunganSekolahSection(amount: String) {
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(20.dp))
-                    
+
                     Button(
-                        onClick = {},
+                        onClick = onTopUpClick,
                         modifier = Modifier.fillMaxWidth(0.35f).height(46.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = StatusSuccess)

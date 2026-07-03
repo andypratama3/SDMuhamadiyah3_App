@@ -2,8 +2,9 @@ package com.sdm3.parent.feature.nilai
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.GradeComponentDto
-import kotlinx.coroutines.delay
+import com.sdm3.parent.domain.repository.GradeRepositoryContract
 
 data class DetailNilaiMapelUiState(
     val studentId: String = "",
@@ -15,26 +16,32 @@ data class DetailNilaiMapelUiState(
     override val isEmpty: Boolean = true
 ) : ScreenState
 
-class DetailNilaiMapelViewModel : BaseViewModel<DetailNilaiMapelUiState>(DetailNilaiMapelUiState()) {
+class DetailNilaiMapelViewModel(
+    private val gradeRepository: GradeRepositoryContract
+) : BaseViewModel<DetailNilaiMapelUiState>(DetailNilaiMapelUiState()) {
 
     fun loadComponents(studentId: String, subjectId: String) {
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null, studentId = studentId, subjectId = subjectId) }
-            delay(800)
-            
-            val dummyComponents = listOf(
-                GradeComponentDto(id = "1", subjectId = subjectId, subjectName = "Matematika", componentType = "sumatif", componentSubtype = "Sumatif 1", score = 95.0, tpName = "Bilangan Cacah", tpNumber = 1),
-                GradeComponentDto(id = "2", subjectId = subjectId, subjectName = "Matematika", componentType = "sumatif", componentSubtype = "Sumatif 2", score = 90.0, tpName = "Operasi Hitung", tpNumber = 2),
-                GradeComponentDto(id = "3", subjectId = subjectId, subjectName = "Matematika", componentType = "formatif", componentSubtype = "Formatif 1", score = 88.0, tpName = "Bangun Datar", tpNumber = 3)
-            )
 
-            updateState {
-                it.copy(
-                    isLoading = false,
-                    components = dummyComponents,
-                    subjectName = "Matematika",
-                    isEmpty = false
-                )
+            when (val result = gradeRepository.getGradeComponents(studentId, subjectId)) {
+                is ApiResult.Success -> {
+                    val components = result.data
+                    val subjectName = components.firstOrNull()?.subjectName ?: ""
+                    updateState {
+                        it.copy(
+                            isLoading = false,
+                            components = components,
+                            subjectName = subjectName,
+                            isEmpty = components.isEmpty()
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
             }
         }
     }

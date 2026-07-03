@@ -1,13 +1,26 @@
 package com.sdm3.parent.core.notification
 
-actual class FcmTokenProvider {
-    private var cachedToken: String? = null
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.tasks.await
 
+actual class FcmTokenProvider {
     actual suspend fun getToken(): String? {
-        return cachedToken
+        FcmTokenStore.getCachedToken()?.let { return it }
+        return try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            FcmTokenStore.updateToken(token)
+            token
+        } catch (_: Exception) {
+            null
+        }
     }
 
     actual fun onNewToken(token: String) {
-        cachedToken = token
+        FcmTokenStore.updateToken(token)
+        FcmRegistrationCoordinator.onTokenRefresh(token)
+    }
+
+    actual fun requestPermissionIfNeeded() {
+        // Android 13+ permission is requested from MainActivity.
     }
 }

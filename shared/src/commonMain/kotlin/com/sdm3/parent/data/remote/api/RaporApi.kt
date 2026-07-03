@@ -10,6 +10,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 class RaporApi(private val provider: HttpClientProvider) {
@@ -44,5 +45,8 @@ class RaporApi(private val provider: HttpClientProvider) {
     }
 
     @Serializable
-    private data class RaporVerifyRequest(val qrData: String)
+    private data class RaporVerifyRequest(
+        @SerialName("qr_data")
+        val qrData: String
+    )
 }

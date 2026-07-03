@@ -18,32 +18,37 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import androidx.compose.ui.tooling.preview.Preview
-
-data class AccountDeletionUiState(
-    override val isLoading: Boolean = false,
-    override val errorMessage: String? = null,
-    val reasonText: String = "",
-    val isConfirmDialogShown: Boolean = false,
-    val isRequestSubmitted: Boolean = false
-) : ScreenState {
-    override val isEmpty: Boolean = false
-}
+import com.sdm3.parent.feature.auth.AccountDeletionUiState
+import com.sdm3.parent.feature.auth.AccountDeletionViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountDeletionScreen(
     onBack: () -> Unit,
-    onDeletionRequestSubmitted: () -> Unit
+    onDeletionRequestSubmitted: () -> Unit,
+    viewModel: AccountDeletionViewModel = koinViewModel()
 ) {
-    var uiState by remember { mutableStateOf(AccountDeletionUiState()) }
+    val isPreview = LocalInspectionMode.current
+    val uiState by if (isPreview) {
+        remember { mutableStateOf(AccountDeletionUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
     val colorScheme = MaterialTheme.colorScheme
+
+    LaunchedEffect(uiState.isRequestSubmitted) {
+        if (uiState.isRequestSubmitted) {
+            onDeletionRequestSubmitted()
+        }
+    }
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -157,7 +162,9 @@ fun AccountDeletionScreen(
                     Sdm3Card(padding = 20.dp) {
                         Sdm3TextField(
                             value = uiState.reasonText,
-                            onValueChange = { uiState = uiState.copy(reasonText = it) },
+                            onValueChange = {
+                                if (!isPreview) viewModel.updateReason(it)
+                            },
                             label = "JUSTIFIKASI PENGHAPUSAN",
                             placeholder = "Tuliskan alasan Anda...",
                             leadingIcon = Icons.Outlined.EditNote,
@@ -189,7 +196,9 @@ fun AccountDeletionScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Sdm3Button(
                         text = "Ajukan Terminasi Akun",
-                        onClick = { uiState = uiState.copy(isConfirmDialogShown = true) },
+                        onClick = {
+                            if (!isPreview) viewModel.showConfirmDialog()
+                        },
                         isLoading = uiState.isLoading,
                         containerColor = colorScheme.error,
                         contentColor = Color.White,
@@ -205,7 +214,9 @@ fun AccountDeletionScreen(
 
     if (uiState.isConfirmDialogShown) {
         AlertDialog(
-            onDismissRequest = { uiState = uiState.copy(isConfirmDialogShown = false) },
+            onDismissRequest = {
+                if (!isPreview) viewModel.dismissConfirmDialog()
+            },
             shape = RoundedCornerShape(24.dp),
             containerColor = Color.White,
             title = {
@@ -226,8 +237,7 @@ fun AccountDeletionScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        uiState = uiState.copy(isConfirmDialogShown = false, isRequestSubmitted = true)
-                        onDeletionRequestSubmitted()
+                        if (!isPreview) viewModel.submitDeletionRequest()
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
@@ -236,7 +246,9 @@ fun AccountDeletionScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { uiState = uiState.copy(isConfirmDialogShown = false) }) {
+                TextButton(onClick = {
+                    if (!isPreview) viewModel.dismissConfirmDialog()
+                }) {
                     Text("Batal", color = colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             }

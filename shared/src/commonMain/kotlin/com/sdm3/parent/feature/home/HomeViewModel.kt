@@ -2,9 +2,11 @@ package com.sdm3.parent.feature.home
 
 import com.sdm3.parent.core.base.MviViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.*
-import com.sdm3.parent.data.repository.DashboardRepository
+import com.sdm3.parent.domain.repository.DashboardRepositoryContract
+import com.sdm3.parent.domain.repository.NotificationRepositoryContract
 
 data class HomeUiState(
     val studentId: String = "",
@@ -15,6 +17,7 @@ data class HomeUiState(
     val recentGrades: List<GradeDto> = emptyList(),
     val activeFees: List<StudentFeeDto> = emptyList(),
     val announcements: List<ArticleDto> = emptyList(),
+    val unreadNotificationCount: Int = 0,
     override val isLoading: Boolean = false,
     override val errorMessage: String? = null,
     override val isEmpty: Boolean = true,
@@ -30,7 +33,8 @@ sealed interface HomeEffect {
 }
 
 class HomeViewModel(
-    private val repository: DashboardRepository
+    private val repository: DashboardRepositoryContract,
+    private val notificationRepository: NotificationRepositoryContract
 ) : MviViewModel<HomeUiState, HomeIntent, HomeEffect>(HomeUiState()) {
 
     override fun onIntent(intent: HomeIntent) {
@@ -47,27 +51,36 @@ class HomeViewModel(
             when (val result = repository.getDashboard(studentId)) {
                 is ApiResult.Success -> {
                     val data = result.data
+                    val unread = when (val unreadResult = notificationRepository.getUnreadCount()) {
+                        is ApiResult.Success -> unreadResult.data.unreadCount
+                        is ApiResult.Error -> 0
+                    }
                     updateState {
                         it.copy(
                             isLoading = false,
-                            studentId = data.student.id,
-                            studentName = data.student.name,
-                            className = data.student.className.orEmpty(),
+                            studentId = data.student?.id ?: "",
+                            studentName = data.student?.name ?: "",
+                            className = data.student?.className.orEmpty(),
                             attendanceSummary = data.attendanceSummary,
                             recentGrades = data.recentGrades ?: emptyList(),
                             activeFees = data.activeFees ?: emptyList(),
                             announcements = data.announcements ?: emptyList(),
+                            unreadNotificationCount = unread,
                             isEmpty = false
                         )
                     }
                 }
                 is ApiResult.Error -> {
-                    updateState {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = result.error.toUserMessage(),
-                            isEmpty = it.isEmpty
-                        )
+                    if (result.error is ApiError.Unauthorized || result.error is ApiError.SessionExpired) {
+                        sendEffect(HomeEffect.NavigateToLogin)
+                    } else {
+                        updateState {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = result.error.toUserMessage(),
+                                isEmpty = it.isEmpty
+                            )
+                        }
                     }
                 }
             }

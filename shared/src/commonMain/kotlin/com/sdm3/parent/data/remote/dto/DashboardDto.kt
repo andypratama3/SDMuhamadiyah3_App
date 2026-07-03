@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DashboardDto(
-    val student: StudentDto,
+    val student: StudentDto? = null,
     @SerialName("attendance_summary")
     val attendanceSummary: AttendanceSummaryDto? = null,
     @SerialName("recent_grades")

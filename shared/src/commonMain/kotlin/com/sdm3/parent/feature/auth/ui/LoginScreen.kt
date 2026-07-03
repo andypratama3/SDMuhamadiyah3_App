@@ -266,7 +266,7 @@ fun LoginScreen(
 
                 Sdm3OutlinedButton(
                     text = "Gunakan Biometrik",
-                    onClick = { },
+                    onClick = { viewModel.onIntent(LoginIntent.BiometricLogin) },
                     icon = Icons.Outlined.Fingerprint,
                     contentColor = colorScheme.primary
                 )
@@ -275,7 +275,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "ProductSchool v2.4.0 • Academic Intelligence",
+                text = "SDM3 Parent v${com.sdm3.parent.APP_VERSION_NAME}",
                 style = MaterialTheme.typography.labelSmall,
                 color = colorScheme.primary.copy(alpha = 0.3f),
                 fontWeight = FontWeight.Bold,

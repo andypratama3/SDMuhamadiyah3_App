@@ -2,8 +2,12 @@ package com.sdm3.parent.feature.profil
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.core.notification.FcmRegistrar
 import com.sdm3.parent.data.remote.dto.StudentDto
-import kotlinx.coroutines.delay
+import com.sdm3.parent.domain.repository.AuthRepositoryContract
+import com.sdm3.parent.domain.repository.ProfileRepositoryContract
+import com.sdm3.parent.domain.repository.StudentRepositoryContract
 
 data class ProfilAkunUiState(
     override val isLoading: Boolean = false,
@@ -18,47 +22,50 @@ data class ProfilAkunUiState(
     val editedPhone: String = ""
 ) : ScreenState
 
-class ProfilAkunViewModel : BaseViewModel<ProfilAkunUiState>(ProfilAkunUiState()) {
+class ProfilAkunViewModel(
+    private val profileRepository: ProfileRepositoryContract,
+    private val studentRepository: StudentRepositoryContract,
+    private val authRepository: AuthRepositoryContract,
+    private val fcmRegistration: FcmRegistrar
+) : BaseViewModel<ProfilAkunUiState>(ProfilAkunUiState()) {
 
     fun loadProfile() {
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null) }
-            delay(800)
-            updateState {
-                it.copy(
-                    name = "Andy Pratama",
-                    phone = "081234567890",
-                    email = "andy.pratama@example.com",
-                    editedName = "Andy Pratama",
-                    editedPhone = "081234567890",
-                    isLoading = false
-                )
+            when (val result = profileRepository.getProfile()) {
+                is ApiResult.Success -> {
+                    val p = result.data
+                    updateState {
+                        it.copy(
+                            name = p.name,
+                            phone = p.phone.orEmpty(),
+                            email = p.email,
+                            editedName = p.name,
+                            editedPhone = p.phone.orEmpty(),
+                            isLoading = false
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
             }
         }
     }
 
     fun loadStudents() {
-        val dummyStudents = listOf(
-            StudentDto(
-                id = "student_1",
-                name = "Ahmad Fathan",
-                nisn = "0012345678",
-                gender = "Laki-laki",
-                className = "4-A (Ibnu Sina)",
-                birthPlace = "Samarinda",
-                birthDate = "2015-01-15"
-            ),
-            StudentDto(
-                id = "student_2",
-                name = "Zahra Amira",
-                nisn = "0098765432",
-                gender = "Perempuan",
-                className = "2-B (Al-Khawarizmi)",
-                birthPlace = "Samarinda",
-                birthDate = "2017-05-20"
-            )
-        )
-        updateState { it.copy(students = dummyStudents) }
+        launchSafely {
+            when (val result = studentRepository.getStudents()) {
+                is ApiResult.Success -> {
+                    updateState { it.copy(students = result.data) }
+                }
+                is ApiResult.Error -> {
+                    updateState { it.copy(errorMessage = result.error.toUserMessage()) }
+                }
+            }
+        }
     }
 
     fun startEdit() {
@@ -83,14 +90,23 @@ class ProfilAkunViewModel : BaseViewModel<ProfilAkunUiState>(ProfilAkunUiState()
         val s = uiState.value
         updateState { it.copy(isLoading = true, errorMessage = null) }
         launchSafely {
-            delay(1000)
-            updateState {
-                it.copy(
-                    name = s.editedName,
-                    phone = s.editedPhone,
-                    isEditing = false,
-                    isLoading = false
-                )
+            when (val result = profileRepository.updateProfile(name = s.editedName, phone = s.editedPhone.ifEmpty { null })) {
+                is ApiResult.Success -> {
+                    val p = result.data
+                    updateState {
+                        it.copy(
+                            name = p.name,
+                            phone = p.phone.orEmpty(),
+                            isEditing = false,
+                            isLoading = false
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
             }
         }
     }
@@ -98,5 +114,18 @@ class ProfilAkunViewModel : BaseViewModel<ProfilAkunUiState>(ProfilAkunUiState()
     fun refresh() {
         loadProfile()
         loadStudents()
+    }
+
+    fun logout() {
+        launchSafely {
+            try {
+                fcmRegistration.unregisterIfNeeded()
+                authRepository.apiLogout()
+            } catch (_: Exception) {
+                // Best-effort server logout; always clear local session.
+            } finally {
+                authRepository.logout()
+            }
+        }
     }
 }

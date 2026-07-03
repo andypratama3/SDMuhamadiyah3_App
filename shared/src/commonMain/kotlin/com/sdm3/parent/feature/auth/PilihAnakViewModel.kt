@@ -2,9 +2,9 @@ package com.sdm3.parent.feature.auth
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.StudentDto
-import com.sdm3.parent.data.repository.StudentRepository
-import kotlinx.coroutines.delay
+import com.sdm3.parent.domain.repository.StudentRepositoryContract
 
 data class PilihAnakUiState(
     val students: List<StudentDto> = emptyList(),
@@ -15,7 +15,7 @@ data class PilihAnakUiState(
 ) : ScreenState
 
 class PilihAnakViewModel(
-    private val studentRepository: StudentRepository
+    private val studentRepository: StudentRepositoryContract
 ) : BaseViewModel<PilihAnakUiState>(PilihAnakUiState()) {
 
     init {
@@ -25,38 +25,21 @@ class PilihAnakViewModel(
     fun loadStudents() {
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null) }
-            // Simulasi dummy data untuk sementara
-            delay(1000)
-            val dummyStudents = listOf(
-                StudentDto(
-                    id = "1",
-                    name = "Ahmad Fatih",
-                    nisn = "0123456789",
-                    nis = "12345",
-                    gender = "Laki-laki",
-                    birthPlace = "Samarinda",
-                    birthDate = "2015-05-10",
-                    className = "4-A",
-                    photo = null
-                ),
-                StudentDto(
-                    id = "2",
-                    name = "Siti Aminah",
-                    nisn = "0987654321",
-                    nis = "54321",
-                    gender = "Perempuan",
-                    birthPlace = "Samarinda",
-                    birthDate = "2017-08-15",
-                    className = "2-B",
-                    photo = null
-                )
-            )
-            updateState {
-                it.copy(
-                    isLoading = false,
-                    students = dummyStudents,
-                    isEmpty = dummyStudents.isEmpty()
-                )
+            when (val result = studentRepository.getStudents()) {
+                is ApiResult.Success -> {
+                    updateState {
+                        it.copy(
+                            isLoading = false,
+                            students = result.data,
+                            isEmpty = result.data.isEmpty()
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
             }
         }
     }

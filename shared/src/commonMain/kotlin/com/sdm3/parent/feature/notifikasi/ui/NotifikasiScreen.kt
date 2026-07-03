@@ -30,11 +30,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
+import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
+import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
+import com.sdm3.parent.core.designsystem.component.EmptyStateStyle
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.feature.notifikasi.NotifikasiUiState
 import com.sdm3.parent.feature.notifikasi.NotifikasiViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 private val filterOptions = listOf("Semua", "Akademik", "Keuangan", "Pengumuman")
+
+sealed class NotifUiState {
+    data object Loading : NotifUiState()
+    data object Empty : NotifUiState()
+    data class Error(val message: String) : NotifUiState()
+    data object Success : NotifUiState()
+}
 
 data class NotifItem(
     val id: String,
@@ -43,15 +55,6 @@ data class NotifItem(
     val body: String,
     val timestamp: String,
     val isRead: Boolean
-)
-
-private val notifList = listOf(
-    NotifItem("1", "akademik", "Pembaruan Nilai: Matematika", "Ananda mendapatkan skor Sumatif Matematika: 92 (A). Detail tersedia di portal.", "5 menit lalu", false),
-    NotifItem("2", "keuangan", "Tagihan Pendidikan Terbit", "Tagihan SPP Juli 2026 sebesar Rp350.000 telah siap untuk diselesaikan.", "1 jam lalu", false),
-    NotifItem("3", "pengumuman", "Informasi Libur Institusi", "Sehubungan dengan Hari Raya, kegiatan belajar mengajar dijadwalkan libur.", "3 jam lalu", false),
-    NotifItem("4", "akademik", "Prestasi Projek IPA", "Ananda menyelesaikan Projek IPA dengan skor optimal: 95 (A).", "Kemarin", true),
-    NotifItem("5", "pengumuman", "Kick-off Projek P5", "Projek Penguatan Profil Pelajar Pancasila tema Kelestarian Alam dimulai.", "Kemarin", true),
-    NotifItem("6", "keuangan", "Otentikasi Pembayaran", "Pembayaran SPP Juni 2026 sebesar Rp350.000 telah divalidasi sistem.", "3 hari lalu", true),
 )
 
 private sealed class LazyNotifItem {
@@ -70,10 +73,38 @@ private fun iconForType(type: String): ImageVector = when (type) {
 @Composable
 fun NotifikasiScreen(
     onBack: () -> Unit,
-    viewModel: NotifikasiViewModel? = if (LocalInspectionMode.current) null else koinViewModel()
+    onRetry: () -> Unit = {},
+    uiState: NotifUiState = NotifUiState.Success,
+    viewModel: NotifikasiViewModel = koinViewModel()
 ) {
+    val isPreview = LocalInspectionMode.current
     var selectedFilter by remember { mutableIntStateOf(0) }
     val colorScheme = MaterialTheme.colorScheme
+
+    val vmState by if (isPreview) {
+        remember { mutableStateOf(NotifikasiUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
+
+    val screenState = remember(vmState, isPreview) {
+        if (isPreview) uiState
+        else {
+            val s = vmState
+            when {
+                s.isLoading -> NotifUiState.Loading
+                s.errorMessage != null -> NotifUiState.Error(s.errorMessage)
+                s.isEmpty -> NotifUiState.Empty
+                else -> NotifUiState.Success
+            }
+        }
+    }
+
+    if (!isPreview) {
+        LaunchedEffect(Unit) {
+            viewModel.loadNotifications()
+        }
+    }
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -103,7 +134,7 @@ fun NotifikasiScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel?.markAllAsRead() }) {
+                    IconButton(onClick = { viewModel.markAllAsRead() }) {
                         Surface(
                             modifier = Modifier.size(36.dp),
                             shape = CircleShape,
@@ -114,7 +145,7 @@ fun NotifikasiScreen(
                                     Icons.Outlined.DoneAll,
                                     contentDescription = "Baca Semua",
                                     tint = colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(22.dp)
                                 )
                             }
                         }
@@ -171,123 +202,230 @@ fun NotifikasiScreen(
                     }
                 }
 
-                val filteredNotifs = if (selectedFilter == 0) notifList
-                else notifList.filter { it.type == filterOptions[selectedFilter].lowercase() }
-
-                if (filteredNotifs.isEmpty()) {
-                    EmptyNotifikasiState()
-                } else {
-                    val lazyItems = buildList {
-                        var lastGroup = ""
-                        for (notif in filteredNotifs) {
-                            val dateGroup = when {
-                                notif.timestamp.contains("menit") || notif.timestamp.contains("jam") -> "BARU INI"
-                                notif.timestamp.contains("Kemarin") -> "KEMARIN"
-                                else -> "RIWAYAT"
-                            }
-                            if (dateGroup != lastGroup) {
-                                add(LazyNotifItem.Header(dateGroup))
-                                lastGroup = dateGroup
-                            }
-                            add(LazyNotifItem.Notif(notif))
-                        }
+                when (screenState) {
+                    is NotifUiState.Loading -> {
+                        ShimmerNotifikasiList()
                     }
-
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(lazyItems) { lazyItem ->
-                            when (lazyItem) {
-                                is LazyNotifItem.Header -> {
-                                    Text(
-                                        text = lazyItem.title,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Black,
-                                        letterSpacing = 1.5.sp,
-                                        color = colorScheme.primary.copy(alpha = 0.3f),
-                                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                    is NotifUiState.Empty -> {
+                        EmptyNotifikasiState()
+                    }
+                    is NotifUiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Sdm3ErrorState(
+                                title = "Gagal Memuat",
+                                message = screenState.message,
+                                style = ErrorStateStyle.Generic,
+                                primaryAction = {
+                                    Sdm3Button(
+                                        text = "Coba Lagi",
+                                        onClick = { viewModel.loadNotifications() },
+                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 }
-                                is LazyNotifItem.Notif -> {
-                                    val notif = lazyItem.item
-                                    Sdm3Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        padding = 0.dp
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .background(
-                                                    if (!notif.isRead) colorScheme.primary.copy(alpha = 0.03f)
-                                                    else Color.Transparent
-                                                )
-                                                .padding(16.dp),
-                                            verticalAlignment = Alignment.Top
-                                        ) {
-                                            Surface(
-                                                modifier = Modifier.size(44.dp),
-                                                shape = RoundedCornerShape(12.dp),
-                                                color = colorScheme.primary.copy(alpha = 0.05f)
+                            )
+                        }
+                    }
+                    is NotifUiState.Success -> {
+                        val notifItems = vmState.notifications.map { n ->
+                            NotifItem(
+                                id = n.id,
+                                type = n.type,
+                                title = n.title.orEmpty(),
+                                body = n.message,
+                                timestamp = n.createdAt ?: "",
+                                isRead = n.readAt != null
+                            )
+                        }
+                        val filteredNotifs = if (selectedFilter == 0) notifItems
+                        else notifItems.filter { it.type == filterOptions[selectedFilter].lowercase() }
+
+                        if (filteredNotifs.isEmpty()) {
+                            EmptyNotifikasiState()
+                        } else {
+                            val lazyItems = buildList {
+                                var lastGroup = ""
+                                for (notif in filteredNotifs) {
+                                    val dateGroup = when {
+                                        notif.timestamp.contains("menit") || notif.timestamp.contains("jam") -> "BARU INI"
+                                        notif.timestamp.contains("Kemarin") -> "KEMARIN"
+                                        else -> "RIWAYAT"
+                                    }
+                                    if (dateGroup != lastGroup) {
+                                        add(LazyNotifItem.Header(dateGroup))
+                                        lastGroup = dateGroup
+                                    }
+                                    add(LazyNotifItem.Notif(notif))
+                                }
+                            }
+
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(lazyItems) { lazyItem ->
+                                    when (lazyItem) {
+                                        is LazyNotifItem.Header -> {
+                                            Text(
+                                                text = lazyItem.title,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Black,
+                                                letterSpacing = 1.5.sp,
+                                                color = colorScheme.primary.copy(alpha = 0.3f),
+                                                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                                            )
+                                        }
+                                        is LazyNotifItem.Notif -> {
+                                            val notif = lazyItem.item
+                                            Sdm3Card(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        if (!isPreview) viewModel.markAsRead(notif.id)
+                                                    },
+                                                padding = 0.dp
                                             ) {
-                                                Box(contentAlignment = Alignment.Center) {
-                                                    Icon(
-                                                        iconForType(notif.type),
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(22.dp),
-                                                        tint = colorScheme.primary
-                                                    )
-                                                }
-                                            }
-                                            Spacer(modifier = Modifier.width(16.dp))
-                                            Column(modifier = Modifier.weight(1f)) {
                                                 Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        text = notif.title,
-                                                        style = MaterialTheme.typography.bodyLarge,
-                                                        fontWeight = if (!notif.isRead) FontWeight.Bold else FontWeight.SemiBold,
-                                                        color = colorScheme.primary,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                        modifier = Modifier.weight(1f)
-                                                    )
-                                                    Text(
-                                                        text = notif.timestamp,
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = colorScheme.primary.copy(alpha = 0.3f),
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                }
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    text = notif.body,
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                                    maxLines = 2,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    lineHeight = 20.sp
-                                                )
-                                            }
-                                            if (!notif.isRead) {
-                                                Spacer(modifier = Modifier.width(12.dp))
-                                                Box(
                                                     modifier = Modifier
-                                                        .size(8.dp)
-                                                        .clip(CircleShape)
-                                                        .background(colorScheme.secondary)
-                                                        .align(Alignment.CenterVertically)
-                                                )
+                                                        .background(
+                                                            if (!notif.isRead) colorScheme.primary.copy(alpha = 0.03f)
+                                                            else Color.Transparent
+                                                        )
+                                                        .padding(16.dp),
+                                                    verticalAlignment = Alignment.Top
+                                                ) {
+                                                    Surface(
+                                                        modifier = Modifier.size(44.dp),
+                                                        shape = RoundedCornerShape(12.dp),
+                                                        color = colorScheme.primary.copy(alpha = 0.05f)
+                                                    ) {
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(
+                                                                iconForType(notif.type),
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(26.dp),
+                                                                tint = colorScheme.primary
+                                                            )
+                                                        }
+                                                    }
+                                                    Spacer(modifier = Modifier.width(16.dp))
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            Text(
+                                                                text = notif.title,
+                                                                style = MaterialTheme.typography.bodyLarge,
+                                                                fontWeight = if (!notif.isRead) FontWeight.Bold else FontWeight.SemiBold,
+                                                                color = colorScheme.primary,
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis,
+                                                                modifier = Modifier.weight(1f)
+                                                            )
+                                                            Text(
+                                                                text = notif.timestamp,
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                color = colorScheme.primary.copy(alpha = 0.3f),
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
+                                                        Spacer(modifier = Modifier.height(4.dp))
+                                                        Text(
+                                                            text = notif.body,
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                            maxLines = 2,
+                                                            overflow = TextOverflow.Ellipsis,
+                                                            lineHeight = 20.sp
+                                                        )
+                                                    }
+                                                    if (!notif.isRead) {
+                                                        Spacer(modifier = Modifier.width(12.dp))
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(8.dp)
+                                                                .clip(CircleShape)
+                                                                .background(colorScheme.secondary)
+                                                                .align(Alignment.CenterVertically)
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                item { Spacer(modifier = Modifier.height(100.dp)) }
                             }
                         }
-                        item { Spacer(modifier = Modifier.height(100.dp)) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShimmerNotifikasiList() {
+    val colorScheme = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        repeat(5) {
+            Sdm3Card(
+                modifier = Modifier.fillMaxWidth(),
+                padding = 0.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .shimmerEffect()
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.6f)
+                                    .height(16.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmerEffect()
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .width(60.dp)
+                                    .height(12.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .shimmerEffect()
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(14.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmerEffect()
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f)
+                                .height(14.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .shimmerEffect()
+                        )
                     }
                 }
             }

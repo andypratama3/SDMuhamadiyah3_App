@@ -3,13 +3,13 @@ package com.sdm3.parent.feature.rapor
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.repository.RaporRepository
+import com.sdm3.parent.domain.repository.RaporRepositoryContract
 
 data class PreviewRaporPdfUiState(
     val raporId: String = "",
     val downloadUrl: String = "",
-    val fileName: String = "Rapor_Siswa.pdf",
-    val fileSize: String = "—",
+    val fileName: String = "",
+    val fileSize: String = "",
     val downloadProgress: Float = 0f,
     val isDownloading: Boolean = false,
     val isDownloaded: Boolean = false,
@@ -19,7 +19,7 @@ data class PreviewRaporPdfUiState(
 ) : ScreenState
 
 class PreviewRaporPdfViewModel(
-    private val raporRepository: RaporRepository
+    private val raporRepository: RaporRepositoryContract
 ) : BaseViewModel<PreviewRaporPdfUiState>(PreviewRaporPdfUiState()) {
 
     fun init(raporId: String, downloadUrl: String) {

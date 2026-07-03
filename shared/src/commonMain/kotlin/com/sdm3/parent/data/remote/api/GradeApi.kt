@@ -5,6 +5,7 @@ import com.sdm3.parent.core.network.HttpClientProvider
 import com.sdm3.parent.core.network.toApiResult
 import com.sdm3.parent.data.remote.dto.GradeComponentDto
 import com.sdm3.parent.data.remote.dto.GradeDto
+import com.sdm3.parent.data.remote.dto.TranscriptDto
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.url
@@ -28,6 +29,15 @@ class GradeApi(private val provider: HttpClientProvider) {
             provider.applyAuthHeader(this)
             parameter("student_id", studentId)
             parameter("subject_id", subjectId)
+        }
+        provider.handleSessionExpiredIfNeeded(response)
+        return response.toApiResult()
+    }
+
+    suspend fun getTranscript(studentId: String): ApiResult<TranscriptDto> {
+        val response = provider.client.get {
+            url(Endpoints.PARENT_GRADE_TRANSCRIPT.replace("{studentId}", studentId))
+            provider.applyAuthHeader(this)
         }
         provider.handleSessionExpiredIfNeeded(response)
         return response.toApiResult()

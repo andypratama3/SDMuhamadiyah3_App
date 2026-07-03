@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -12,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.sdm3.parent.core.event.SessionEventBus
 import com.sdm3.parent.core.designsystem.component.Sdm3AdaptiveLayout
 import com.sdm3.parent.feature.auth.ui.AccountDeletionScreen
 import com.sdm3.parent.feature.auth.LoginViewModel
@@ -50,6 +52,14 @@ fun SDM3NavHost(
     startDestination: SDM3Route = SDM3Route.Splash
 ) {
 
+    LaunchedEffect(Unit) {
+        SessionEventBus.events.collect {
+            navController.navigate(SDM3Route.Login) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRouteStr = navBackStackEntry?.destination?.route ?: ""
 
@@ -64,7 +74,7 @@ fun SDM3NavHost(
     }
 
     val currentTab = when {
-        currentRouteStr.contains("Home") -> SDM3BottomTab.Beranda
+        currentRouteStr.contains("Home") || currentRouteStr.contains("Main") -> SDM3BottomTab.Beranda
         currentRouteStr.contains("NilaiRapor") -> SDM3BottomTab.Nilai
         currentRouteStr.contains("PembayaranSpp") -> SDM3BottomTab.Bayar
         currentRouteStr.contains("HalamanRapor") -> SDM3BottomTab.Rapor
@@ -151,7 +161,9 @@ fun SDM3NavHost(
             }
 
             composable<SDM3Route.Onboarding> {
+                val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
                 OnboardingScreen(onComplete = {
+                    secureTokenManager.setOnboardingCompleted(true)
                     navController.navigate(SDM3Route.Login) {
                         popUpTo<SDM3Route.Onboarding> { inclusive = true }
                     }
@@ -160,11 +172,19 @@ fun SDM3NavHost(
 
             composable<SDM3Route.Login> {
                 val loginViewModel: LoginViewModel = koinViewModel()
+                val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
                 LoginScreen(
                     viewModel = loginViewModel,
                     onLoginSuccess = {
-                        navController.navigate(SDM3Route.PilihAnak) {
-                            popUpTo<SDM3Route.Login> { inclusive = true }
+                        val studentId = secureTokenManager.getSelectedStudentId()
+                        if (!studentId.isNullOrBlank()) {
+                            navController.navigate(SDM3Route.Main(studentId)) {
+                                popUpTo<SDM3Route.Login> { inclusive = true }
+                            }
+                        } else {
+                            navController.navigate(SDM3Route.PilihAnak) {
+                                popUpTo<SDM3Route.Login> { inclusive = true }
+                            }
                         }
                     },
                     onForgotPassword = { email ->
@@ -191,9 +211,8 @@ fun SDM3NavHost(
                 val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
                 PilihAnakScreen(
                     onChildSelected = { studentId ->
-                        val finalId = if (studentId == "guest_student") "student_1" else studentId
-                        secureTokenManager.saveSelectedStudentId(finalId)
-                        navController.navigate(SDM3Route.Main(finalId)) {
+                        secureTokenManager.saveSelectedStudentId(studentId)
+                        navController.navigate(SDM3Route.Main(studentId)) {
                             popUpTo<SDM3Route.PilihAnak> { inclusive = true }
                         }
                     }
@@ -284,7 +303,7 @@ fun SDM3NavHost(
                         navController.navigate(SDM3Route.DetailBuktiBayar(route.paymentId))
                     },
                     onKembali = {
-                        navController.navigate(SDM3Route.Main("")) {
+                        navController.navigate(SDM3Route.Main(savedStudentId)) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
@@ -373,7 +392,7 @@ fun SDM3NavHost(
                     },
                     onLogout = {
                         navController.navigate(SDM3Route.Login) {
-                            popUpTo<SDM3Route.Main> { inclusive = true }
+                            popUpTo(0) { inclusive = true }
                         }
                     }
                 )
@@ -401,7 +420,6 @@ fun SDM3NavHost(
                 PreviewRaporPdfScreen(
                     raporId = route.raporId,
                     downloadUrl = route.downloadUrl,
-                    viewModel = org.koin.compose.koinInject(),
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -410,7 +428,6 @@ fun SDM3NavHost(
                 val route = backStackEntry.toRoute<SDM3Route.VerifikasiQrRapor>()
                 VerifikasiQrRaporScreen(
                     raporId = route.raporId,
-                    viewModel = org.koin.compose.koinInject(),
                     onBack = { navController.popBackStack() }
                 )
             }

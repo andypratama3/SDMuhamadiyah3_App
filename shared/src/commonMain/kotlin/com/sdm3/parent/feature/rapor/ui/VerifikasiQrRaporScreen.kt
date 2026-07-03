@@ -31,13 +31,34 @@ import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.rapor.VerifikasiQrRaporUiState
 import com.sdm3.parent.feature.rapor.VerifikasiQrRaporViewModel
-import org.koin.compose.koinInject
+import com.sdm3.parent.platform.PlatformActions
+import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
+
+sealed class VerifikasiQrUiState {
+    data object Loading : VerifikasiQrUiState()
+    data object Empty : VerifikasiQrUiState()
+    data class Error(val message: String) : VerifikasiQrUiState()
+    data class Success(
+        val qrInput: String = "",
+        val isLoading: Boolean = false,
+        val showResult: Boolean = false,
+        val errorMessage: String? = null,
+        val verifyResult: VerifyResultData? = null
+    ) : VerifikasiQrUiState()
+}
+
+data class VerifyResultData(
+    val valid: Boolean,
+    val studentName: String? = null,
+    val nisn: String? = null
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerifikasiQrRaporScreen(
     raporId: String,
-    viewModel: VerifikasiQrRaporViewModel? = if (LocalInspectionMode.current) null else koinInject(),
+    viewModel: VerifikasiQrRaporViewModel = koinViewModel(),
     onBack: () -> Unit
 ) {
     val isPreview = LocalInspectionMode.current
@@ -45,11 +66,44 @@ fun VerifikasiQrRaporScreen(
     val state by if (isPreview) {
         remember { mutableStateOf(VerifikasiQrRaporUiState()) }
     } else {
-        viewModel!!.uiState.collectAsState()
+        viewModel.uiState.collectAsState()
     }
 
     if (!isPreview) {
-        LaunchedEffect(raporId) { viewModel?.init(raporId) }
+        LaunchedEffect(raporId) { viewModel.init(raporId) }
+    }
+
+    val scope = rememberCoroutineScope()
+    val launchQrScan: () -> Unit = {
+        if (!isPreview) {
+            scope.launch {
+                val code = PlatformActions.scanQrCode()
+                if (!code.isNullOrBlank()) {
+                    viewModel.updateQrInput(code)
+                }
+            }
+        }
+    }
+
+    val uiState: VerifikasiQrUiState = with(state) {
+        when {
+            isLoading && !showResult -> VerifikasiQrUiState.Loading
+            errorMessage != null && !showResult -> VerifikasiQrUiState.Error(errorMessage)
+            isEmpty -> VerifikasiQrUiState.Empty
+            else -> VerifikasiQrUiState.Success(
+                qrInput = qrInput,
+                isLoading = isLoading,
+                showResult = showResult,
+                errorMessage = errorMessage,
+                verifyResult = verifyResult?.let { result ->
+                    VerifyResultData(
+                        valid = result.valid,
+                        studentName = result.studentName,
+                        nisn = result.nisn
+                    )
+                }
+            )
+        }
     }
 
     Scaffold(
@@ -88,7 +142,6 @@ fun VerifikasiQrRaporScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Atmospheric Glow
             Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -99,145 +152,229 @@ fun VerifikasiQrRaporScreen(
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Sdm3Card(padding = 24.dp) {
+            when (val currentState = uiState) {
+                is VerifikasiQrUiState.Loading -> {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        Spacer(modifier = Modifier.height(12.dp))
                         Box(
                             modifier = Modifier
-                                .size(220.dp)
+                                .fillMaxWidth()
+                                .height(280.dp)
                                 .clip(RoundedCornerShape(32.dp))
-                                .background(colorScheme.primary.copy(alpha = 0.03f))
-                                .border(2.dp, colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(32.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    imageVector = Icons.Default.QrCodeScanner,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(64.dp),
-                                    tint = colorScheme.primary.copy(alpha = 0.2f)
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "Scan QR Code Resmi\ndi Rapor Cetak",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = colorScheme.primary.copy(alpha = 0.4f),
-                                    textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.Bold,
-                                    lineHeight = 16.sp
-                                )
-                            }
-                        }
+                                .shimmerEffect()
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(24.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shimmerEffect()
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .shimmerEffect()
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .shimmerEffect()
+                        )
                     }
                 }
 
-                SectionHeader(title = "Input Manual", modifier = Modifier.padding(top = 8.dp))
+                is VerifikasiQrUiState.Empty -> {
+                    Sdm3EmptyState(
+                        title = "Belum Ada Verifikasi",
+                        message = "Silakan scan QR Code pada rapor cetak atau masukkan kode otentikasi secara manual.",
+                        style = EmptyStateStyle.Informative,
+                        icon = Icons.Outlined.QrCode2,
+                        action = {
+                            Sdm3Button(
+                                text = "Mulai Verifikasi",
+                                onClick = launchQrScan,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                            )
+                        }
+                    )
+                }
 
-                Sdm3TextField(
-                    value = state.qrInput,
-                    onValueChange = { if (!isPreview) viewModel?.updateQrInput(it) },
-                    label = "KODE OTENTIKASI",
-                    placeholder = "Masukkan string QR...",
-                    leadingIcon = Icons.Outlined.QrCode2
-                )
+                is VerifikasiQrUiState.Error -> {
+                    Sdm3ErrorState(
+                        title = "Verifikasi Gagal",
+                        message = currentState.message,
+                        style = ErrorStateStyle.Generic,
+                        primaryAction = {
+                            Sdm3Button(
+                                text = "Coba Lagi",
+                                onClick = { viewModel.reset() },
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                            )
+                        },
+                        secondaryAction = {
+                            Sdm3OutlinedButton(
+                                text = "Kembali",
+                                onClick = onBack,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                            )
+                        }
+                    )
+                }
 
-                Sdm3Button(
-                    text = "Validasi Dokumen",
-                    onClick = { viewModel?.verify() },
-                    isLoading = state.isLoading,
-                    enabled = !state.isLoading && state.qrInput.isNotBlank(),
-                    modifier = Modifier.fillMaxWidth().height(56.dp)
-                )
-
-                AnimatedVisibility(visible = state.showResult) {
+                is VerifikasiQrUiState.Success -> {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 24.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        state.errorMessage?.let { error ->
-                            Surface(
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Sdm3Card(padding = 24.dp) {
+                            Column(
                                 modifier = Modifier.fillMaxWidth(),
-                                color = colorScheme.error.copy(alpha = 0.1f),
-                                shape = RoundedCornerShape(12.dp)
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Error, contentDescription = null, modifier = Modifier.size(20.dp), tint = colorScheme.error)
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Text(error, style = MaterialTheme.typography.bodySmall, color = colorScheme.error, fontWeight = FontWeight.Bold)
+                                Box(
+                                    modifier = Modifier
+                                        .size(220.dp)
+                                        .clip(RoundedCornerShape(32.dp))
+                                        .background(colorScheme.primary.copy(alpha = 0.03f))
+                                        .border(2.dp, colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                                        .clickable(onClick = launchQrScan),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Icon(
+                                            imageVector = Icons.Default.QrCodeScanner,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(64.dp),
+                                            tint = colorScheme.primary.copy(alpha = 0.2f)
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "Scan QR Code Resmi\ndi Rapor Cetak",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = colorScheme.primary.copy(alpha = 0.4f),
+                                            textAlign = TextAlign.Center,
+                                            fontWeight = FontWeight.Bold,
+                                            lineHeight = 16.sp
+                                        )
+                                    }
                                 }
                             }
                         }
 
-                        val result = state.verifyResult
-                        if (result != null) {
-                            Sdm3Card(padding = 24.dp) {
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Surface(
-                                            modifier = Modifier.size(56.dp),
-                                            shape = CircleShape,
-                                            color = (if (result.valid) StatusSuccess else colorScheme.error).copy(alpha = 0.1f)
-                                        ) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Icon(
-                                                    imageVector = if (result.valid) Icons.Default.Verified else Icons.Default.NewReleases,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(32.dp),
-                                                    tint = if (result.valid) StatusSuccess else colorScheme.error
-                                                )
-                                            }
+                        SectionHeader(title = "Input Manual", modifier = Modifier.padding(top = 8.dp))
+
+                        Sdm3TextField(
+                            value = currentState.qrInput,
+                            onValueChange = { if (!isPreview) viewModel.updateQrInput(it) },
+                            label = "KODE OTENTIKASI",
+                            placeholder = "Masukkan string QR...",
+                            leadingIcon = Icons.Outlined.QrCode2
+                        )
+
+                        Sdm3Button(
+                            text = "Validasi Dokumen",
+                            onClick = { viewModel.verify() },
+                            isLoading = currentState.isLoading,
+                            enabled = !currentState.isLoading && currentState.qrInput.isNotBlank(),
+                            modifier = Modifier.fillMaxWidth().height(56.dp)
+                        )
+
+                        AnimatedVisibility(visible = currentState.showResult) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                currentState.errorMessage?.let { error ->
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = colorScheme.error.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(Icons.Default.Error, contentDescription = null, modifier = Modifier.size(20.dp), tint = colorScheme.error)
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(error, style = MaterialTheme.typography.bodySmall, color = colorScheme.error, fontWeight = FontWeight.Bold)
                                         }
-                                        Spacer(modifier = Modifier.width(20.dp))
+                                    }
+                                }
+
+                                val result = currentState.verifyResult
+                                if (result != null) {
+                                    Sdm3Card(padding = 24.dp) {
                                         Column {
-                                            Text(
-                                                text = if (result.valid) "DOKUMEN VALID" else "DOKUMEN TIDAK SAH",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Black,
-                                                letterSpacing = 1.sp,
-                                                color = if (result.valid) StatusSuccess else colorScheme.error
-                                            )
-                                            Text(
-                                                text = if (result.valid) "Terautentikasi" else "Gagal Verifikasi",
-                                                style = MaterialTheme.typography.titleLarge,
-                                                fontWeight = FontWeight.Bold,
-                                                color = colorScheme.primary
-                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Surface(
+                                                    modifier = Modifier.size(56.dp),
+                                                    shape = CircleShape,
+                                                    color = (if (result.valid) StatusSuccess else colorScheme.error).copy(alpha = 0.1f)
+                                                ) {
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Icon(
+                                                            imageVector = if (result.valid) Icons.Default.Verified else Icons.Default.NewReleases,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(32.dp),
+                                                            tint = if (result.valid) StatusSuccess else colorScheme.error
+                                                        )
+                                                    }
+                                                }
+                                                Spacer(modifier = Modifier.width(20.dp))
+                                                Column {
+                                                    Text(
+                                                        text = if (result.valid) "DOKUMEN VALID" else "DOKUMEN TIDAK SAH",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Black,
+                                                        letterSpacing = 1.sp,
+                                                        color = if (result.valid) StatusSuccess else colorScheme.error
+                                                    )
+                                                    Text(
+                                                        text = if (result.valid) "Terautentikasi" else "Gagal Verifikasi",
+                                                        style = MaterialTheme.typography.titleLarge,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = colorScheme.primary
+                                                    )
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.height(24.dp))
+                                            SectionHeader(title = "Detail Siswa", modifier = Modifier.alpha(0.5f))
+                                            Spacer(modifier = Modifier.height(12.dp))
+
+                                            result.studentName?.let { VerifInfoRow("NAMA LENGKAP", it) }
+                                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 10.dp))
+                                            result.nisn?.let { VerifInfoRow("NOMOR INDUK", it) }
                                         }
                                     }
 
-                                    Spacer(modifier = Modifier.height(24.dp))
-                                    SectionHeader(title = "Detail Siswa", modifier = Modifier.alpha(0.5f))
-                                    Spacer(modifier = Modifier.height(12.dp))
-
-                                    result.studentName?.let { VerifInfoRow("NAMA LENGKAP", it) }
-                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 10.dp))
-                                    result.nisn?.let { VerifInfoRow("NOMOR INDUK", it) }
+                                    Sdm3OutlinedButton(
+                                        text = "Ulangi Verifikasi",
+                                        onClick = { viewModel.reset() },
+                                        icon = Icons.Default.Refresh,
+                                        contentColor = colorScheme.primary
+                                    )
                                 }
                             }
-
-                            Sdm3OutlinedButton(
-                                text = "Ulangi Verifikasi",
-                                onClick = { viewModel?.reset() },
-                                icon = Icons.Default.Refresh,
-                                contentColor = colorScheme.primary
-                            )
                         }
+
+                        Spacer(modifier = Modifier.height(100.dp))
                     }
                 }
-
-                Spacer(modifier = Modifier.height(100.dp))
             }
         }
     }

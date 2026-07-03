@@ -15,13 +15,20 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.serializer
 import io.ktor.client.request.HttpRequestBuilder
+import com.sdm3.parent.core.event.SessionEventBus
+import com.sdm3.parent.isDebugBuild
 
 class HttpClientProvider(
     private val baseUrl: String,
     private val tokenProvider: suspend () -> String?,
     private val onSessionExpired: suspend () -> Unit,
-    private val certificatePins: List<String> = emptyList()
+    private val certificatePins: List<String> = emptyList(),
+    private val enableLogging: Boolean = false
 ) {
     val client: HttpClient = HttpClient {
         install(ContentNegotiation) {
@@ -36,9 +43,10 @@ class HttpClientProvider(
             connectTimeoutMillis = 10_000
         }
         install(Logging) {
-            level = LogLevel.INFO
+            level = if (enableLogging) LogLevel.INFO else LogLevel.NONE
             logger = object : Logger {
                 override fun log(message: String) {
+                    if (!enableLogging) return
                     if (!message.contains("Authorization", ignoreCase = true) &&
                         !message.contains("password", ignoreCase = true)
                     ) {
@@ -66,24 +74,61 @@ class HttpClientProvider(
     }
 
     internal suspend fun handleSessionExpiredIfNeeded(response: HttpResponse) {
-        if (response.status.value == 419) {
+        if (response.status.value == 419 || response.status.value == 401) {
             onSessionExpired()
+            SessionEventBus.emit()
         }
     }
 }
 
+@PublishedApi internal val apiJson = Json { ignoreUnknownKeys = true; isLenient = true; explicitNulls = false; coerceInputValues = true }
+
 suspend inline fun <reified T> HttpResponse.toApiResult(): ApiResult<T> {
+    val text = body<String>()
+    val root = try {
+        apiJson.parseToJsonElement(text).jsonObject
+    } catch (_: Exception) {
+        return try {
+            ApiResult.Success(apiJson.decodeFromString<T>(text))
+        } catch (_: Exception) {
+            ApiResult.Error(ApiError.Unknown("Gagal memproses respons server"))
+        }
+    }
+
+    val message = (root["message"] as? JsonPrimitive)?.content
+
+    if (status.value == 419) {
+        return ApiResult.Error(ApiError.SessionExpired)
+    }
+
     return when (status) {
         HttpStatusCode.OK, HttpStatusCode.Created -> {
-            ApiResult.Success(body())
+            val data = root["data"]
+            if (data == null || data is JsonNull) {
+                return ApiResult.Error(ApiError.Unknown("Data kosong"))
+            }
+            try {
+                ApiResult.Success(apiJson.decodeFromJsonElement(serializer<T>(), data))
+            } catch (e: Exception) {
+                if (isDebugBuild()) {
+                    println("[SDM3] Deserialization error for ${T::class.simpleName}: ${e.message}")
+                }
+                ApiResult.Error(ApiError.Unknown("Gagal memproses data: ${e.message}"))
+            }
         }
-        HttpStatusCode.Unauthorized -> ApiResult.Error(ApiError.Unauthorized("Sesi tidak valid, silakan login kembali."))
-        HttpStatusCode.Forbidden -> ApiResult.Error(ApiError.Forbidden("Anda tidak memiliki akses ke data ini."))
+        HttpStatusCode.Unauthorized -> ApiResult.Error(ApiError.Unauthorized(message ?: "Sesi tidak valid, silakan login kembali."))
+        HttpStatusCode.Forbidden -> ApiResult.Error(ApiError.Forbidden(message ?: "Anda tidak memiliki akses ke data ini."))
         HttpStatusCode.NotFound -> ApiResult.Error(ApiError.NotFound)
-        HttpStatusCode(419, "") -> ApiResult.Error(ApiError.SessionExpired)
         HttpStatusCode.UnprocessableEntity -> {
-            val body: LaravelValidationErrorDto = body()
-            ApiResult.Error(ApiError.Validation(body.errors))
+            val errors = try {
+                val errorsElement = root["data"]?.jsonObject?.get("errors")
+                if (errorsElement != null) {
+                    apiJson.decodeFromJsonElement(serializer<Map<String, List<String>>>(), errorsElement)
+                } else emptyMap()
+            } catch (_: Exception) {
+                emptyMap()
+            }
+            ApiResult.Error(ApiError.Validation(errors))
         }
         HttpStatusCode.TooManyRequests -> {
             val retryAfter = headers["Retry-After"]?.toIntOrNull()
@@ -93,14 +138,8 @@ suspend inline fun <reified T> HttpResponse.toApiResult(): ApiResult<T> {
             if (status.value >= 500) {
                 ApiResult.Error(ApiError.ServerError(status.value))
             } else {
-                ApiResult.Error(ApiError.Unknown("Terjadi kesalahan tidak terduga (${status.value})"))
+                ApiResult.Error(ApiError.Unknown(message ?: "Terjadi kesalahan tidak terduga (${status.value})"))
             }
         }
     }
 }
-
-@kotlinx.serialization.Serializable
-data class LaravelValidationErrorDto(
-    val message: String,
-    val errors: Map<String, List<String>>
-)

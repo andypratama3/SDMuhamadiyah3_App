@@ -29,9 +29,20 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.data.remote.dto.GradeDto
+import com.sdm3.parent.feature.nilai.FormatifGradeItem
+import com.sdm3.parent.feature.nilai.NilaiRaporUiState
 import com.sdm3.parent.feature.nilai.NilaiRaporViewModel
+import com.sdm3.parent.feature.nilai.ProjekGradeItem
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.tooling.preview.Preview
+
+sealed class NilaiRaporScreenUiState {
+    data object Loading : NilaiRaporScreenUiState()
+    data object Empty : NilaiRaporScreenUiState()
+    data class Error(val message: String) : NilaiRaporScreenUiState()
+    data object Success : NilaiRaporScreenUiState()
+}
 
 private val tabLabels = listOf("Sumatif", "Formatif", "Projek")
 private val PremiumEasing = androidx.compose.animation.core.CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
@@ -43,14 +54,43 @@ fun NilaiRaporScreen(
     semester: String,
     onBack: (() -> Unit)? = null,
     onDetailMapel: ((subjectId: String) -> Unit)? = null,
-    viewModel: NilaiRaporViewModel? = if (LocalInspectionMode.current) null else koinViewModel()
+    viewModel: NilaiRaporViewModel = koinViewModel()
 ) {
+    val isPreview = LocalInspectionMode.current
     var selectedTab by remember { mutableIntStateOf(0) }
     val colorScheme = MaterialTheme.colorScheme
+    val semesterOptions = remember { listOf("ganjil", "genap", "ts1", "as1", "ts2", "at") }
+    var showSemesterMenu by remember { mutableStateOf(false) }
+    val semesterLabel = remember(semester) {
+        when (semester.lowercase()) {
+            "ganjil" -> "Semester Ganjil"
+            "genap" -> "Semester Genap"
+            "ts1" -> "Tengah Semester 1"
+            "as1" -> "Akhir Semester 1"
+            "ts2" -> "Tengah Semester 2"
+            "at" -> "Akhir Tahun"
+            else -> "Semester $semester"
+        }
+    }
+    val vmState by if (isPreview) {
+        remember { mutableStateOf(NilaiRaporUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
 
-    if (!LocalInspectionMode.current) {
+    val uiState: NilaiRaporScreenUiState = remember(vmState) {
+        val s = vmState
+        when {
+            s.isLoading -> NilaiRaporScreenUiState.Loading
+            s.errorMessage != null -> NilaiRaporScreenUiState.Error(s.errorMessage)
+            s.isEmpty -> NilaiRaporScreenUiState.Empty
+            else -> NilaiRaporScreenUiState.Success
+        }
+    }
+
+    if (!isPreview) {
         LaunchedEffect(studentId) {
-            viewModel?.loadGrades(studentId, semester)
+            viewModel.loadGrades(studentId, semester)
         }
     }
 
@@ -67,13 +107,45 @@ fun NilaiRaporScreen(
                             color = colorScheme.primary,
                             letterSpacing = (-0.5).sp
                         )
-                        Text(
-                            text = "Semester $semester".uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
+                        Box {
+                            Text(
+                                text = semesterLabel.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary.copy(alpha = 0.4f),
+                                letterSpacing = 1.sp,
+                                modifier = Modifier.clickable { showSemesterMenu = true }
+                            )
+                            DropdownMenu(
+                                expanded = showSemesterMenu,
+                                onDismissRequest = { showSemesterMenu = false }
+                            ) {
+                                semesterOptions.forEach { opt ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                when (opt) {
+                                                    "ganjil" -> "Semester Ganjil"
+                                                    "genap" -> "Semester Genap"
+                                                    "ts1" -> "Tengah Semester 1"
+                                                    "as1" -> "Akhir Semester 1"
+                                                    "ts2" -> "Tengah Semester 2"
+                                                    "at" -> "Akhir Tahun"
+                                                    else -> opt
+                                                },
+                                                fontWeight = if (opt == semester) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                        },
+                                        onClick = {
+                                            showSemesterMenu = false
+                                            if (opt != semester) {
+                                                viewModel.loadGrades(studentId, opt)
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 },
                 navigationIcon = {
@@ -136,17 +208,64 @@ fun NilaiRaporScreen(
                     }
                 }
 
-                AnimatedContent(
-                    targetState = selectedTab,
-                    transitionSpec = {
-                        (fadeIn(tween(400, easing = PremiumEasing)) + scaleIn(initialScale = 0.95f)) togetherWith fadeOut(tween(300))
-                    },
-                    label = "tabContent"
-                ) { targetTab ->
-                    when (targetTab) {
-                        0 -> SumatifTabContent(studentId, semester, onDetailMapel)
-                        1 -> FormatifTabContent(studentId)
-                        2 -> ProjekTabContent(studentId)
+                Box(modifier = Modifier.weight(1f)) {
+                    when (uiState) {
+                        NilaiRaporScreenUiState.Loading -> {
+                            AnimatedContent(
+                                targetState = selectedTab,
+                                transitionSpec = {
+                                    (fadeIn(tween(400, easing = PremiumEasing)) + scaleIn(initialScale = 0.95f)) togetherWith fadeOut(tween(300))
+                                },
+                                label = "tabShimmer"
+                            ) { targetTab ->
+                                when (targetTab) {
+                                    0 -> SumatifTabShimmer()
+                                    1 -> FormatifTabShimmer()
+                                    2 -> ProjekTabShimmer()
+                                }
+                            }
+                        }
+                        NilaiRaporScreenUiState.Empty -> {
+                            Sdm3EmptyState(
+                                title = "Belum Ada Data Nilai",
+                                message = "Data nilai untuk semester ini belum tersedia.",
+                                style = EmptyStateStyle.Neutral,
+                                action = {
+                                    Sdm3Button(
+                                        text = "Muat Ulang",
+                                        onClick = { viewModel.refresh() }
+                                    )
+                                }
+                            )
+                        }
+                        is NilaiRaporScreenUiState.Error -> {
+                            Sdm3ErrorState(
+                                title = "Gagal Memuat Data",
+                                message = uiState.message,
+                                style = ErrorStateStyle.Generic,
+                                primaryAction = {
+                                    Sdm3Button(
+                                        text = "Coba Lagi",
+                                        onClick = { viewModel.refresh() }
+                                    )
+                                }
+                            )
+                        }
+                        NilaiRaporScreenUiState.Success -> {
+                            AnimatedContent(
+                                targetState = selectedTab,
+                                transitionSpec = {
+                                    (fadeIn(tween(400, easing = PremiumEasing)) + scaleIn(initialScale = 0.95f)) togetherWith fadeOut(tween(300))
+                                },
+                                label = "tabContent"
+                            ) { targetTab ->
+                                when (targetTab) {
+                                    0 -> SumatifTabContent(vmState.grades, onDetailMapel)
+                                    1 -> FormatifTabContent(vmState.formatifGrades)
+                                    2 -> ProjekTabContent(vmState.projekGrades)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -155,23 +274,138 @@ fun NilaiRaporScreen(
 }
 
 @Composable
+private fun SumatifTabShimmer() {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .shimmerEffect()
+            )
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .shimmerEffect()
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .shimmerEffect()
+                )
+            }
+        }
+        item {
+            Box(
+                modifier = Modifier
+                    .width(180.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
+            )
+        }
+        items(8) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect()
+            )
+        }
+        item { Spacer(Modifier.height(100.dp)) }
+    }
+}
+
+@Composable
+private fun FormatifTabShimmer() {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect()
+            )
+        }
+        items(5) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect()
+            )
+        }
+        item { Spacer(Modifier.height(100.dp)) }
+    }
+}
+
+@Composable
+private fun ProjekTabShimmer() {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .width(220.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
+            )
+        }
+        items(3) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect()
+            )
+        }
+        item { Spacer(Modifier.height(100.dp)) }
+    }
+}
+
+@Composable
 private fun SumatifTabContent(
-    studentId: String,
-    semester: String,
+    grades: List<GradeDto>,
     onDetailMapel: ((subjectId: String) -> Unit)?
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val subjects = listOf(
-        SubjectGrade("Matematika", 92, "A", "SANGAT BAIK", "1"),
-        SubjectGrade("Bahasa Indonesia", 88, "B+", "BAIK", "2"),
-        SubjectGrade("IPA", 95, "A", "SANGAT BAIK", "3"),
-        SubjectGrade("IPS", 78, "B", "CUKUP", "4"),
-        SubjectGrade("Pend. Agama", 90, "A", "SANGAT BAIK", "5"),
-        SubjectGrade("PJOK", 85, "B+", "BAIK", "6"),
-        SubjectGrade("Seni Budaya", 82, "B", "BAIK", "7"),
-        SubjectGrade("Bahasa Inggris", 76, "B", "CUKUP", "8")
-    )
-    val avgScore = subjects.map { it.score }.average().toInt()
+    val subjects = grades.map { grade ->
+        SubjectGrade(
+            name = grade.subjectName,
+            score = grade.score?.toInt() ?: 0,
+            predicate = grade.predicate ?: "-",
+            description = grade.narrative ?: "",
+            id = grade.subjectId
+        )
+    }
+    val avgScore = if (subjects.isNotEmpty()) subjects.map { it.score }.average().toInt() else 0
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -216,12 +450,19 @@ private fun SumatifTabContent(
                             color = colorScheme.onPrimary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
+                        val predicate = when {
+                            avgScore >= 90 -> "A"
+                            avgScore >= 80 -> "B"
+                            avgScore >= 70 -> "C"
+                            avgScore >= 60 -> "D"
+                            else -> "E"
+                        }
                         Surface(
                             color = colorScheme.secondary,
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
-                                text = " PREDIKAT A ",
+                                text = " PREDIKAT $predicate ",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
                                 color = colorScheme.primary,
@@ -386,15 +627,10 @@ private fun StatMiniCard(
 }
 
 @Composable
-private fun FormatifTabContent(studentId: String) {
+private fun FormatifTabContent(
+    formatifItems: List<FormatifGradeItem>
+) {
     val colorScheme = MaterialTheme.colorScheme
-    val tpData = listOf(
-        TPItem("TP 1.1", "Menjelaskan operasi hitung bilangan cacah", 85),
-        TPItem("TP 1.2", "Menyelesaikan soal cerita penjumlahan", 90),
-        TPItem("TP 2.1", "Mengidentifikasi sifat-sifat bangun datar", 78),
-        TPItem("TP 2.2", "Menghitung keliling bangun datar", 72),
-        TPItem("TP 3.1", "Menyelesaikan masalah kontekstual", 88)
-    )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -419,7 +655,7 @@ private fun FormatifTabContent(studentId: String) {
             }
         }
 
-        items(tpData) { tp ->
+        items(formatifItems) { tp ->
             val tpColor = when {
                 tp.score >= 90 -> StatusSuccess
                 tp.score >= 75 -> StatusWarning
@@ -470,13 +706,10 @@ private fun FormatifTabContent(studentId: String) {
 }
 
 @Composable
-private fun ProjekTabContent(studentId: String) {
+private fun ProjekTabContent(
+    projekItems: List<ProjekGradeItem>
+) {
     val colorScheme = MaterialTheme.colorScheme
-    val proyek = listOf(
-        ProjekItem("Gaya Hidup Berkelanjutan", "Daur ulang limbah rumah tangga", 88, "A"),
-        ProjekItem("Kearifan Lokal", "Pameran budaya Kalimantan Timur", 92, "A"),
-        ProjekItem("Bangunlah Jiwa Raganya", "Kampanye anti-bullying", 85, "B+")
-    )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -489,7 +722,7 @@ private fun ProjekTabContent(studentId: String) {
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
-        items(proyek) { proyekItem ->
+        items(projekItems) { proyekItem ->
             Sdm3Card {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(
@@ -553,6 +786,4 @@ data class SubjectGrade(
     val id: String
 )
 
-data class TPItem(val code: String, val description: String, val score: Int)
 
-data class ProjekItem(val tema: String, val deskripsi: String, val nilai: Int, val predikat: String)

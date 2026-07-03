@@ -26,8 +26,18 @@ data class PaymentDto(
     @SerialName("payment_type")
     val paymentType: String? = null,
     val status: String,
+    @SerialName("payment_url")
+    val paymentUrl: String? = null,
     @SerialName("va_number")
     val vaNumber: String? = null,
+    @SerialName("student_name")
+    val studentName: String? = null,
+    @SerialName("student_class")
+    val studentClass: String? = null,
+    @SerialName("student_nisn")
+    val studentNisn: String? = null,
+    @SerialName("payment_title")
+    val paymentTitle: PaymentTitleDto? = null,
     @SerialName("paid_at")
     val paidAt: String? = null,
     @SerialName("created_at")
@@ -35,9 +45,32 @@ data class PaymentDto(
 )
 
 @Serializable
+data class PaymentTitleDto(
+    val id: String,
+    val name: String
+)
+
+@Serializable
 data class SnapTokenResponse(
     @SerialName("snap_token")
     val snapToken: String,
     @SerialName("redirect_url")
-    val redirectUrl: String? = null
+    val redirectUrl: String? = null,
+    @SerialName("payment_id")
+    val paymentId: String? = null,
+    @SerialName("order_id")
+    val orderId: String? = null
+)
+
+@Serializable
+data class SnapTokenRequest(
+    @SerialName("payment_method")
+    val paymentMethod: String
+)
+
+@Serializable
+data class PaymentMethodDto(
+    val id: String,
+    val name: String,
+    val description: String? = null
 )

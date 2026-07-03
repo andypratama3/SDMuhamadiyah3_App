@@ -167,13 +167,17 @@ class CacheDataSource(private val database: SDM3Database) {
     fun cacheProfile(profile: ProfileDto) {
         queries.insertProfile(profile.toEntity(now))
     }
+
+    fun clearAll() {
+        queries.clearAllCache()
+    }
 }
 
 // -- DTO to Entity mappings --
 
 private fun StudentDto.toEntity(cachedAt: Long) = StudentEntity(
-    id = id, name = name, nisn = nisn, nis = nis, gender = gender,
-    birth_place = birthPlace, birth_date = birthDate, photo = photo,
+    id = id, name = name, nisn = nisn.orEmpty(), nis = nis, gender = gender,
+    birth_place = birthPlace.orEmpty(), birth_date = birthDate.orEmpty(), photo = photo,
     class_name = className, spp = spp?.toLong(), dpp = dpp?.toLong(),
     cached_at = cachedAt,
 )
@@ -266,7 +270,7 @@ private fun PaymentEntity.toDto() = PaymentDto(
 )
 
 private fun NotificationDto.toEntity(cachedAt: Long) = NotificationEntity(
-    id = id, type = type, title = title, message = message,
+    id = id, type = type, title = title.orEmpty(), message = message,
     data_json = data?.toString(),
     read_at = readAt, created_at = createdAt, cached_at = cachedAt,
 )
@@ -310,7 +314,7 @@ private fun ExtracurricularEntity.toDto() = ExtracurricularDto(
 
 private fun RaporInstanceDto.toEntity(studentId: String, cachedAt: Long) = RaporInstanceEntity(
     id = id, student_id = studentId, semester = semester,
-    academic_year = academicYear, status = status, pdf_url = pdfUrl,
+    academic_year = academicYear.orEmpty(), status = status, pdf_url = pdfUrl,
     cached_at = cachedAt,
 )
 

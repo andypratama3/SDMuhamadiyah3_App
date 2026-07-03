@@ -6,6 +6,8 @@ import com.sdm3.parent.data.remote.dto.UserDto
 interface AuthRepositoryContract {
     suspend fun login(email: String, password: String): ApiResult<UserDto>
     suspend fun getAuthenticatedUser(): ApiResult<UserDto>
+    suspend fun apiLogout(): ApiResult<Unit>
+    suspend fun deleteAccount(reason: String): ApiResult<Unit>
     suspend fun isLoggedIn(): Boolean
     suspend fun logout()
     suspend fun requestOtp(email: String): ApiResult<String>

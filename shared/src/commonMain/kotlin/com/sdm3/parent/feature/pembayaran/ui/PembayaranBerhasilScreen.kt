@@ -4,11 +4,21 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -19,9 +29,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
+import com.sdm3.parent.feature.pembayaran.PembayaranBerhasilViewModel
+import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.ui.platform.LocalInspectionMode
+
+sealed class PembayaranBerhasilUiState {
+    data object Loading : PembayaranBerhasilUiState()
+    data object Empty : PembayaranBerhasilUiState()
+    data class Error(val message: String = "Silakan coba kembali.") : PembayaranBerhasilUiState()
+    data object Success : PembayaranBerhasilUiState()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +47,28 @@ fun PembayaranBerhasilScreen(
     onLihatBukti: () -> Unit,
     onKembali: () -> Unit
 ) {
+    val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
+    val viewModel: PembayaranBerhasilViewModel = koinViewModel()
+    val vmState by if (isPreview) {
+        remember { mutableStateOf(com.sdm3.parent.feature.pembayaran.PembayaranBerhasilUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
+    val uiState: PembayaranBerhasilUiState = remember(vmState) {
+        val s = vmState
+        when {
+            s.isLoading -> PembayaranBerhasilUiState.Loading
+            s.errorMessage != null -> PembayaranBerhasilUiState.Error(s.errorMessage)
+            s.isEmpty -> PembayaranBerhasilUiState.Empty
+            else -> PembayaranBerhasilUiState.Success
+        }
+    }
+    if (!isPreview) {
+        LaunchedEffect(paymentId) {
+            viewModel.loadTransaction(paymentId)
+        }
+    }
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -42,95 +80,197 @@ fun PembayaranBerhasilScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Success Background Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(StatusSuccess, Color.Transparent),
-                        center = Offset(size.width * 0.5f, size.height * 0.4f),
-                        radius = size.width
-                    )
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Surface(
-                    modifier = Modifier.size(110.dp),
-                    shape = RoundedCornerShape(36.dp),
-                    color = Color.White.copy(alpha = 0.5f),
-                    border = BorderStroke(2.dp, Color.White.copy(alpha = 0.8f))
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Outlined.CheckCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(56.dp),
-                            tint = StatusSuccess
+            when (val state = uiState) {
+                is PembayaranBerhasilUiState.Loading -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(110.dp)
+                                .clip(RoundedCornerShape(36.dp))
+                                .shimmerEffect()
+                        )
+                        Spacer(modifier = Modifier.height(40.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.6f)
+                                .height(32.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shimmerEffect()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f)
+                                .height(48.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shimmerEffect()
+                        )
+                        Spacer(modifier = Modifier.height(48.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .shimmerEffect()
+                        )
+                        Spacer(modifier = Modifier.height(48.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .shimmerEffect()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .height(24.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shimmerEffect()
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(40.dp))
-
-                Text(
-                    text = "Konfirmasi Berhasil",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                    letterSpacing = (-1).sp
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "Dana telah terotentikasi oleh sistem sekolah dan masuk ke rekapitulasi pembayaran.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center,
-                    lineHeight = 26.sp,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Sdm3Card(padding = 24.dp) {
-                    Column {
-                        SuccessRow("Item Akademik", "SPP JULI 2026")
-                        HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                        SuccessRow("Total Transaksi", "Rp350.000")
-                        HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                        SuccessRow("Status Audit", "LUNAS & VERIF")
-                    }
+                is PembayaranBerhasilUiState.Empty -> {
+                    Sdm3EmptyState(
+                        title = "Tidak Ada Data",
+                        message = "Data pembayaran tidak tersedia.",
+                        style = EmptyStateStyle.Neutral,
+                        modifier = Modifier.padding(padding),
+                        action = {
+                            Sdm3Button(
+                                text = "Muat Ulang",
+                                onClick = { viewModel.loadTransaction(paymentId) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(48.dp))
+                is PembayaranBerhasilUiState.Error -> {
+                    Sdm3ErrorState(
+                        title = "Konfirmasi Gagal",
+                        message = state.message,
+                        style = ErrorStateStyle.Generic,
+                        modifier = Modifier.padding(padding),
+                        primaryAction = {
+                            Sdm3Button(
+                                text = "Coba Lagi",
+                                onClick = { viewModel.loadTransaction(paymentId) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        secondaryAction = {
+                            Sdm3OutlinedButton(
+                                text = "Kembali",
+                                onClick = onKembali,
+                                contentColor = colorScheme.primary
+                            )
+                        }
+                    )
+                }
 
-                Sdm3Button(
-                    text = "Lihat E-Kwitansi",
-                    onClick = onLihatBukti,
-                    icon = Icons.AutoMirrored.Outlined.ReceiptLong,
-                    containerColor = colorScheme.secondary,
-                    contentColor = colorScheme.primary,
-                    modifier = Modifier.fillMaxWidth().height(56.dp)
-                )
+                is PembayaranBerhasilUiState.Success -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+                            drawCircle(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(StatusSuccess, Color.Transparent),
+                                    center = Offset(size.width * 0.5f, size.height * 0.4f),
+                                    radius = size.width
+                                )
+                            )
+                        }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(padding)
+                                .padding(horizontal = 24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Surface(
+                                modifier = Modifier.size(110.dp),
+                                shape = RoundedCornerShape(36.dp),
+                                color = Color.White.copy(alpha = 0.5f),
+                                border = BorderStroke(2.dp, Color.White.copy(alpha = 0.8f))
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.CheckCircle,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(56.dp),
+                                        tint = StatusSuccess
+                                    )
+                                }
+                            }
 
-                Sdm3OutlinedButton(
-                    text = "Kembali Ke Portal",
-                    onClick = onKembali,
-                    contentColor = colorScheme.primary
-                )
+                            Spacer(modifier = Modifier.height(40.dp))
 
-                Spacer(modifier = Modifier.height(60.dp))
+                            Text(
+                                text = "Konfirmasi Berhasil",
+                                style = MaterialTheme.typography.displaySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary,
+                                textAlign = TextAlign.Center,
+                                letterSpacing = (-1).sp
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = "Dana telah terotentikasi oleh sistem sekolah dan masuk ke rekapitulasi pembayaran.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 26.sp,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(48.dp))
+
+                            Sdm3Card(padding = 24.dp) {
+                                Column {
+                                    SuccessRow("Item Akademik", vmState.paymentTitle.uppercase())
+                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                                    SuccessRow("Total Transaksi", formatCurrency(vmState.amount))
+                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                                    SuccessRow("Status Audit", if (vmState.amount > 0L) "LUNAS & VERIF" else "PENDING")
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(48.dp))
+
+                            Sdm3Button(
+                                text = "Lihat E-Kwitansi",
+                                onClick = onLihatBukti,
+                                icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+                                containerColor = colorScheme.secondary,
+                                contentColor = colorScheme.primary,
+                                modifier = Modifier.fillMaxWidth().height(56.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Sdm3OutlinedButton(
+                                text = "Kembali Ke Portal",
+                                onClick = onKembali,
+                                contentColor = colorScheme.primary
+                            )
+
+                            Spacer(modifier = Modifier.height(60.dp))
+                        }
+                    }
+                }
             }
         }
     }
@@ -158,6 +298,16 @@ private fun SuccessRow(label: String, value: String) {
             color = colorScheme.primary
         )
     }
+}
+
+private fun formatCurrency(amount: Number): String {
+    val s = amount.toLong().toString()
+    val sb = StringBuilder()
+    for (i in s.indices) {
+        if (i > 0 && (s.length - i) % 3 == 0) sb.append('.')
+        sb.append(s[i])
+    }
+    return "Rp$sb"
 }
 
 @Preview

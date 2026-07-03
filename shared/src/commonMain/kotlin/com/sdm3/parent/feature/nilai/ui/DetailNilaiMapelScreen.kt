@@ -27,6 +27,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import androidx.compose.ui.platform.LocalInspectionMode
+import com.sdm3.parent.feature.nilai.DetailNilaiMapelUiState
+import com.sdm3.parent.feature.nilai.DetailNilaiMapelViewModel
+import org.koin.compose.viewmodel.koinViewModel
+
+sealed class DetailNilaiMapelScreenUiState {
+    data object Loading : DetailNilaiMapelScreenUiState()
+    data object Empty : DetailNilaiMapelScreenUiState()
+    data class Error(val message: String) : DetailNilaiMapelScreenUiState()
+    data object Success : DetailNilaiMapelScreenUiState()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,12 +45,34 @@ fun DetailNilaiMapelScreen(
     studentId: String,
     subjectId: String,
     semester: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: DetailNilaiMapelViewModel = koinViewModel()
 ) {
+    val isPreview = LocalInspectionMode.current
+    val uiState by if (isPreview) {
+        remember { mutableStateOf(DetailNilaiMapelUiState()) }
+    } else {
+        viewModel.uiState.collectAsState()
+    }
     val colorScheme = MaterialTheme.colorScheme
-    val subjectName = "Matematika"
-    val finalScore = 92
-    val predicate = "A"
+
+    val errorMessage = uiState.errorMessage
+
+    val screenState = remember(uiState.isLoading, uiState.isEmpty, errorMessage, isPreview) {
+        if (isPreview) DetailNilaiMapelScreenUiState.Success
+        else when {
+            uiState.isLoading && uiState.isEmpty -> DetailNilaiMapelScreenUiState.Loading
+            errorMessage != null -> DetailNilaiMapelScreenUiState.Error(errorMessage)
+            !uiState.isLoading && uiState.isEmpty -> DetailNilaiMapelScreenUiState.Empty
+            else -> DetailNilaiMapelScreenUiState.Success
+        }
+    }
+
+    if (!isPreview) {
+        LaunchedEffect(studentId, subjectId) {
+            viewModel.loadComponents(studentId, subjectId)
+        }
+    }
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -48,7 +81,7 @@ fun DetailNilaiMapelScreen(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = subjectName,
+                            text = uiState.subjectName.ifEmpty { "Mata Pelajaran" },
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary,
@@ -84,196 +117,325 @@ fun DetailNilaiMapelScreen(
                 )
             }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-            ) {
-                item {
-                    // Score Hero Card
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
-                    ) {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
-                            Canvas(modifier = Modifier.fillMaxWidth().height(160.dp).alpha(0.15f)) {
-                                drawCircle(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(glowColor, Color.Transparent),
-                                        center = Offset(size.width * 0.9f, 0f),
-                                        radius = size.width
-                                    )
-                                )
-                            }
-                            
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "SKOR AKHIR",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 2.sp,
-                                    color = Color.White.copy(alpha = 0.5f)
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "$finalScore",
-                                    style = MaterialTheme.typography.displayLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Surface(
-                                    color = colorScheme.secondary,
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text(
-                                        text = " PREDIKAT $predicate ",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Black,
-                                        color = colorScheme.primary,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
+            when (screenState) {
+                DetailNilaiMapelScreenUiState.Loading -> {
+                    DetailNilaiMapelShimmer(modifier = Modifier.fillMaxSize().padding(padding))
                 }
-
-                item {
-                    SectionHeader(
-                        title = "Parameter Penilaian",
-                        modifier = Modifier.padding(top = 8.dp)
+                DetailNilaiMapelScreenUiState.Empty -> {
+                    Sdm3EmptyState(
+                        title = "Tidak Ada Data Penilaian",
+                        message = "Data penilaian untuk mata pelajaran ini belum tersedia.",
+                        style = EmptyStateStyle.Neutral,
+                        modifier = Modifier.fillMaxSize().padding(padding)
                     )
                 }
-
-                item { KomponenBar("Sumatif (40%)", 90f, 100f, colorScheme.primary) }
-                item { KomponenBar("Formatif (40%)", 88f, 100f, colorScheme.secondary) }
-                item { KomponenBar("Projek (20%)", 95f, 100f, StatusSuccess) }
-
-                item {
-                    SectionHeader(
-                        title = "Ketercapaian TP",
-                        modifier = Modifier.padding(top = 8.dp)
+                is DetailNilaiMapelScreenUiState.Error -> {
+                    Sdm3ErrorState(
+                        title = "Gagal Memuat Data Penilaian",
+                        message = screenState.message,
+                        style = ErrorStateStyle.Generic,
+                        modifier = Modifier.fillMaxSize().padding(padding),
+                        primaryAction = if (!isPreview) {
+                            {
+                                Sdm3Button(
+                                    text = "Coba Lagi",
+                                    onClick = { viewModel.refresh() }
+                                )
+                            }
+                        } else null
                     )
                 }
+                DetailNilaiMapelScreenUiState.Success -> {
+                    val components = uiState.components
+                    val subjectName = uiState.subjectName.ifEmpty { "Mata Pelajaran" }
 
-                val tpList = listOf(
-                    TPDetail("3.1", "Operasi hitung bilangan cacah", 95),
-                    TPDetail("3.2", "Soal cerita penjumlahan", 90),
-                    TPDetail("3.3", "Sifat-sifat bangun datar", 78),
-                    TPDetail("3.4", "Keliling bangun datar", 85)
-                )
+                    val componentGroups = components.groupBy { it.componentType }
+                    val sumatifAvg = componentGroups["sumatif"]?.let { group -> group.mapNotNull { it.score }.average() } ?: 0.0
+                    val formatifAvg = componentGroups["formatif"]?.let { group -> group.mapNotNull { it.score }.average() } ?: 0.0
+                    val projekAvg = componentGroups["projek"]?.let { group -> group.mapNotNull { it.score }.average() } ?: 0.0
 
-                items(tpList) { tp ->
-                    var expanded by remember { mutableStateOf(false) }
-                    val tpColor = when {
-                        tp.score >= 90 -> StatusSuccess
-                        tp.score >= 75 -> StatusWarning
-                        else -> colorScheme.error
+                    val finalScore = if (components.isNotEmpty()) {
+                        components.mapNotNull { it.score?.toInt() }.average().toInt()
+                    } else 0
+
+                    val predicate = when {
+                        finalScore >= 90 -> "A"
+                        finalScore >= 80 -> "B+"
+                        finalScore >= 70 -> "B"
+                        finalScore >= 60 -> "C+"
+                        else -> "C"
                     }
 
-                    Sdm3Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { expanded = !expanded },
-                        padding = 16.dp
+                    val tpList = components.filter { it.tpName != null }
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize().padding(padding),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .animateContentSize()
-                        ) {
-                            Row(
+                        item {
+                            // Score Hero Card
+                            Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                                shape = RoundedCornerShape(28.dp),
+                                colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
                             ) {
-                                Surface(
-                                    modifier = Modifier.size(44.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = colorScheme.primary.copy(alpha = 0.05f)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(
-                                            text = tp.code,
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = colorScheme.primary
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
+                                    Canvas(modifier = Modifier.fillMaxWidth().height(160.dp).alpha(0.15f)) {
+                                        drawCircle(
+                                            brush = Brush.radialGradient(
+                                                colors = listOf(glowColor, Color.Transparent),
+                                                center = Offset(size.width * 0.9f, 0f),
+                                                radius = size.width
+                                            )
                                         )
                                     }
+
+                                    Column(
+                                        modifier = Modifier.padding(24.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = "SKOR AKHIR",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Black,
+                                            letterSpacing = 2.sp,
+                                            color = Color.White.copy(alpha = 0.5f)
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = "$finalScore",
+                                            style = MaterialTheme.typography.displayLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Surface(
+                                            color = colorScheme.secondary,
+                                            shape = RoundedCornerShape(8.dp)
+                                        ) {
+                                            Text(
+                                                text = " PREDIKAT $predicate ",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Black,
+                                                color = colorScheme.primary,
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
                                 }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = tp.description,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = colorScheme.primary
+                            }
+                        }
+
+                        item {
+                            SectionHeader(
+                                title = "Parameter Penilaian",
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+
+                        if (componentGroups.containsKey("sumatif")) {
+                            item { KomponenBar("Sumatif", sumatifAvg.toFloat(), 100f, colorScheme.primary) }
+                        }
+                        if (componentGroups.containsKey("formatif")) {
+                            item { KomponenBar("Formatif", formatifAvg.toFloat(), 100f, colorScheme.secondary) }
+                        }
+                        if (componentGroups.containsKey("projek")) {
+                            item { KomponenBar("Projek", projekAvg.toFloat(), 100f, StatusSuccess) }
+                        }
+
+                        if (tpList.isNotEmpty()) {
+                            item {
+                                SectionHeader(
+                                    title = "Ketercapaian TP",
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+
+                            items(tpList) { tp ->
+                                var expanded by remember { mutableStateOf(false) }
+                                val tpScore = tp.score?.toInt() ?: 0
+                                val tpColor = when {
+                                    tpScore >= 90 -> StatusSuccess
+                                    tpScore >= 75 -> StatusWarning
+                                    else -> colorScheme.error
+                                }
+
+                                Sdm3Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { expanded = !expanded },
+                                    padding = 16.dp
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateContentSize()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Surface(
+                                                modifier = Modifier.size(44.dp),
+                                                shape = RoundedCornerShape(12.dp),
+                                                color = colorScheme.primary.copy(alpha = 0.05f)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Text(
+                                                        text = "TP ${tp.tpNumber ?: ""}",
+                                                        style = MaterialTheme.typography.labelLarge,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = colorScheme.primary
+                                                    )
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = tp.tpName ?: "",
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = colorScheme.primary
+                                                )
+                                            }
+                                            Text(
+                                                text = "${tpScore}",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = tpColor
+                                            )
+                                        }
+                                        if (expanded) {
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f))
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            val tpNote = when {
+                                                tpScore >= 90 -> "Ananda telah menguasai TP ini dengan sangat baik. Pertahankan prestasi ini."
+                                                tpScore >= 75 -> "Ananda telah mencapai standar minimal pada TP ini. Terus tingkatkan pemahaman."
+                                                else -> "Ananda perlu bimbingan tambahan pada TP ini. Disarankan untuk belajar lebih giat."
+                                            }
+                                            Text(
+                                                text = tpNote,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                lineHeight = 22.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                            val catatanGuru = components.firstOrNull { it.catatan != null }?.catatan
+                            if (catatanGuru != null) {
+                                item {
+                                    SectionHeader(
+                                        title = "Anotasi Akademik",
+                                        modifier = Modifier.padding(top = 8.dp)
                                     )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Sdm3Card(padding = 20.dp) {
+                                        Column {
+                                            Icon(
+                                                Icons.Outlined.FormatQuote,
+                                                contentDescription = null,
+                                                tint = colorScheme.secondary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text(
+                                                text = catatanGuru,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = colorScheme.primary,
+                                                fontWeight = FontWeight.Medium,
+                                                lineHeight = 26.sp
+                                            )
+                                        }
+                                    }
                                 }
-                                Text(
-                                    text = "${tp.score}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = tpColor
-                                )
                             }
-                            if (expanded) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f))
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = "Ananda telah menguasai kompetensi dasar pada TP ini dengan hasil yang melampaui standar minimal.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    lineHeight = 22.sp
-                                )
-                            }
-                        }
+
+                        item { Spacer(modifier = Modifier.height(100.dp)) }
                     }
                 }
-
-                item {
-                    SectionHeader(
-                        title = "Anotasi Akademik",
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Sdm3Card(padding = 20.dp) {
-                        Column {
-                            Icon(
-                                Icons.Outlined.FormatQuote,
-                                contentDescription = null,
-                                tint = colorScheme.secondary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = "Ananda menunjukkan ketekunan yang luar biasa. Fokus utama selanjutnya adalah penerapan konsep matematika dalam skenario dunia nyata.",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = colorScheme.primary,
-                                fontWeight = FontWeight.Medium,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "\u2014 Ibu Siti Rahmawati, S.Pd.",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Black,
-                                color = colorScheme.primary.copy(alpha = 0.4f),
-                                letterSpacing = 1.sp
-                            )
-                        }
-                    }
-                }
-
-                item { Spacer(modifier = Modifier.height(100.dp)) }
             }
         }
+    }
+}
+
+@Composable
+private fun DetailNilaiMapelShimmer(modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .shimmerEffect()
+            )
+        }
+        item {
+            Box(
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
+            )
+        }
+        items(3) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect()
+            )
+        }
+        item {
+            Box(
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
+            )
+        }
+        items(4) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect()
+            )
+        }
+        item {
+            Box(
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
+            )
+        }
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect()
+            )
+        }
+        item { Spacer(Modifier.height(100.dp)) }
     }
 }
 
@@ -296,8 +458,6 @@ private fun KomponenBar(komponen: String, nilai: Float, max: Float, warna: Color
         }
     }
 }
-
-data class TPDetail(val code: String, val description: String, val score: Int)
 
 @Preview
 @Composable

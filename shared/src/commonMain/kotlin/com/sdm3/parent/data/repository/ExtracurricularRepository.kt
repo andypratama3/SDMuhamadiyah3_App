@@ -1,11 +1,10 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.di.DevMode
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.dummy.DummyDataProvider
 import com.sdm3.parent.data.remote.api.ExtracurricularApi
+import com.sdm3.parent.data.remote.dto.AcademicProgramDto
 import com.sdm3.parent.data.remote.dto.ExtracurricularDto
 import com.sdm3.parent.domain.repository.ExtracurricularRepositoryContract
 
@@ -22,8 +21,15 @@ class ExtracurricularRepository(
         } catch (e: Exception) {
             val cached = cache.getExtracurriculars()
             if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyExtracurriculars)
             else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data ekstrakurikuler"))
+        }
+    }
+
+    override suspend fun getAcademicPrograms(studentId: String): ApiResult<List<AcademicProgramDto>> {
+        return try {
+            api.getAcademicPrograms(studentId)
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data program unggulan"))
         }
     }
 }

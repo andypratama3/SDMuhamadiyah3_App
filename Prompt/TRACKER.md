@@ -31,7 +31,8 @@ After finishing a task:
 | P8 | SQLDelight offline-first data layer | `21-KMP-STANDARDS.md` | ✅ Done | A, I | — | Completed prior to kit adoption |
 | P9 | Design System Foundation (EduOctoTheme, Colors, Typography, Spacing, Shapes, Motion, GlassSurface) | `03`–`06`, `08`, `09` | ✅ Done | I | `DESIGN_SYSTEM_CHECKLIST.md` | Android not yet verified — see P9.5a |
 | P9.5a | Verify Design System Foundation on Android (incl. `supportsBackdropBlur()` branch) | `08-GLASSMORPHISM.md`, `21-KMP-STANDARDS.md` | ⬜ Not Started | — | `DESIGN_SYSTEM_CHECKLIST.md` | Blocking — must close before any screen work |
-| P9.5b | Migrate `com.sdm3.parent.core.designsystem.theme` (Sdm3*/SDM3*) → `com.eduocto.designsystem` (EduOcto*), delete old package | `29-REFACTORING-RULES.md`, `20-COMPONENT-LIBRARY.md` | ⬜ Not Started | — | — | Flagged conflict from P9 report |
+| P9.5b | Migrate theme/component package to EduOcto namespace | `29-REFACTORING-RULES.md`, `20-COMPONENT-LIBRARY.md` | ❌ Skipped | — | — | Decision: keep SDM3Theme + `com.sdm3.parent.core.designsystem.*`; no EduOcto migration |
+| P9.5c | Add shimmer skeletons, empty states, error states to all 25 existing screens | `17-EMPTY-STATES.md`, `18-LOADING-STATES.md`, `19-ERROR-STATES.md`, `30-FULL-OUTPUT-ENFORCEMENT.md` | ✅ Done | A, I | — | Added sealed UiState (Loading/Empty/Error/Success), shimmer skeletons matching layout, Sdm3EmptyState/Sdm3ErrorState to all screens |
 
 ## Phase 1 — App Shell
 
@@ -81,12 +82,12 @@ After finishing a task:
 
 ## Summary
 
-- **Total tasks:** 33 (4 done, 29 remaining)
-- **Current phase:** Phase 0 (closing out) — P9.5a and P9.5b must complete before Phase 1 begins
+- **Total tasks:** 34 (5 done, 1 skipped, 28 remaining)
+- **Current phase:** Phase 0 (closing out) — P9.5a must complete before Phase 1 begins; P9.5c (skeleton/empty/error) completed across 24 screens
 - **Next task to pick up:** P9.5a
 
 ## Conflict/Flag Log (cumulative — never delete entries, only mark resolved)
 
 | Raised in | Description | Status |
 |---|---|---|
-| P9 | Two parallel design systems (`com.eduocto.designsystem` vs `com.sdm3.parent.core.designsystem.theme`) | ⚠️ Open — being resolved in P9.5b |
+| P9 | Two parallel design systems (`com.eduocto.designsystem` vs `com.sdm3.parent.core.designsystem.theme`) | ✅ Resolved — keep `com.sdm3.parent.core.designsystem.*`; no migration to EduOcto |

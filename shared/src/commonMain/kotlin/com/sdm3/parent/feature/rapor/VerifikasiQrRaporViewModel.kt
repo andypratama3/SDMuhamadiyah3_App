@@ -2,8 +2,9 @@ package com.sdm3.parent.feature.rapor
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.RaporVerifyResponse
-import kotlinx.coroutines.delay
+import com.sdm3.parent.domain.repository.RaporRepositoryContract
 
 data class VerifikasiQrRaporUiState(
     override val isLoading: Boolean = false,
@@ -14,10 +15,11 @@ data class VerifikasiQrRaporUiState(
     val verifyResult: RaporVerifyResponse? = null
 ) : ScreenState
 
-class VerifikasiQrRaporViewModel : BaseViewModel<VerifikasiQrRaporUiState>(VerifikasiQrRaporUiState()) {
+class VerifikasiQrRaporViewModel(
+    private val raporRepository: RaporRepositoryContract
+) : BaseViewModel<VerifikasiQrRaporUiState>(VerifikasiQrRaporUiState()) {
 
     fun init(raporId: String) {
-        // Option to pre-fill if navigating from a specific rapor
         updateState { it.copy(qrInput = raporId) }
     }
 
@@ -26,25 +28,27 @@ class VerifikasiQrRaporViewModel : BaseViewModel<VerifikasiQrRaporUiState>(Verif
     }
 
     fun verify() {
+        val qrInput = uiState.value.qrInput
+        if (qrInput.isBlank()) {
+            updateState { it.copy(errorMessage = "Masukkan kode QR atau ID rapor") }
+            return
+        }
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null, showResult = false) }
-            delay(1500)
-            
-            // Dummy logic: if input contains "error", show error, else valid
-            if (uiState.value.qrInput.contains("error", ignoreCase = true)) {
-                updateState { it.copy(isLoading = false, errorMessage = "Kode verifikasi tidak valid atau tidak ditemukan.") }
-            } else {
-                updateState {
-                    it.copy(
-                        isLoading = false,
-                        showResult = true,
-                        verifyResult = RaporVerifyResponse(
-                            valid = true,
-                            message = "Dokumen ini sah secara digital melalui sistem SDM3 Parent Portal.",
-                            studentName = "Ahmad Zaki Al-Fatih",
-                            nisn = "0012345678"
+            when (val result = raporRepository.verifyQr(qrInput)) {
+                is ApiResult.Success -> {
+                    updateState {
+                        it.copy(
+                            isLoading = false,
+                            showResult = true,
+                            verifyResult = result.data
                         )
-                    )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
                 }
             }
         }

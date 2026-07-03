@@ -4,6 +4,10 @@ import com.sdm3.parent.core.base.MviViewModel
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.core.security.BiometricAuthGate
+import com.sdm3.parent.core.security.BiometricResult
+import com.sdm3.parent.core.security.SecureTokenManager
+import com.sdm3.parent.core.notification.FcmRegistrar
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
 
 
@@ -20,6 +24,7 @@ sealed interface LoginIntent {
     data class EmailChanged(val email: String) : LoginIntent
     data class PasswordChanged(val password: String) : LoginIntent
     data object Login : LoginIntent
+    data object BiometricLogin : LoginIntent
     data object ClearError : LoginIntent
 }
 
@@ -28,7 +33,10 @@ sealed interface LoginEffect {
 }
 
 class LoginViewModel(
-    private val authRepository: AuthRepositoryContract
+    private val authRepository: AuthRepositoryContract,
+    private val secureTokenManager: SecureTokenManager,
+    private val biometricAuth: BiometricAuthGate,
+    private val fcmRegistration: FcmRegistrar,
 ) : MviViewModel<LoginUiState, LoginIntent, LoginEffect>(LoginUiState()) {
 
     override fun onIntent(intent: LoginIntent) {
@@ -40,6 +48,7 @@ class LoginViewModel(
                 updateState { it.copy(password = intent.password, errorMessage = null) }
             }
             is LoginIntent.Login -> login()
+            is LoginIntent.BiometricLogin -> biometricLogin()
             is LoginIntent.ClearError -> {
                 updateState { it.copy(errorMessage = null) }
             }
@@ -61,12 +70,55 @@ class LoginViewModel(
 
             when (val result = authRepository.login(state.email, state.password)) {
                 is ApiResult.Success -> {
+                    secureTokenManager.setBiometricEnabled(true)
+                    fcmRegistration.registerIfAvailable()
                     updateState { it.copy(isLoading = false, isLoggedIn = true) }
                     sendEffect(LoginEffect.LoginSuccess)
                 }
                 is ApiResult.Error -> {
                     val msg = result.error.toUserMessage()
                     updateState { it.copy(isLoading = false, errorMessage = msg) }
+                }
+            }
+        }
+    }
+
+    private fun biometricLogin() {
+        val token = secureTokenManager.getBearerToken()
+        if (token.isNullOrBlank()) {
+            updateState { it.copy(errorMessage = "Silakan masuk dengan email terlebih dahulu untuk mengaktifkan biometrik") }
+            return
+        }
+        launchSafely(
+            onError = { error ->
+                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Autentikasi biometrik gagal") }
+            }
+        ) {
+            updateState { it.copy(isLoading = true, errorMessage = null) }
+            when (val result = biometricAuth.authenticate("Masuk ke Portal Orang Tua")) {
+                BiometricResult.Success -> {
+                    when (val userResult = authRepository.getAuthenticatedUser()) {
+                        is ApiResult.Success -> {
+                            fcmRegistration.registerIfAvailable()
+                            updateState { it.copy(isLoading = false) }
+                            sendEffect(LoginEffect.LoginSuccess)
+                        }
+                        is ApiResult.Error -> {
+                            secureTokenManager.clearAllSecureData()
+                            updateState {
+                                it.copy(
+                                    isLoading = false,
+                                    errorMessage = userResult.error.toUserMessage()
+                                )
+                            }
+                        }
+                    }
+                }
+                BiometricResult.NotAvailable -> {
+                    updateState { it.copy(isLoading = false, errorMessage = "Biometrik tidak tersedia di perangkat ini") }
+                }
+                is BiometricResult.Error -> {
+                    updateState { it.copy(isLoading = false, errorMessage = result.message) }
                 }
             }
         }

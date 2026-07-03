@@ -2,7 +2,9 @@ package com.sdm3.parent.feature.pembayaran
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
-import kotlinx.coroutines.delay
+import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.data.remote.dto.PaymentDto
+import com.sdm3.parent.domain.repository.PaymentRepositoryContract
 
 enum class PaymentProcessStatus {
     WAITING_PAYMENT, PROCESSING, SUCCESS, FAILED
@@ -12,6 +14,8 @@ data class ProsesPembayaranUiState(
     override val isLoading: Boolean = false,
     override val errorMessage: String? = null,
     override val isEmpty: Boolean = false,
+    val paymentId: String = "",
+    val orderId: String = "",
     val snapTokenUrl: String = "",
     val redirectUrl: String? = null,
     val vaNumber: String = "",
@@ -20,26 +24,68 @@ data class ProsesPembayaranUiState(
     val status: PaymentProcessStatus = PaymentProcessStatus.WAITING_PAYMENT
 ) : ScreenState
 
-class ProsesPembayaranViewModel : BaseViewModel<ProsesPembayaranUiState>(ProsesPembayaranUiState()) {
+class ProsesPembayaranViewModel(
+    private val paymentRepository: PaymentRepositoryContract
+) : BaseViewModel<ProsesPembayaranUiState>(ProsesPembayaranUiState()) {
 
-    fun startPayment(snapTokenUrl: String, redirectUrl: String? = null, vaNumber: String = "", grossAmount: Double = 0.0, paymentMethod: String = "") {
-        updateState {
-            it.copy(
-                snapTokenUrl = snapTokenUrl,
-                redirectUrl = redirectUrl,
-                vaNumber = "8507 0812 3456 7890",
-                grossAmount = 1250000.0,
-                paymentMethod = "Bank Syariah Indonesia",
-                status = PaymentProcessStatus.WAITING_PAYMENT
-            )
+    fun loadPaymentInstructions(paymentId: String) {
+        launchSafely {
+            updateState { it.copy(isLoading = true, errorMessage = null, paymentId = paymentId) }
+            when (val result = paymentRepository.getPaymentDetail(paymentId)) {
+                is ApiResult.Success -> {
+                    val p = result.data
+                    updateState {
+                        it.copy(
+                            isLoading = false,
+                            orderId = p.orderId,
+                            snapTokenUrl = p.paymentUrl ?: "",
+                            redirectUrl = p.paymentUrl,
+                            vaNumber = p.vaNumber ?: "",
+                            grossAmount = p.grossAmount ?: 0.0,
+                            paymentMethod = p.paymentType ?: "",
+                            status = PaymentProcessStatus.WAITING_PAYMENT
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
+            }
         }
     }
 
-    fun pollStatus(chargeId: String) {
+    fun pollStatus() {
+        val chargeId = uiState.value.orderId.ifBlank { uiState.value.paymentId }
+        if (chargeId.isBlank()) return
         launchSafely {
             updateState { it.copy(isLoading = true, status = PaymentProcessStatus.PROCESSING) }
-            delay(2000)
-            updateState { it.copy(isLoading = false, status = PaymentProcessStatus.SUCCESS) }
+            when (val result = paymentRepository.checkPaymentStatus(chargeId)) {
+                is ApiResult.Success -> {
+                    val payment = result.data
+                    updateState {
+                        it.copy(
+                            isLoading = false,
+                            vaNumber = payment.vaNumber ?: it.vaNumber,
+                            grossAmount = payment.grossAmount ?: it.grossAmount,
+                            paymentMethod = payment.paymentType ?: it.paymentMethod,
+                            status = if (payment.status == "settlement" || payment.status == "success") {
+                                PaymentProcessStatus.SUCCESS
+                            } else if (payment.status == "failed" || payment.status == "expire" || payment.status == "deny") {
+                                PaymentProcessStatus.FAILED
+                            } else {
+                                PaymentProcessStatus.WAITING_PAYMENT
+                            }
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                    }
+                }
+            }
         }
     }
 }

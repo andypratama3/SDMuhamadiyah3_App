@@ -36,20 +36,39 @@ import org.koin.compose.viewmodel.koinViewModel
 
 private val PremiumEasing = androidx.compose.animation.core.CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
 
+sealed class KehadiranScreenUiState {
+    data object Loading : KehadiranScreenUiState()
+    data object Empty : KehadiranScreenUiState()
+    data class Error(val message: String) : KehadiranScreenUiState()
+    data object Success : KehadiranScreenUiState()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KehadiranSiswaScreen(
     studentId: String,
     onBack: () -> Unit,
-    viewModel: KehadiranSiswaViewModel? = if (LocalInspectionMode.current) null else koinViewModel()
+    viewModel: KehadiranSiswaViewModel = koinViewModel()
 ) {
-    val isPreview = viewModel == null
+    val isPreview = LocalInspectionMode.current
     val uiState by if (isPreview) {
         remember { mutableStateOf(KehadiranSiswaUiState()) }
     } else {
         viewModel.uiState.collectAsState()
     }
     val colorScheme = MaterialTheme.colorScheme
+
+    val errorMessage = uiState.errorMessage
+
+    val screenState = remember(uiState.isLoading, uiState.isEmpty, errorMessage, isPreview) {
+        if (isPreview) KehadiranScreenUiState.Success
+        else when {
+            uiState.isLoading && uiState.isEmpty -> KehadiranScreenUiState.Loading
+            errorMessage != null -> KehadiranScreenUiState.Error(errorMessage)
+            !uiState.isLoading && uiState.isEmpty -> KehadiranScreenUiState.Empty
+            else -> KehadiranScreenUiState.Success
+        }
+    }
 
     if (!isPreview) {
         LaunchedEffect(studentId) {
@@ -94,7 +113,6 @@ fun KehadiranSiswaScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Atmospheric Background Glow
             Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -105,197 +123,533 @@ fun KehadiranSiswaScreen(
                 )
             }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    TodayAttendanceCard()
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            when (screenState) {
+                is KehadiranScreenUiState.Loading -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        SummaryCard(
-                            modifier = Modifier.weight(1f),
-                            label = "HADIR",
-                            count = "18",
-                            color = StatusSuccess,
-                            icon = Icons.Outlined.CheckCircle
-                        )
-                        SummaryCard(
-                            modifier = Modifier.weight(1f),
-                            label = "SAKIT",
-                            count = "1",
-                            color = StatusWarning,
-                            icon = Icons.Outlined.MedicalServices
-                        )
+                        item { TodayShimmer() }
+                        item { SummaryShimmer() }
+                        item { CalendarShimmer() }
+                        item { Spacer(Modifier.height(8.dp)) }
+                        item { LogRowShimmer() }
+                        item { LogRowShimmer() }
+                        item { LogRowShimmer() }
+                        item { Spacer(Modifier.height(100.dp)) }
                     }
                 }
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        SummaryCard(
-                            modifier = Modifier.weight(1f),
-                            label = "IZIN",
-                            count = "2",
-                            color = colorScheme.primary,
-                            icon = Icons.Outlined.EventAvailable
-                        )
-                        SummaryCard(
-                            modifier = Modifier.weight(1f),
-                            label = "ALPA",
-                            count = "0",
-                            color = colorScheme.error,
-                            icon = Icons.Outlined.Cancel
-                        )
-                    }
-                }
-
-                item {
-                    SectionHeader(
-                        title = "Kalender Presensi",
-                        modifier = Modifier.padding(top = 8.dp)
+                is KehadiranScreenUiState.Error -> {
+                    Sdm3ErrorState(
+                        title = "Gagal Memuat Data",
+                        message = screenState.message,
+                        style = ErrorStateStyle.Generic,
+                        primaryAction = {
+                            Sdm3Button(
+                                text = "Coba Lagi",
+                                onClick = { viewModel.refresh() }
+                            )
+                        }
                     )
                 }
+                is KehadiranScreenUiState.Empty -> {
+                    Sdm3EmptyState(
+                        title = "Belum Ada Data Presensi",
+                        message = "Data kehadiran siswa belum tersedia.",
+                        style = EmptyStateStyle.Neutral
+                    )
+                }
+                is KehadiranScreenUiState.Success -> {
+                    val attendances = uiState.attendances
+                    val summary = uiState.summary
+                    val month = uiState.selectedMonth
+                    val year = uiState.selectedYear
 
-                item {
-                    Sdm3Card(padding = 20.dp) {
-                        Column {
+                    val presentCount = summary?.hadir ?: attendances.count { it.status == "hadir" }
+                    val sickCount = summary?.sakit ?: attendances.count { it.status == "sakit" }
+                    val izinCount = summary?.izin ?: attendances.count { it.status == "izin" }
+                    val alpaCount = summary?.alpa ?: attendances.count { it.status == "alpa" }
+
+                    val attendancesByDay = attendances.mapNotNull { att ->
+                        val day = att.date.split("-").last().toIntOrNull()
+                        if (day != null) day to att else null
+                    }.toMap()
+
+                    val maxDay = attendancesByDay.keys.maxOrNull() ?: 0
+                    val days = if (maxDay > 0) (1..maxDay).toList() else emptyList()
+                    val rows = days.chunked(7)
+
+                    val todayAttendance = attendances.maxByOrNull { it.date }
+                    val todayStatusLabel = when (todayAttendance?.status) {
+                        "hadir" -> "Terverifikasi Hadir"
+                        "sakit" -> "Sedang Sakit"
+                        "izin" -> "Izin Tidak Hadir"
+                        "alpa" -> "Tanpa Keterangan"
+                        else -> "Terverifikasi Hadir"
+                    }
+                    val todayTimeLocation = if (todayAttendance?.notes != null) {
+                        "Pukul ${todayAttendance.notes}"
+                    } else "Belum tercatat"
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        item {
+                            TodayAttendanceCard(
+                                statusLabel = todayStatusLabel,
+                                timeLocation = todayTimeLocation
+                            )
+                        }
+
+                        item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Text(
-                                    text = "Oktober 2026",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.primary
+                                SummaryCard(
+                                    modifier = Modifier.weight(1f),
+                                    label = "HADIR",
+                                    count = "$presentCount",
+                                    color = StatusSuccess,
+                                    icon = Icons.Outlined.CheckCircle
                                 )
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Surface(
-                                        modifier = Modifier.size(32.dp),
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = colorScheme.primary.copy(alpha = 0.05f)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(Icons.Outlined.ChevronLeft, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(18.dp))
-                                        }
-                                    }
-                                    Surface(
-                                        modifier = Modifier.size(32.dp),
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = colorScheme.primary.copy(alpha = 0.05f)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(18.dp))
-                                        }
-                                    }
-                                }
+                                SummaryCard(
+                                    modifier = Modifier.weight(1f),
+                                    label = "SAKIT",
+                                    count = "$sickCount",
+                                    color = StatusWarning,
+                                    icon = Icons.Outlined.MedicalServices
+                                )
                             }
+                        }
 
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                listOf("MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB").forEach {
-                                    Text(
-                                        text = it,
-                                        modifier = Modifier.weight(1f),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Black,
-                                        color = colorScheme.primary.copy(alpha = 0.3f),
-                                        letterSpacing = 0.5.sp
-                                    )
-                                }
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                SummaryCard(
+                                    modifier = Modifier.weight(1f),
+                                    label = "IZIN",
+                                    count = "$izinCount",
+                                    color = colorScheme.primary,
+                                    icon = Icons.Outlined.EventAvailable
+                                )
+                                SummaryCard(
+                                    modifier = Modifier.weight(1f),
+                                    label = "ALPA",
+                                    count = "$alpaCount",
+                                    color = colorScheme.error,
+                                    icon = Icons.Outlined.Cancel
+                                )
                             }
+                        }
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                        item {
+                            SectionHeader(
+                                title = "Kalender Presensi",
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
 
-                            val days = (1..30).toList()
-                            val rows = days.chunked(7)
-                            rows.forEach { row ->
-                                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                    row.forEach { day ->
-                                        Box(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .aspectRatio(1f),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            val isToday = day == 12
-                                            if (isToday) {
-                                                Surface(
-                                                    modifier = Modifier.fillMaxSize(0.85f),
-                                                    shape = RoundedCornerShape(12.dp),
-                                                    color = colorScheme.primary,
-                                                    border = BorderStroke(1.dp, colorScheme.primary)
-                                                ) {
-                                                    DayContent(day, isToday, colorScheme, true)
+                        item {
+                            Sdm3Card(padding = 20.dp) {
+                                Column {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "${monthName(month)} $year",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.primary
+                                        )
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Surface(
+                                                modifier = Modifier.size(32.dp),
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = colorScheme.primary.copy(alpha = 0.05f)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(Icons.Outlined.ChevronLeft, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(18.dp))
                                                 }
-                                            } else {
-                                                DayContent(day, false, colorScheme)
+                                            }
+                                            Surface(
+                                                modifier = Modifier.size(32.dp),
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = colorScheme.primary.copy(alpha = 0.05f)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(18.dp))
+                                                }
                                             }
                                         }
                                     }
-                                    if (row.size < 7) {
-                                        repeat(7 - row.size) { Spacer(Modifier.weight(1f)) }
+
+                                    Spacer(modifier = Modifier.height(24.dp))
+
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        listOf("MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB").forEach {
+                                            Text(
+                                                text = it,
+                                                modifier = Modifier.weight(1f),
+                                                textAlign = TextAlign.Center,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Black,
+                                                color = colorScheme.primary.copy(alpha = 0.3f),
+                                                letterSpacing = 0.5.sp
+                                            )
+                                        }
                                     }
-                                }
-                            }
 
-                            Spacer(modifier = Modifier.height(20.dp))
+                                    Spacer(modifier = Modifier.height(16.dp))
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                listOf("Hadir" to StatusSuccess, "Sakit" to StatusWarning, "Alpa" to colorScheme.error).forEach { (label, color) ->
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(color))
-                                        Spacer(Modifier.width(6.dp))
-                                        Text(
-                                            text = label,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = colorScheme.primary.copy(alpha = 0.5f)
-                                        )
+                                    rows.forEach { row ->
+                                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                            row.forEach { day ->
+                                                val att = attendancesByDay[day]
+                                                val status = att?.status
+                                                val isLatest = day == (attendancesByDay.keys.maxOrNull() ?: 0)
+                                                Box(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .aspectRatio(1f),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    if (isLatest) {
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxSize(0.85f),
+                                                            shape = RoundedCornerShape(12.dp),
+                                                            color = colorScheme.primary,
+                                                            border = BorderStroke(1.dp, colorScheme.primary)
+                                                        ) {
+                                                            DayContent(day, isLatest, colorScheme, true, status)
+                                                        }
+                                                    } else {
+                                                        DayContent(day, false, colorScheme, status = status)
+                                                    }
+                                                }
+                                            }
+                                            if (row.size < 7) {
+                                                repeat(7 - row.size) { Spacer(Modifier.weight(1f)) }
+                                            }
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(20.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        listOf("Hadir" to StatusSuccess, "Sakit" to StatusWarning, "Alpa" to colorScheme.error).forEach { (label, color) ->
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(color))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(
+                                                    text = label,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = colorScheme.primary.copy(alpha = 0.5f)
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+
+                        if (attendances.isNotEmpty()) {
+                            item {
+                                SectionHeader(
+                                    title = "Log Aktivitas",
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+
+                            itemsIndexed(attendances) { _, att ->
+                                val logStatus = att.status
+                                val (logColor, logIcon) = when (logStatus) {
+                                    "hadir" -> StatusSuccess to Icons.Outlined.CheckCircle
+                                    "sakit" -> StatusWarning to Icons.Outlined.MedicalServices
+                                    "izin" -> colorScheme.primary to Icons.Outlined.EventAvailable
+                                    "alpa" -> colorScheme.error to Icons.Outlined.Cancel
+                                    else -> colorScheme.onSurfaceVariant.copy(alpha = 0.3f) to Icons.Outlined.Info
+                                }
+                                val logNote = att.notes ?: when (logStatus) {
+                                    "hadir" -> "Hadir sesuai jadwal."
+                                    "sakit" -> "Tidak hadir karena sakit."
+                                    "izin" -> "Izin tidak hadir."
+                                    "alpa" -> "Tanpa keterangan."
+                                    else -> ""
+                                }
+                                val logTime = att.notes ?: "-"
+                                val displayStatus = logStatus.replaceFirstChar { it.uppercase() }
+                                AttendanceLogRow(att.date, displayStatus, logNote, logTime, logColor, logIcon)
+                            }
+                        }
+
+                        item { Spacer(Modifier.height(100.dp)) }
                     }
                 }
-
-                item {
-                    SectionHeader(
-                        title = "Log Aktivitas",
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-
-                item { AttendanceLogRow("Senin, 12 Okt", "Hadir", "Tepat waktu di sekolah.", "06:58", StatusSuccess, Icons.Outlined.CheckCircle) }
-                item { AttendanceLogRow("Jumat, 9 Okt", "Sakit", "Demam, istirahat di rumah.", "07:15", StatusWarning, Icons.Outlined.MedicalServices) }
-                item { AttendanceLogRow("Kamis, 8 Okt", "Hadir", "Hadir sesuai jadwal.", "07:02", StatusSuccess, Icons.Outlined.CheckCircle) }
-
-                item { Spacer(Modifier.height(100.dp)) }
             }
         }
     }
 }
 
 @Composable
-private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onPrimary: Boolean = false) {
-    val presentDays = listOf(1, 2, 5, 6, 7, 8, 9, 12, 13, 14, 15)
+private fun TodayShimmer() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.3f)
+                    .height(12.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .shimmerEffect()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .height(24.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .shimmerEffect()
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.4f)
+                    .height(16.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .shimmerEffect()
+            )
+        }
+    }
+}
+
+@Composable
+private fun SummaryShimmer() {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            repeat(2) {
+                Sdm3Card(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .shimmerEffect()
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .height(28.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .shimmerEffect()
+                            )
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.3f)
+                                .height(16.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .shimmerEffect()
+                        )
+                    }
+                }
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            repeat(2) {
+                Sdm3Card(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .shimmerEffect()
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .height(28.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .shimmerEffect()
+                            )
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.3f)
+                                .height(16.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .shimmerEffect()
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalendarShimmer() {
+    Sdm3Card(padding = 20.dp) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.4f)
+                        .height(24.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .shimmerEffect()
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .shimmerEffect()
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .shimmerEffect()
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                repeat(7) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(12.dp)
+                            .padding(horizontal = 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .shimmerEffect()
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            repeat(5) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    repeat(7) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .padding(4.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shimmerEffect()
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun LogRowShimmer() {
+    Sdm3Card {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .shimmerEffect()
+            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(18.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .shimmerEffect()
+                )
+                Spacer(Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .shimmerEffect()
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .width(40.dp)
+                    .height(14.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .shimmerEffect()
+            )
+        }
+    }
+}
+
+@Composable
+private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onPrimary: Boolean = false, status: String? = null) {
+    val dotColor = when (status) {
+        "hadir" -> if (onPrimary) Color.White else StatusSuccess
+        "sakit" -> StatusWarning
+        "izin" -> colorScheme.primary
+        "alpa" -> colorScheme.error
+        else -> null
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -307,15 +661,34 @@ private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onP
             fontWeight = if (isToday) FontWeight.Black else FontWeight.Bold,
             color = if (onPrimary) Color.White else if (day % 7 == 0) colorScheme.error else colorScheme.primary
         )
-        if (presentDays.contains(day)) {
+        if (dotColor != null) {
             Spacer(modifier = Modifier.height(2.dp))
-            Box(modifier = Modifier.size(3.dp).clip(CircleShape).background(if (onPrimary) Color.White else StatusSuccess))
+            Box(modifier = Modifier.size(3.dp).clip(CircleShape).background(dotColor))
         }
     }
 }
 
+private fun monthName(month: Int): String = when (month) {
+    1 -> "Januari"
+    2 -> "Februari"
+    3 -> "Maret"
+    4 -> "April"
+    5 -> "Mei"
+    6 -> "Juni"
+    7 -> "Juli"
+    8 -> "Agustus"
+    9 -> "September"
+    10 -> "Oktober"
+    11 -> "November"
+    12 -> "Desember"
+    else -> ""
+}
+
 @Composable
-private fun TodayAttendanceCard() {
+private fun TodayAttendanceCard(
+    statusLabel: String = "Terverifikasi Hadir",
+    timeLocation: String = "Pukul 06:58 \u00B7 Gerbang Utama"
+) {
     val colorScheme = MaterialTheme.colorScheme
 
     Card(
@@ -334,7 +707,7 @@ private fun TodayAttendanceCard() {
                     )
                 )
             }
-            
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -364,14 +737,14 @@ private fun TodayAttendanceCard() {
                     letterSpacing = 2.sp
                 )
                 Text(
-                    text = "Terverifikasi Hadir",
+                    text = statusLabel,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Pukul 06:58 \u00B7 Gerbang Utama",
+                    text = timeLocation,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.8f)
                 )

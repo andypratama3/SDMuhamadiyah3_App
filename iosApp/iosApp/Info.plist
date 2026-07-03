@@ -4,5 +4,15 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>CFBundleDisplayName</key>
+	<string>SDM3 Parent</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Kamera diperlukan untuk memindai QR Code pada dokumen rapor.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID digunakan untuk masuk ke portal orang tua dengan aman.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

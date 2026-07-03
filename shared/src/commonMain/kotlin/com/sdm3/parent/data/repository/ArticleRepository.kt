@@ -1,10 +1,8 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.di.DevMode
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.data.dummy.DummyDataProvider
 import com.sdm3.parent.data.remote.api.ArticleApi
 import com.sdm3.parent.data.remote.dto.ArticleDto
 import com.sdm3.parent.domain.repository.ArticleRepositoryContract
@@ -22,8 +20,25 @@ class ArticleRepository(
         } catch (e: Exception) {
             val cached = cache.getArticles()
             if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else if (DevMode.isEnabled) ApiResult.Success(DummyDataProvider.dummyArticles)
             else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil artikel"))
+        }
+    }
+
+    override suspend fun getArticleById(id: String): ApiResult<ArticleDto> {
+        return try {
+            api.getArticleById(id)
+        } catch (e: Exception) {
+            val cached = cache.getArticles().firstOrNull { it.id == id }
+            if (cached != null) ApiResult.Success(cached)
+            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil artikel"))
+        }
+    }
+
+    override suspend fun getArticleBySlug(slug: String): ApiResult<ArticleDto> {
+        return try {
+            api.getArticleBySlug(slug)
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil artikel"))
         }
     }
 }

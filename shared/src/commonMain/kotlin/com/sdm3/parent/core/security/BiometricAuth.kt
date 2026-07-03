@@ -6,6 +6,6 @@ sealed class BiometricResult {
     data object NotAvailable : BiometricResult()
 }
 
-expect class BiometricAuthenticator() {
-    suspend fun authenticate(reason: String): BiometricResult
+expect class BiometricAuthenticator() : BiometricAuthGate {
+    override suspend fun authenticate(reason: String): BiometricResult
 }

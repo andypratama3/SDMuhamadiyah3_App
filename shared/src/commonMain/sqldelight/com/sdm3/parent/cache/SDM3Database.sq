@@ -272,3 +272,18 @@ INSERT OR REPLACE INTO ProfileEntity VALUES ?;
 
 deleteProfile:
 DELETE FROM ProfileEntity WHERE id = ?;
+
+clearAllCache:
+DELETE FROM StudentEntity;
+DELETE FROM AttendanceEntity;
+DELETE FROM AttendanceSummaryEntity;
+DELETE FROM GradeEntity;
+DELETE FROM GradeComponentEntity;
+DELETE FROM GradeWeightEntity;
+DELETE FROM StudentFeeEntity;
+DELETE FROM PaymentEntity;
+DELETE FROM NotificationEntity;
+DELETE FROM ArticleEntity;
+DELETE FROM ExtracurricularEntity;
+DELETE FROM RaporInstanceEntity;
+DELETE FROM ProfileEntity;

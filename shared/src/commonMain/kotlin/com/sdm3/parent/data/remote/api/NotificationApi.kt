@@ -4,6 +4,7 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.network.HttpClientProvider
 import com.sdm3.parent.core.network.toApiResult
 import com.sdm3.parent.data.remote.dto.NotificationDto
+import com.sdm3.parent.data.remote.dto.UnreadCountDto
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.url
@@ -22,6 +23,24 @@ class NotificationApi(private val provider: HttpClientProvider) {
     suspend fun markAsRead(id: String): ApiResult<Unit> {
         val response = provider.client.post {
             url(Endpoints.PARENT_NOTIFICATION_READ.replace("{id}", id))
+            provider.applyAuthHeader(this)
+        }
+        provider.handleSessionExpiredIfNeeded(response)
+        return response.toApiResult()
+    }
+
+    suspend fun markAllAsRead(): ApiResult<Unit> {
+        val response = provider.client.post {
+            url(Endpoints.PARENT_NOTIFICATION_READ_ALL)
+            provider.applyAuthHeader(this)
+        }
+        provider.handleSessionExpiredIfNeeded(response)
+        return response.toApiResult()
+    }
+
+    suspend fun getUnreadCount(): ApiResult<UnreadCountDto> {
+        val response = provider.client.get {
+            url(Endpoints.PARENT_NOTIFICATION_UNREAD_COUNT)
             provider.applyAuthHeader(this)
         }
         provider.handleSessionExpiredIfNeeded(response)

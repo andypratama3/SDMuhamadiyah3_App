@@ -2,9 +2,10 @@ package com.sdm3.parent.feature.pembayaran
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.PaymentDto
 import com.sdm3.parent.data.remote.dto.StudentFeeDto
-import kotlinx.coroutines.delay
+import com.sdm3.parent.domain.repository.PaymentRepositoryContract
 
 data class PembayaranSppUiState(
     override val isLoading: Boolean = false,
@@ -16,26 +17,31 @@ data class PembayaranSppUiState(
     val studentName: String = ""
 ) : ScreenState
 
-class PembayaranSppViewModel : BaseViewModel<PembayaranSppUiState>(PembayaranSppUiState()) {
+class PembayaranSppViewModel(
+    private val paymentRepository: PaymentRepositoryContract
+) : BaseViewModel<PembayaranSppUiState>(PembayaranSppUiState()) {
 
     fun loadData(studentId: String) {
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null, studentId = studentId) }
-            delay(1000)
-            val dummyFees = listOf(
-                StudentFeeDto(id = "f1", paymentTitleId = "p1", paymentTitleName = "SPP Juli 2026", amount = 350000.0, dueDate = "15 Juli 2026", status = "belum_bayar")
-            )
-            val dummyPayments = listOf(
-                PaymentDto(id = "1", orderId = "ORD-001", grossAmount = 350000.0, status = "success", createdAt = "2024-06-12", paidAt = "2024-06-12", paymentType = "bank_transfer"),
-                PaymentDto(id = "2", orderId = "ORD-002", grossAmount = 350000.0, status = "success", createdAt = "2024-05-10", paidAt = "2024-05-10", paymentType = "bank_transfer")
-            )
-            updateState { 
+
+            val feesResult = paymentRepository.getStudentFees(studentId)
+            val paymentsResult = paymentRepository.getPayments(studentId)
+
+            val fees = if (feesResult is ApiResult.Success) feesResult.data else emptyList()
+            val payments = if (paymentsResult is ApiResult.Success) paymentsResult.data else emptyList()
+            val error = if (feesResult is ApiResult.Error) feesResult.error.toUserMessage()
+                else if (paymentsResult is ApiResult.Error) paymentsResult.error.toUserMessage()
+                else null
+
+            updateState {
                 it.copy(
                     isLoading = false,
-                    studentName = "Aisyah Humaira",
-                    fees = dummyFees,
-                    payments = dummyPayments,
-                    isEmpty = false
+                    studentName = "",
+                    fees = fees,
+                    payments = payments,
+                    isEmpty = fees.isEmpty() && payments.isEmpty(),
+                    errorMessage = error
                 )
             }
         }
