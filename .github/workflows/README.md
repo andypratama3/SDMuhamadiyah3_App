@@ -51,9 +51,19 @@ GitHub → Actions → **Release Android** → **Run workflow**
 
 ## Firebase di CI
 
-`androidApp/google-services.json` sudah di repo — CI tidak perlu secret tambahan untuk build.
+File asli **tidak** di-commit. CI memakai placeholder:
 
-Push notification **tidak** ditest di CI (butuh device fisik).
+```bash
+cp androidApp/google-services.json.example androidApp/google-services.json
+```
+
+Untuk build lokal / release asli, jalankan:
+
+```bash
+./scripts/setup-firebase-config.sh
+```
+
+Push notification **tidak** ditest di CI (butuh device fisik + config asli).
 
 ## Branch protection (disarankan)
 

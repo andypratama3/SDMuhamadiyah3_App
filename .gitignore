@@ -17,3 +17,13 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+
+# Firebase — jangan commit file asli (berisi API key)
+androidApp/google-services.json
+iosApp/iosApp/GoogleService-Info.plist
+
+# CocoaPods
+iosApp/Pods/
+iosApp/Podfile.lock
+iosApp/*.xcworkspace
+!iosApp/*.xcworkspace/contents.xcworkspacedata

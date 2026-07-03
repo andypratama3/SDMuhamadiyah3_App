@@ -35,6 +35,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Prepare Firebase config (CI placeholder)
+        run: cp androidApp/google-services.json.example androidApp/google-services.json
+
       - name: Compile shared (Android)
         run: ./gradlew :shared:compileAndroidMain --stacktrace
 
