@@ -16,6 +16,7 @@ object Endpoints {
     const val PARENT_ATTENDANCE_SUMMARY = "/api/parent/attendance-summary"
     const val PARENT_PAYMENTS = "/api/parent/payments"
     const val PARENT_PAYMENT_DETAIL = "/api/parent/payments/{id}"
+    const val PARENT_PAYMENT_RECEIPT = "/api/parent/payments/{id}/receipt"
     const val PARENT_STUDENT_FEES = "/api/parent/student-fees"
     const val PARENT_NOTIFICATIONS = "/api/parent/notifications"
     const val PARENT_NOTIFICATION_READ = "/api/parent/notifications/{id}/read"

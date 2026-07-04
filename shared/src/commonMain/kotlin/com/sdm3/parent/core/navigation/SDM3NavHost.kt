@@ -125,7 +125,7 @@ fun SDM3NavHost(
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
+            modifier = Modifier.fillMaxSize(),
             enterTransition = { 
                 slideInHorizontally(
                     initialOffsetX = { it }, 

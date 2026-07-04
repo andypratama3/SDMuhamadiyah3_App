@@ -10,6 +10,7 @@ interface PaymentRepositoryContract {
     suspend fun getStudentFees(studentId: String): ApiResult<List<StudentFeeDto>>
     suspend fun getPayments(studentId: String? = null, status: String? = null): ApiResult<List<PaymentDto>>
     suspend fun getPaymentDetail(id: String): ApiResult<PaymentDto>
+    suspend fun getReceiptUrl(id: String): ApiResult<String>
     suspend fun getSnapToken(studentFeeId: String, paymentMethod: String): ApiResult<SnapTokenResponse>
     suspend fun checkPaymentStatus(chargeId: String): ApiResult<PaymentDto>
     suspend fun getPaymentMethods(): ApiResult<List<PaymentMethodDto>>

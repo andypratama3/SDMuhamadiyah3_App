@@ -130,13 +130,24 @@ fun HomeScreen(
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Box(modifier = Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
+            // Atmospheric Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
+                        center = Offset(size.width, 0f),
+                        radius = size.width * 1.2f
+                    )
+                )
+            }
+
             when (screenState) {
                 is HomeScreenUiState.Loading -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 100.dp),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+                        contentPadding = PaddingValues(bottom = 120.dp),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
                         item { GreetingShimmer() }
                         item { ShortcutFavoritShimmer() }
@@ -168,8 +179,8 @@ fun HomeScreen(
                 is HomeScreenUiState.Success -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 100.dp),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.xl)
+                        contentPadding = PaddingValues(bottom = 120.dp),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
                         item {
                             GreetingSection(
@@ -333,7 +344,7 @@ private fun HomeHeader(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(start = 20.dp, end = 12.dp, top = 24.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -342,13 +353,13 @@ private fun HomeHeader(
             modifier = Modifier.weight(1f)
         ) {
             Sdm3Logo(
-                size = 40.dp,
+                size = 36.dp,
                 showBackground = false
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = "SD Muhammadiyah 3 Samarinda",
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
                 letterSpacing = (-0.5).sp,
@@ -584,16 +595,17 @@ private fun GreetingSection(name: String, info: String, onClick: () -> Unit) {
     ) {
         Text(
             text = "Halo, $name!",
-            style = MaterialTheme.typography.displayMedium,
+            style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
             letterSpacing = (-1).sp
         )
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = info,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            fontWeight = FontWeight.Medium
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -605,20 +617,13 @@ private fun ShortcutFavoritSection(
     onELibraryClick: () -> Unit
 ) {
     Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Shortcut Favorit",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+        Text(
+            text = "Shortcut Favorit",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -664,41 +669,40 @@ private fun ShortcutCard(
     comingSoon: Boolean = false
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Card(
+    Sdm3Card(
         modifier = Modifier
-            .size(140.dp, 160.dp)
+            .size(130.dp, 150.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        padding = 0.dp
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
+                modifier = Modifier.fillMaxSize().padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Surface(
-                    modifier = Modifier.size(52.dp),
+                    modifier = Modifier.size(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    color = iconColor.copy(alpha = if (comingSoon) 0.06f else 0.1f)
+                    color = iconColor.copy(alpha = if (comingSoon) 0.05f else 0.08f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             icon,
                             contentDescription = null,
-                            tint = if (comingSoon) iconColor.copy(alpha = 0.5f) else iconColor,
-                            modifier = Modifier.size(28.dp)
+                            tint = if (comingSoon) iconColor.copy(alpha = 0.4f) else iconColor,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    color = if (comingSoon) colorScheme.primary.copy(alpha = 0.6f) else colorScheme.primary
+                    color = if (comingSoon) colorScheme.primary.copy(alpha = 0.6f) else colorScheme.primary,
+                    lineHeight = 18.sp
                 )
             }
             if (comingSoon) {
@@ -758,16 +762,11 @@ private fun LayananSekolahSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            color = Color.White,
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
-        ) {
-            Column(modifier = Modifier.padding(vertical = 16.dp)) {
+        Sdm3Card(padding = 4.dp) {
+            Column(modifier = Modifier.padding(vertical = 4.dp)) {
                 items.chunked(4).forEach { rowItems ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         rowItems.forEach { entry ->

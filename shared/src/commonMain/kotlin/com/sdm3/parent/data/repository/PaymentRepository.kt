@@ -48,6 +48,14 @@ class PaymentRepository(
         }
     }
 
+    override suspend fun getReceiptUrl(id: String): ApiResult<String> {
+        return try {
+            api.getReceiptUrl(id)
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal membuat kwitansi"))
+        }
+    }
+
     override suspend fun getSnapToken(studentFeeId: String, paymentMethod: String): ApiResult<SnapTokenResponse> {
         return try {
             api.getSnapToken(studentFeeId, paymentMethod)

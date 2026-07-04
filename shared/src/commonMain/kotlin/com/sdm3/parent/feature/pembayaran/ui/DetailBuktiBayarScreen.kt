@@ -1,6 +1,7 @@
 package com.sdm3.parent.feature.pembayaran.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -24,16 +25,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarUiState
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarViewModel
-import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.platform.PlatformActions
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -58,10 +64,23 @@ fun DetailBuktiBayarScreen(
         viewModel.uiState.collectAsState()
     }
     val colorScheme = MaterialTheme.colorScheme
+    val snackbarHostState = remember { SnackbarHostState() }
 
     if (!isPreview) {
         LaunchedEffect(paymentId) {
             viewModel.loadPaymentDetail(paymentId)
+        }
+        LaunchedEffect(vmState.receiptUrlToOpen) {
+            vmState.receiptUrlToOpen?.let { url ->
+                PlatformActions.openUrl(url)
+                viewModel.consumeReceiptUrl()
+            }
+        }
+        LaunchedEffect(vmState.receiptMessage) {
+            vmState.receiptMessage?.let { msg ->
+                snackbarHostState.showSnackbar(msg)
+                viewModel.consumeReceiptMessage()
+            }
         }
     }
 
@@ -82,7 +101,7 @@ fun DetailBuktiBayarScreen(
                 title = {
                     Text(
                         text = "Kwitansi Digital",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-0.5).sp,
                         color = colorScheme.primary
@@ -99,15 +118,16 @@ fun DetailBuktiBayarScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         val glowColor = colorScheme.primaryContainer
         Box(modifier = Modifier.fillMaxSize()) {
-            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
                 drawCircle(
-                    brush = androidx.compose.ui.graphics.Brush.radialGradient(
+                    brush = Brush.radialGradient(
                         colors = listOf(glowColor, Color.Transparent),
-                        center = androidx.compose.ui.geometry.Offset(size.width, 0f),
+                        center = Offset(size.width, 0f),
                         radius = size.width * 1.5f
                     )
                 )
@@ -245,127 +265,166 @@ fun DetailBuktiBayarScreen(
                             isFailed -> Icons.Outlined.Cancel
                             else -> Icons.Outlined.HourglassEmpty
                         }
-                        // School Header
+
+                        Spacer(modifier = Modifier.height(Spacing.lg))
+
+                        // Receipt Header
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            Sdm3Logo(
+                                size = 64.dp,
+                                showBackground = false,
+                                modifier = Modifier.alpha(0.9f)
+                            )
+                            Spacer(modifier = Modifier.height(Spacing.md))
                             Text(
                                 text = "SD MUHAMMADIYAH 3 SAMARINDA",
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Black,
                                 color = colorScheme.primary,
-                                letterSpacing = 1.sp
+                                letterSpacing = 1.sp,
+                                textAlign = TextAlign.Center
                             )
                             Text(
-                                text = "KWITANSI DIGITAL",
+                                text = "PENERIMAAN PEMBAYARAN PENDIDIKAN",
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Black,
-                                color = colorScheme.primary.copy(alpha = 0.4f),
-                                letterSpacing = 2.sp
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary.copy(alpha = 0.5f),
+                                letterSpacing = 1.sp,
+                                textAlign = TextAlign.Center
                             )
+                        }
+
+                        Spacer(modifier = Modifier.height(Spacing.xl))
+
+                        // Status Section
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Surface(
+                                modifier = Modifier.size(64.dp),
+                                shape = CircleShape,
+                                color = statusColor.copy(alpha = 0.1f)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        statusIcon,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(32.dp),
+                                        tint = statusColor
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(Spacing.md))
+                            Surface(
+                                color = statusColor.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(99.dp),
+                                border = BorderStroke(1.dp, statusColor.copy(alpha = 0.2f))
+                            ) {
+                                Text(
+                                    text = statusBadge,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.sp,
+                                    color = statusColor,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(Spacing.xs))
+                            Text(
+                                text = statusHeadline,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = colorScheme.primary,
+                                letterSpacing = (-0.5).sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(Spacing.xxl))
+
+                        // Main Receipt Card
+                        Sdm3Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            padding = Spacing.lg
+                        ) {
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                // Watermark
+                                Sdm3Logo(
+                                    size = 120.dp,
+                                    showBackground = false,
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .alpha(0.03f)
+                                )
+
+                                Column {
+                                    Text(
+                                        text = "RINCIAN TRANSAKSI",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Black,
+                                        color = colorScheme.primary.copy(alpha = 0.4f),
+                                        letterSpacing = 2.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(Spacing.md))
+
+                                    ReceiptRow("Nomor Referensi", payment.orderId.ifBlank { payment.id }.uppercase())
+                                    ReceiptRow("Waktu Bayar", com.sdm3.parent.core.util.formatTanggalWaktu(payment.paidAt ?: payment.createdAt))
+                                    ReceiptRow("Metode Pembayaran", com.sdm3.parent.core.util.formatPaymentMethod(payment.paymentType))
+                                    ReceiptRow("Status Audit", statusHeadline)
+
+                                    Spacer(modifier = Modifier.height(Spacing.lg))
+                                    DashedDivider(color = colorScheme.outlineVariant)
+                                    Spacer(modifier = Modifier.height(Spacing.lg))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.Bottom
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = "TOTAL BAYAR",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Black,
+                                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                                letterSpacing = 1.sp
+                                            )
+                                            Text(
+                                                text = "Lunas & Terverifikasi",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = StatusSuccess,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Text(
+                                            text = com.sdm3.parent.core.util.formatRupiah(payment.grossAmount ?: 0.0),
+                                            style = MaterialTheme.typography.headlineMedium,
+                                            fontWeight = FontWeight.Black,
+                                            color = colorScheme.primary,
+                                            letterSpacing = (-1).sp
+                                        )
+                                    }
+                                }
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(Spacing.lg))
 
+                        // Student Info Card
                         Sdm3Card(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(Spacing.lg),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Surface(
-                                    modifier = Modifier.size(72.dp),
-                                    shape = CircleShape,
-                                    color = statusColor.copy(alpha = 0.1f)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            statusIcon,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(40.dp),
-                                            tint = statusColor
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(Spacing.lg))
-                                Surface(
-                                    color = statusColor.copy(alpha = 0.15f),
-                                    shape = RoundedCornerShape(999.dp)
-                                ) {
-                                    Text(
-                                        text = " $statusBadge ",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp,
-                                        color = statusColor,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(Spacing.sm))
-                                Text(
-                                    text = statusHeadline,
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.primary
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(Spacing.xl))
-
-                        Text(
-                            text = "Rincian Pembayaran",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(Spacing.md))
-
-                        Sdm3Card {
-                            ReceiptRow("Nomor Referensi", payment.orderId.ifBlank { payment.id }.uppercase())
-                            ReceiptRow("Waktu Bayar", com.sdm3.parent.core.util.formatTanggalWaktu(payment.paidAt ?: payment.createdAt))
-                            ReceiptRow("Metode", com.sdm3.parent.core.util.formatPaymentMethod(payment.paymentType))
-
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = Spacing.md),
-                                color = colorScheme.outlineVariant.copy(alpha = 0.5f)
-                            )
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Total Bayar",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = com.sdm3.parent.core.util.formatRupiah(payment.grossAmount ?: 0.0),
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = colorScheme.primary
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(Spacing.xl))
-
-                        Sdm3Card(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            padding = Spacing.md
                         ) {
                             Row(
-                                modifier = Modifier.padding(Spacing.sm),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 val studentName = payment.studentName ?: payment.paymentTitle?.name ?: "Santri"
                                 val initials = com.sdm3.parent.core.util.nameInitials(studentName)
                                 Surface(
-                                    modifier = Modifier.size(52.dp),
+                                    modifier = Modifier.size(48.dp),
                                     shape = CircleShape,
                                     color = colorScheme.primary.copy(alpha = 0.05f),
                                     border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
@@ -382,7 +441,7 @@ fun DetailBuktiBayarScreen(
                                 Spacer(modifier = Modifier.width(Spacing.md))
                                 Column {
                                     Text(
-                                        text = payment.studentName ?: payment.paymentTitle?.name ?: "Santri",
+                                        text = studentName,
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
@@ -404,16 +463,26 @@ fun DetailBuktiBayarScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(Spacing.xxl))
+                        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                         Sdm3Button(
-                            text = "Download Kwitansi PDF",
-                            onClick = {
-                                payment.paymentUrl?.let { PlatformActions.openUrl(it) }
-                            },
+                            text = if (vmState.isGeneratingReceipt) "Menyiapkan Kwitansi..." else "Download Kwitansi PDF",
+                            onClick = { viewModel.generateReceipt(payment.id) },
                             icon = Icons.Outlined.FileDownload,
-                            enabled = payment.paymentUrl != null
+                            enabled = isPaid && !vmState.isGeneratingReceipt,
+                            modifier = Modifier.fillMaxWidth()
                         )
+
+                        if (!isPaid) {
+                            Spacer(modifier = Modifier.height(Spacing.xs))
+                            Text(
+                                text = "Kwitansi PDF tersedia setelah pembayaran lunas.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(Spacing.md))
 
@@ -432,7 +501,8 @@ fun DetailBuktiBayarScreen(
                                 PlatformActions.shareText(shareText.trim(), "Bukti Pembayaran")
                             },
                             icon = Icons.Outlined.Share,
-                            contentColor = colorScheme.primary
+                            contentColor = colorScheme.primary,
+                            modifier = Modifier.fillMaxWidth()
                         )
 
                         Spacer(modifier = Modifier.height(Spacing.xxxl))
@@ -450,23 +520,46 @@ private fun ReceiptRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.sm),
+            .padding(vertical = Spacing.md),
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         verticalAlignment = Alignment.Top
     ) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            fontWeight = FontWeight.Medium
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp,
+            modifier = Modifier.width(100.dp)
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = colorScheme.onSurface,
-            textAlign = androidx.compose.ui.text.style.TextAlign.End,
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.primary,
+            textAlign = TextAlign.End,
             modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun DashedDivider(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.outlineVariant,
+    thickness: Dp = 1.dp,
+) {
+    Canvas(
+        modifier
+            .fillMaxWidth()
+            .height(thickness)
+    ) {
+        drawLine(
+            color = color,
+            start = Offset(0f, 0f),
+            end = Offset(size.width, 0f),
+            strokeWidth = thickness.toPx(),
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
         )
     }
 }

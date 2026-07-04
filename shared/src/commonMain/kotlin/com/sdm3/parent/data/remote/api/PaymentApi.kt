@@ -13,8 +13,12 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
+import kotlinx.serialization.Serializable
 
 class PaymentApi(private val provider: HttpClientProvider) {
+
+    @Serializable
+    private data class ReceiptResponse(val url: String? = null)
 
     suspend fun getStudentFees(studentId: String): ApiResult<List<StudentFeeDto>> {
         val response = provider.client.get {
@@ -44,6 +48,18 @@ class PaymentApi(private val provider: HttpClientProvider) {
         }
         provider.handleSessionExpiredIfNeeded(response)
         return response.toApiResult()
+    }
+
+    suspend fun getReceiptUrl(id: String): ApiResult<String> {
+        val response = provider.client.get {
+            url(Endpoints.PARENT_PAYMENT_RECEIPT.replace("{id}", id))
+            provider.applyAuthHeader(this)
+        }
+        provider.handleSessionExpiredIfNeeded(response)
+        return when (val result = response.toApiResult<ReceiptResponse>()) {
+            is ApiResult.Success -> ApiResult.Success(result.data.url.orEmpty())
+            is ApiResult.Error -> result
+        }
     }
 
     suspend fun getSnapToken(studentFeeId: String, paymentMethod: String): ApiResult<SnapTokenResponse> {

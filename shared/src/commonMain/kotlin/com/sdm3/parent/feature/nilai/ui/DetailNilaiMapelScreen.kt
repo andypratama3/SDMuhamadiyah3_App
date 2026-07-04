@@ -79,10 +79,10 @@ fun DetailNilaiMapelScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
                             text = uiState.subjectName.ifEmpty { "Mata Pelajaran" },
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary,
                             letterSpacing = (-0.5).sp
@@ -161,14 +161,6 @@ fun DetailNilaiMapelScreen(
                     val scoreBasis = aggregateScores.ifEmpty { fallbackScores }
                     val finalScore = if (scoreBasis.isNotEmpty()) scoreBasis.average().toInt() else 0
 
-                    val predicate = when {
-                        finalScore >= 90 -> "A"
-                        finalScore >= 80 -> "B+"
-                        finalScore >= 70 -> "B"
-                        finalScore >= 60 -> "C+"
-                        else -> "C"
-                    }
-
                     val tpList = components.filter { it.tpName != null }
 
                     LazyColumn(
@@ -177,15 +169,16 @@ fun DetailNilaiMapelScreen(
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                     ) {
                         item {
-                            // Score Hero Card
+                            // Score Hero Card (Centered and Refined)
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(28.dp),
-                                colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
+                                shape = RoundedCornerShape(32.dp),
+                                colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                             ) {
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
-                                    Canvas(modifier = Modifier.fillMaxWidth().height(160.dp).alpha(0.15f)) {
+                                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                    val glowColor = colorScheme.surfaceTint.copy(alpha = 0.3f)
+                                    Canvas(modifier = Modifier.fillMaxWidth().height(180.dp).alpha(0.1f)) {
                                         drawCircle(
                                             brush = Brush.radialGradient(
                                                 colors = listOf(glowColor, Color.Transparent),
@@ -196,7 +189,7 @@ fun DetailNilaiMapelScreen(
                                     }
 
                                     Column(
-                                        modifier = Modifier.padding(24.dp),
+                                        modifier = Modifier.padding(vertical = 32.dp, horizontal = 24.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Text(
@@ -204,26 +197,35 @@ fun DetailNilaiMapelScreen(
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Black,
                                             letterSpacing = 2.sp,
-                                            color = Color.White.copy(alpha = 0.5f)
+                                            color = Color.White.copy(alpha = 0.4f)
                                         )
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(16.dp))
                                         Text(
                                             text = "$finalScore",
-                                            style = MaterialTheme.typography.displayLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
+                                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 56.sp),
+                                            fontWeight = FontWeight.Black,
+                                            color = Color.White,
+                                            letterSpacing = (-2).sp
                                         )
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        val (predicateLabel, predicateColor) = when {
+                                            finalScore >= 90 -> "SANGAT BAIK" to StatusSuccess
+                                            finalScore >= 80 -> "BAIK" to colorScheme.secondary
+                                            finalScore >= 70 -> "CUKUP" to StatusWarning
+                                            else -> "PERLU BIMBINGAN" to StatusDanger
+                                        }
                                         Surface(
-                                            color = colorScheme.secondary,
-                                            shape = RoundedCornerShape(8.dp)
+                                            color = Color.White.copy(alpha = 0.1f),
+                                            shape = RoundedCornerShape(99.dp),
+                                            border = BorderStroke(1.dp, predicateColor.copy(alpha = 0.3f))
                                         ) {
                                             Text(
-                                                text = " PREDIKAT $predicate ",
+                                                text = " $predicateLabel ",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Black,
-                                                color = colorScheme.primary,
-                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                                color = predicateColor,
+                                                letterSpacing = 1.sp,
+                                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                                             )
                                         }
                                     }
