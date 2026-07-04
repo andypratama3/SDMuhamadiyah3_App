@@ -132,7 +132,7 @@ private fun Sdm3NavRail(
                     animationSpec = tween(400)
                 )
                 val backgroundColor by animateColorAsState(
-                    targetValue = if (selected) Color(0xFF2E7D32) else Color.Transparent,
+                    targetValue = if (selected) colorScheme.primary else Color.Transparent,
                     animationSpec = tween(400)
                 )
 
@@ -162,12 +162,12 @@ private fun Sdm3NavRail(
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                                 letterSpacing = 0.sp
                             ),
-                            color = if (selected) Color(0xFF2E7D32) else colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            color = if (selected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     },
                     colors = NavigationRailItemDefaults.colors(
-                        selectedIconColor = Color(0xFF2E7D32),
-                        selectedTextColor = Color(0xFF2E7D32),
+                        selectedIconColor = colorScheme.primary,
+                        selectedTextColor = colorScheme.primary,
                         unselectedIconColor = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         unselectedTextColor = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         indicatorColor = Color.Transparent
@@ -219,7 +219,7 @@ private fun Sdm3DrawerContent(
         navItems.forEach { item ->
             val selected = selectedTab == item.tab
             val backgroundColor by animateColorAsState(
-                targetValue = if (selected) Color(0xFF2E7D32).copy(alpha = 0.1f) else Color.Transparent,
+                targetValue = if (selected) colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent,
                 animationSpec = tween(400)
             )
 
@@ -230,7 +230,7 @@ private fun Sdm3DrawerContent(
                     Icon(
                         imageVector = item.icon,
                         contentDescription = item.label,
-                        tint = if (selected) Color(0xFF2E7D32) else colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        tint = if (selected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 },
                 label = {
@@ -239,7 +239,7 @@ private fun Sdm3DrawerContent(
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
                         ),
-                        color = if (selected) Color(0xFF2E7D32) else colorScheme.onSurfaceVariant
+                        color = if (selected) colorScheme.primary else colorScheme.onSurfaceVariant
                     )
                 },
                 colors = NavigationDrawerItemDefaults.colors(

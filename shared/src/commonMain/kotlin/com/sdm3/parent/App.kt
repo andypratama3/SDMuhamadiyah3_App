@@ -13,6 +13,7 @@ import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.core.notification.FcmRegistrar
 import com.sdm3.parent.core.notification.FcmRegistrationCoordinator
 import com.sdm3.parent.core.notification.FcmTokenProvider
+import com.sdm3.parent.core.security.InstallState
 import com.sdm3.parent.core.security.SecureTokenManager
 import org.koin.compose.koinInject
 
@@ -23,6 +24,17 @@ fun App() {
         val fcmRegistrar: FcmRegistrar = koinInject()
         val secureTokenManager: SecureTokenManager = koinInject()
         val fcmTokenProvider: FcmTokenProvider = koinInject()
+        val installState: InstallState = koinInject()
+
+        // Bersihkan sisa data lama pada (re)install baru (khusus iOS: Keychain
+        // bertahan setelah uninstall). Harus dijalankan sebelum Splash memutuskan
+        // tujuan navigasi, sehingga onboarding & login muncul dari awal.
+        LaunchedEffect(installState, secureTokenManager) {
+            if (installState.isFreshInstall()) {
+                secureTokenManager.resetForFreshInstall()
+                installState.markInstalled()
+            }
+        }
 
         LaunchedEffect(fcmRegistrar, secureTokenManager) {
             FcmRegistrationCoordinator.bind(fcmRegistrar, secureTokenManager)
@@ -30,6 +42,12 @@ fun App() {
 
         LaunchedEffect(fcmTokenProvider) {
             fcmTokenProvider.requestPermissionIfNeeded()
+            // Debug saja: cetak FCM token ke log agar mudah diuji dari Firebase Console.
+            // Cari baris "SDM3_FCM_TOKEN" di Logcat (Android) / konsol Xcode (iOS).
+            if (isDebugBuild()) {
+                val token = fcmTokenProvider.getToken()
+                println("SDM3_FCM_TOKEN => $token")
+            }
         }
     }
 

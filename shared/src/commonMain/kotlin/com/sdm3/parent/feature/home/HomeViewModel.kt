@@ -7,6 +7,7 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.*
 import com.sdm3.parent.domain.repository.DashboardRepositoryContract
 import com.sdm3.parent.domain.repository.NotificationRepositoryContract
+import com.sdm3.parent.domain.repository.StudentRepositoryContract
 
 data class HomeUiState(
     val studentId: String = "",
@@ -34,7 +35,8 @@ sealed interface HomeEffect {
 
 class HomeViewModel(
     private val repository: DashboardRepositoryContract,
-    private val notificationRepository: NotificationRepositoryContract
+    private val notificationRepository: NotificationRepositoryContract,
+    private val studentRepository: StudentRepositoryContract
 ) : MviViewModel<HomeUiState, HomeIntent, HomeEffect>(HomeUiState()) {
 
     override fun onIntent(intent: HomeIntent) {
@@ -44,7 +46,22 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * Daftar anak dipakai untuk penukar anak aktif di Beranda. Bersifat pelengkap:
+     * kegagalannya tidak boleh menutup dashboard. Dimuat sekali saja karena jarang berubah.
+     */
+    private fun loadStudentsIfNeeded() {
+        if (uiState.value.students.isNotEmpty()) return
+        launchSafely {
+            val result = studentRepository.getStudents()
+            if (result is ApiResult.Success) {
+                updateState { it.copy(students = result.data) }
+            }
+        }
+    }
+
     private fun loadDashboard(studentId: String) {
+        loadStudentsIfNeeded()
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null, studentId = studentId) }
 

@@ -240,11 +240,28 @@ fun PembayaranBerhasilScreen(
 
                             Sdm3Card(padding = 24.dp) {
                                 Column {
-                                    SuccessRow("Item Akademik", vmState.paymentTitle.uppercase())
-                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                                    if (vmState.paymentTitle.isNotBlank()) {
+                                        SuccessRow("Item Akademik", vmState.paymentTitle.uppercase())
+                                        HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                                    }
                                     SuccessRow("Total Transaksi", formatCurrency(vmState.amount))
+                                    if (vmState.paymentMethod.isNotBlank()) {
+                                        HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                                        SuccessRow("Metode Bayar", com.sdm3.parent.core.util.formatPaymentMethod(vmState.paymentMethod))
+                                    }
+                                    if (vmState.paidAt.isNotBlank()) {
+                                        HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                                        SuccessRow("Waktu Bayar", com.sdm3.parent.core.util.formatTanggalWaktu(vmState.paidAt))
+                                    }
                                     HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                                    SuccessRow("Status Audit", if (vmState.amount > 0L) "LUNAS & VERIF" else "PENDING")
+                                    val statusLower = vmState.status.lowercase()
+                                    val statusLabel = when {
+                                        statusLower in listOf("settlement", "success", "capture", "paid", "lunas", "completed") -> "LUNAS & VERIF"
+                                        statusLower in listOf("failed", "failure", "expire", "expired", "deny", "cancel", "cancelled", "refunded") -> "GAGAL"
+                                        statusLower.isBlank() -> if (vmState.amount > 0L) "LUNAS & VERIF" else "PENDING"
+                                        else -> "MENUNGGU"
+                                    }
+                                    SuccessRow("Status Audit", statusLabel)
                                 }
                             }
 

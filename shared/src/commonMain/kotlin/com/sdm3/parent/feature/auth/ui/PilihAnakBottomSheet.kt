@@ -102,7 +102,7 @@ fun PilihAnakBottomSheet(
                                     color = colorScheme.primary
                                 )
                                 Text(
-                                    text = "Kelas ${student.className ?: "-"}",
+                                    text = com.sdm3.parent.core.util.formatClassName(student.className),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                     fontWeight = FontWeight.Bold

@@ -3,6 +3,7 @@ package com.sdm3.parent.data.remote.api
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.network.HttpClientProvider
 import com.sdm3.parent.core.network.toApiResult
+import com.sdm3.parent.data.remote.dto.RaporDownloadDto
 import com.sdm3.parent.data.remote.dto.RaporInstanceDto
 import com.sdm3.parent.data.remote.dto.RaporVerifyResponse
 import io.ktor.client.request.get
@@ -31,7 +32,11 @@ class RaporApi(private val provider: HttpClientProvider) {
             provider.applyAuthHeader(this)
         }
         provider.handleSessionExpiredIfNeeded(response)
-        return response.toApiResult()
+        // Backend mengembalikan objek { id, url, student_name, semester }, bukan string mentah.
+        return when (val result = response.toApiResult<RaporDownloadDto>()) {
+            is ApiResult.Success -> ApiResult.Success(result.data.url.orEmpty())
+            is ApiResult.Error -> result
+        }
     }
 
     suspend fun verifyQr(qrData: String): ApiResult<RaporVerifyResponse> {

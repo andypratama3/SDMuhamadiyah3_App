@@ -37,9 +37,26 @@ import com.sdm3.parent.core.designsystem.component.EmptyStateStyle
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.notifikasi.NotifikasiUiState
 import com.sdm3.parent.feature.notifikasi.NotifikasiViewModel
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 import org.koin.compose.viewmodel.koinViewModel
 
 private val filterOptions = listOf("Semua", "Akademik", "Keuangan", "Pengumuman")
+
+// Backend memakai kunci tipe bahasa Inggris (grade/payment/attendance/announcement/
+// general/leave/…). Petakan ke kategori tab agar filter benar-benar bekerja
+// (sebelumnya membandingkan langsung ke "akademik/keuangan/pengumuman" → selalu kosong).
+private fun notifMatchesCategory(type: String, category: String): Boolean {
+    val t = type.lowercase()
+    return when (category) {
+        "Akademik" -> t in setOf("grade", "nilai", "rapor", "report", "akademik", "academic", "attendance", "kehadiran", "leave", "izin", "exam", "ujian")
+        "Keuangan" -> t in setOf("payment", "payment_receipt", "keuangan", "spp", "finance", "tagihan", "invoice", "billing")
+        "Pengumuman" -> t in setOf("announcement", "pengumuman", "general", "info", "broadcast", "umum")
+        else -> true
+    }
+}
 
 sealed class NotifUiState {
     data object Loading : NotifUiState()
@@ -237,7 +254,7 @@ fun NotifikasiScreen(
                             )
                         }
                         val filteredNotifs = if (selectedFilter == 0) notifItems
-                        else notifItems.filter { it.type == filterOptions[selectedFilter].lowercase() }
+                        else notifItems.filter { notifMatchesCategory(it.type, filterOptions[selectedFilter]) }
 
                         if (filteredNotifs.isEmpty()) {
                             EmptyNotifikasiState()
@@ -245,11 +262,7 @@ fun NotifikasiScreen(
                             val lazyItems = buildList {
                                 var lastGroup = ""
                                 for (notif in filteredNotifs) {
-                                    val dateGroup = when {
-                                        notif.timestamp.contains("menit") || notif.timestamp.contains("jam") -> "BARU INI"
-                                        notif.timestamp.contains("Kemarin") -> "KEMARIN"
-                                        else -> "RIWAYAT"
-                                    }
+                                    val (dateGroup, _) = notifGroupAndLabel(notif.timestamp)
                                     if (dateGroup != lastGroup) {
                                         add(LazyNotifItem.Header(dateGroup))
                                         lastGroup = dateGroup
@@ -325,7 +338,7 @@ fun NotifikasiScreen(
                                                                 modifier = Modifier.weight(1f)
                                                             )
                                                             Text(
-                                                                text = notif.timestamp,
+                                                                text = notifGroupAndLabel(notif.timestamp).second,
                                                                 style = MaterialTheme.typography.labelSmall,
                                                                 color = colorScheme.primary.copy(alpha = 0.3f),
                                                                 fontWeight = FontWeight.Bold
@@ -473,6 +486,50 @@ private fun EmptyNotifikasiState() {
             lineHeight = 26.sp
         )
     }
+}
+
+private val bulanSingkatNotif = listOf(
+    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+)
+
+private fun parseInstantOrNull(iso: String): Instant? {
+    if (iso.isBlank()) return null
+    runCatching { return Instant.parse(iso) }
+    // Format tanpa zona ("2026-07-04 10:30:00") -> ubah spasi jadi 'T' dan tambahkan Z.
+    val normalized = iso.trim().replace(' ', 'T').let { if (it.endsWith("Z")) it else "${it}Z" }
+    return runCatching { Instant.parse(normalized) }.getOrNull()
+}
+
+/**
+ * Mengubah timestamp ISO menjadi pasangan (grup, label relatif).
+ * Grup dipakai untuk header seksi, label untuk teks kecil di kartu.
+ */
+@Suppress("DEPRECATION")
+private fun notifGroupAndLabel(iso: String): Pair<String, String> {
+    val instant = parseInstantOrNull(iso)
+        ?: return "RIWAYAT" to (iso.substringBefore('T').substringBefore(' '))
+    val tz = TimeZone.currentSystemDefault()
+    val now = Clock.System.now()
+    val nowDate = now.toLocalDateTime(tz).date
+    val notifDate = instant.toLocalDateTime(tz).date
+    val daysDiff = (nowDate.toEpochDays() - notifDate.toEpochDays()).toInt()
+    val diff = now - instant
+
+    val label = when {
+        diff.isNegative() -> "Baru saja"
+        diff.inWholeMinutes < 1 -> "Baru saja"
+        diff.inWholeMinutes < 60 -> "${diff.inWholeMinutes} mnt lalu"
+        daysDiff <= 0 -> "${diff.inWholeHours} jam lalu"
+        daysDiff == 1 -> "Kemarin"
+        else -> "${notifDate.dayOfMonth} ${bulanSingkatNotif[notifDate.monthNumber - 1]}"
+    }
+    val group = when {
+        daysDiff <= 0 -> "BARU INI"
+        daysDiff == 1 -> "KEMARIN"
+        daysDiff <= 7 -> "MINGGU INI"
+        else -> "RIWAYAT"
+    }
+    return group to label
 }
 
 @Preview

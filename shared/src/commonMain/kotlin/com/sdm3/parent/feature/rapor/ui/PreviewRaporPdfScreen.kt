@@ -183,7 +183,7 @@ fun PreviewRaporPdfScreen(
                         primaryAction = {
                             Sdm3Button(
                                 text = "Coba Lagi",
-                                onClick = { viewModel.init(raporId, downloadUrl) },
+                                onClick = { viewModel.retry() },
                                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
                             )
                         },
@@ -222,13 +222,13 @@ fun PreviewRaporPdfScreen(
                                 Spacer(modifier = Modifier.width(20.dp))
                                 Column {
                                     Text(
-                                        text = currentState.fileName.ifEmpty { "Rapor_Digital_Siswa.pdf" },
+                                        text = currentState.fileName.ifEmpty { "Dokumen Rapor.pdf" },
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
                                     Text(
-                                        text = "Ukuran: ${currentState.fileSize.ifEmpty { "1.2 MB" }}",
+                                        text = if (currentState.fileSize.isNotEmpty()) "Ukuran: ${currentState.fileSize}" else "Format: PDF",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary.copy(alpha = 0.4f)

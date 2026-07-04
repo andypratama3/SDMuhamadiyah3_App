@@ -107,7 +107,7 @@ fun SDM3NavHost(
         showNav = showBottomBar,
         onTabSelected = { tab ->
             val route: SDM3Route = when (tab) {
-                SDM3BottomTab.Beranda -> SDM3Route.Home(studentId)
+                SDM3BottomTab.Beranda -> SDM3Route.Main(studentId)
                 SDM3BottomTab.Nilai -> SDM3Route.NilaiRapor(studentId, "ganjil")
                 SDM3BottomTab.Bayar -> SDM3Route.PembayaranSpp(studentId)
                 SDM3BottomTab.Rapor -> SDM3Route.HalamanRapor(studentId)
@@ -152,7 +152,12 @@ fun SDM3NavHost(
             }
         ) {
 
-            composable<SDM3Route.Splash> {
+            composable<SDM3Route.Splash>(
+                enterTransition = { fadeIn(animationSpec = tween(400)) },
+                exitTransition = { fadeOut(animationSpec = tween(400)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(400)) },
+                popExitTransition = { fadeOut(animationSpec = tween(400)) }
+            ) {
                 SplashScreen(onNavigate = { route ->
                     navController.navigate(route) {
                         popUpTo<SDM3Route.Splash> { inclusive = true }
@@ -160,7 +165,12 @@ fun SDM3NavHost(
                 })
             }
 
-            composable<SDM3Route.Onboarding> {
+            composable<SDM3Route.Onboarding>(
+                enterTransition = { fadeIn(animationSpec = tween(400)) },
+                exitTransition = { fadeOut(animationSpec = tween(400)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(400)) },
+                popExitTransition = { fadeOut(animationSpec = tween(400)) }
+            ) {
                 val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
                 OnboardingScreen(onComplete = {
                     secureTokenManager.setOnboardingCompleted(true)
@@ -170,7 +180,12 @@ fun SDM3NavHost(
                 })
             }
 
-            composable<SDM3Route.Login> {
+            composable<SDM3Route.Login>(
+                enterTransition = { fadeIn(animationSpec = tween(400)) },
+                exitTransition = { fadeOut(animationSpec = tween(400)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(400)) },
+                popExitTransition = { fadeOut(animationSpec = tween(400)) }
+            ) {
                 val loginViewModel: LoginViewModel = koinViewModel()
                 val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
                 LoginScreen(
@@ -207,7 +222,12 @@ fun SDM3NavHost(
                 )
             }
 
-            composable<SDM3Route.PilihAnak> {
+            composable<SDM3Route.PilihAnak>(
+                enterTransition = { fadeIn(animationSpec = tween(400)) },
+                exitTransition = { fadeOut(animationSpec = tween(400)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(400)) },
+                popExitTransition = { fadeOut(animationSpec = tween(400)) }
+            ) {
                 val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
                 PilihAnakScreen(
                     onChildSelected = { studentId ->
@@ -384,6 +404,13 @@ fun SDM3NavHost(
 
             composable<SDM3Route.ProfilAkun> {
                 ProfilAkunScreen(
+                    selectedStudentId = studentId,
+                    onSwitchStudent = { newId ->
+                        secureTokenManager.saveSelectedStudentId(newId)
+                        navController.navigate(SDM3Route.Main(newId)) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
                     onNotifikasiSetting = {
                         navController.navigate(SDM3Route.PengaturanNotifikasi)
                     },

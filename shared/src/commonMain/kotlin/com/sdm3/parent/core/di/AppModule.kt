@@ -141,7 +141,7 @@ val viewModelModule = module {
     viewModelOf(::AccountDeletionViewModel)
     viewModelOf(::PilihAnakViewModel)
     viewModelOf(::VerifikasiOtpViewModel)
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModelOf(::PembayaranSppViewModel)
     viewModel { PilihMetodeBayarViewModel(get(), get()) }
     viewModelOf(::ProsesPembayaranViewModel)

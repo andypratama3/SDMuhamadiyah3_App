@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -61,9 +60,6 @@ fun SDM3BottomNavBar(
                 color = Color.White.copy(alpha = 0.6f)
             )
         ) {
-            // Backdrop Blur Effect (Glassmorphism)
-            Box(modifier = Modifier.fillMaxSize().blur(20.dp))
-
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -80,7 +76,7 @@ fun SDM3BottomNavBar(
                     )
 
                     val backgroundColor by animateColorAsState(
-                        targetValue = if (selected) Color(0xFF2E7D32) else Color.Transparent, // Using Green for Home as per image
+                        targetValue = if (selected) colorScheme.primary else Color.Transparent,
                         animationSpec = tween(400)
                     )
 
@@ -119,7 +115,7 @@ fun SDM3BottomNavBar(
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                                 letterSpacing = 0.sp
                             ),
-                            color = if (selected) Color(0xFF2E7D32) else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            color = if (selected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             maxLines = 1
                         )
                     }

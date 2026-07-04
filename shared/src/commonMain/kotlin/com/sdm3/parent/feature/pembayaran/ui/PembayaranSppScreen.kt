@@ -202,10 +202,15 @@ fun PembayaranSppScreen(
                 }
 
                 is PembayaranSppUiState.Success -> {
+                    val paidStatuses = listOf("lunas", "paid", "success", "settlement")
                     val totalFees = vmState.fees.size
-                    val paidFees = vmState.fees.count { it.status == "lunas" }
+                    val paidFees = vmState.fees.count { it.status.lowercase() in paidStatuses }
                     val progress = if (totalFees > 0) paidFees.toFloat() / totalFees.toFloat() else 0f
                     val progressPercent = (progress * 100).toInt()
+                    // Tagihan aktif = tagihan pertama yang BELUM lunas (bukan sekadar item pertama).
+                    val activeFee = vmState.fees.firstOrNull { it.status.lowercase() !in paidStatuses }
+                    val displayFee = activeFee ?: vmState.fees.firstOrNull()
+                    val hasActive = activeFee != null
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -245,7 +250,7 @@ fun PembayaranSppScreen(
                                                 )
                                                 Spacer(modifier = Modifier.height(4.dp))
                                                 Text(
-                                                    text = vmState.fees.firstOrNull()?.paymentTitleName ?: "Tagihan Aktif",
+                                                    text = displayFee?.paymentTitleName ?: (if (hasActive) "Tagihan Aktif" else "Semua Tagihan Lunas"),
                                                     style = MaterialTheme.typography.titleLarge,
                                                     color = Color.White,
                                                     fontWeight = FontWeight.Bold
@@ -253,10 +258,10 @@ fun PembayaranSppScreen(
                                             }
                                             Surface(
                                                 shape = RoundedCornerShape(999.dp),
-                                                color = colorScheme.error
+                                                color = if (hasActive) colorScheme.error else StatusSuccess
                                             ) {
                                                 Text(
-                                                    text = " BELUM DIBAYAR ",
+                                                    text = if (hasActive) " BELUM DIBAYAR " else " LUNAS ",
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = Color.White,
                                                     fontWeight = FontWeight.Black,
@@ -274,13 +279,13 @@ fun PembayaranSppScreen(
                                         ) {
                                             Column {
                                                 Text(
-                                                    text = formatCurrency(vmState.fees.firstOrNull()?.amount ?: 0.0),
+                                                    text = formatCurrency(displayFee?.amount ?: 0.0),
                                                     style = MaterialTheme.typography.displaySmall,
                                                     fontWeight = FontWeight.Bold,
                                                     color = Color.White
                                                 )
                                                 Text(
-                                                    text = vmState.fees.firstOrNull()?.dueDate?.let { "Jatuh tempo: $it" } ?: "",
+                                                    text = displayFee?.dueDate?.takeIf { it.isNotBlank() }?.let { "Jatuh tempo: ${formatTanggal(it)}" } ?: "",
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = Color.White.copy(alpha = 0.6f)
                                                 )
@@ -290,8 +295,9 @@ fun PembayaranSppScreen(
                                         Spacer(modifier = Modifier.height(24.dp))
 
                                         Sdm3Button(
-                                            text = "Bayar Sekarang",
-                                            onClick = { vmState.fees.firstOrNull()?.let { onBayarSekarang(it.id) } },
+                                            text = if (hasActive) "Bayar Sekarang" else "Tidak Ada Tagihan",
+                                            onClick = { activeFee?.let { onBayarSekarang(it.id) } },
+                                            enabled = hasActive,
                                             icon = Icons.Outlined.CreditCard,
                                             containerColor = colorScheme.secondary,
                                             contentColor = colorScheme.primary,
@@ -355,13 +361,26 @@ fun PembayaranSppScreen(
                             PaymentHistory(
                                 id = payment.id,
                                 title = payment.orderId,
-                                date = payment.paidAt ?: payment.createdAt ?: "",
+                                date = formatTanggal(payment.paidAt ?: payment.createdAt ?: ""),
                                 amount = payment.grossAmount?.toInt() ?: 0,
                                 status = payment.status
                             )
                         }
 
                         items(history) { payment ->
+                            val statusLower = payment.status.lowercase()
+                            val isPaid = statusLower in listOf("success", "settlement", "lunas", "paid", "capture", "completed")
+                            val isFailed = statusLower in listOf("failed", "failure", "expire", "expired", "deny", "cancel", "cancelled", "refunded")
+                            val statusLabel = when {
+                                isPaid -> "LUNAS"
+                                isFailed -> "GAGAL"
+                                else -> "MENUNGGU"
+                            }
+                            val statusColor = when {
+                                isPaid -> StatusSuccess
+                                isFailed -> colorScheme.error
+                                else -> StatusWarning
+                            }
                             Sdm3Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -379,10 +398,10 @@ fun PembayaranSppScreen(
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
                                             Icon(
-                                                imageVector = if (payment.status == "success") Icons.Outlined.Verified else Icons.Outlined.History,
+                                                imageVector = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.History,
                                                 contentDescription = null,
                                                 modifier = Modifier.size(24.dp),
-                                                tint = if (payment.status == "success") StatusSuccess else colorScheme.primary.copy(alpha = 0.4f)
+                                                tint = if (isPaid) StatusSuccess else colorScheme.primary.copy(alpha = 0.4f)
                                             )
                                         }
                                     }
@@ -402,21 +421,21 @@ fun PembayaranSppScreen(
                                     }
                                     Column(horizontalAlignment = Alignment.End) {
                                         Text(
-                                            text = "Rp${payment.amount / 1000}k",
+                                            text = formatCurrency(payment.amount),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold,
                                             color = colorScheme.primary
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
                                         Surface(
-                                            color = StatusSuccess.copy(alpha = 0.1f),
+                                            color = statusColor.copy(alpha = 0.1f),
                                             shape = RoundedCornerShape(4.dp)
                                         ) {
                                             Text(
-                                                text = " LUNAS ",
+                                                text = " $statusLabel ",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Black,
-                                                color = StatusSuccess,
+                                                color = statusColor,
                                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                             )
                                         }
@@ -441,14 +460,23 @@ data class PaymentHistory(
     val status: String
 )
 
-private fun formatCurrency(amount: Number): String {
-    val s = amount.toLong().toString()
-    val sb = StringBuilder()
-    for (i in s.indices) {
-        if (i > 0 && (s.length - i) % 3 == 0) sb.append('.')
-        sb.append(s[i])
-    }
-    return "Rp$sb"
+private fun formatCurrency(amount: Number): String = com.sdm3.parent.core.util.formatRupiah(amount)
+
+private val bulanSingkat = listOf(
+    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+)
+
+/** Ubah tanggal ISO (yyyy-MM-dd atau yyyy-MM-ddTHH:mm) menjadi "15 Jul 2026". */
+private fun formatTanggal(raw: String): String {
+    if (raw.isBlank()) return raw
+    val datePart = raw.substringBefore('T').substringBefore(' ')
+    val parts = datePart.split('-')
+    if (parts.size < 3) return raw
+    val year = parts[0].toIntOrNull() ?: return raw
+    val month = parts[1].toIntOrNull() ?: return raw
+    val day = parts[2].take(2).toIntOrNull() ?: return raw
+    if (month !in 1..12) return raw
+    return "$day ${bulanSingkat[month - 1]} $year"
 }
 
 @Preview

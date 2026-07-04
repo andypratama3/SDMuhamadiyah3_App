@@ -10,7 +10,7 @@
 # JANGAN commit GoogleService-Info.plist — file asli ada di .gitignore
 
 platform :ios, '15.0'
-use_frameworks!
+use_frameworks! :linkage => :static
 
 target 'iosApp' do
   pod 'FirebaseCore'

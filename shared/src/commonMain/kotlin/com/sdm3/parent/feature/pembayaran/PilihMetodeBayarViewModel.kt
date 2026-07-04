@@ -46,7 +46,11 @@ class PilihMetodeBayarViewModel(
             when (val methodsResult = paymentRepository.getPaymentMethods()) {
                 is ApiResult.Success -> {
                     updateState {
-                        it.copy(paymentMethods = methodsResult.data, isLoading = false)
+                        it.copy(
+                            paymentMethods = methodsResult.data,
+                            isLoading = false,
+                            isEmpty = methodsResult.data.isEmpty()
+                        )
                     }
                 }
                 is ApiResult.Error -> {
@@ -96,5 +100,14 @@ class PilihMetodeBayarViewModel(
 
     fun selectMethod(method: String) {
         updateState { it.copy(selectedMethod = method) }
+    }
+
+    /** Tandai snap token sudah diproses agar tidak memicu navigasi ulang saat kembali. */
+    fun consumeSnapToken() {
+        updateState { it.copy(snapTokenRequested = false) }
+    }
+
+    fun showError(message: String) {
+        updateState { it.copy(isLoading = false, errorMessage = message) }
     }
 }

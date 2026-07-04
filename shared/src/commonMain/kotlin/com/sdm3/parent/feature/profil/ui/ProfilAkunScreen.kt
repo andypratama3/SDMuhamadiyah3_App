@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +38,7 @@ import com.sdm3.parent.core.designsystem.component.EmptyStateStyle
 import com.sdm3.parent.core.designsystem.theme.*
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.data.remote.dto.StudentDto
+import com.sdm3.parent.feature.auth.ui.PilihAnakBottomSheet
 import com.sdm3.parent.feature.profil.ProfilAkunUiState
 import com.sdm3.parent.feature.profil.ProfilAkunViewModel
 import com.sdm3.parent.platform.PlatformActions
@@ -56,6 +58,8 @@ fun ProfilAkunScreen(
     onNotifikasiSetting: () -> Unit,
     onAccountDeletion: () -> Unit,
     onLogout: () -> Unit,
+    selectedStudentId: String = "",
+    onSwitchStudent: (String) -> Unit = {},
     viewModel: ProfilAkunViewModel = koinViewModel()
 ) {
     val isPreview = LocalInspectionMode.current
@@ -65,6 +69,7 @@ fun ProfilAkunScreen(
         viewModel.uiState.collectAsState()
     }
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showStudentSheet by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
     val errorMessage = uiState.errorMessage
@@ -172,9 +177,17 @@ fun ProfilAkunScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
+                        val activeStudent = uiState.students.firstOrNull { it.id == selectedStudentId }
+                            ?: uiState.students.firstOrNull()
+                        val canSwitch = uiState.students.size > 1
                         SectionHeader(title = "IDENTITAS AKADEMIK", modifier = Modifier.alpha(0.5f))
                         Spacer(modifier = Modifier.height(12.dp))
-                        StudentMiniCard(students = uiState.students)
+                        StudentMiniCard(
+                            student = activeStudent,
+                            childCount = uiState.students.size,
+                            canSwitch = canSwitch,
+                            onSwitchClick = { if (canSwitch) showStudentSheet = true }
+                        )
 
                         Spacer(modifier = Modifier.height(32.dp))
 
@@ -186,9 +199,9 @@ fun ProfilAkunScreen(
                                 listOf(
                                     SettingsItem("Notifikasi Portal", Icons.Outlined.Notifications, colorScheme.primary, onNotifikasiSetting),
                                     SettingsItem("Preferensi Bahasa", Icons.Outlined.Language, colorScheme.primary, { showInfo("Bahasa Indonesia aktif") }),
-                                    SettingsItem("Pusat Bantuan", Icons.AutoMirrored.Outlined.Chat, colorScheme.primary, { PlatformActions.openUrl("https://admin.sdm3.sch.id") }),
-                                    SettingsItem("Kebijakan Privasi", Icons.Outlined.VerifiedUser, colorScheme.primary, { PlatformActions.openUrl("https://admin.sdm3.sch.id/privacy") }),
-                                    SettingsItem("Tentang Aplikasi", Icons.Outlined.Info, colorScheme.primary, { showInfo("SDM3 Parent v${com.sdm3.parent.APP_VERSION_NAME}") })
+                                    SettingsItem("Pusat Bantuan", Icons.AutoMirrored.Outlined.Chat, colorScheme.primary, { PlatformActions.openUrl("https://sdmuhammadiyah3smd.cloud") }),
+                                    SettingsItem("Kebijakan Privasi", Icons.Outlined.VerifiedUser, colorScheme.primary, { PlatformActions.openUrl("https://sdmuhammadiyah3smd.cloud/privacy") }),
+                                    SettingsItem("Tentang Aplikasi", Icons.Outlined.Info, colorScheme.primary, { showInfo("SD Muhammadiyah 3 Samarinda v${com.sdm3.parent.APP_VERSION_NAME}") })
                                 ).forEachIndexed { index, item ->
                                     SettingsItemRow(item = item, trailing = if (index == 1) "ID" else null)
                                     if (index < 4) {
@@ -231,14 +244,14 @@ fun ProfilAkunScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "EDU OCTO PORTAL v1.0.2",
+                                text = "PORTAL WALI MURID v${com.sdm3.parent.APP_VERSION_NAME}",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
                                 color = colorScheme.primary.copy(alpha = 0.3f),
                                 letterSpacing = 1.sp
                             )
                             Text(
-                                text = "Build 2026.04.12 • SDM3 Samarinda",
+                                text = "SD Muhammadiyah 3 Samarinda",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.primary.copy(alpha = 0.2f)
                             )
@@ -337,6 +350,18 @@ fun ProfilAkunScreen(
                     Text("Batal", fontWeight = FontWeight.Bold, color = colorScheme.primary)
                 }
             }
+        )
+    }
+
+    if (!isPreview && showStudentSheet && uiState.students.size > 1) {
+        PilihAnakBottomSheet(
+            students = uiState.students,
+            selectedStudentId = selectedStudentId,
+            onStudentSelected = { newId ->
+                showStudentSheet = false
+                onSwitchStudent(newId)
+            },
+            onDismiss = { showStudentSheet = false }
         )
     }
 }
@@ -487,11 +512,22 @@ private fun ProfileHeader(name: String, phone: String, email: String, onEditClic
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary
                 )
-                Text(
-                    text = phone,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                )
+                if (phone.isNotBlank()) {
+                    Text(
+                        text = phone,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
+                if (email.isNotBlank()) {
+                    Text(
+                        text = email,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Surface(
                     color = StatusSuccess.copy(alpha = 0.1f),
@@ -525,80 +561,122 @@ private fun ProfileHeader(name: String, phone: String, email: String, onEditClic
 }
 
 @Composable
-private fun StudentMiniCard(students: List<StudentDto>) {
+private fun StudentMiniCard(
+    student: StudentDto?,
+    childCount: Int,
+    canSwitch: Boolean,
+    onSwitchClick: () -> Unit
+) {
     val colorScheme = MaterialTheme.colorScheme
-    val student = students.firstOrNull()
 
-    Sdm3Card(padding = 16.dp) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                color = colorScheme.primaryContainer,
-                border = BorderStroke(2.dp, Color.White)
+    Sdm3Card(
+        modifier = if (canSwitch) Modifier.clickable(onClick = onSwitchClick) else Modifier,
+        padding = 16.dp
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Surface(
+                    modifier = Modifier.size(56.dp),
+                    shape = CircleShape,
+                    color = colorScheme.primaryContainer,
+                    border = BorderStroke(2.dp, Color.White)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = com.sdm3.parent.core.util.nameInitials(student?.name),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = student?.let { "${it.name.first()}${it.name.split(" ").lastOrNull()?.first() ?: ""}" } ?: "?",
-                        style = MaterialTheme.typography.titleLarge,
+                        text = student?.name ?: "Belum ada siswa",
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.primary
                     )
+                    Text(
+                        text = student?.let { com.sdm3.parent.core.util.formatClassName(it.className) } ?: "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                    if (student?.nisn != null) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "NISN: ${student.nisn}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.primary.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    if (student?.portalId != null) {
+                        Text(
+                            text = "ID Portal: ${student.portalId}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.primary.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    if (student?.waliKelas != null) {
+                        Text(
+                            text = "Wali Kelas: ${student.waliKelas}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.primary.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                Surface(
+                    color = colorScheme.secondary,
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = "AKTIF",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = student?.name ?: "Belum ada siswa",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Text(
-                    text = student?.let { "Kelas ${it.className.orEmpty()}" } ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colorScheme.onSurfaceVariant
-                )
-                if (student?.nisn != null) {
-                    Spacer(modifier = Modifier.height(2.dp))
+
+            if (canSwitch) {
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.06f))
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                        text = "NISN: ${student.nisn}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.primary.copy(alpha = 0.6f),
-                        fontWeight = FontWeight.Bold
+                        text = "$childCount anak terdaftar",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        fontWeight = FontWeight.Medium
                     )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Outlined.SwapHoriz,
+                            contentDescription = "Ganti anak",
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Ganti Siswa",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary
+                        )
+                    }
                 }
-                if (student?.portalId != null) {
-                    Text(
-                        text = "ID Portal: ${student.portalId}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.primary.copy(alpha = 0.6f),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                if (student?.waliKelas != null) {
-                    Text(
-                        text = "Wali Kelas: ${student.waliKelas}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.primary.copy(alpha = 0.6f),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-            Surface(
-                color = colorScheme.secondary,
-                shape = RoundedCornerShape(6.dp)
-            ) {
-                Text(
-                    text = "AKTIF",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Black,
-                    color = colorScheme.primary,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
             }
         }
     }

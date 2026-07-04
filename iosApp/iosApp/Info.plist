@@ -5,7 +5,9 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDisplayName</key>
-	<string>SDM3 Parent</string>
+	<string>SD Muhammadiyah 3 Samarinda</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Kamera diperlukan untuk memindai QR Code pada dokumen rapor.</string>
 	<key>NSFaceIDUsageDescription</key>

@@ -15,10 +15,13 @@ data class LoginUiState(
     val email: String = "",
     val password: String = "",
     val isLoggedIn: Boolean = false,
+    val biometricAvailable: Boolean = false,
     override val isLoading: Boolean = false,
     override val errorMessage: String? = null,
     override val isEmpty: Boolean = false,
 ) : ScreenState
+
+private val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
 sealed interface LoginIntent {
     data class EmailChanged(val email: String) : LoginIntent
@@ -38,6 +41,14 @@ class LoginViewModel(
     private val biometricAuth: BiometricAuthGate,
     private val fcmRegistration: FcmRegistrar,
 ) : MviViewModel<LoginUiState, LoginIntent, LoginEffect>(LoginUiState()) {
+
+    init {
+        // Tampilkan opsi biometrik hanya bila pengguna sudah pernah login di
+        // perangkat ini (token tersimpan) dan biometrik diaktifkan.
+        val canBiometric = secureTokenManager.isBiometricEnabled() &&
+            !secureTokenManager.getBearerToken().isNullOrBlank()
+        updateState { it.copy(biometricAvailable = canBiometric) }
+    }
 
     override fun onIntent(intent: LoginIntent) {
         when (intent) {
@@ -61,6 +72,10 @@ class LoginViewModel(
             updateState { it.copy(errorMessage = "Email dan password harus diisi") }
             return
         }
+        if (!EMAIL_REGEX.matches(state.email.trim())) {
+            updateState { it.copy(errorMessage = "Format email tidak valid") }
+            return
+        }
         launchSafely(
             onError = { error ->
                 updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Terjadi kesalahan") }
@@ -68,7 +83,7 @@ class LoginViewModel(
         ) {
             updateState { it.copy(isLoading = true, errorMessage = null) }
 
-            when (val result = authRepository.login(state.email, state.password)) {
+            when (val result = authRepository.login(state.email.trim(), state.password)) {
                 is ApiResult.Success -> {
                     secureTokenManager.setBiometricEnabled(true)
                     fcmRegistration.registerIfAvailable()

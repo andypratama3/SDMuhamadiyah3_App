@@ -67,7 +67,9 @@ fun Sdm3TextField(
             value = value,
             onValueChange = onValueChange,
             enabled = enabled,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp),
             shape = RoundedCornerShape(16.dp), // Mutlak 16px radius
             placeholder = placeholder?.let {
                 {

@@ -55,6 +55,10 @@ class VerifikasiQrRaporViewModel(
     }
 
     fun reset() {
-        updateState { VerifikasiQrRaporUiState() }
+        // Pertahankan input QR/ID yang sudah ada agar pengguna bisa memverifikasi
+        // ulang tanpa kehilangan prefill dari daftar rapor.
+        updateState {
+            VerifikasiQrRaporUiState(qrInput = it.qrInput)
+        }
     }
 }

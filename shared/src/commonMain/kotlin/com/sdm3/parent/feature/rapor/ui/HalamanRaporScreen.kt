@@ -33,6 +33,17 @@ import com.sdm3.parent.feature.rapor.HalamanRaporViewModel
 import androidx.compose.ui.platform.LocalInspectionMode
 import org.koin.compose.viewmodel.koinViewModel
 
+private fun isRaporPublished(status: String?): Boolean =
+    status?.lowercase() in listOf("published", "approved", "terbit", "signed", "final")
+
+private fun raporStatusLabel(status: String?): String = when (status?.lowercase()) {
+    "published", "approved", "terbit", "signed", "final" -> "TERBIT"
+    "generated", "ready", "siap" -> "SIAP UNDUH"
+    "draft", "pending", "processing", "queued", "generating" -> "DIPROSES"
+    null, "" -> "-"
+    else -> status.uppercase()
+}
+
 sealed class HalamanRaporUiState {
     data object Loading : HalamanRaporUiState()
     data object Empty : HalamanRaporUiState()
@@ -79,7 +90,7 @@ fun HalamanRaporScreen(
     val filteredRapors = remember(vmState.rapors, selectedSemesterIndex) {
         if (selectedSemesterIndex == 0) vmState.rapors
         else {
-            val target = allSemesters.getOrNull(selectedSemesterIndex) ?: ""
+            val target = allSemesters.getOrNull(selectedSemesterIndex - 1) ?: ""
             vmState.rapors.filter { (it.semesterLabel ?: it.semester) == target }
         }
     }
@@ -317,20 +328,22 @@ fun HalamanRaporScreen(
                                                 }
                                                 Spacer(modifier = Modifier.width(16.dp))
                                                 Text(
-                                                    text = "Sumatif Akhir",
+                                                    text = latestRapor?.semesterLabel?.takeIf { it.isNotBlank() }
+                                                        ?: "Rapor Semester",
                                                     style = MaterialTheme.typography.titleLarge,
                                                     fontWeight = FontWeight.Bold,
                                                     color = Color.White
                                                 )
                                             }
+                                            val statusPublished = isRaporPublished(latestRapor?.status)
                                             Surface(
                                                 shape = RoundedCornerShape(999.dp),
-                                                color = colorScheme.secondary
+                                                color = if (statusPublished) colorScheme.secondary else Color.White.copy(alpha = 0.2f)
                                             ) {
                                                 Text(
-                                                    text = " TERBIT ",
+                                                    text = " ${raporStatusLabel(latestRapor?.status)} ",
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = colorScheme.primary,
+                                                    color = if (statusPublished) colorScheme.primary else Color.White,
                                                     fontWeight = FontWeight.Black,
                                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                                 )
@@ -340,7 +353,7 @@ fun HalamanRaporScreen(
 
                                     Column(modifier = Modifier.padding(24.dp)) {
                                         Text(
-                                            text = if (latestRapor?.approvedAt != null) "Dipublikasi pada ${latestRapor.approvedAt}" else "Dokumen resmi negara",
+                                            text = if (latestRapor?.approvedAt != null) "Dipublikasi pada ${com.sdm3.parent.core.util.formatTanggal(latestRapor.approvedAt)}" else "Dokumen resmi negara",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = Color.White.copy(alpha = 0.7f),
                                             fontWeight = FontWeight.Medium
@@ -372,7 +385,7 @@ fun HalamanRaporScreen(
                                             Box(modifier = Modifier.weight(1f)) {
                                                 Sdm3OutlinedButton(
                                                     text = "Pratinjau",
-                                                    onClick = { onPreviewClick(latestRapor?.id ?: "", latestRapor?.pdfUrl ?: "") },
+                                                    onClick = { onPreviewClick(latestRapor?.id ?: "", latestRapor?.pdfUrl ?: latestRapor?.generatedPdfUrl ?: "") },
                                                     icon = Icons.Outlined.Visibility,
                                                     contentColor = Color.White
                                                 )
@@ -380,7 +393,7 @@ fun HalamanRaporScreen(
                                             Box(modifier = Modifier.weight(1f)) {
                                                 Sdm3OutlinedButton(
                                                     text = "Verifikasi",
-                                                    onClick = { onVerifikasiClick(latestRapor?.id ?: "") },
+                                                    onClick = { onVerifikasiClick(latestRapor?.verificationCode ?: latestRapor?.id ?: "") },
                                                     icon = Icons.Outlined.QrCodeScanner,
                                                     contentColor = Color.White
                                                 )
@@ -448,7 +461,7 @@ fun HalamanRaporScreen(
                                             color = colorScheme.primary
                                         )
                                         Text(
-                                            text = "Status: ${rapor.status.replaceFirstChar { it.uppercase() }}",
+                                            text = "Status: ${raporStatusLabel(rapor.status)}",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                         )

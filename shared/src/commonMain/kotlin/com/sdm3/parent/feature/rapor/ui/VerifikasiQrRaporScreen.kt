@@ -51,7 +51,8 @@ sealed class VerifikasiQrUiState {
 data class VerifyResultData(
     val valid: Boolean,
     val studentName: String? = null,
-    val nisn: String? = null
+    val nisn: String? = null,
+    val message: String? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,8 +75,9 @@ fun VerifikasiQrRaporScreen(
     }
 
     val scope = rememberCoroutineScope()
+    val qrScanSupported = remember { !isPreview && PlatformActions.isQrScanSupported() }
     val launchQrScan: () -> Unit = {
-        if (!isPreview) {
+        if (!isPreview && qrScanSupported) {
             scope.launch {
                 val code = PlatformActions.scanQrCode()
                 if (!code.isNullOrBlank()) {
@@ -99,7 +101,8 @@ fun VerifikasiQrRaporScreen(
                     VerifyResultData(
                         valid = result.valid,
                         studentName = result.studentName,
-                        nisn = result.nisn
+                        nisn = result.nisn,
+                        message = result.message
                     )
                 }
             )
@@ -254,7 +257,7 @@ fun VerifikasiQrRaporScreen(
                                         .clip(RoundedCornerShape(32.dp))
                                         .background(colorScheme.primary.copy(alpha = 0.03f))
                                         .border(2.dp, colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
-                                        .clickable(onClick = launchQrScan),
+                                        .then(if (qrScanSupported) Modifier.clickable(onClick = launchQrScan) else Modifier),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -266,7 +269,8 @@ fun VerifikasiQrRaporScreen(
                                         )
                                         Spacer(modifier = Modifier.height(16.dp))
                                         Text(
-                                            text = "Scan QR Code Resmi\ndi Rapor Cetak",
+                                            text = if (qrScanSupported) "Scan QR Code Resmi\ndi Rapor Cetak"
+                                                else "Pindai kamera belum tersedia.\nMasukkan kode secara manual di bawah.",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = colorScheme.primary.copy(alpha = 0.4f),
                                             textAlign = TextAlign.Center,
@@ -350,6 +354,16 @@ fun VerifikasiQrRaporScreen(
                                                         color = colorScheme.primary
                                                     )
                                                 }
+                                            }
+
+                                            result.message?.takeIf { it.isNotBlank() }?.let { msg ->
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                Text(
+                                                    text = msg,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = colorScheme.primary.copy(alpha = 0.7f),
+                                                    lineHeight = 20.sp
+                                                )
                                             }
 
                                             Spacer(modifier = Modifier.height(24.dp))

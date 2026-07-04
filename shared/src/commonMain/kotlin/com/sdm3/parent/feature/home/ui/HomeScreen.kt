@@ -45,7 +45,10 @@ import com.sdm3.parent.core.navigation.SDM3BottomTab
 import com.sdm3.parent.feature.home.HomeEffect
 import com.sdm3.parent.feature.home.HomeIntent
 import com.sdm3.parent.feature.home.HomeViewModel
+import com.sdm3.parent.feature.auth.ui.PilihAnakBottomSheet
+import com.sdm3.parent.core.security.SecureTokenManager
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.compose.koinInject
 import kotlinx.coroutines.launch
 
 sealed class HomeScreenUiState {
@@ -103,6 +106,19 @@ fun HomeScreen(
         }
     }
 
+    // Penukar anak aktif (1 orang tua bisa punya banyak anak).
+    val secureTokenManager = if (isPreview) null else koinInject<SecureTokenManager>()
+    var showStudentSheet by remember { mutableStateOf(false) }
+    val switchStudent: (String) -> Unit = { newId ->
+        showStudentSheet = false
+        if (newId != state.studentId) {
+            secureTokenManager?.saveSelectedStudentId(newId)
+            navController.navigate(SDM3Route.Main(newId)) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
     Scaffold(
         containerColor = colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -157,10 +173,20 @@ fun HomeScreen(
                     ) {
                         item {
                             GreetingSection(
-                                name = state.studentName.split(" ").firstOrNull() ?: "Wali Murid",
-                                info = state.className,
+                                name = state.studentName.trim().split(" ").firstOrNull()?.takeIf { it.isNotBlank() } ?: "Wali Murid",
+                                info = state.className.takeIf { it.isNotBlank() }?.let { com.sdm3.parent.core.util.formatClassName(it) } ?: "",
                                 onClick = { navController.navigate(SDM3Route.DetailInfoAnak(studentId)) }
                             )
+                        }
+                        if (state.students.size > 1) {
+                            item {
+                                StudentSwitcherBar(
+                                    name = state.studentName.ifBlank { "Pilih Siswa" },
+                                    className = state.className,
+                                    childCount = state.students.size,
+                                    onClick = { showStudentSheet = true }
+                                )
+                            }
                         }
                         item {
                             ShortcutFavoritSection(
@@ -187,11 +213,108 @@ fun HomeScreen(
                         }
                         item {
                             val totalActive = state.activeFees.sumOf { it.amount.toLong() }
-                            val formatted = totalActive.let { amt ->
-                                "Rp ${amt.toString().reversed().chunked(3).joinToString(".").reversed()}"
-                            }
-                            TabunganSekolahSection(amount = formatted, onTopUpClick = showComingSoon)
+                            val formatted = com.sdm3.parent.core.util.formatRupiah(totalActive)
+                            TabunganSekolahSection(
+                                amount = formatted,
+                                hasBills = totalActive > 0L,
+                                onBayarClick = { navController.navigate(SDM3Route.PembayaranSpp(studentId)) }
+                            )
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showStudentSheet && state.students.size > 1) {
+        PilihAnakBottomSheet(
+            students = state.students,
+            selectedStudentId = state.studentId,
+            onStudentSelected = switchStudent,
+            onDismiss = { showStudentSheet = false }
+        )
+    }
+}
+
+@Composable
+private fun StudentSwitcherBar(
+    name: String,
+    className: String,
+    childCount: Int,
+    onClick: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Sdm3Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+            padding = 14.dp
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    modifier = Modifier.size(44.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = colorScheme.primaryContainer
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = com.sdm3.parent.core.util.nameInitials(name),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "MEMANTAU · $childCount ANAK",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = colorScheme.primary.copy(alpha = 0.4f),
+                        letterSpacing = 0.5.sp
+                    )
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                    if (className.isNotBlank()) {
+                        Text(
+                            text = com.sdm3.parent.core.util.formatClassName(className),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = colorScheme.primary.copy(alpha = 0.06f)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            Icons.Outlined.SwapHoriz,
+                            contentDescription = "Ganti anak",
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Ganti",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary
+                        )
                     }
                 }
             }
@@ -495,12 +618,6 @@ private fun ShortcutFavoritSection(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
-            Text(
-                text = "Edit",
-                style = MaterialTheme.typography.labelLarge,
-                color = StatusSuccess,
-                fontWeight = FontWeight.Bold
-            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -522,6 +639,7 @@ private fun ShortcutFavoritSection(
                     title = "E-Library",
                     icon = Icons.Outlined.LocalLibrary,
                     iconColor = MaterialTheme.colorScheme.primary,
+                    comingSoon = true,
                     onClick = onELibraryClick
                 )
             }
@@ -542,8 +660,10 @@ private fun ShortcutCard(
     title: String,
     icon: ImageVector,
     iconColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    comingSoon: Boolean = false
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier
             .size(140.dp, 160.dp)
@@ -552,31 +672,61 @@ private fun ShortcutCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = iconColor.copy(alpha = 0.1f)
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(28.dp))
+                Surface(
+                    modifier = Modifier.size(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = iconColor.copy(alpha = if (comingSoon) 0.06f else 0.1f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            icon,
+                            contentDescription = null,
+                            tint = if (comingSoon) iconColor.copy(alpha = 0.5f) else iconColor,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = if (comingSoon) colorScheme.primary.copy(alpha = 0.6f) else colorScheme.primary
+                )
+            }
+            if (comingSoon) {
+                Surface(
+                    shape = RoundedCornerShape(bottomStart = 12.dp),
+                    color = colorScheme.secondary,
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        text = "SEGERA",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                        fontWeight = FontWeight.Black,
+                        color = colorScheme.primary,
+                        letterSpacing = 0.5.sp,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.primary
-            )
         }
     }
 }
+
+private data class ServiceEntry(
+    val label: String,
+    val icon: ImageVector,
+    val comingSoon: Boolean,
+    val onClick: () -> Unit
+)
 
 @Composable
 private fun LayananSekolahSection(
@@ -584,18 +734,18 @@ private fun LayananSekolahSection(
     onComingSoonClick: () -> Unit
 ) {
     val items = listOf(
-        Triple("PERPUS", Icons.Outlined.AutoStories, onComingSoonClick),
-        Triple("KANTIN", Icons.Outlined.Restaurant, onComingSoonClick),
-        Triple("EKSKUL", Icons.Outlined.SportsSoccer, onEkskulClick),
-        Triple("ALUMNI", Icons.Outlined.Groups, onComingSoonClick),
-        Triple("EVENT", Icons.Outlined.CalendarMonth, onComingSoonClick),
-        Triple("CS", Icons.Outlined.SupportAgent, onComingSoonClick),
-        Triple("BEASISWA", Icons.Outlined.School, onComingSoonClick),
-        Triple("KONSELING", Icons.Outlined.Psychology, onComingSoonClick),
-        Triple("BUS", Icons.Outlined.DirectionsBus, onComingSoonClick),
-        Triple("UKS", Icons.Outlined.MedicalServices, onComingSoonClick),
-        Triple("HALL FAME", Icons.Outlined.MilitaryTech, onComingSoonClick),
-        Triple("LAINNYA", Icons.Outlined.GridView, onComingSoonClick)
+        ServiceEntry("EKSKUL", Icons.Outlined.SportsSoccer, false, onEkskulClick),
+        ServiceEntry("PERPUS", Icons.Outlined.AutoStories, true, onComingSoonClick),
+        ServiceEntry("KANTIN", Icons.Outlined.Restaurant, true, onComingSoonClick),
+        ServiceEntry("ALUMNI", Icons.Outlined.Groups, true, onComingSoonClick),
+        ServiceEntry("EVENT", Icons.Outlined.CalendarMonth, true, onComingSoonClick),
+        ServiceEntry("CS", Icons.Outlined.SupportAgent, true, onComingSoonClick),
+        ServiceEntry("BEASISWA", Icons.Outlined.School, true, onComingSoonClick),
+        ServiceEntry("KONSELING", Icons.Outlined.Psychology, true, onComingSoonClick),
+        ServiceEntry("BUS", Icons.Outlined.DirectionsBus, true, onComingSoonClick),
+        ServiceEntry("UKS", Icons.Outlined.MedicalServices, true, onComingSoonClick),
+        ServiceEntry("HALL FAME", Icons.Outlined.MilitaryTech, true, onComingSoonClick),
+        ServiceEntry("LAINNYA", Icons.Outlined.GridView, true, onComingSoonClick)
     )
 
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -620,8 +770,8 @@ private fun LayananSekolahSection(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        rowItems.forEach { (label, icon, onClick) ->
-                            ServiceItem(label, icon, onClick)
+                        rowItems.forEach { entry ->
+                            ServiceItem(entry.label, entry.icon, entry.comingSoon, entry.onClick)
                         }
                     }
                 }
@@ -634,21 +784,46 @@ private fun LayananSekolahSection(
 private fun ServiceItem(
     label: String,
     icon: ImageVector,
+    comingSoon: Boolean,
     onClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(70.dp)
             .clickable(onClick = onClick)
     ) {
-        Surface(
-            modifier = Modifier.size(48.dp),
-            shape = RoundedCornerShape(14.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+        Box {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = colorScheme.primaryContainer.copy(alpha = if (comingSoon) 0.15f else 0.3f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = if (comingSoon) colorScheme.primary.copy(alpha = 0.4f) else colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+            if (comingSoon) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = colorScheme.secondary,
+                    modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp, y = (-4).dp)
+                ) {
+                    Text(
+                        text = "SEGERA",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 7.sp),
+                        fontWeight = FontWeight.Black,
+                        color = colorScheme.primary,
+                        letterSpacing = 0.3.sp,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -657,7 +832,7 @@ private fun ServiceItem(
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (comingSoon) colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant,
             maxLines = 1
         )
     }
@@ -718,7 +893,7 @@ private fun PengumumanSection(
 }
 
 @Composable
-private fun TabunganSekolahSection(amount: String, onTopUpClick: () -> Unit) {
+private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarClick: () -> Unit) {
     val colorScheme = MaterialTheme.colorScheme
     val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
 
@@ -741,14 +916,14 @@ private fun TabunganSekolahSection(amount: String, onTopUpClick: () -> Unit) {
 
                 Column(modifier = Modifier.padding(24.dp)) {
                     Text(
-                        text = "Tabungan Sekolah",
+                        text = if (hasBills) "Total Tagihan Aktif" else "Tagihan Sekolah",
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White.copy(alpha = 0.6f),
                         fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = amount,
+                        text = if (hasBills) amount else "Lunas",
                         style = MaterialTheme.typography.displayMedium,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -756,12 +931,12 @@ private fun TabunganSekolahSection(amount: String, onTopUpClick: () -> Unit) {
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Button(
-                        onClick = onTopUpClick,
-                        modifier = Modifier.fillMaxWidth(0.35f).height(46.dp),
+                        onClick = onBayarClick,
+                        modifier = Modifier.fillMaxWidth(0.4f).height(46.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = StatusSuccess)
                     ) {
-                        Text("Top Up", fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(if (hasBills) "Bayar" else "Riwayat", fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }

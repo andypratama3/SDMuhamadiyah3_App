@@ -57,13 +57,11 @@ class ProfilAkunViewModel(
 
     fun loadStudents() {
         launchSafely {
-            when (val result = studentRepository.getStudents()) {
-                is ApiResult.Success -> {
-                    updateState { it.copy(students = result.data) }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(errorMessage = result.error.toUserMessage()) }
-                }
+            // Daftar siswa bersifat pelengkap; kegagalannya tidak boleh menutup
+            // seluruh layar profil yang datanya sudah berhasil dimuat.
+            val result = studentRepository.getStudents()
+            if (result is ApiResult.Success) {
+                updateState { it.copy(students = result.data) }
             }
         }
     }

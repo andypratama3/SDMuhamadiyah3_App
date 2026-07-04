@@ -41,33 +41,51 @@ class PengaturanNotifikasiViewModel(
 
     fun togglePush() {
         updateState { it.copy(settings = it.settings.copy(pushEnabled = !it.settings.pushEnabled)) }
+        persistSettings()
     }
 
     fun toggleEmail() {
         updateState { it.copy(settings = it.settings.copy(emailEnabled = !it.settings.emailEnabled)) }
+        persistSettings()
     }
 
     fun toggleSms() {
         updateState { it.copy(settings = it.settings.copy(smsEnabled = !it.settings.smsEnabled)) }
+        persistSettings()
     }
 
     fun toggleNilai() {
         updateState { it.copy(settings = it.settings.copy(nilaiNotif = !it.settings.nilaiNotif)) }
+        persistSettings()
     }
 
     fun toggleTagihan() {
         updateState { it.copy(settings = it.settings.copy(tagihanNotif = !it.settings.tagihanNotif)) }
+        persistSettings()
     }
 
     fun togglePengumuman() {
         updateState { it.copy(settings = it.settings.copy(pengumumanNotif = !it.settings.pengumumanNotif)) }
+        persistSettings()
     }
 
     fun toggleKehadiran() {
         updateState { it.copy(settings = it.settings.copy(kehadiranNotif = !it.settings.kehadiranNotif)) }
+        persistSettings()
     }
 
     fun toggleRapor() {
         updateState { it.copy(settings = it.settings.copy(raporNotif = !it.settings.raporNotif)) }
+        persistSettings()
+    }
+
+    private fun persistSettings() {
+        launchSafely(
+            onError = { error ->
+                updateState { it.copy(errorMessage = error.message ?: "Gagal menyimpan pengaturan") }
+            }
+        ) {
+            settingsRepository.saveNotificationSettings(uiState.value.settings)
+        }
     }
 }

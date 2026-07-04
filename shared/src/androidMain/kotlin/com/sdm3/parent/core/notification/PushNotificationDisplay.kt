@@ -32,7 +32,7 @@ object PushNotificationDisplay {
         ensureChannel(context)
         val title = message.notification?.title
             ?: message.data["title"]
-            ?: "SDM3 Parent"
+            ?: "SD Muhammadiyah 3 Samarinda"
         val body = message.notification?.body
             ?: message.data["message"]
             ?: message.data["body"]

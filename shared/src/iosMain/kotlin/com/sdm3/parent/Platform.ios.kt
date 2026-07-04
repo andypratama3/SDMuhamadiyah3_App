@@ -4,7 +4,10 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.Platform
 
 actual fun getPlatformName(): String = "iOS"
-actual fun defaultBaseUrl(): String = "https://admin.sdm3.sch.id"
+
+// Semua build menunjuk ke server produksi (domain publik HTTPS).
+// Untuk pengembangan lokal, ganti sementara ke "http://127.0.0.1:8000".
+actual fun defaultBaseUrl(): String = "https://sdmuhammadiyah3smd.cloud"
 
 @OptIn(ExperimentalNativeApi::class)
 actual fun isDebugBuild(): Boolean = Platform.isDebugBinary

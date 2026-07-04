@@ -7,7 +7,7 @@ import com.sdm3.parent.data.remote.dto.StudentDto
 import com.sdm3.parent.domain.repository.StudentRepositoryContract
 
 data class DetailInfoAnakUiState(
-    override val isLoading: Boolean = false,
+    override val isLoading: Boolean = true,
     override val errorMessage: String? = null,
     override val isEmpty: Boolean = false,
     val student: StudentDto? = null

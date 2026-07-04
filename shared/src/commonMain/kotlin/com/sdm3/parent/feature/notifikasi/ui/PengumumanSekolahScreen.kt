@@ -229,7 +229,7 @@ fun PengumumanSekolahScreen(
                             contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)
                         ) {
                             items(articles) { article ->
-                                val dateParts = (article.publishedAt ?: "").split(" ")
+                                val (badgeDay, badgeMonth) = dateBadgeParts(article.publishedAt ?: "")
                                 Sdm3Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -251,13 +251,13 @@ fun PengumumanSekolahScreen(
                                                 modifier = Modifier.fillMaxSize()
                                             ) {
                                                 Text(
-                                                    text = dateParts.getOrNull(0) ?: "--",
+                                                    text = badgeDay,
                                                     style = MaterialTheme.typography.titleMedium,
                                                     fontWeight = FontWeight.Bold,
                                                     color = colorScheme.primary
                                                 )
                                                 Text(
-                                                    text = dateParts.getOrNull(1)?.uppercase() ?: "",
+                                                    text = badgeMonth,
                                                     style = MaterialTheme.typography.labelSmall,
                                                     fontWeight = FontWeight.Bold,
                                                     color = colorScheme.primary
@@ -343,6 +343,26 @@ private fun ShimmerPengumumanList() {
             }
         }
     }
+}
+
+private val bulanBadge = listOf(
+    "JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"
+)
+
+/** Ambil (tanggal, bulan singkat) dari string tanggal ISO untuk badge. */
+private fun dateBadgeParts(iso: String): Pair<String, String> {
+    if (iso.isBlank()) return "--" to ""
+    val datePart = iso.substringBefore('T').substringBefore(' ')
+    val parts = datePart.split('-')
+    if (parts.size >= 3) {
+        val month = parts[1].toIntOrNull()
+        val day = parts[2].take(2).toIntOrNull()
+        if (month != null && day != null && month in 1..12) {
+            return day.toString() to bulanBadge[month - 1]
+        }
+    }
+    val sp = iso.split(" ")
+    return (sp.getOrNull(0) ?: "--") to (sp.getOrNull(1)?.uppercase() ?: "")
 }
 
 @Preview

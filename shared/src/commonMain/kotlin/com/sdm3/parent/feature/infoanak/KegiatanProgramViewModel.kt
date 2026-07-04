@@ -20,10 +20,23 @@ class KegiatanProgramViewModel(
 ) : BaseViewModel<KegiatanProgramUiState>(KegiatanProgramUiState()) {
 
     fun loadActivities(studentId: String) {
-        launchSafely {
+        launchSafely(
+            onError = { error ->
+                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Gagal memuat aktivitas") }
+            }
+        ) {
             updateState { it.copy(isLoading = true, errorMessage = null) }
             val ekskulResult = extracurricularRepository.getExtracurriculars(studentId)
             val programResult = extracurricularRepository.getAcademicPrograms(studentId)
+
+            // Bila KEDUA endpoint gagal, tampilkan error (bukan state kosong)
+            // agar pesan sesi kedaluwarsa/koneksi tetap sampai ke pengguna.
+            if (ekskulResult is ApiResult.Error && programResult is ApiResult.Error) {
+                updateState {
+                    it.copy(isLoading = false, errorMessage = ekskulResult.error.toUserMessage())
+                }
+                return@launchSafely
+            }
 
             val ekskul = if (ekskulResult is ApiResult.Success) ekskulResult.data else emptyList()
             val programs = if (programResult is ApiResult.Success) programResult.data else emptyList()

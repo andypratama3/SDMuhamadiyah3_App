@@ -120,7 +120,8 @@ fun OnboardingScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 32.dp),
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 32.dp, vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {

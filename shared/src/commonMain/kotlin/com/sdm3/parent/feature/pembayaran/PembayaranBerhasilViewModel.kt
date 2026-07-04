@@ -14,7 +14,8 @@ data class PembayaranBerhasilUiState(
     val amount: Long = 0,
     val paymentMethod: String = "",
     val paidAt: String = "",
-    val orderId: String = ""
+    val orderId: String = "",
+    val status: String = ""
 ) : ScreenState
 
 class PembayaranBerhasilViewModel(
@@ -34,7 +35,8 @@ class PembayaranBerhasilViewModel(
                             amount = (p.grossAmount?.toLong() ?: 0),
                             paymentMethod = p.paymentType ?: "",
                             paidAt = p.paidAt ?: "",
-                            orderId = p.orderId
+                            orderId = p.orderId,
+                            status = p.status
                         )
                     }
                 }

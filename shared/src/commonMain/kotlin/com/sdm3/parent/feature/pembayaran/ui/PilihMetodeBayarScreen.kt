@@ -71,16 +71,21 @@ fun PilihMetodeBayarScreen(
         }
     }
 
-    var snapHandled by remember { mutableStateOf(false) }
-
-    LaunchedEffect(vmState.snapTokenRequested, vmState.snapTokenResponse) {
-        if (!isPreview && vmState.snapTokenRequested && !snapHandled) {
-            snapHandled = true
-            vmState.snapTokenResponse?.redirectUrl?.takeIf { it.isNotBlank() }?.let { url ->
-                PlatformActions.openUrl(url)
+    LaunchedEffect(vmState.snapTokenRequested) {
+        if (!isPreview && vmState.snapTokenRequested) {
+            val resp = vmState.snapTokenResponse
+            val redirect = resp?.redirectUrl?.takeIf { it.isNotBlank() }
+            val paymentId = resp?.paymentId?.takeIf { it.isNotBlank() }
+            // Tandai sudah dikonsumsi agar tidak memicu navigasi ulang saat back.
+            viewModel.consumeSnapToken()
+            when {
+                redirect != null -> {
+                    PlatformActions.openUrl(redirect)
+                    onLanjutkan(paymentId ?: studentFeeId)
+                }
+                paymentId != null -> onLanjutkan(paymentId)
+                else -> viewModel.showError("Gagal memulai pembayaran. Silakan coba lagi.")
             }
-            val paymentId = vmState.snapTokenResponse?.paymentId?.takeIf { it.isNotBlank() } ?: studentFeeId
-            onLanjutkan(paymentId)
         }
     }
 
@@ -333,15 +338,7 @@ fun PilihMetodeBayarScreen(
     }
 }
 
-private fun formatCurrency(amount: Number): String {
-    val s = amount.toLong().toString()
-    val sb = StringBuilder()
-    for (i in s.indices) {
-        if (i > 0 && (s.length - i) % 3 == 0) sb.append('.')
-        sb.append(s[i])
-    }
-    return "Rp$sb"
-}
+private fun formatCurrency(amount: Number): String = com.sdm3.parent.core.util.formatRupiah(amount)
 
 @Preview
 @Composable

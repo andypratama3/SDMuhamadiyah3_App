@@ -43,29 +43,39 @@ class NotifikasiViewModel(
     }
 
     fun markAsRead(id: String) {
+        // Jangan tandai terbaca secara lokal bila panggilan API gagal.
+        if (uiState.value.notifications.any { it.id == id && it.readAt == null }.not()) return
         launchSafely {
-            notificationRepository.markAsRead(id)
-            val updated = uiState.value.notifications.map { n ->
-                if (n.id == id) n.copy(readAt = "now") else n
-            }
-            updateState {
-                it.copy(
-                    notifications = updated,
-                    unreadCount = updated.count { n -> n.readAt == null }
-                )
+            when (notificationRepository.markAsRead(id)) {
+                is ApiResult.Success -> {
+                    val updated = uiState.value.notifications.map { n ->
+                        if (n.id == id) n.copy(readAt = "now") else n
+                    }
+                    updateState {
+                        it.copy(
+                            notifications = updated,
+                            unreadCount = updated.count { n -> n.readAt == null }
+                        )
+                    }
+                }
+                is ApiResult.Error -> Unit
             }
         }
     }
 
     fun markAllAsRead() {
         launchSafely {
-            notificationRepository.markAllAsRead()
-            val updated = uiState.value.notifications.map { it.copy(readAt = "now") }
-            updateState {
-                it.copy(
-                    notifications = updated,
-                    unreadCount = 0
-                )
+            when (notificationRepository.markAllAsRead()) {
+                is ApiResult.Success -> {
+                    val updated = uiState.value.notifications.map { it.copy(readAt = "now") }
+                    updateState {
+                        it.copy(
+                            notifications = updated,
+                            unreadCount = 0
+                        )
+                    }
+                }
+                is ApiResult.Error -> Unit
             }
         }
     }

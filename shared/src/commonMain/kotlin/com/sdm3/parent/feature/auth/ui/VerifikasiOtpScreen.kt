@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,9 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -301,58 +306,67 @@ private fun OtpDigitInput(
     onCodeChanged: (String) -> Unit,
     colorScheme: androidx.compose.material3.ColorScheme
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            for (i in 0 until 6) {
-                val digit = if (i < code.length) code[i].toString() else ""
-                val isFocused = i == code.length
+    val focusRequester = remember { FocusRequester() }
+    val isPreview = LocalInspectionMode.current
 
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(60.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(
-                            if (isFocused) colorScheme.primary.copy(alpha = 0.05f)
-                            else Color.White.copy(alpha = 0.5f)
-                        )
-                        .border(
-                            width = if (isFocused) 2.dp else 1.dp,
-                            color = if (isFocused) colorScheme.primary else Color.White.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(14.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (digit.isNotEmpty()) {
-                        Text(
-                            text = digit,
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary
-                        )
-                    } else if (isFocused) {
-                        Box(modifier = Modifier.size(2.dp, 24.dp).background(colorScheme.primary.copy(alpha = 0.4f)))
+    LaunchedEffect(Unit) {
+        if (!isPreview) {
+            runCatching { focusRequester.requestFocus() }
+        }
+    }
+
+    BasicTextField(
+        value = code,
+        onValueChange = { raw ->
+            val digitsOnly = raw.filter { c -> c.isDigit() }.take(6)
+            onCodeChanged(digitsOnly)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        cursorBrush = SolidColor(Color.Transparent),
+        decorationBox = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                for (i in 0 until 6) {
+                    val digit = if (i < code.length) code[i].toString() else ""
+                    val isFocused = i == code.length
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(60.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                if (isFocused) colorScheme.primary.copy(alpha = 0.05f)
+                                else Color.White.copy(alpha = 0.5f)
+                            )
+                            .border(
+                                width = if (isFocused) 2.dp else 1.dp,
+                                color = if (isFocused) colorScheme.primary else Color.White.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(14.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (digit.isNotEmpty()) {
+                            Text(
+                                text = digit,
+                                style = MaterialTheme.typography.displaySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary
+                            )
+                        } else if (isFocused) {
+                            Box(modifier = Modifier.size(2.dp, 24.dp).background(colorScheme.primary.copy(alpha = 0.4f)))
+                        }
                     }
                 }
             }
         }
-    }
-
-    // Hidden input field for OTP
-    Box(modifier = Modifier.size(1.dp).alpha(0f)) {
-        Sdm3TextField(
-            value = code,
-            onValueChange = { 
-                if (it.length <= 6) onCodeChanged(it.filter { c -> c.isDigit() }) 
-            },
-            label = "",
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-    }
+    )
 }
 
 @Preview

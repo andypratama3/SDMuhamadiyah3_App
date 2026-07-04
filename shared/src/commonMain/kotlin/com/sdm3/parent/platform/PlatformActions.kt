@@ -5,4 +5,7 @@ expect object PlatformActions {
     fun shareText(text: String, title: String? = null)
     fun openUrl(url: String)
     suspend fun scanQrCode(): String?
+
+    /** Apakah pemindaian QR via kamera didukung di platform ini. */
+    fun isQrScanSupported(): Boolean
 }

@@ -78,7 +78,13 @@ class VerifikasiOtpViewModel(
                 }
                 is ApiResult.Error -> {
                     updateState {
-                        it.copy(isLoading = false, errorMessage = result.error.toUserMessage())
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = result.error.toUserMessage(),
+                            // Jangan biarkan countdown macet di 60 dtk bila request gagal.
+                            countdownSeconds = 0,
+                            canResend = true
+                        )
                     }
                 }
             }
@@ -134,8 +140,9 @@ class VerifikasiOtpViewModel(
     }
 
     fun resendOtp() {
+        // requestOtp() akan menyetel ulang countdown + menjalankan timer saat sukses,
+        // dan menyetel canResend=true saat gagal. Cukup batalkan timer lama di sini.
         countdownJob?.cancel()
-        updateState { it.copy(countdownSeconds = 60, canResend = false) }
         requestOtp()
     }
 

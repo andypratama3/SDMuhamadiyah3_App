@@ -43,7 +43,7 @@ class ProsesPembayaranViewModel(
                             vaNumber = p.vaNumber ?: "",
                             grossAmount = p.grossAmount ?: 0.0,
                             paymentMethod = p.paymentType ?: "",
-                            status = PaymentProcessStatus.WAITING_PAYMENT
+                            status = mapStatus(p.status)
                         )
                     }
                 }
@@ -70,13 +70,7 @@ class ProsesPembayaranViewModel(
                             vaNumber = payment.vaNumber ?: it.vaNumber,
                             grossAmount = payment.grossAmount ?: it.grossAmount,
                             paymentMethod = payment.paymentType ?: it.paymentMethod,
-                            status = if (payment.status == "settlement" || payment.status == "success") {
-                                PaymentProcessStatus.SUCCESS
-                            } else if (payment.status == "failed" || payment.status == "expire" || payment.status == "deny") {
-                                PaymentProcessStatus.FAILED
-                            } else {
-                                PaymentProcessStatus.WAITING_PAYMENT
-                            }
+                            status = mapStatus(payment.status)
                         )
                     }
                 }
@@ -87,5 +81,34 @@ class ProsesPembayaranViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * Polling latar tanpa mengubah [isLoading]/error — dipakai untuk memeriksa
+     * status pembayaran secara berkala tanpa membuat layar berkedip.
+     */
+    fun pollStatusSilently() {
+        val chargeId = uiState.value.orderId.ifBlank { uiState.value.paymentId }
+        if (chargeId.isBlank()) return
+        launchSafely {
+            val result = paymentRepository.checkPaymentStatus(chargeId)
+            if (result is ApiResult.Success) {
+                val payment = result.data
+                updateState {
+                    it.copy(
+                        vaNumber = payment.vaNumber ?: it.vaNumber,
+                        grossAmount = payment.grossAmount ?: it.grossAmount,
+                        paymentMethod = payment.paymentType ?: it.paymentMethod,
+                        status = mapStatus(payment.status)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun mapStatus(raw: String?): PaymentProcessStatus = when (raw?.lowercase()) {
+        "settlement", "success", "capture", "paid", "lunas", "completed" -> PaymentProcessStatus.SUCCESS
+        "failed", "failure", "expire", "expired", "deny", "cancel", "cancelled", "refund", "refunded" -> PaymentProcessStatus.FAILED
+        else -> PaymentProcessStatus.WAITING_PAYMENT
     }
 }

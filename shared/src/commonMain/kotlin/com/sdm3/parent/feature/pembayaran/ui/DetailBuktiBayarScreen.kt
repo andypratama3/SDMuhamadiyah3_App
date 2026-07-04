@@ -8,8 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -220,6 +222,29 @@ fun DetailBuktiBayarScreen(
                         .padding(horizontal = Spacing.xl)
                 ) {
                     vmState.payment?.let { payment ->
+                        val statusLower = payment.status.lowercase()
+                        val isPaid = statusLower in listOf("success", "settlement", "lunas", "paid", "capture", "completed")
+                        val isFailed = statusLower in listOf("failed", "failure", "expire", "expired", "deny", "cancel", "cancelled", "refunded")
+                        val statusBadge = when {
+                            isPaid -> "TRANSAKSI BERHASIL"
+                            isFailed -> "TRANSAKSI GAGAL"
+                            else -> "MENUNGGU PEMBAYARAN"
+                        }
+                        val statusHeadline = when {
+                            isPaid -> "Lunas & Terverifikasi"
+                            isFailed -> "Pembayaran Gagal"
+                            else -> "Menunggu Pembayaran"
+                        }
+                        val statusColor = when {
+                            isPaid -> StatusSuccess
+                            isFailed -> colorScheme.error
+                            else -> StatusWarning
+                        }
+                        val statusIcon = when {
+                            isPaid -> Icons.Outlined.CheckCircle
+                            isFailed -> Icons.Outlined.Cancel
+                            else -> Icons.Outlined.HourglassEmpty
+                        }
                         // School Header
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -253,34 +278,34 @@ fun DetailBuktiBayarScreen(
                                 Surface(
                                     modifier = Modifier.size(72.dp),
                                     shape = CircleShape,
-                                    color = StatusSuccess.copy(alpha = 0.1f)
+                                    color = statusColor.copy(alpha = 0.1f)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
-                                            Icons.Outlined.CheckCircle,
+                                            statusIcon,
                                             contentDescription = null,
                                             modifier = Modifier.size(40.dp),
-                                            tint = StatusSuccess
+                                            tint = statusColor
                                         )
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(Spacing.lg))
                                 Surface(
-                                    color = StatusSuccess.copy(alpha = 0.15f),
+                                    color = statusColor.copy(alpha = 0.15f),
                                     shape = RoundedCornerShape(999.dp)
                                 ) {
                                     Text(
-                                        text = " TRANSAKSI BERHASIL ",
+                                        text = " $statusBadge ",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 1.sp,
-                                        color = StatusSuccess,
+                                        color = statusColor,
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(Spacing.sm))
                                 Text(
-                                    text = "Lunas & Terverifikasi",
+                                    text = statusHeadline,
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.primary
@@ -299,9 +324,9 @@ fun DetailBuktiBayarScreen(
                         Spacer(modifier = Modifier.height(Spacing.md))
 
                         Sdm3Card {
-                            ReceiptRow("Nomor Referensi", payment.id)
-                            ReceiptRow("Waktu Bayar", payment.createdAt ?: "-")
-                            ReceiptRow("Metode", payment.paymentType ?: "-")
+                            ReceiptRow("Nomor Referensi", payment.orderId.ifBlank { payment.id }.uppercase())
+                            ReceiptRow("Waktu Bayar", com.sdm3.parent.core.util.formatTanggalWaktu(payment.paidAt ?: payment.createdAt))
+                            ReceiptRow("Metode", com.sdm3.parent.core.util.formatPaymentMethod(payment.paymentType))
 
                             HorizontalDivider(
                                 modifier = Modifier.padding(vertical = Spacing.md),
@@ -320,7 +345,7 @@ fun DetailBuktiBayarScreen(
                                     color = colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Rp${payment.grossAmount?.toInt() ?: 0}",
+                                    text = com.sdm3.parent.core.util.formatRupiah(payment.grossAmount ?: 0.0),
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = colorScheme.primary
@@ -338,7 +363,7 @@ fun DetailBuktiBayarScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 val studentName = payment.studentName ?: payment.paymentTitle?.name ?: "Santri"
-                                val initials = studentName.split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.first().uppercase() }.ifEmpty { "S" }
+                                val initials = com.sdm3.parent.core.util.nameInitials(studentName)
                                 Surface(
                                     modifier = Modifier.size(52.dp),
                                     shape = CircleShape,
@@ -364,8 +389,10 @@ fun DetailBuktiBayarScreen(
                                     )
                                     Text(
                                         text = buildString {
-                                            if (payment.studentClass != null) append("Kelas ${payment.studentClass}")
-                                            if (payment.studentNisn != null) {
+                                            if (!payment.studentClass.isNullOrBlank()) {
+                                                append(com.sdm3.parent.core.util.formatClassName(payment.studentClass))
+                                            }
+                                            if (!payment.studentNisn.isNullOrBlank()) {
                                                 if (isNotEmpty()) append(" · ")
                                                 append("NISN: ${payment.studentNisn}")
                                             }
@@ -395,10 +422,12 @@ fun DetailBuktiBayarScreen(
                             onClick = {
                                 val shareText = buildString {
                                     appendLine("Bukti Pembayaran SD Muhammadiyah 3 Samarinda")
-                                    appendLine("Ref: ${payment.id}")
-                                    appendLine("Total: Rp${payment.grossAmount?.toInt() ?: 0}")
-                                    appendLine("Status: ${payment.status}")
-                                    payment.paidAt?.let { appendLine("Waktu: $it") }
+                                    appendLine("Ref: ${payment.orderId.ifBlank { payment.id }.uppercase()}")
+                                    appendLine("Total: ${com.sdm3.parent.core.util.formatRupiah(payment.grossAmount ?: 0.0)}")
+                                    appendLine("Metode: ${com.sdm3.parent.core.util.formatPaymentMethod(payment.paymentType)}")
+                                    (payment.paidAt ?: payment.createdAt)?.let {
+                                        appendLine("Waktu: ${com.sdm3.parent.core.util.formatTanggalWaktu(it)}")
+                                    }
                                 }
                                 PlatformActions.shareText(shareText.trim(), "Bukti Pembayaran")
                             },
@@ -422,7 +451,8 @@ private fun ReceiptRow(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        verticalAlignment = Alignment.Top
     ) {
         Text(
             text = label,
@@ -434,7 +464,9 @@ private fun ReceiptRow(label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
-            color = colorScheme.onSurface
+            color = colorScheme.onSurface,
+            textAlign = androidx.compose.ui.text.style.TextAlign.End,
+            modifier = Modifier.weight(1f)
         )
     }
 }

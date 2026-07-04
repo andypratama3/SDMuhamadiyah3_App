@@ -48,4 +48,14 @@ class SecureTokenManager(private val storage: SecureStorage) {
         storage.deleteObject(forKey = KEY_FCM_TOKEN)
         storage.deleteObject(forKey = KEY_BIOMETRIC_ENABLED)
     }
+
+    /**
+     * Dipakai saat terdeteksi (re)install baru: bersihkan seluruh data termasuk
+     * flag onboarding, karena di iOS Keychain bertahan setelah uninstall sehingga
+     * token/onboarding lama bisa "nyangkut" dan membuat onboarding tidak muncul.
+     */
+    fun resetForFreshInstall() {
+        clearAllSecureData()
+        storage.deleteObject(forKey = KEY_ONBOARDING_COMPLETED)
+    }
 }

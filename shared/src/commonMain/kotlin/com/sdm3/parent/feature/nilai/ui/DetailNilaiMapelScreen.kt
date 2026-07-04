@@ -150,13 +150,16 @@ fun DetailNilaiMapelScreen(
                     val subjectName = uiState.subjectName.ifEmpty { "Mata Pelajaran" }
 
                     val componentGroups = components.groupBy { it.componentType }
-                    val sumatifAvg = componentGroups["sumatif"]?.let { group -> group.mapNotNull { it.score }.average() } ?: 0.0
-                    val formatifAvg = componentGroups["formatif"]?.let { group -> group.mapNotNull { it.score }.average() } ?: 0.0
-                    val projekAvg = componentGroups["projek"]?.let { group -> group.mapNotNull { it.score }.average() } ?: 0.0
+                    val sumatifAvg = componentGroups["sumatif"]?.let { group -> group.mapNotNull { it.score }.takeIf { it.isNotEmpty() }?.average() } ?: 0.0
+                    val formatifAvg = componentGroups["formatif"]?.let { group -> group.mapNotNull { it.score }.takeIf { it.isNotEmpty() }?.average() } ?: 0.0
+                    val projekAvg = componentGroups["projek"]?.let { group -> group.mapNotNull { it.score }.takeIf { it.isNotEmpty() }?.average() } ?: 0.0
 
-                    val finalScore = if (components.isNotEmpty()) {
-                        components.mapNotNull { it.score?.toInt() }.average().toInt()
-                    } else 0
+                    // Skor akhir dihitung dari komponen agregat (baris ringkasan),
+                    // BUKAN dari baris rincian TP — agar TP tidak ikut dihitung ganda.
+                    val aggregateScores = components.filter { it.tpName == null }.mapNotNull { it.score }
+                    val fallbackScores = components.mapNotNull { it.score }
+                    val scoreBasis = aggregateScores.ifEmpty { fallbackScores }
+                    val finalScore = if (scoreBasis.isNotEmpty()) scoreBasis.average().toInt() else 0
 
                     val predicate = when {
                         finalScore >= 90 -> "A"

@@ -6,6 +6,15 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.AttendanceDto
 import com.sdm3.parent.data.remote.dto.AttendanceSummaryDto
 import com.sdm3.parent.domain.repository.AttendanceRepositoryContract
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+
+private val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+@Suppress("DEPRECATION")
+private val currentMonthNumber: Int = today.monthNumber
+private val currentYearNumber: Int = today.year
 
 data class KehadiranSiswaUiState(
     val studentId: String = "",
@@ -14,8 +23,8 @@ data class KehadiranSiswaUiState(
     override val isLoading: Boolean = false,
     override val errorMessage: String? = null,
     override val isEmpty: Boolean = true,
-    val selectedMonth: Int = 1,
-    val selectedYear: Int = 2026
+    val selectedMonth: Int = currentMonthNumber,
+    val selectedYear: Int = currentYearNumber
 ) : ScreenState
 
 class KehadiranSiswaViewModel(
@@ -45,13 +54,11 @@ class KehadiranSiswaViewModel(
 
     fun loadSummary(studentId: String) {
         launchSafely {
-            when (val result = attendanceRepository.getAttendanceSummary(studentId)) {
-                is ApiResult.Success -> {
-                    updateState { it.copy(summary = result.data) }
-                }
-                is ApiResult.Error -> {
-                    updateState { it.copy(errorMessage = result.error.toUserMessage()) }
-                }
+            // Summary bersifat pelengkap; kegagalan di sini tidak boleh
+            // menutupi data kehadiran yang sudah berhasil dimuat.
+            val result = attendanceRepository.getAttendanceSummary(studentId)
+            if (result is ApiResult.Success) {
+                updateState { it.copy(summary = result.data) }
             }
         }
     }

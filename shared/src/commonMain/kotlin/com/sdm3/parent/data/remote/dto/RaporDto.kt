@@ -39,6 +39,15 @@ data class RaporAcademicYearDto(
 )
 
 @Serializable
+data class RaporDownloadDto(
+    val id: String? = null,
+    val url: String? = null,
+    @SerialName("student_name")
+    val studentName: String? = null,
+    val semester: String? = null
+)
+
+@Serializable
 data class RaporVerifyResponse(
     val valid: Boolean,
     val message: String,

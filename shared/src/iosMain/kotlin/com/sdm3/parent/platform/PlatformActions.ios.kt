@@ -26,4 +26,7 @@ actual object PlatformActions {
     }
 
     actual suspend fun scanQrCode(): String? = null
+
+    // Pemindaian QR via kamera belum tersedia di iOS; pakai input manual.
+    actual fun isQrScanSupported(): Boolean = false
 }

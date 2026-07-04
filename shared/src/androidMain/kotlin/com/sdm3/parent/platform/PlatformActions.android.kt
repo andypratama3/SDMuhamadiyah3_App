@@ -51,4 +51,6 @@ actual object PlatformActions {
             }
         }
     }
+
+    actual fun isQrScanSupported(): Boolean = AndroidPlatformProvider.launchQrScan != null
 }

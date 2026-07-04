@@ -34,6 +34,7 @@ import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.platform.PlatformActions
 import com.sdm3.parent.feature.pembayaran.ProsesPembayaranViewModel
+import kotlinx.coroutines.delay
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.platform.LocalInspectionMode
 
@@ -78,6 +79,17 @@ fun ProsesPembayaranScreen(
                 onPembayaranBerhasil()
             }
         }
+        // Polling status otomatis selama masih menunggu pembayaran.
+        LaunchedEffect(paymentId) {
+            while (true) {
+                delay(7000)
+                val st = viewModel.uiState.value.status
+                if (st == com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS ||
+                    st == com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED
+                ) break
+                viewModel.pollStatusSilently()
+            }
+        }
     }
 
     Scaffold(
@@ -94,7 +106,12 @@ fun ProsesPembayaranScreen(
                             letterSpacing = (-0.5).sp
                         )
                         Text(
-                            text = "PENDING TRANSFER",
+                            text = when (vmState.status) {
+                                com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> "PEMBAYARAN BERHASIL"
+                                com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED -> "PEMBAYARAN GAGAL"
+                                com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.PROCESSING -> "MEMPROSES"
+                                else -> "MENUNGGU PEMBAYARAN"
+                            },
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
                             color = colorScheme.primary.copy(alpha = 0.4f),
@@ -225,8 +242,14 @@ fun ProsesPembayaranScreen(
 
                                 Spacer(modifier = Modifier.height(20.dp))
 
+                                val hasVa = vmState.vaNumber.isNotBlank()
+                                val redirect = vmState.redirectUrl
                                 Text(
-                                    text = "NOMOR VIRTUAL ACCOUNT",
+                                    text = when {
+                                        hasVa -> "NOMOR VIRTUAL ACCOUNT"
+                                        !redirect.isNullOrBlank() -> "HALAMAN PEMBAYARAN"
+                                        else -> "MENUNGGU INSTRUKSI"
+                                    },
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.sp,
@@ -234,23 +257,38 @@ fun ProsesPembayaranScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = vmState.vaNumber,
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    text = when {
+                                        hasVa -> vmState.vaNumber
+                                        !redirect.isNullOrBlank() -> "Selesaikan pembayaran pada halaman yang disediakan"
+                                        else -> "Menyiapkan instruksi pembayaran…"
+                                    },
+                                    style = if (hasVa) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.primary,
-                                    letterSpacing = 1.sp
+                                    textAlign = TextAlign.Center,
+                                    letterSpacing = if (hasVa) 1.sp else 0.sp
                                 )
 
                                 Spacer(modifier = Modifier.height(20.dp))
 
-                                Sdm3Button(
-                                    text = "Salin Nomor VA",
-                                    onClick = { PlatformActions.copyToClipboard(vmState.vaNumber, "Nomor VA") },
-                                    icon = Icons.Default.ContentCopy,
-                                    containerColor = colorScheme.primary,
-                                    contentColor = Color.White,
-                                    modifier = Modifier.fillMaxWidth().height(52.dp)
-                                )
+                                if (hasVa) {
+                                    Sdm3Button(
+                                        text = "Salin Nomor VA",
+                                        onClick = { PlatformActions.copyToClipboard(vmState.vaNumber, "Nomor VA") },
+                                        icon = Icons.Default.ContentCopy,
+                                        containerColor = colorScheme.primary,
+                                        contentColor = Color.White,
+                                        modifier = Modifier.fillMaxWidth().height(52.dp)
+                                    )
+                                } else if (!redirect.isNullOrBlank()) {
+                                    Sdm3Button(
+                                        text = "Buka Halaman Pembayaran",
+                                        onClick = { PlatformActions.openUrl(redirect) },
+                                        containerColor = colorScheme.primary,
+                                        contentColor = Color.White,
+                                        modifier = Modifier.fillMaxWidth().height(52.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -268,21 +306,32 @@ fun ProsesPembayaranScreen(
                                         color = colorScheme.primary.copy(alpha = 0.4f)
                                     )
                                     Text(
-                                        text = formatCurrency(vmState.grossAmount),
+                                        text = com.sdm3.parent.core.util.formatRupiah(vmState.grossAmount),
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
                                 }
+                                val statusColor = when (vmState.status) {
+                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> StatusSuccess
+                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED -> colorScheme.error
+                                    else -> StatusWarning
+                                }
+                                val statusLabel = when (vmState.status) {
+                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> "BERHASIL"
+                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED -> "GAGAL"
+                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.PROCESSING -> "MEMPROSES"
+                                    else -> "MENUNGGU BAYAR"
+                                }
                                 Surface(
-                                    color = StatusWarning.copy(alpha = 0.1f),
+                                    color = statusColor.copy(alpha = 0.1f),
                                     shape = RoundedCornerShape(999.dp)
                                 ) {
                                     Text(
-                                        text = " ${vmState.status.name.replace('_', ' ')} ",
+                                        text = " $statusLabel ",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
-                                        color = StatusWarning,
+                                        color = statusColor,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
                                 }
@@ -291,14 +340,26 @@ fun ProsesPembayaranScreen(
 
                         SectionHeader(title = "Langkah Pembayaran", modifier = Modifier.padding(top = 8.dp))
 
-                        val steps = listOf(
-                            "Buka aplikasi mobile banking Anda",
-                            "Pilih menu Transfer > Virtual Account",
-                            "Masukkan nomor ${vmState.vaNumber}",
-                            "Konfirmasi rincian dan nominal tagihan",
-                            "Masukkan PIN transaksi Anda",
-                            "Simpan resi sebagai bukti otentik"
-                        )
+                        // Instruksi menyesuaikan metode: Virtual Account (transfer m-banking)
+                        // vs halaman pembayaran (e-wallet/kartu/gerai via Midtrans).
+                        val steps = if (vmState.vaNumber.isNotBlank()) {
+                            listOf(
+                                "Buka aplikasi mobile banking Anda",
+                                "Pilih menu Transfer > Virtual Account",
+                                "Masukkan nomor ${vmState.vaNumber}",
+                                "Konfirmasi rincian dan nominal tagihan",
+                                "Masukkan PIN transaksi Anda",
+                                "Simpan resi sebagai bukti otentik"
+                            )
+                        } else {
+                            listOf(
+                                "Tekan tombol \"Buka Halaman Pembayaran\" di atas",
+                                "Pilih metode pembayaran yang tersedia (e-wallet, kartu, atau gerai)",
+                                "Ikuti instruksi pada halaman pembayaran hingga selesai",
+                                "Kembali ke aplikasi — status diperbarui otomatis",
+                                "Simpan bukti pembayaran dari penyedia"
+                            )
+                        }
 
                         Sdm3Card(padding = 20.dp) {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -324,14 +385,41 @@ fun ProsesPembayaranScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Sdm3Button(
-                            text = if (vmState.isLoading) "Memverifikasi..." else "Konfirmasi Sudah Bayar",
-                            onClick = { viewModel.pollStatus() },
-                            isLoading = vmState.isLoading,
-                            containerColor = colorScheme.secondary,
-                            contentColor = colorScheme.primary,
-                            modifier = Modifier.fillMaxWidth().height(56.dp)
-                        )
+                        if (vmState.status == com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED) {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = colorScheme.error.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Outlined.ErrorOutline, contentDescription = null, modifier = Modifier.size(20.dp), tint = colorScheme.error)
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = "Pembayaran gagal atau kedaluwarsa. Silakan ulangi transaksi.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = colorScheme.error,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Sdm3Button(
+                                text = "Kembali",
+                                onClick = onBack,
+                                containerColor = colorScheme.primary,
+                                contentColor = Color.White,
+                                modifier = Modifier.fillMaxWidth().height(56.dp)
+                            )
+                        } else {
+                            Sdm3Button(
+                                text = if (vmState.isLoading) "Memverifikasi..." else "Konfirmasi Sudah Bayar",
+                                onClick = { viewModel.pollStatus() },
+                                isLoading = vmState.isLoading,
+                                containerColor = colorScheme.secondary,
+                                contentColor = colorScheme.primary,
+                                modifier = Modifier.fillMaxWidth().height(56.dp)
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(100.dp))
                     }
@@ -339,16 +427,6 @@ fun ProsesPembayaranScreen(
             }
         }
     }
-}
-
-private fun formatCurrency(amount: Number): String {
-    val s = amount.toLong().toString()
-    val sb = StringBuilder()
-    for (i in s.indices) {
-        if (i > 0 && (s.length - i) % 3 == 0) sb.append('.')
-        sb.append(s[i])
-    }
-    return "Rp$sb"
 }
 
 @Preview

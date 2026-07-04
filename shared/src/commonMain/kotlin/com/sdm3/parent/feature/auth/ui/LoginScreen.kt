@@ -262,20 +262,22 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                if (uiState.biometricAvailable) {
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                Sdm3OutlinedButton(
-                    text = "Gunakan Biometrik",
-                    onClick = { viewModel.onIntent(LoginIntent.BiometricLogin) },
-                    icon = Icons.Outlined.Fingerprint,
-                    contentColor = colorScheme.primary
-                )
+                    Sdm3OutlinedButton(
+                        text = "Gunakan Biometrik",
+                        onClick = { viewModel.onIntent(LoginIntent.BiometricLogin) },
+                        icon = Icons.Outlined.Fingerprint,
+                        contentColor = colorScheme.primary
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "SDM3 Parent v${com.sdm3.parent.APP_VERSION_NAME}",
+                text = "SD Muhammadiyah 3 Samarinda v${com.sdm3.parent.APP_VERSION_NAME}",
                 style = MaterialTheme.typography.labelSmall,
                 color = colorScheme.primary.copy(alpha = 0.3f),
                 fontWeight = FontWeight.Bold,

@@ -1,10 +1,9 @@
 package com.sdm3.parent.feature.nilai.ui
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,10 +29,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.data.remote.dto.GradeDto
-import com.sdm3.parent.feature.nilai.FormatifGradeItem
 import com.sdm3.parent.feature.nilai.NilaiRaporUiState
 import com.sdm3.parent.feature.nilai.NilaiRaporViewModel
-import com.sdm3.parent.feature.nilai.ProjekGradeItem
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.tooling.preview.Preview
 
@@ -44,8 +41,25 @@ sealed class NilaiRaporScreenUiState {
     data object Success : NilaiRaporScreenUiState()
 }
 
-private val tabLabels = listOf("Sumatif", "Formatif", "Projek")
-private val PremiumEasing = androidx.compose.animation.core.CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
+internal fun semesterLabelOf(semester: String): String = when (semester.lowercase()) {
+    "ganjil" -> "Semester Ganjil"
+    "genap" -> "Semester Genap"
+    "ts1" -> "Tengah Semester 1"
+    "as1" -> "Akhir Semester 1"
+    "ts2" -> "Tengah Semester 2"
+    "at" -> "Akhir Tahun"
+    else -> "Semester $semester"
+}
+
+internal fun semesterShortLabel(semester: String): String = when (semester.lowercase()) {
+    "ganjil" -> "Ganjil"
+    "genap" -> "Genap"
+    "ts1" -> "TS 1"
+    "as1" -> "AS 1"
+    "ts2" -> "TS 2"
+    "at" -> "Akhir Tahun"
+    else -> semester.replaceFirstChar { it.uppercase() }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,26 +71,13 @@ fun NilaiRaporScreen(
     viewModel: NilaiRaporViewModel = koinViewModel()
 ) {
     val isPreview = LocalInspectionMode.current
-    var selectedTab by remember { mutableIntStateOf(0) }
     val colorScheme = MaterialTheme.colorScheme
-    val semesterOptions = remember { listOf("ganjil", "genap", "ts1", "as1", "ts2", "at") }
-    var showSemesterMenu by remember { mutableStateOf(false) }
-    val semesterLabel = remember(semester) {
-        when (semester.lowercase()) {
-            "ganjil" -> "Semester Ganjil"
-            "genap" -> "Semester Genap"
-            "ts1" -> "Tengah Semester 1"
-            "as1" -> "Akhir Semester 1"
-            "ts2" -> "Tengah Semester 2"
-            "at" -> "Akhir Tahun"
-            else -> "Semester $semester"
-        }
-    }
     val vmState by if (isPreview) {
         remember { mutableStateOf(NilaiRaporUiState()) }
     } else {
         viewModel.uiState.collectAsState()
     }
+    val activeSemester = vmState.semester.ifBlank { semester }
 
     val uiState: NilaiRaporScreenUiState = remember(vmState) {
         val s = vmState
@@ -90,7 +91,7 @@ fun NilaiRaporScreen(
 
     if (!isPreview) {
         LaunchedEffect(studentId) {
-            viewModel.loadGrades(studentId, semester)
+            viewModel.loadInitial(studentId, semester)
         }
     }
 
@@ -99,7 +100,10 @@ fun NilaiRaporScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         Text(
                             text = "Analitik Akademik",
                             style = MaterialTheme.typography.titleLarge,
@@ -107,45 +111,13 @@ fun NilaiRaporScreen(
                             color = colorScheme.primary,
                             letterSpacing = (-0.5).sp
                         )
-                        Box {
-                            Text(
-                                text = semesterLabel.uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary.copy(alpha = 0.4f),
-                                letterSpacing = 1.sp,
-                                modifier = Modifier.clickable { showSemesterMenu = true }
-                            )
-                            DropdownMenu(
-                                expanded = showSemesterMenu,
-                                onDismissRequest = { showSemesterMenu = false }
-                            ) {
-                                semesterOptions.forEach { opt ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                when (opt) {
-                                                    "ganjil" -> "Semester Ganjil"
-                                                    "genap" -> "Semester Genap"
-                                                    "ts1" -> "Tengah Semester 1"
-                                                    "as1" -> "Akhir Semester 1"
-                                                    "ts2" -> "Tengah Semester 2"
-                                                    "at" -> "Akhir Tahun"
-                                                    else -> opt
-                                                },
-                                                fontWeight = if (opt == semester) FontWeight.Bold else FontWeight.Normal
-                                            )
-                                        },
-                                        onClick = {
-                                            showSemesterMenu = false
-                                            if (opt != semester) {
-                                                viewModel.loadGrades(studentId, opt)
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
+                        Text(
+                            text = semesterLabelOf(activeSemester).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            color = colorScheme.primary.copy(alpha = 0.4f),
+                            letterSpacing = 1.sp
+                        )
                     }
                 },
                 navigationIcon = {
@@ -176,32 +148,31 @@ fun NilaiRaporScreen(
             }
 
             Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-                // Editorial Tab Switcher
-                Surface(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp, vertical = 12.dp)
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.White.copy(alpha = 0.5f),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
-                ) {
-                    Row(modifier = Modifier.padding(6.dp)) {
-                        tabLabels.forEachIndexed { index, label ->
-                            val isSelected = selectedTab == index
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(42.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) colorScheme.primary else Color.Transparent)
-                                    .clickable { selectedTab = index },
-                                contentAlignment = Alignment.Center
+                val semesters = vmState.availableSemesters
+                if (semesters.size > 1) {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(semesters) { opt ->
+                            val selected = opt == activeSemester
+                            Surface(
+                                shape = RoundedCornerShape(999.dp),
+                                color = if (selected) colorScheme.primary else Color.White.copy(alpha = 0.6f),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (selected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.15f)
+                                ),
+                                modifier = Modifier.clickable(enabled = !selected) { viewModel.selectSemester(opt) }
                             ) {
                                 Text(
-                                    text = label,
+                                    text = semesterShortLabel(opt),
                                     style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isSelected) colorScheme.onPrimary else colorScheme.primary.copy(alpha = 0.6f)
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (selected) colorScheme.onPrimary else colorScheme.primary.copy(alpha = 0.7f),
+                                    letterSpacing = 0.2.sp,
+                                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 9.dp)
                                 )
                             }
                         }
@@ -211,19 +182,7 @@ fun NilaiRaporScreen(
                 Box(modifier = Modifier.weight(1f)) {
                     when (uiState) {
                         NilaiRaporScreenUiState.Loading -> {
-                            AnimatedContent(
-                                targetState = selectedTab,
-                                transitionSpec = {
-                                    (fadeIn(tween(400, easing = PremiumEasing)) + scaleIn(initialScale = 0.95f)) togetherWith fadeOut(tween(300))
-                                },
-                                label = "tabShimmer"
-                            ) { targetTab ->
-                                when (targetTab) {
-                                    0 -> SumatifTabShimmer()
-                                    1 -> FormatifTabShimmer()
-                                    2 -> ProjekTabShimmer()
-                                }
-                            }
+                            SumatifTabShimmer()
                         }
                         NilaiRaporScreenUiState.Empty -> {
                             Sdm3EmptyState(
@@ -252,19 +211,7 @@ fun NilaiRaporScreen(
                             )
                         }
                         NilaiRaporScreenUiState.Success -> {
-                            AnimatedContent(
-                                targetState = selectedTab,
-                                transitionSpec = {
-                                    (fadeIn(tween(400, easing = PremiumEasing)) + scaleIn(initialScale = 0.95f)) togetherWith fadeOut(tween(300))
-                                },
-                                label = "tabContent"
-                            ) { targetTab ->
-                                when (targetTab) {
-                                    0 -> SumatifTabContent(vmState.grades, onDetailMapel)
-                                    1 -> FormatifTabContent(vmState.formatifGrades)
-                                    2 -> ProjekTabContent(vmState.projekGrades)
-                                }
-                            }
+                            SumatifTabContent(vmState.grades, onDetailMapel)
                         }
                     }
                 }
@@ -324,64 +271,6 @@ private fun SumatifTabShimmer() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(72.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .shimmerEffect()
-            )
-        }
-        item { Spacer(Modifier.height(100.dp)) }
-    }
-}
-
-@Composable
-private fun FormatifTabShimmer() {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-    ) {
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .shimmerEffect()
-            )
-        }
-        items(5) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .shimmerEffect()
-            )
-        }
-        item { Spacer(Modifier.height(100.dp)) }
-    }
-}
-
-@Composable
-private fun ProjekTabShimmer() {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-    ) {
-        item {
-            Box(
-                modifier = Modifier
-                    .width(220.dp)
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .shimmerEffect()
-            )
-        }
-        items(3) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .shimmerEffect()
             )
@@ -474,25 +363,27 @@ private fun SumatifTabContent(
             }
         }
 
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatMiniCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.AutoMirrored.Outlined.TrendingUp,
-                    label = "TERTINGGI",
-                    value = "${subjects.maxOf { it.score }}",
-                    color = StatusSuccess
-                )
-                StatMiniCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.AutoMirrored.Outlined.TrendingDown,
-                    label = "TERENDAH",
-                    value = "${subjects.minOf { it.score }}",
-                    color = StatusWarning
-                )
+        if (subjects.isNotEmpty()) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatMiniCard(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.AutoMirrored.Outlined.TrendingUp,
+                        label = "TERTINGGI",
+                        value = "${subjects.maxOf { it.score }}",
+                        color = StatusSuccess
+                    )
+                    StatMiniCard(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.AutoMirrored.Outlined.TrendingDown,
+                        label = "TERENDAH",
+                        value = "${subjects.minOf { it.score }}",
+                        color = StatusWarning
+                    )
+                }
             }
         }
 
@@ -623,145 +514,6 @@ private fun StatMiniCard(
                 color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
         }
-    }
-}
-
-@Composable
-private fun FormatifTabContent(
-    formatifItems: List<FormatifGradeItem>
-) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-    ) {
-        item {
-            Sdm3Card {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Icon(Icons.Outlined.Info, contentDescription = null, tint = colorScheme.primary.copy(alpha = 0.4f), modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = "Evaluasi berkelanjutan berdasarkan Tujuan Pembelajaran (TP) yang dicapai setiap pekan.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.primary.copy(alpha = 0.6f),
-                        lineHeight = 20.sp
-                    )
-                }
-            }
-        }
-
-        items(formatifItems) { tp ->
-            val tpColor = when {
-                tp.score >= 90 -> StatusSuccess
-                tp.score >= 75 -> StatusWarning
-                else -> StatusDanger
-            }
-            Sdm3Card {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        modifier = Modifier.size(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        color = colorScheme.primary.copy(alpha = 0.05f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = tp.code,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = tp.description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            maxLines = 2
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "${tp.score}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = tpColor
-                    )
-                }
-            }
-        }
-
-        item { Spacer(Modifier.height(100.dp)) }
-    }
-}
-
-@Composable
-private fun ProjekTabContent(
-    projekItems: List<ProjekGradeItem>
-) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-    ) {
-        item {
-            SectionHeader(
-                title = "Projek Profil Pancasila (P5)",
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
-        items(projekItems) { proyekItem ->
-            Sdm3Card {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = proyekItem.tema,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Surface(
-                            color = StatusSuccess.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                text = " ${proyekItem.nilai} (${proyekItem.predikat}) ",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Black,
-                                color = StatusSuccess,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = proyekItem.deskripsi,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        lineHeight = 22.sp
-                    )
-                }
-            }
-        }
-
-        item { Spacer(Modifier.height(100.dp)) }
     }
 }
 

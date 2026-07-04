@@ -32,9 +32,24 @@ import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.kehadiran.KehadiranSiswaUiState
 import com.sdm3.parent.feature.kehadiran.KehadiranSiswaViewModel
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import org.koin.compose.viewmodel.koinViewModel
 
 private val PremiumEasing = androidx.compose.animation.core.CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
+
+private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+private fun pad2(n: Int): String = if (n < 10) "0$n" else "$n"
+
+private fun daysInMonth(month: Int, year: Int): Int = when (month) {
+    1, 3, 5, 7, 8, 10, 12 -> 31
+    4, 6, 9, 11 -> 30
+    2 -> if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) 29 else 28
+    else -> 30
+}
 
 sealed class KehadiranScreenUiState {
     data object Loading : KehadiranScreenUiState()
@@ -178,21 +193,30 @@ fun KehadiranSiswaScreen(
                         if (day != null) day to att else null
                     }.toMap()
 
-                    val maxDay = attendancesByDay.keys.maxOrNull() ?: 0
-                    val days = if (maxDay > 0) (1..maxDay).toList() else emptyList()
-                    val rows = days.chunked(7)
+                    // Susun sel kalender dengan offset hari-pertama agar tanggal jatuh
+                    // di kolom hari (MIN..SAB) yang benar; sel kosong di awal = null.
+                    val totalDays = daysInMonth(month, year)
+                    val firstOffset = (LocalDate(year, month, 1).dayOfWeek.ordinal + 1) % 7
+                    val cells: List<Int?> = List(firstOffset) { null } + (1..totalDays).toList()
+                    val weeks = cells.chunked(7)
 
-                    val todayAttendance = attendances.maxByOrNull { it.date }
+                    val todayIso = todayDate.toString()
+                    // "Status hari ini" hanya valid bila ada catatan untuk tanggal hari
+                    // ini yang sebenarnya — jangan memalsukan "Hadir" sebagai default.
+                    val todayAttendance = attendances.firstOrNull { it.date == todayIso }
                     val todayStatusLabel = when (todayAttendance?.status) {
                         "hadir" -> "Terverifikasi Hadir"
                         "sakit" -> "Sedang Sakit"
                         "izin" -> "Izin Tidak Hadir"
                         "alpa" -> "Tanpa Keterangan"
-                        else -> "Terverifikasi Hadir"
+                        else -> "Belum Ada Data Hari Ini"
                     }
-                    val todayTimeLocation = if (todayAttendance?.notes != null) {
-                        "Pukul ${todayAttendance.notes}"
-                    } else "Belum tercatat"
+                    val todayNotes = todayAttendance?.notes
+                    val todayTimeLocation = when {
+                        !todayNotes.isNullOrBlank() -> todayNotes
+                        todayAttendance != null -> "Tercatat hari ini"
+                        else -> "Belum tercatat"
+                    }
 
                     LazyColumn(
                         modifier = Modifier
@@ -275,21 +299,31 @@ fun KehadiranSiswaScreen(
                                         )
                                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                             Surface(
-                                                modifier = Modifier.size(32.dp),
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .clickable(enabled = !isPreview) {
+                                                        val (prevMonth, prevYear) = if (month <= 1) 12 to (year - 1) else (month - 1) to year
+                                                        viewModel.changeMonth(prevMonth, prevYear)
+                                                    },
                                                 shape = RoundedCornerShape(8.dp),
                                                 color = colorScheme.primary.copy(alpha = 0.05f)
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
-                                                    Icon(Icons.Outlined.ChevronLeft, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(18.dp))
+                                                    Icon(Icons.Outlined.ChevronLeft, contentDescription = "Bulan sebelumnya", tint = colorScheme.primary, modifier = Modifier.size(18.dp))
                                                 }
                                             }
                                             Surface(
-                                                modifier = Modifier.size(32.dp),
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .clickable(enabled = !isPreview) {
+                                                        val (nextMonth, nextYear) = if (month >= 12) 1 to (year + 1) else (month + 1) to year
+                                                        viewModel.changeMonth(nextMonth, nextYear)
+                                                    },
                                                 shape = RoundedCornerShape(8.dp),
                                                 color = colorScheme.primary.copy(alpha = 0.05f)
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
-                                                    Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(18.dp))
+                                                    Icon(Icons.Outlined.ChevronRight, contentDescription = "Bulan berikutnya", tint = colorScheme.primary, modifier = Modifier.size(18.dp))
                                                 }
                                             }
                                         }
@@ -313,34 +347,40 @@ fun KehadiranSiswaScreen(
 
                                     Spacer(modifier = Modifier.height(16.dp))
 
-                                    rows.forEach { row ->
+                                    weeks.forEach { week ->
                                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                            row.forEach { day ->
+                                            week.forEachIndexed { columnIndex, day ->
+                                                if (day == null) {
+                                                    Spacer(Modifier.weight(1f))
+                                                    return@forEachIndexed
+                                                }
                                                 val att = attendancesByDay[day]
                                                 val status = att?.status
-                                                val isLatest = day == (attendancesByDay.keys.maxOrNull() ?: 0)
+                                                val dayIso = "$year-${pad2(month)}-${pad2(day)}"
+                                                val isToday = dayIso == todayIso
+                                                val isSunday = columnIndex == 0
                                                 Box(
                                                     modifier = Modifier
                                                         .weight(1f)
                                                         .aspectRatio(1f),
                                                     contentAlignment = Alignment.Center
                                                 ) {
-                                                    if (isLatest) {
+                                                    if (isToday) {
                                                         Surface(
                                                             modifier = Modifier.fillMaxSize(0.85f),
                                                             shape = RoundedCornerShape(12.dp),
                                                             color = colorScheme.primary,
                                                             border = BorderStroke(1.dp, colorScheme.primary)
                                                         ) {
-                                                            DayContent(day, isLatest, colorScheme, true, status)
+                                                            DayContent(day, isToday = true, colorScheme, onPrimary = true, status = status, isSunday = isSunday)
                                                         }
                                                     } else {
-                                                        DayContent(day, false, colorScheme, status = status)
+                                                        DayContent(day, isToday = false, colorScheme, status = status, isSunday = isSunday)
                                                     }
                                                 }
                                             }
-                                            if (row.size < 7) {
-                                                repeat(7 - row.size) { Spacer(Modifier.weight(1f)) }
+                                            if (week.size < 7) {
+                                                repeat(7 - week.size) { Spacer(Modifier.weight(1f)) }
                                             }
                                         }
                                     }
@@ -392,9 +432,8 @@ fun KehadiranSiswaScreen(
                                     "alpa" -> "Tanpa keterangan."
                                     else -> ""
                                 }
-                                val logTime = att.notes ?: "-"
                                 val displayStatus = logStatus.replaceFirstChar { it.uppercase() }
-                                AttendanceLogRow(att.date, displayStatus, logNote, logTime, logColor, logIcon)
+                                AttendanceLogRow(att.date, displayStatus, logNote, "", logColor, logIcon)
                             }
                         }
 
@@ -642,7 +681,7 @@ private fun LogRowShimmer() {
 }
 
 @Composable
-private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onPrimary: Boolean = false, status: String? = null) {
+private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onPrimary: Boolean = false, status: String? = null, isSunday: Boolean = false) {
     val dotColor = when (status) {
         "hadir" -> if (onPrimary) Color.White else StatusSuccess
         "sakit" -> StatusWarning
@@ -659,7 +698,7 @@ private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onP
             text = "$day",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = if (isToday) FontWeight.Black else FontWeight.Bold,
-            color = if (onPrimary) Color.White else if (day % 7 == 0) colorScheme.error else colorScheme.primary
+            color = if (onPrimary) Color.White else if (isSunday) colorScheme.error else colorScheme.primary
         )
         if (dotColor != null) {
             Spacer(modifier = Modifier.height(2.dp))

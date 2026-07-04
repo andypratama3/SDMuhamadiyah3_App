@@ -24,7 +24,7 @@ object Endpoints {
     const val PARENT_ARTICLES = "/api/parent/articles"
     const val PARENT_ARTICLE_DETAIL = "/api/parent/articles/{id}"
     const val PARENT_ARTICLE_BY_SLUG = "/api/parent/articles/slug/{slug}"
-    const val PARENT_RAPOR_INSTANCES = "/api/parent/rapor-instances"
+    const val PARENT_RAPOR_INSTANCES = "/api/parent/rapors"
     const val PARENT_RAPOR_DETAIL = "/api/parent/rapors/{id}"
     const val PARENT_RAPOR_DOWNLOAD = "/api/parent/rapor/{id}/download"
     const val PARENT_RAPOR_VERIFY = "/api/parent/rapor/verify"

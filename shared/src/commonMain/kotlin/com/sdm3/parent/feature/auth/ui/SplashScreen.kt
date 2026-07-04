@@ -55,7 +55,7 @@ fun SplashScreen(
                         onNavigate(SDM3Route.Onboarding)
                     }
                 }
-                auth != null && tokenManager != null -> {
+                auth != null -> {
                     when (val result = auth.getAuthenticatedUser()) {
                         is ApiResult.Success -> {
                             val studentId = tokenManager.getSelectedStudentId()
@@ -290,7 +290,7 @@ private fun SplashContent(
 
         // Institutional Footer
         Text(
-            text = "EDU OCTO • ACADEMIC INTELLIGENCE",
+            text = "PORTAL WALI MURID • SD MUHAMMADIYAH 3 SAMARINDA",
             color = Color.White.copy(alpha = 0.4f),
             style = MaterialTheme.typography.labelSmall.copy(
                 letterSpacing = 2.sp,

@@ -274,10 +274,7 @@ fun DetailInfoAnakScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     val student = vmState.student
-                                    val initials = student?.name?.split(" ")
-                                        ?.filter { it.isNotBlank() }
-                                        ?.joinToString("") { it.first().uppercase() }
-                                        ?: "--"
+                                    val initials = com.sdm3.parent.core.util.nameInitials(student?.name)
 
                                     Surface(
                                         modifier = Modifier.size(100.dp),
@@ -322,7 +319,14 @@ fun DetailInfoAnakScreen(
 
                                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                         StatusChip(text = "NISN: ${student?.nisn ?: ""}", color = colorScheme.primary)
-                                        StatusChip(text = "AKTIF", color = StatusSuccess)
+                                        val statusRaw = student?.status?.takeIf { it.isNotBlank() }
+                                        val statusIsActive = statusRaw == null ||
+                                            statusRaw.equals("aktif", ignoreCase = true) ||
+                                            statusRaw.equals("active", ignoreCase = true)
+                                        StatusChip(
+                                            text = (statusRaw ?: "AKTIF").uppercase(),
+                                            color = if (statusIsActive) StatusSuccess else StatusWarning
+                                        )
                                     }
                                 }
                             }

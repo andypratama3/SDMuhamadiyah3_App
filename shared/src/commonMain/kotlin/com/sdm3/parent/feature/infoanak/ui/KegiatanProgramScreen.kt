@@ -382,7 +382,9 @@ fun KegiatanProgramScreen(
 
                                                 Spacer(modifier = Modifier.height(12.dp))
 
-                                                val progressFraction = (program.progress.toFloat() / program.target.toFloat()).coerceIn(0f, 1f)
+                                                val progressFraction = if (program.target > 0) {
+                                                    (program.progress.toFloat() / program.target.toFloat()).coerceIn(0f, 1f)
+                                                } else 0f
                                                 LinearProgressIndicator(
                                                     progress = { progressFraction },
                                                     modifier = Modifier.fillMaxWidth().height(10.dp).clip(CircleShape),
