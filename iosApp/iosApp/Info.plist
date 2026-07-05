@@ -30,5 +30,7 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Kamera digunakan untuk memindai QR Code rapor siswa.</string>
 </dict>
 </plist>

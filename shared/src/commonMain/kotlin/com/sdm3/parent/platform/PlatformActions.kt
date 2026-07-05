@@ -8,4 +8,6 @@ expect object PlatformActions {
 
     /** Apakah pemindaian QR via kamera didukung di platform ini. */
     fun isQrScanSupported(): Boolean
+
+    suspend fun pickAvatarImage(): PickedImage?
 }

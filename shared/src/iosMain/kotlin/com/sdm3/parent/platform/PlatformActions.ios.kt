@@ -1,10 +1,12 @@
 package com.sdm3.parent.platform
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.Foundation.NSURL
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIPasteboard
+import kotlin.coroutines.resume
 
 actual object PlatformActions {
 
@@ -25,8 +27,27 @@ actual object PlatformActions {
         UIApplication.sharedApplication.openURL(nsUrl)
     }
 
-    actual suspend fun scanQrCode(): String? = null
+    actual suspend fun scanQrCode(): String? {
+        val launcher = IosPlatformProvider.launchQrScan ?: return null
+        return suspendCancellableCoroutine { continuation ->
+            launcher { result ->
+                if (continuation.isActive) {
+                    continuation.resume(result?.takeIf { it.isNotBlank() })
+                }
+            }
+        }
+    }
 
-    // Pemindaian QR via kamera belum tersedia di iOS; pakai input manual.
-    actual fun isQrScanSupported(): Boolean = false
+    actual fun isQrScanSupported(): Boolean = IosPlatformProvider.launchQrScan != null
+
+    actual suspend fun pickAvatarImage(): PickedImage? {
+        val launcher = IosPlatformProvider.launchPickAvatar ?: return null
+        return suspendCancellableCoroutine { continuation ->
+            launcher { result ->
+                if (continuation.isActive) {
+                    continuation.resume(result)
+                }
+            }
+        }
+    }
 }

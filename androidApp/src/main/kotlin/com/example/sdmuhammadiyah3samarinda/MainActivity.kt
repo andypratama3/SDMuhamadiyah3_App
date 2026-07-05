@@ -1,6 +1,7 @@
 package com.sdm3.parent
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.sdm3.parent.core.di.allAppModules
+import com.sdm3.parent.core.notification.PushDeepLinkHolder
 import com.sdm3.parent.core.notification.PushNotificationDisplay
 import com.sdm3.parent.platform.AndroidPlatformBootstrap
 import com.sdm3.parent.platform.installAndroidPlatformBindings
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity() {
         PushNotificationDisplay.ensureChannel(this)
         requestNotificationPermissionIfNeeded()
         platformBootstrap = installAndroidPlatformBindings()
+        handlePushIntent(intent)
 
         setContent {
             @Suppress("DEPRECATION")
@@ -40,6 +43,25 @@ class MainActivity : AppCompatActivity() {
             }) {
                 App()
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handlePushIntent(intent)
+    }
+
+    private fun handlePushIntent(intent: Intent?) {
+        val extras = intent?.extras ?: return
+        val data = buildMap {
+            for (key in extras.keySet()) {
+                val value = extras.getString(key)?.trim().orEmpty()
+                if (value.isNotEmpty()) put(key, value)
+            }
+        }
+        if (data.isNotEmpty()) {
+            PushDeepLinkHolder.setFromMap(data)
         }
     }
 

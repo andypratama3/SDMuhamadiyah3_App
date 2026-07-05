@@ -11,6 +11,7 @@ import com.sdm3.parent.data.remote.dto.StudentDto
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
 import com.sdm3.parent.domain.repository.ProfileRepositoryContract
 import com.sdm3.parent.domain.repository.StudentRepositoryContract
+import com.sdm3.parent.platform.PlatformActions
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
@@ -21,6 +22,8 @@ data class ProfilAkunUiState(
     val name: String = "",
     val phone: String = "",
     val email: String = "",
+    val avatarUrl: String? = null,
+    val isUploadingAvatar: Boolean = false,
     val students: List<StudentDto> = emptyList(),
     val isEditing: Boolean = false,
     val editedName: String = "",
@@ -87,6 +90,7 @@ class ProfilAkunViewModel(
                             name = p.name,
                             phone = p.phone.orEmpty(),
                             email = p.email,
+                            avatarUrl = p.avatar,
                             editedName = p.name,
                             editedPhone = p.phone.orEmpty(),
                             isLoading = false
@@ -129,6 +133,38 @@ class ProfilAkunViewModel(
 
     fun updateEditedPhone(phone: String) {
         updateState { it.copy(editedPhone = phone) }
+    }
+
+    fun uploadAvatar() {
+        launchSafely {
+            val picked = PlatformActions.pickAvatarImage() ?: return@launchSafely
+            updateState { it.copy(isUploadingAvatar = true, errorMessage = null) }
+            when (
+                val result = profileRepository.uploadAvatar(
+                    bytes = picked.bytes,
+                    fileName = picked.fileName,
+                    mimeType = picked.mimeType,
+                )
+            ) {
+                is ApiResult.Success -> {
+                    val p = result.data
+                    updateState {
+                        it.copy(
+                            avatarUrl = p.avatar,
+                            isUploadingAvatar = false,
+                        )
+                    }
+                }
+                is ApiResult.Error -> {
+                    updateState {
+                        it.copy(
+                            isUploadingAvatar = false,
+                            errorMessage = result.error.toUserMessage(),
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun updateProfile() {

@@ -15,6 +15,9 @@ object AndroidPlatformProvider {
 
     @Volatile
     var launchQrScan: ((onResult: (String?) -> Unit) -> Unit)? = null
+
+    @Volatile
+    var launchPickAvatar: ((onResult: (PickedImage?) -> Unit) -> Unit)? = null
 }
 
 actual object PlatformActions {
@@ -53,4 +56,15 @@ actual object PlatformActions {
     }
 
     actual fun isQrScanSupported(): Boolean = AndroidPlatformProvider.launchQrScan != null
+
+    actual suspend fun pickAvatarImage(): PickedImage? {
+        val launcher = AndroidPlatformProvider.launchPickAvatar ?: return null
+        return suspendCancellableCoroutine { continuation ->
+            launcher { result ->
+                if (continuation.isActive) {
+                    continuation.resume(result)
+                }
+            }
+        }
+    }
 }

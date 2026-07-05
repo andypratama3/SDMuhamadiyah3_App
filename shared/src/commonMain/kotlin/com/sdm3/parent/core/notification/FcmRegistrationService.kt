@@ -18,8 +18,8 @@ class FcmRegistrationService(
     }
 
     override suspend fun unregisterIfNeeded() {
-        if (secureTokenManager.getFcmToken() == null) return
-        fcmApi.unregister()
+        val token = secureTokenManager.getFcmToken() ?: return
+        fcmApi.unregister(fcmToken = token)
         secureTokenManager.clearFcmToken()
         FcmTokenStore.clear()
     }

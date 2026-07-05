@@ -369,7 +369,7 @@ fun DetailInfoAnakScreen(
                                     title = "Analitik Nilai",
                                     icon = Icons.Outlined.Assessment,
                                     color = colorScheme.primary,
-                                    onClick = { onQuickNavClick(SDM3Route.NilaiRapor(studentId, "ganjil")) }
+                                    onClick = { onQuickNavClick(SDM3Route.NilaiRapor(studentId, "")) }
                                 )
                                 QuickNavItem(
                                     modifier = Modifier.weight(1f),

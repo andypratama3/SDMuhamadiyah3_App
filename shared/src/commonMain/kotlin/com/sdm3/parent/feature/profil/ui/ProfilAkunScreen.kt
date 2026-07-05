@@ -36,7 +36,9 @@ import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
 import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
 import com.sdm3.parent.core.designsystem.component.EmptyStateStyle
 import com.sdm3.parent.core.designsystem.theme.*
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
+import coil3.compose.AsyncImage
 import com.sdm3.parent.data.remote.dto.StudentDto
 import com.sdm3.parent.feature.auth.ui.PilihAnakBottomSheet
 import com.sdm3.parent.feature.profil.ProfilAkunUiState
@@ -185,6 +187,11 @@ fun ProfilAkunScreen(
                             name = uiState.name,
                             phone = uiState.phone,
                             email = uiState.email,
+                            avatarUrl = uiState.avatarUrl,
+                            isUploadingAvatar = uiState.isUploadingAvatar,
+                            onAvatarClick = {
+                                if (!isPreview) viewModel.uploadAvatar()
+                            },
                             onEditClick = {
                                 if (!isPreview) viewModel.startEdit()
                             }
@@ -503,7 +510,15 @@ private fun ShimmerProfil() {
 }
 
 @Composable
-private fun ProfileHeader(name: String, phone: String, email: String, onEditClick: () -> Unit) {
+private fun ProfileHeader(
+    name: String,
+    phone: String,
+    email: String,
+    avatarUrl: String?,
+    isUploadingAvatar: Boolean,
+    onAvatarClick: () -> Unit,
+    onEditClick: () -> Unit,
+) {
     val colorScheme = MaterialTheme.colorScheme
     val statusSuccess = statusSuccessColor()
 
@@ -512,19 +527,49 @@ private fun ProfileHeader(name: String, phone: String, email: String, onEditClic
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                modifier = Modifier.size(70.dp),
-                shape = RoundedCornerShape(20.dp),
-                color = colorScheme.primary.copy(alpha = 0.05f),
-                border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+            Box(
+                modifier = Modifier
+                    .size(70.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .clickable(onClick = onAvatarClick),
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp),
-                        tint = colorScheme.primary
-                    )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(20.dp),
+                    color = colorScheme.primary.copy(alpha = 0.05f),
+                    border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        if (!avatarUrl.isNullOrBlank()) {
+                            AsyncImage(
+                                model = avatarUrl,
+                                contentDescription = "Foto profil",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop,
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp),
+                                tint = colorScheme.primary
+                            )
+                        }
+                    }
+                }
+                if (isUploadingAvatar) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.35f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp,
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.width(20.dp))

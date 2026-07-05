@@ -6,6 +6,7 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.PaymentDto
 import com.sdm3.parent.data.remote.dto.StudentFeeDto
 import com.sdm3.parent.domain.repository.PaymentRepositoryContract
+import com.sdm3.parent.domain.repository.StudentRepositoryContract
 
 data class PembayaranSppUiState(
     override val isLoading: Boolean = false,
@@ -18,7 +19,8 @@ data class PembayaranSppUiState(
 ) : ScreenState
 
 class PembayaranSppViewModel(
-    private val paymentRepository: PaymentRepositoryContract
+    private val paymentRepository: PaymentRepositoryContract,
+    private val studentRepository: StudentRepositoryContract,
 ) : BaseViewModel<PembayaranSppUiState>(PembayaranSppUiState()) {
 
     fun loadData(studentId: String) {
@@ -27,6 +29,10 @@ class PembayaranSppViewModel(
 
             val feesResult = paymentRepository.getStudentFees(studentId)
             val paymentsResult = paymentRepository.getPayments(studentId)
+            val studentName = when (val studentResult = studentRepository.getStudentDetail(studentId)) {
+                is ApiResult.Success -> studentResult.data.name
+                is ApiResult.Error -> ""
+            }
 
             val fees = if (feesResult is ApiResult.Success) feesResult.data else emptyList()
             val payments = if (paymentsResult is ApiResult.Success) paymentsResult.data else emptyList()
@@ -37,7 +43,7 @@ class PembayaranSppViewModel(
             updateState {
                 it.copy(
                     isLoading = false,
-                    studentName = "",
+                    studentName = studentName,
                     fees = fees,
                     payments = payments,
                     isEmpty = fees.isEmpty() && payments.isEmpty(),

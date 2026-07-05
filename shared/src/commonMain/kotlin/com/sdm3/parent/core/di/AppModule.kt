@@ -21,6 +21,7 @@ import com.sdm3.parent.data.remote.api.AuthApi
 import com.sdm3.parent.data.remote.api.DashboardApi
 import com.sdm3.parent.data.remote.api.ExtracurricularApi
 import com.sdm3.parent.data.remote.api.FcmApi
+import com.sdm3.parent.data.remote.api.NotificationPreferencesApi
 import com.sdm3.parent.data.remote.api.GradeApi
 import com.sdm3.parent.data.remote.api.NotificationApi
 import com.sdm3.parent.data.remote.api.PaymentApi
@@ -87,10 +88,14 @@ val securityModule = module {
 val networkModule = module {
     single {
         val secureTokenManager = get<SecureTokenManager>()
+        val cache = get<CacheDataSource>()
         HttpClientProvider(
             baseUrl = get<SDM3Config>().baseUrl,
             tokenProvider = { secureTokenManager.getBearerToken() },
-            onSessionExpired = { secureTokenManager.clearAllSecureData() },
+            onSessionExpired = {
+                secureTokenManager.clearAllSecureData()
+                cache.clearAll()
+            },
             certificatePins = CertificatePins.pins,
             enableLogging = isDebugBuild()
         )
@@ -119,6 +124,7 @@ val apiModule = module {
     single { ProfileApi(get()) }
     single { ExtracurricularApi(get()) }
     single { FcmApi(get()) }
+    single { NotificationPreferencesApi(get()) }
 }
 
 val repositoryModule = module {
@@ -133,7 +139,7 @@ val repositoryModule = module {
     single<DashboardRepositoryContract> { DashboardRepository(get(), get()) }
     single<ProfileRepositoryContract> { ProfileRepository(get(), get()) }
     single<ExtracurricularRepositoryContract> { ExtracurricularRepository(get(), get()) }
-    single<SettingsRepositoryContract> { SettingsRepository(get()) }
+    single<SettingsRepositoryContract> { SettingsRepository(get(), get()) }
 }
 
 val viewModelModule = module {
@@ -151,7 +157,7 @@ val viewModelModule = module {
     viewModelOf(::DetailPengumumanViewModel)
     viewModelOf(::PengumumanSekolahViewModel)
     viewModel { ProfilAkunViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { PengaturanNotifikasiViewModel(get()) }
+    viewModel { PengaturanNotifikasiViewModel(get(), get()) }
     viewModelOf(::DetailInfoAnakViewModel)
     viewModelOf(::KegiatanProgramViewModel)
     viewModelOf(::NilaiRaporViewModel)

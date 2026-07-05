@@ -3,6 +3,8 @@ package com.sdm3.parent.feature.nilai
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.core.security.SecureTokenManager
+import com.sdm3.parent.data.remote.dto.GradeComponentDto
 import com.sdm3.parent.data.remote.dto.GradeDto
 import com.sdm3.parent.domain.repository.GradeRepositoryContract
 
@@ -33,7 +35,8 @@ data class ProjekGradeItem(
 )
 
 class NilaiRaporViewModel(
-    private val gradeRepository: GradeRepositoryContract
+    private val gradeRepository: GradeRepositoryContract,
+    private val secureTokenManager: SecureTokenManager,
 ) : BaseViewModel<NilaiRaporUiState>(NilaiRaporUiState()) {
 
     // Cache subjek per-semester dari transcript agar perpindahan semester instan
@@ -48,6 +51,55 @@ class NilaiRaporViewModel(
             val idx = semesterOrder.indexOf(key.lowercase())
             if (idx == -1) Int.MAX_VALUE else idx
         }
+
+    private fun persistSemester(semester: String) {
+        secureTokenManager.saveLastNilaiSemester(semester)
+    }
+
+    private suspend fun loadComponentGrades(
+        studentId: String,
+        grades: List<GradeDto>,
+    ): Pair<List<FormatifGradeItem>, List<ProjekGradeItem>> {
+        val formatif = mutableListOf<FormatifGradeItem>()
+        val projek = mutableListOf<ProjekGradeItem>()
+
+        for (grade in grades) {
+            when (val result = gradeRepository.getGradeComponents(studentId, grade.subjectId)) {
+                is ApiResult.Success -> {
+                    result.data.forEach { component ->
+                        when (component.componentType.lowercase()) {
+                            "formatif" -> formatif += component.toFormatifItem()
+                            "projek" -> projek += component.toProjekItem()
+                        }
+                    }
+                }
+                is ApiResult.Error -> Unit
+            }
+        }
+        return formatif to projek
+    }
+
+    private fun applyGradesState(
+        semester: String,
+        grades: List<GradeDto>,
+        formatifGrades: List<FormatifGradeItem>,
+        projekGrades: List<ProjekGradeItem>,
+        availableSemesters: List<String> = uiState.value.availableSemesters,
+    ) {
+        persistSemester(semester)
+        updateState {
+            it.copy(
+                isLoading = false,
+                availableSemesters = availableSemesters,
+                semester = semester,
+                grades = grades,
+                formatifGrades = formatifGrades,
+                projekGrades = projekGrades,
+                isEmpty = grades.isEmpty() && formatifGrades.isEmpty() && projekGrades.isEmpty(),
+                selectedTab = 0,
+            )
+        }
+    }
 
     /**
      * Muat data awal: ambil transcript untuk tahu semester mana yang benar-benar
@@ -64,26 +116,18 @@ class NilaiRaporViewModel(
                     semesterSubjects = map
                     val ordered = orderSemesters(map.keys)
                     val chosen = when {
-                        requestedSemester in map -> requestedSemester
-                        ordered.isNotEmpty() -> ordered.first()
-                        else -> requestedSemester
+                        requestedSemester.isNotBlank() && requestedSemester in map -> requestedSemester
+                        ordered.isNotEmpty() -> ordered.last()
+                        requestedSemester.isNotBlank() -> requestedSemester
+                        else -> ordered.firstOrNull() ?: "ganjil"
                     }
                     val subjects = map[chosen].orEmpty()
-                    updateState {
-                        it.copy(
-                            isLoading = false,
-                            availableSemesters = ordered,
-                            semester = chosen,
-                            grades = subjects,
-                            formatifGrades = emptyList(),
-                            projekGrades = emptyList(),
-                            isEmpty = subjects.isEmpty()
-                        )
-                    }
+                    val (formatif, projek) = loadComponentGrades(studentId, subjects)
+                    applyGradesState(chosen, subjects, formatif, projek, ordered)
                 }
                 is ApiResult.Error -> {
                     // Transcript gagal (mis. jaringan): fallback ke endpoint grades biasa.
-                    loadGrades(studentId, requestedSemester)
+                    loadGrades(studentId, requestedSemester.takeIf { it.isNotBlank() })
                 }
             }
         }
@@ -95,16 +139,10 @@ class NilaiRaporViewModel(
         val studentId = uiState.value.studentId
         val cached = semesterSubjects[semester]
         if (cached != null) {
-            updateState {
-                it.copy(
-                    semester = semester,
-                    grades = cached,
-                    formatifGrades = emptyList(),
-                    projekGrades = emptyList(),
-                    isEmpty = cached.isEmpty(),
-                    errorMessage = null,
-                    isLoading = false
-                )
+            launchSafely {
+                updateState { it.copy(isLoading = true, semester = semester) }
+                val (formatif, projek) = loadComponentGrades(studentId, cached)
+                applyGradesState(semester, cached, formatif, projek)
             }
         } else {
             loadGrades(studentId, semester)
@@ -119,19 +157,8 @@ class NilaiRaporViewModel(
             when (val result = gradeRepository.getGrades(studentId, sem)) {
                 is ApiResult.Success -> {
                     val grades = result.data
-                    // Data formatif & projek (P5) yang sebenarnya tersedia per-mapel
-                    // di layar Detail Nilai (GradeComponentDto.componentType). Endpoint
-                    // ringkasan ini hanya mengembalikan nilai sumatif per-mapel, jadi
-                    // JANGAN mengarang data formatif/projek dari nilai sumatif.
-                    updateState {
-                        it.copy(
-                            isLoading = false,
-                            grades = grades,
-                            formatifGrades = emptyList(),
-                            projekGrades = emptyList(),
-                            isEmpty = grades.isEmpty()
-                        )
-                    }
+                    val (formatif, projek) = loadComponentGrades(studentId, grades)
+                    applyGradesState(sem, grades, formatif, projek)
                 }
                 is ApiResult.Error -> {
                     updateState {
@@ -150,4 +177,25 @@ class NilaiRaporViewModel(
         val s = uiState.value
         loadInitial(s.studentId, s.semester)
     }
+}
+
+private fun GradeComponentDto.toFormatifItem() = FormatifGradeItem(
+    code = subjectName,
+    description = tpName ?: catatan ?: componentSubtype.orEmpty(),
+    score = score?.toInt() ?: 0,
+)
+
+private fun GradeComponentDto.toProjekItem() = ProjekGradeItem(
+    tema = subjectName,
+    deskripsi = tpName ?: catatan.orEmpty(),
+    nilai = score?.toInt() ?: 0,
+    predikat = predicateFor(score),
+)
+
+private fun predicateFor(score: Double?): String = when {
+    score == null -> "-"
+    score >= 90 -> "A"
+    score >= 80 -> "B"
+    score >= 70 -> "C"
+    else -> "D"
 }

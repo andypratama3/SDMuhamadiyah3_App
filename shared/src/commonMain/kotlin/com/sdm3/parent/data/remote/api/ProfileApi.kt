@@ -4,10 +4,15 @@ import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.network.HttpClientProvider
 import com.sdm3.parent.core.network.toApiResult
 import com.sdm3.parent.data.remote.dto.ProfileDto
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -49,6 +54,33 @@ class ProfileApi(private val provider: HttpClientProvider) {
                     password = password,
                     passwordConfirmation = passwordConfirmation
                 )
+            )
+        }
+        provider.handleSessionExpiredIfNeeded(response)
+        return response.toApiResult()
+    }
+
+    suspend fun uploadAvatar(
+        bytes: ByteArray,
+        fileName: String,
+        mimeType: String,
+    ): ApiResult<ProfileDto> {
+        val response = provider.client.post {
+            url(Endpoints.PARENT_PROFILE_AVATAR)
+            provider.applyAuthHeader(this)
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            "avatar",
+                            bytes,
+                            Headers.build {
+                                append(HttpHeaders.ContentType, mimeType)
+                                append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                            },
+                        )
+                    },
+                ),
             )
         }
         provider.handleSessionExpiredIfNeeded(response)

@@ -29,8 +29,10 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.data.remote.dto.GradeDto
+import com.sdm3.parent.feature.nilai.FormatifGradeItem
 import com.sdm3.parent.feature.nilai.NilaiRaporUiState
 import com.sdm3.parent.feature.nilai.NilaiRaporViewModel
+import com.sdm3.parent.feature.nilai.ProjekGradeItem
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.tooling.preview.Preview
 
@@ -180,6 +182,13 @@ fun NilaiRaporScreen(
                 }
 
                 Box(modifier = Modifier.weight(1f)) {
+                    val tabs = buildList {
+                        add("Sumatif")
+                        if (vmState.formatifGrades.isNotEmpty()) add("Formatif")
+                        if (vmState.projekGrades.isNotEmpty()) add("Projek")
+                    }
+                    val selectedTab = vmState.selectedTab.coerceIn(0, (tabs.size - 1).coerceAtLeast(0))
+
                     when (uiState) {
                         NilaiRaporScreenUiState.Loading -> {
                             SumatifTabShimmer()
@@ -211,7 +220,38 @@ fun NilaiRaporScreen(
                             )
                         }
                         NilaiRaporScreenUiState.Success -> {
-                            SumatifTabContent(vmState.grades, onDetailMapel)
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                if (tabs.size > 1) {
+                                    PrimaryScrollableTabRow(
+                                        selectedTabIndex = selectedTab,
+                                        containerColor = Color.Transparent,
+                                        contentColor = colorScheme.primary,
+                                        edgePadding = 24.dp,
+                                        divider = {},
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        tabs.forEachIndexed { index, label ->
+                                            Tab(
+                                                selected = selectedTab == index,
+                                                onClick = { viewModel.selectTab(index) },
+                                                text = {
+                                                    Text(
+                                                        text = label,
+                                                        fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                Box(modifier = Modifier.weight(1f)) {
+                                    when (tabs.getOrNull(selectedTab)) {
+                                        "Formatif" -> FormatifTabContent(vmState.formatifGrades)
+                                        "Projek" -> ProjekTabContent(vmState.projekGrades)
+                                        else -> SumatifTabContent(vmState.grades, onDetailMapel)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -408,6 +448,102 @@ private fun SumatifTabContent(
             )
         }
 
+        item { Spacer(Modifier.height(100.dp)) }
+    }
+}
+
+@Composable
+private fun FormatifTabContent(items: List<FormatifGradeItem>) {
+    val colorScheme = MaterialTheme.colorScheme
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+    ) {
+        item {
+            SectionHeader(title = "Penilaian Formatif", modifier = Modifier.padding(top = 8.dp))
+        }
+        items(items) { item ->
+            Sdm3Card(modifier = Modifier.fillMaxWidth(), padding = 16.dp) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = item.code,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary
+                        )
+                        if (item.description.isNotBlank()) {
+                            Text(
+                                text = item.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                    Text(
+                        text = "${item.score}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        color = colorScheme.secondary
+                    )
+                }
+            }
+        }
+        item { Spacer(Modifier.height(100.dp)) }
+    }
+}
+
+@Composable
+private fun ProjekTabContent(items: List<ProjekGradeItem>) {
+    val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+    ) {
+        item {
+            SectionHeader(title = "Projek P5", modifier = Modifier.padding(top = 8.dp))
+        }
+        items(items) { item ->
+            Sdm3Card(modifier = Modifier.fillMaxWidth(), padding = 16.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = item.tema,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                    if (item.deskripsi.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = item.deskripsi,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${item.nilai}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Black,
+                            color = statusSuccess
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Predikat ${item.predikat}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
+                }
+            }
+        }
         item { Spacer(Modifier.height(100.dp)) }
     }
 }

@@ -5,6 +5,7 @@ private const val KEY_SELECTED_STUDENT_ID = "sdm3_selected_student_id"
 private const val KEY_BIOMETRIC_ENABLED = "sdm3_biometric_enabled"
 private const val KEY_FCM_TOKEN = "sdm3_fcm_token"
 private const val KEY_ONBOARDING_COMPLETED = "sdm3_onboarding_completed"
+private const val KEY_LAST_NILAI_SEMESTER = "sdm3_last_nilai_semester"
 
 class SecureTokenManager(private val storage: SecureStorage) {
 
@@ -38,6 +39,14 @@ class SecureTokenManager(private val storage: SecureStorage) {
 
     fun getFcmToken(): String? = storage.string(forKey = KEY_FCM_TOKEN)
 
+    fun saveLastNilaiSemester(semester: String) {
+        if (semester.isNotBlank()) {
+            storage.set(key = KEY_LAST_NILAI_SEMESTER, value = semester)
+        }
+    }
+
+    fun getLastNilaiSemester(): String? = storage.string(forKey = KEY_LAST_NILAI_SEMESTER)
+
     fun clearFcmToken() {
         storage.deleteObject(forKey = KEY_FCM_TOKEN)
     }
@@ -47,6 +56,7 @@ class SecureTokenManager(private val storage: SecureStorage) {
         storage.deleteObject(forKey = KEY_SELECTED_STUDENT_ID)
         storage.deleteObject(forKey = KEY_FCM_TOKEN)
         storage.deleteObject(forKey = KEY_BIOMETRIC_ENABLED)
+        storage.deleteObject(forKey = KEY_LAST_NILAI_SEMESTER)
     }
 
     /**

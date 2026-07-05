@@ -18,6 +18,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
         requestPushAuthorization(application)
+        if let remote = launchOptions?[.remoteNotification] as? [AnyHashable: Any] {
+            bridgePushDeepLink(userInfo: remote)
+        }
         return true
     }
 
@@ -128,6 +131,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         completionHandler([.banner, .sound, .badge])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        bridgePushDeepLink(userInfo: response.notification.request.content.userInfo)
+        completionHandler()
+    }
+
+    private func bridgePushDeepLink(userInfo: [AnyHashable: Any]) {
+        var data: [String: String] = [:]
+        for (key, value) in userInfo {
+            guard let key = key as? String else { continue }
+            if key == "aps" { continue }
+            data[key] = "\(value)"
+        }
+        guard !data.isEmpty else { return }
+        PushDeepLinkBridge.shared.onNotificationOpened(data: data)
     }
 
     private func debugLog(_ message: String) {

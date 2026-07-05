@@ -47,4 +47,18 @@ class ProfileRepository(
             ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal memperbarui profil"))
         }
     }
+
+    override suspend fun uploadAvatar(
+        bytes: ByteArray,
+        fileName: String,
+        mimeType: String,
+    ): ApiResult<ProfileDto> {
+        return try {
+            val result = api.uploadAvatar(bytes, fileName, mimeType)
+            if (result is ApiResult.Success) cache.cacheProfile(result.data)
+            result
+        } catch (e: Exception) {
+            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengunggah foto profil"))
+        }
+    }
 }

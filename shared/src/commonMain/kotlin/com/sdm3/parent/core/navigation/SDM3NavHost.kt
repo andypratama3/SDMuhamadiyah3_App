@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -14,6 +15,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.sdm3.parent.core.event.SessionEventBus
+import com.sdm3.parent.core.notification.PushDeepLinkHolder
+import com.sdm3.parent.core.notification.PushDeepLinkNavigator
 import com.sdm3.parent.core.designsystem.component.Sdm3AdaptiveLayout
 import com.sdm3.parent.feature.auth.ui.AccountDeletionScreen
 import com.sdm3.parent.feature.auth.LoginViewModel
@@ -62,6 +65,21 @@ fun SDM3NavHost(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRouteStr = navBackStackEntry?.destination?.route ?: ""
+    val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
+
+    val pendingDeepLink by PushDeepLinkHolder.pending.collectAsState()
+    LaunchedEffect(pendingDeepLink, currentRouteStr) {
+        val link = pendingDeepLink ?: return@LaunchedEffect
+        if (!PushDeepLinkNavigator.isAuthenticatedDestination(currentRouteStr)) return@LaunchedEffect
+        val route = PushDeepLinkNavigator.toRoute(link, secureTokenManager) ?: return@LaunchedEffect
+        PushDeepLinkHolder.consume()
+        navController.navigate(route) {
+            popUpTo<SDM3Route.Main> {
+                saveState = true
+            }
+            launchSingleTop = true
+        }
+    }
 
     val showBottomBar = when {
         currentRouteStr.contains("Main") -> true
@@ -81,7 +99,6 @@ fun SDM3NavHost(
         currentRouteStr.contains("ProfilAkun") -> SDM3BottomTab.Profil
         else -> null
     }
-    val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager = org.koin.compose.koinInject()
     val savedStudentId = secureTokenManager.getSelectedStudentId() ?: ""
     val argStudentId = try {
         when {
@@ -108,7 +125,10 @@ fun SDM3NavHost(
         onTabSelected = { tab ->
             val route: SDM3Route = when (tab) {
                 SDM3BottomTab.Beranda -> SDM3Route.Main(studentId)
-                SDM3BottomTab.Nilai -> SDM3Route.NilaiRapor(studentId, "ganjil")
+                SDM3BottomTab.Nilai -> SDM3Route.NilaiRapor(
+                    studentId,
+                    secureTokenManager.getLastNilaiSemester().orEmpty()
+                )
                 SDM3BottomTab.Bayar -> SDM3Route.PembayaranSpp(studentId)
                 SDM3BottomTab.Rapor -> SDM3Route.HalamanRapor(studentId)
                 SDM3BottomTab.Profil -> SDM3Route.ProfilAkun

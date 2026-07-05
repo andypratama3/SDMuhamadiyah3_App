@@ -2,6 +2,7 @@ package com.sdm3.parent.feature.profil
 
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
+import com.sdm3.parent.core.notification.FcmRegistrar
 import com.sdm3.parent.domain.repository.SettingsRepositoryContract
 
 data class PengaturanNotifikasiUiState(
@@ -12,7 +13,8 @@ data class PengaturanNotifikasiUiState(
 ) : ScreenState
 
 class PengaturanNotifikasiViewModel(
-    private val settingsRepository: SettingsRepositoryContract
+    private val settingsRepository: SettingsRepositoryContract,
+    private val fcmRegistration: FcmRegistrar,
 ) : BaseViewModel<PengaturanNotifikasiUiState>(PengaturanNotifikasiUiState()) {
 
     fun loadSettings() {
@@ -40,8 +42,15 @@ class PengaturanNotifikasiViewModel(
     }
 
     fun togglePush() {
-        updateState { it.copy(settings = it.settings.copy(pushEnabled = !it.settings.pushEnabled)) }
-        persistSettings()
+        val enabled = !uiState.value.settings.pushEnabled
+        updateState { it.copy(settings = it.settings.copy(pushEnabled = enabled)) }
+        persistSettings {
+            if (enabled) {
+                fcmRegistration.registerIfAvailable()
+            } else {
+                fcmRegistration.unregisterIfNeeded()
+            }
+        }
     }
 
     fun toggleEmail() {
@@ -79,13 +88,14 @@ class PengaturanNotifikasiViewModel(
         persistSettings()
     }
 
-    private fun persistSettings() {
+    private fun persistSettings(onSuccess: suspend () -> Unit = {}) {
         launchSafely(
             onError = { error ->
                 updateState { it.copy(errorMessage = error.message ?: "Gagal menyimpan pengaturan") }
             }
         ) {
             settingsRepository.saveNotificationSettings(uiState.value.settings)
+            onSuccess()
         }
     }
 }

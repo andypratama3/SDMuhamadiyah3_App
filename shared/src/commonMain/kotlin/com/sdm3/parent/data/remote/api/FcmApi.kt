@@ -23,10 +23,13 @@ class FcmApi(private val provider: HttpClientProvider) {
         return response.toApiResult()
     }
 
-    suspend fun unregister(): ApiResult<Unit> {
+    suspend fun unregister(fcmToken: String? = null): ApiResult<Unit> {
         val response = provider.client.post {
             url(Endpoints.PARENT_FCM_UNREGISTER)
             provider.applyAuthHeader(this)
+            if (fcmToken != null) {
+                setBody(FcmUnregisterRequest(fcmToken = fcmToken))
+            }
         }
         provider.handleSessionExpiredIfNeeded(response)
         return response.toApiResult()
@@ -38,5 +41,11 @@ class FcmApi(private val provider: HttpClientProvider) {
         val fcmToken: String,
         @SerialName("device_platform")
         val devicePlatform: String? = "android"
+    )
+
+    @Serializable
+    private data class FcmUnregisterRequest(
+        @SerialName("fcm_token")
+        val fcmToken: String,
     )
 }

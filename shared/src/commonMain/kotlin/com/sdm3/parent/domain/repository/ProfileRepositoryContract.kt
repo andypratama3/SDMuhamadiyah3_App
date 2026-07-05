@@ -13,4 +13,9 @@ interface ProfileRepositoryContract {
         password: String? = null,
         passwordConfirmation: String? = null
     ): ApiResult<ProfileDto>
+    suspend fun uploadAvatar(
+        bytes: ByteArray,
+        fileName: String,
+        mimeType: String,
+    ): ApiResult<ProfileDto>
 }

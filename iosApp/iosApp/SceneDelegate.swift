@@ -3,6 +3,8 @@ import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    private var qrScanObserver: NSObjectProtocol?
+    private var avatarPickObserver: NSObjectProtocol?
 
     func scene(
         _ scene: UIScene,
@@ -16,5 +18,50 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = composeController
         window.makeKeyAndVisible()
         self.window = window
+
+        qrScanObserver = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("SDM3QrScanRequest"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let root = self?.window?.rootViewController else {
+                IosQrScanCallbackDispatcher.shared.deliverResult(value: nil)
+                return
+            }
+            QrCodeScannerPresenter.present(from: root) { result in
+                IosQrScanCallbackDispatcher.shared.deliverResult(value: result)
+            }
+        }
+
+        avatarPickObserver = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("SDM3AvatarPickRequest"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let root = self?.window?.rootViewController else {
+                IosAvatarPickCallbackDispatcher.shared.deliverResult(
+                    base64Data: nil,
+                    fileName: nil,
+                    mimeType: nil
+                )
+                return
+            }
+            AvatarImagePickerPresenter.present(from: root) { base64Data, fileName, mimeType in
+                IosAvatarPickCallbackDispatcher.shared.deliverResult(
+                    base64Data: base64Data,
+                    fileName: fileName,
+                    mimeType: mimeType
+                )
+            }
+        }
+    }
+
+    deinit {
+        if let qrScanObserver {
+            NotificationCenter.default.removeObserver(qrScanObserver)
+        }
+        if let avatarPickObserver {
+            NotificationCenter.default.removeObserver(avatarPickObserver)
+        }
     }
 }
