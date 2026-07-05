@@ -85,7 +85,6 @@ class LoginViewModel(
 
             when (val result = authRepository.login(state.email.trim(), state.password)) {
                 is ApiResult.Success -> {
-                    secureTokenManager.setBiometricEnabled(true)
                     fcmRegistration.registerIfAvailable()
                     updateState { it.copy(isLoading = false, isLoggedIn = true) }
                     sendEffect(LoginEffect.LoginSuccess)

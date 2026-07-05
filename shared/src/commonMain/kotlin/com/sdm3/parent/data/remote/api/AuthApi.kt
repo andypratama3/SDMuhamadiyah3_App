@@ -9,6 +9,7 @@ import com.sdm3.parent.data.remote.dto.ForgotPasswordRequest
 import com.sdm3.parent.data.remote.dto.ForgotPasswordResponse
 import com.sdm3.parent.data.remote.dto.LoginRequest
 import com.sdm3.parent.data.remote.dto.LoginResponse
+import com.sdm3.parent.data.remote.dto.ProfileDto
 import com.sdm3.parent.data.remote.dto.ResetPasswordRequest
 import com.sdm3.parent.data.remote.dto.ResetPasswordResponse
 import com.sdm3.parent.data.remote.dto.UserDto
@@ -47,11 +48,22 @@ class AuthApi(private val provider: HttpClientProvider) {
 
     suspend fun getUser(): ApiResult<UserDto> {
         val response = provider.client.get {
-            url(Endpoints.API_USER)
+            url(Endpoints.PARENT_ME)
             provider.applyAuthHeader(this)
         }
         provider.handleSessionExpiredIfNeeded(response)
-        return response.parseUserResponse()
+        return when (val result = response.toApiResult<ProfileDto>()) {
+            is ApiResult.Success -> ApiResult.Success(
+                UserDto(
+                    id = result.data.id,
+                    name = result.data.name,
+                    email = result.data.email,
+                    phone = result.data.phone,
+                    avatar = result.data.avatar,
+                )
+            )
+            is ApiResult.Error -> result
+        }
     }
 
     suspend fun deleteAccount(reason: String): ApiResult<Unit> {

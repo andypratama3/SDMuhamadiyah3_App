@@ -150,7 +150,7 @@ val viewModelModule = module {
     viewModelOf(::NotifikasiViewModel)
     viewModelOf(::DetailPengumumanViewModel)
     viewModelOf(::PengumumanSekolahViewModel)
-    viewModel { ProfilAkunViewModel(get(), get(), get(), get()) }
+    viewModel { ProfilAkunViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { PengaturanNotifikasiViewModel(get()) }
     viewModelOf(::DetailInfoAnakViewModel)
     viewModelOf(::KegiatanProgramViewModel)

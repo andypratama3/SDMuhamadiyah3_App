@@ -172,8 +172,9 @@ fun OnboardingScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .navigationBarsPadding()
                         .padding(horizontal = 24.dp)
-                        .padding(bottom = 40.dp),
+                        .padding(bottom = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Modern Pager Indicators

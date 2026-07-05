@@ -34,14 +34,13 @@ class PilihMetodeBayarViewModel(
         val studentId = secureTokenManager.getSelectedStudentId() ?: return
         launchSafely {
             updateState { it.copy(isLoading = true, errorMessage = null) }
+            var feeError: String? = null
             when (val feesResult = paymentRepository.getStudentFees(studentId)) {
                 is ApiResult.Success -> {
                     val fee = feesResult.data.find { it.id == uiState.value.studentFeeId }
                     updateState { it.copy(selectedFee = fee) }
                 }
-                is ApiResult.Error -> {
-                    updateState { it.copy(errorMessage = feesResult.error.toUserMessage()) }
-                }
+                is ApiResult.Error -> feeError = feesResult.error.toUserMessage()
             }
             when (val methodsResult = paymentRepository.getPaymentMethods()) {
                 is ApiResult.Success -> {
@@ -49,13 +48,18 @@ class PilihMetodeBayarViewModel(
                         it.copy(
                             paymentMethods = methodsResult.data,
                             isLoading = false,
-                            isEmpty = methodsResult.data.isEmpty()
+                            isEmpty = methodsResult.data.isEmpty(),
+                            errorMessage = feeError,
                         )
                     }
                 }
                 is ApiResult.Error -> {
                     updateState {
-                        it.copy(isLoading = false, errorMessage = methodsResult.error.toUserMessage())
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = methodsResult.error.toUserMessage().takeIf { it.isNotBlank() }
+                                ?: feeError,
+                        )
                     }
                 }
             }

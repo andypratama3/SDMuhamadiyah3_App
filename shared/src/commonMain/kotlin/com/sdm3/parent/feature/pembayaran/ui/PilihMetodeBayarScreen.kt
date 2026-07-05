@@ -83,7 +83,11 @@ fun PilihMetodeBayarScreen(
             when {
                 redirect != null -> {
                     PlatformActions.openUrl(redirect)
-                    onLanjutkan(paymentId ?: studentFeeId)
+                    if (paymentId != null) {
+                        onLanjutkan(paymentId)
+                    } else {
+                        viewModel.showError("Data pembayaran tidak lengkap dari server. Silakan coba lagi.")
+                    }
                 }
                 paymentId != null -> onLanjutkan(paymentId)
                 else -> viewModel.showError("Gagal memulai pembayaran. Silakan coba lagi.")

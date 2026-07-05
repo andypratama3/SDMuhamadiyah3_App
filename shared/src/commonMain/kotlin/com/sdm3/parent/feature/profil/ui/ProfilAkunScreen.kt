@@ -72,6 +72,14 @@ fun ProfilAkunScreen(
     var showStudentSheet by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
+    if (!isPreview) {
+        LaunchedEffect(viewModel) {
+            viewModel.logoutCompletedFlow.collect {
+                onLogout()
+            }
+        }
+    }
+
     val errorMessage = uiState.errorMessage
 
     val screenState = remember(uiState.isLoading, uiState.isEmpty, errorMessage, isPreview) {
@@ -84,17 +92,24 @@ fun ProfilAkunScreen(
         }
     }
 
-    if (!isPreview) {
-        LaunchedEffect(Unit) {
-            viewModel.loadProfile()
-            viewModel.loadStudents()
-        }
-    }
-
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val showInfo: (String) -> Unit = { message ->
         scope.launch { snackbarHostState.showSnackbar(message) }
+    }
+
+    if (!isPreview) {
+        LaunchedEffect(Unit) {
+            viewModel.loadProfile()
+            viewModel.loadStudents()
+            viewModel.loadBiometricState()
+        }
+        LaunchedEffect(uiState.biometricMessage) {
+            uiState.biometricMessage?.let { message ->
+                snackbarHostState.showSnackbar(message)
+                viewModel.clearBiometricMessage()
+            }
+        }
     }
 
     Scaffold(
@@ -196,6 +211,14 @@ fun ProfilAkunScreen(
 
                         Sdm3Card(padding = 8.dp) {
                             Column {
+                                BiometricSettingsRow(
+                                    enabled = uiState.biometricEnabled,
+                                    onToggle = { if (!isPreview) viewModel.setBiometricEnabled(it) },
+                                )
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = colorScheme.primary.copy(alpha = 0.05f)
+                                )
                                 listOf(
                                     SettingsItem("Notifikasi Portal", Icons.Outlined.Notifications, colorScheme.primary, onNotifikasiSetting),
                                     SettingsItem("Preferensi Bahasa", Icons.Outlined.Language, colorScheme.primary, { showInfo("Bahasa Indonesia aktif") }),
@@ -337,7 +360,6 @@ fun ProfilAkunScreen(
                         if (!isPreview) {
                             viewModel.logout()
                         }
-                        onLogout()
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
@@ -680,6 +702,53 @@ private fun StudentMiniCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BiometricSettingsRow(
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit,
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(12.dp),
+            color = colorScheme.primary.copy(alpha = 0.05f),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    Icons.Outlined.Fingerprint,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = colorScheme.primary,
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Login Biometrik",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.primary,
+            )
+            Text(
+                text = "Masuk cepat dengan sidik jari atau Face ID",
+                style = MaterialTheme.typography.labelSmall,
+                color = colorScheme.primary.copy(alpha = 0.5f),
+            )
+        }
+        Switch(
+            checked = enabled,
+            onCheckedChange = onToggle,
+        )
     }
 }
 

@@ -43,7 +43,9 @@ fun App() {
         }
 
         LaunchedEffect(fcmTokenProvider) {
-            fcmTokenProvider.requestPermissionIfNeeded()
+            if (getPlatformName() == "Android") {
+                fcmTokenProvider.requestPermissionIfNeeded()
+            }
             // Debug Android: cetak FCM token ke Logcat. iOS dicetak dari AppDelegate Swift.
             if (isDebugBuild() && getPlatformName() == "Android") {
                 delay(1500)

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.Sdm3Logo
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.core.security.SecureTokenManager
@@ -66,11 +67,26 @@ fun SplashScreen(
                             }
                         }
                         is ApiResult.Error -> {
-                            auth.clearLocalSession()
-                            onNavigate(
-                                if (tokenManager.isOnboardingCompleted()) SDM3Route.Login
-                                else SDM3Route.Onboarding
-                            )
+                            when (result.error) {
+                                is ApiError.Unauthorized,
+                                is ApiError.SessionExpired,
+                                is ApiError.Forbidden -> {
+                                    auth.clearLocalSession()
+                                    onNavigate(
+                                        if (tokenManager.isOnboardingCompleted()) SDM3Route.Login
+                                        else SDM3Route.Onboarding
+                                    )
+                                }
+                                else -> {
+                                    // Jaringan/server down: jangan hapus token yang masih valid.
+                                    val studentId = tokenManager.getSelectedStudentId()
+                                    if (!studentId.isNullOrBlank()) {
+                                        onNavigate(SDM3Route.Main(studentId))
+                                    } else {
+                                        onNavigate(SDM3Route.PilihAnak)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -87,6 +103,7 @@ private fun SplashContent(
 ) {
     val isPreview = LocalInspectionMode.current
     val reducedMotion = LocalReducedMotion.current
+    val colorScheme = MaterialTheme.colorScheme
     val heroContent = heroContentColor()
     val glassSurface = glassSurfaceColor()
     var startAnimation by remember { mutableStateOf(isPreview) }
@@ -164,7 +181,10 @@ private fun SplashContent(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Primary, Primary.copy(alpha = 0.15f).copy(alpha = 0.8f))
+                    colors = listOf(
+                        colorScheme.primary,
+                        colorScheme.primaryContainer.copy(alpha = 0.85f)
+                    )
                 )
             )
             .safeDrawingPadding(),
@@ -179,7 +199,7 @@ private fun SplashContent(
             // Orb 1: Academic Gold Glow
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Secondary.copy(alpha = 0.15f), Color.Transparent),
+                    colors = listOf(colorScheme.secondary.copy(alpha = 0.15f), Color.Transparent),
                     center = Offset(canvasWidth * phase1, canvasHeight * 0.2f),
                     radius = maxRadius
                 ),
@@ -190,7 +210,7 @@ private fun SplashContent(
             // Orb 2: Soft Navy Glow
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Primary.copy(alpha = 0.15f).copy(alpha = 0.1f), Color.Transparent),
+                    colors = listOf(colorScheme.primary.copy(alpha = 0.1f), Color.Transparent),
                     center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.8f),
                     radius = maxRadius * 0.7f
                 ),
@@ -261,7 +281,7 @@ private fun SplashContent(
                 // Academic Gold Subtitle
                 Text(
                     text = stringResource(Res.string.splash_subtitle).uppercase(),
-                    color = Secondary,
+                    color = colorScheme.secondary,
                     style = MaterialTheme.typography.labelMedium.copy(
                         letterSpacing = 4.sp,
                         fontWeight = FontWeight.Bold
@@ -292,7 +312,7 @@ private fun SplashContent(
                         .fillMaxWidth(progressAnim)
                         .background(
                             Brush.horizontalGradient(
-                                colors = listOf(Color.Transparent, Secondary, Color.Transparent)
+                                colors = listOf(Color.Transparent, colorScheme.secondary, Color.Transparent)
                             )
                         )
                 )

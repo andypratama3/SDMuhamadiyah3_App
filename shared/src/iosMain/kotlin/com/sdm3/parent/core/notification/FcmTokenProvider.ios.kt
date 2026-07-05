@@ -1,10 +1,5 @@
 package com.sdm3.parent.core.notification
 
-import platform.UserNotifications.UNAuthorizationOptionAlert
-import platform.UserNotifications.UNAuthorizationOptionBadge
-import platform.UserNotifications.UNAuthorizationOptionSound
-import platform.UserNotifications.UNUserNotificationCenter
-
 actual class FcmTokenProvider {
     actual suspend fun getToken(): String? = FcmTokenStore.getCachedToken()
 
@@ -14,9 +9,6 @@ actual class FcmTokenProvider {
     }
 
     actual fun requestPermissionIfNeeded() {
-        val center = UNUserNotificationCenter.currentNotificationCenter()
-        center.requestAuthorizationWithOptions(
-            options = UNAuthorizationOptionAlert or UNAuthorizationOptionSound or UNAuthorizationOptionBadge
-        ) { _, _ -> }
+        // iOS: izin push diminta sekali di AppDelegate (Swift) agar tidak dobel prompt.
     }
 }

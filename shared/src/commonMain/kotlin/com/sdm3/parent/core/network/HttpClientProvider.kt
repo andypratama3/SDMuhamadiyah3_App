@@ -21,6 +21,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.serializer
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.http.encodedPath
 import com.sdm3.parent.core.event.SessionEventBus
 import com.sdm3.parent.isDebugBuild
 
@@ -80,10 +81,22 @@ class HttpClientProvider(
     }
 
     internal suspend fun handleSessionExpiredIfNeeded(response: HttpResponse) {
+        val path = response.call.request.url.encodedPath
+        if (path in PUBLIC_API_PATHS) return
+
         if (response.status.value == 419 || response.status.value == 401) {
             onSessionExpired()
             SessionEventBus.emit()
         }
+    }
+
+    private companion object {
+        val PUBLIC_API_PATHS = setOf(
+            "/api/sanctum/token",
+            "/api/forgot-password",
+            "/api/verify-otp",
+            "/api/reset-password",
+        )
     }
 }
 
