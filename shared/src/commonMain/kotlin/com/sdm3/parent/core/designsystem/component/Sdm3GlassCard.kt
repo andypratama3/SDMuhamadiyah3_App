@@ -42,7 +42,7 @@ fun Sdm3GlassCard(
     modifier: Modifier = Modifier,
     padding: Dp = 0.dp,
     blurRadius: Dp = 12.dp,
-    tint: Color = GlassSurface,
+    tint: Color = ProductSchoolTheme.colors.surfaceGlass,
     innerHighlightAlpha: Float = 0.35f,
     content: @Composable () -> Unit,
 ) {
@@ -57,7 +57,7 @@ fun Sdm3GlassCard(
             width = 1.dp,
             brush = Brush.verticalGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = innerHighlightAlpha),
+                    ProductSchoolTheme.colors.glassOutline,
                     Color.Transparent,
                 ),
             ),
@@ -75,13 +75,14 @@ fun Sdm3DashedGlassCard(
     padding: Dp = Spacing.md,
     content: @Composable () -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
     Card(
         modifier = modifier
             .fillMaxWidth()
             .drawWithContent {
                 drawContent()
                 drawRoundRect(
-                    color = Primary.copy(alpha = 0.2f),
+                    color = primaryColor.copy(alpha = 0.2f),
                     cornerRadius = CornerRadius(16.dp.toPx()),
                     style = Stroke(
                         width = 1.5.dp.toPx(),
@@ -94,7 +95,7 @@ fun Sdm3DashedGlassCard(
             },
         shape = CardShape,
         colors = CardDefaults.cardColors(
-            containerColor = GlassSurface,
+            containerColor = ProductSchoolTheme.colors.surfaceGlass,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {

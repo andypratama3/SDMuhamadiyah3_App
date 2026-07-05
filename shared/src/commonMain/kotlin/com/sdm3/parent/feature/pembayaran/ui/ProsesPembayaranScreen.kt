@@ -54,6 +54,8 @@ fun ProsesPembayaranScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
     val viewModel: ProsesPembayaranViewModel = koinViewModel()
     val vmState by if (isPreview) {
         remember { mutableStateOf(com.sdm3.parent.feature.pembayaran.ProsesPembayaranUiState()) }
@@ -277,7 +279,7 @@ fun ProsesPembayaranScreen(
                                         onClick = { PlatformActions.copyToClipboard(vmState.vaNumber, "Nomor VA") },
                                         icon = Icons.Default.ContentCopy,
                                         containerColor = colorScheme.primary,
-                                        contentColor = Color.White,
+                                        contentColor = colorScheme.onPrimary,
                                         modifier = Modifier.fillMaxWidth().height(52.dp)
                                     )
                                 } else if (!redirect.isNullOrBlank()) {
@@ -285,7 +287,7 @@ fun ProsesPembayaranScreen(
                                         text = "Buka Halaman Pembayaran",
                                         onClick = { PlatformActions.openUrl(redirect) },
                                         containerColor = colorScheme.primary,
-                                        contentColor = Color.White,
+                                        contentColor = colorScheme.onPrimary,
                                         modifier = Modifier.fillMaxWidth().height(52.dp)
                                     )
                                 }
@@ -313,9 +315,9 @@ fun ProsesPembayaranScreen(
                                     )
                                 }
                                 val statusColor = when (vmState.status) {
-                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> StatusSuccess
+                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> statusSuccess
                                     com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED -> colorScheme.error
-                                    else -> StatusWarning
+                                    else -> statusWarning
                                 }
                                 val statusLabel = when (vmState.status) {
                                     com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> "BERHASIL"
@@ -407,7 +409,7 @@ fun ProsesPembayaranScreen(
                                 text = "Kembali",
                                 onClick = onBack,
                                 containerColor = colorScheme.primary,
-                                contentColor = Color.White,
+                                contentColor = colorScheme.onPrimary,
                                 modifier = Modifier.fillMaxWidth().height(56.dp)
                             )
                         } else {

@@ -72,6 +72,8 @@ fun KehadiranSiswaScreen(
         viewModel.uiState.collectAsState()
     }
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
 
     val errorMessage = uiState.errorMessage
 
@@ -183,7 +185,7 @@ fun KehadiranSiswaScreen(
                     val month = uiState.selectedMonth
                     val year = uiState.selectedYear
 
-                    val presentCount = summary?.hadir ?: attendances.count { it.status == "hadir" }
+                    val presentCount = summary?.hadir ?: attendances.count { it.status.equals("hadir", true) || it.status.equals("present", true) }
                     val sickCount = summary?.sakit ?: attendances.count { it.status == "sakit" }
                     val izinCount = summary?.izin ?: attendances.count { it.status == "izin" }
                     val alpaCount = summary?.alpa ?: attendances.count { it.status == "alpa" }
@@ -241,14 +243,14 @@ fun KehadiranSiswaScreen(
                                     modifier = Modifier.weight(1f),
                                     label = "HADIR",
                                     count = "$presentCount",
-                                    color = StatusSuccess,
+                                    color = statusSuccess,
                                     icon = Icons.Outlined.CheckCircle
                                 )
                                 SummaryCard(
                                     modifier = Modifier.weight(1f),
                                     label = "SAKIT",
                                     count = "$sickCount",
-                                    color = StatusWarning,
+                                    color = statusWarning,
                                     icon = Icons.Outlined.MedicalServices
                                 )
                             }
@@ -391,7 +393,7 @@ fun KehadiranSiswaScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        listOf("Hadir" to StatusSuccess, "Sakit" to StatusWarning, "Alpa" to colorScheme.error).forEach { (label, color) ->
+                                        listOf("Hadir" to statusSuccess, "Sakit" to statusWarning, "Alpa" to colorScheme.error).forEach { (label, color) ->
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(color))
                                                 Spacer(Modifier.width(6.dp))
@@ -419,8 +421,8 @@ fun KehadiranSiswaScreen(
                             itemsIndexed(attendances) { _, att ->
                                 val logStatus = att.status
                                 val (logColor, logIcon) = when (logStatus) {
-                                    "hadir" -> StatusSuccess to Icons.Outlined.CheckCircle
-                                    "sakit" -> StatusWarning to Icons.Outlined.MedicalServices
+                                    "hadir" -> statusSuccess to Icons.Outlined.CheckCircle
+                                    "sakit" -> statusWarning to Icons.Outlined.MedicalServices
                                     "izin" -> colorScheme.primary to Icons.Outlined.EventAvailable
                                     "alpa" -> colorScheme.error to Icons.Outlined.Cancel
                                     else -> colorScheme.onSurfaceVariant.copy(alpha = 0.3f) to Icons.Outlined.Info
@@ -682,9 +684,12 @@ private fun LogRowShimmer() {
 
 @Composable
 private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onPrimary: Boolean = false, status: String? = null, isSunday: Boolean = false) {
+    val heroContent = heroContentColor()
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
     val dotColor = when (status) {
-        "hadir" -> if (onPrimary) Color.White else StatusSuccess
-        "sakit" -> StatusWarning
+        "hadir" -> if (onPrimary) heroContent else statusSuccess
+        "sakit" -> statusWarning
         "izin" -> colorScheme.primary
         "alpa" -> colorScheme.error
         else -> null
@@ -698,7 +703,7 @@ private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onP
             text = "$day",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = if (isToday) FontWeight.Black else FontWeight.Bold,
-            color = if (onPrimary) Color.White else if (isSunday) colorScheme.error else colorScheme.primary
+            color = if (onPrimary) heroContent else if (isSunday) colorScheme.error else colorScheme.primary
         )
         if (dotColor != null) {
             Spacer(modifier = Modifier.height(2.dp))
@@ -729,6 +734,7 @@ private fun TodayAttendanceCard(
     timeLocation: String = "Pukul 06:58 \u00B7 Gerbang Utama"
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val heroContent = heroContentColor()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -756,13 +762,13 @@ private fun TodayAttendanceCard(
                 Surface(
                     modifier = Modifier.size(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    color = Color.White.copy(alpha = 0.2f)
+                    color = heroContent.copy(alpha = 0.2f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             Icons.Outlined.Fingerprint,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = heroContent,
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -772,20 +778,20 @@ private fun TodayAttendanceCard(
                     text = "STATUS HARI INI",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
-                    color = Color.White.copy(alpha = 0.6f),
+                    color = heroContent.copy(alpha = 0.6f),
                     letterSpacing = 2.sp
                 )
                 Text(
                     text = statusLabel,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = heroContent
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = timeLocation,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.8f)
+                    color = heroContent.copy(alpha = 0.8f)
                 )
             }
         }

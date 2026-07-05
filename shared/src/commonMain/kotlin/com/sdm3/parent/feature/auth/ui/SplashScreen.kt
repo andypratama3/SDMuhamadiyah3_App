@@ -66,7 +66,7 @@ fun SplashScreen(
                             }
                         }
                         is ApiResult.Error -> {
-                            auth.logout()
+                            auth.clearLocalSession()
                             onNavigate(
                                 if (tokenManager.isOnboardingCompleted()) SDM3Route.Login
                                 else SDM3Route.Onboarding
@@ -87,6 +87,8 @@ private fun SplashContent(
 ) {
     val isPreview = LocalInspectionMode.current
     val reducedMotion = LocalReducedMotion.current
+    val heroContent = heroContentColor()
+    val glassSurface = glassSurfaceColor()
     var startAnimation by remember { mutableStateOf(isPreview) }
 
     // High-End Vanguard Motion Curves
@@ -164,7 +166,8 @@ private fun SplashContent(
                 Brush.verticalGradient(
                     colors = listOf(Primary, Primary.copy(alpha = 0.15f).copy(alpha = 0.8f))
                 )
-            ),
+            )
+            .safeDrawingPadding(),
         contentAlignment = Alignment.Center
     ) {
         // Multi-Orb Animated Mesh Background (ProductSchool Style)
@@ -199,7 +202,10 @@ private fun SplashContent(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(horizontal = Spacing.xxl)
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = (-36).dp)
+                .padding(horizontal = Spacing.xxl)
         ) {
             // Logo with Glassmorphic Glow
             Box(
@@ -219,7 +225,7 @@ private fun SplashContent(
                         .size(logoSize * 1.8f)
                         .background(
                             Brush.radialGradient(
-                                listOf(Color.White.copy(alpha = 0.1f * logoAlphaAnim), Color.Transparent)
+                                listOf(glassSurface.copy(alpha = 0.1f * logoAlphaAnim), Color.Transparent)
                             )
                         )
                 )
@@ -230,7 +236,7 @@ private fun SplashContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(Spacing.xxxl))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             // Typography Stack with Inter-like Hierarchy
             Column(
@@ -242,7 +248,7 @@ private fun SplashContent(
             ) {
                 Text(
                     text = stringResource(Res.string.app_name),
-                    color = Color.White,
+                    color = heroContent,
                     style = MaterialTheme.typography.displayMedium.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-1.0).sp
@@ -265,42 +271,46 @@ private fun SplashContent(
             }
         }
 
-        // Micro-Precision Progress Line (Academic Gold)
-        Box(
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 100.dp)
-                .width(160.dp)
-                .height(3.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(Color.White.copy(alpha = 0.1f)),
-            contentAlignment = Alignment.Center
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(progressAnim)
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(Color.Transparent, Secondary, Color.Transparent)
+                    .width(160.dp)
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(glassSurface.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(progressAnim)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(Color.Transparent, Secondary, Color.Transparent)
+                            )
                         )
-                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "PORTAL WALI MURID • SD MUHAMMADIYAH 3 SAMARINDA",
+                color = heroContent.copy(alpha = 0.4f),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    letterSpacing = 2.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.graphicsLayer { alpha = textAlphaAnim }
             )
         }
-
-        // Institutional Footer
-        Text(
-            text = "PORTAL WALI MURID • SD MUHAMMADIYAH 3 SAMARINDA",
-            color = Color.White.copy(alpha = 0.4f),
-            style = MaterialTheme.typography.labelSmall.copy(
-                letterSpacing = 2.sp,
-                fontWeight = FontWeight.Bold
-            ),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = Spacing.xl)
-                .graphicsLayer { alpha = textAlphaAnim }
-        )
     }
 }
 

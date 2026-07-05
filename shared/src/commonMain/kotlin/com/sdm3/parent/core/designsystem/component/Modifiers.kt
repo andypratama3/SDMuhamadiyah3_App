@@ -28,7 +28,7 @@ fun Modifier.doubleBezel(
     innerRadius: Dp = 24.dp,
     outerPadding: Dp = 6.dp,
     outerColor: Color = Color.Black.copy(alpha = 0.04f),
-    innerColor: Color = Color.White
+    innerColor: Color,
 ): Modifier = this
     .background(outerColor, RoundedCornerShape(outerRadius))
     .padding(outerPadding)
@@ -70,7 +70,7 @@ private fun ModifiersPreview() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .doubleBezel(),
+                    .doubleBezel(innerColor = MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
                 Text("doubleBezel()", style = MaterialTheme.typography.bodyMedium)
@@ -81,7 +81,7 @@ private fun ModifiersPreview() {
                     .height(60.dp)
                     .clip(RoundedCornerShape(24.dp))
                     .level1Shadow()
-                    .background(Color.White),
+                    .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
                 Text("level1Shadow()", style = MaterialTheme.typography.bodyMedium)
@@ -92,7 +92,7 @@ private fun ModifiersPreview() {
                     .height(60.dp)
                     .clip(RoundedCornerShape(28.dp))
                     .level2Shadow()
-                    .background(Color.White),
+                    .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
                 Text("level2Shadow()", style = MaterialTheme.typography.bodyMedium)

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
 import com.sdm3.parent.core.navigation.SDM3BottomTab
 
 enum class WindowWidthSizeClass { Compact, Medium, Expanded }
@@ -107,12 +108,13 @@ private fun Sdm3NavRail(
     onTabSelected: (SDM3BottomTab) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val glassSurface = glassSurfaceColor()
 
     Surface(
         modifier = Modifier
             .fillMaxHeight()
             .width(80.dp),
-        color = Color.White.copy(alpha = 0.95f),
+        color = glassSurface,
         tonalElevation = 0.dp
     ) {
         NavigationRail(
@@ -128,7 +130,7 @@ private fun Sdm3NavRail(
             navItems.forEach { item ->
                 val selected = selectedTab == item.tab
                 val contentColor by animateColorAsState(
-                    targetValue = if (selected) Color.White else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    targetValue = if (selected) colorScheme.onPrimary else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     animationSpec = tween(400)
                 )
                 val backgroundColor by animateColorAsState(

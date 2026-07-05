@@ -27,7 +27,7 @@ class NotifikasiViewModel(
                     updateState {
                         it.copy(
                             notifications = notifs,
-                            unreadCount = notifs.count { n -> n.readAt == null },
+                            unreadCount = notifs.count { n -> !n.isUnread() },
                             isLoading = false,
                             isEmpty = notifs.isEmpty()
                         )
@@ -44,17 +44,17 @@ class NotifikasiViewModel(
 
     fun markAsRead(id: String) {
         // Jangan tandai terbaca secara lokal bila panggilan API gagal.
-        if (uiState.value.notifications.any { it.id == id && it.readAt == null }.not()) return
+        if (uiState.value.notifications.none { it.id == id && it.isUnread() }) return
         launchSafely {
             when (notificationRepository.markAsRead(id)) {
                 is ApiResult.Success -> {
                     val updated = uiState.value.notifications.map { n ->
-                        if (n.id == id) n.copy(readAt = "now") else n
+                        if (n.id == id) n.copy(isRead = true, readAt = "now") else n
                     }
                     updateState {
                         it.copy(
                             notifications = updated,
-                            unreadCount = updated.count { n -> n.readAt == null }
+                            unreadCount = updated.count { n -> n.isUnread() }
                         )
                     }
                 }
@@ -67,7 +67,7 @@ class NotifikasiViewModel(
         launchSafely {
             when (notificationRepository.markAllAsRead()) {
                 is ApiResult.Success -> {
-                    val updated = uiState.value.notifications.map { it.copy(readAt = "now") }
+                    val updated = uiState.value.notifications.map { it.copy(isRead = true, readAt = "now") }
                     updateState {
                         it.copy(
                             notifications = updated,
@@ -84,3 +84,7 @@ class NotifikasiViewModel(
         loadNotifications()
     }
 }
+
+/** Belum dibaca jika is_read false/null dan read_at kosong. */
+private fun NotificationDto.isUnread(): Boolean =
+    isRead != true && readAt.isNullOrBlank()

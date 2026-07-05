@@ -31,8 +31,8 @@ fun NetworkErrorDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(28.dp),
-        containerColor = Color.White.copy(alpha = 0.9f),
-        modifier = Modifier.border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(28.dp)),
+        containerColor = colorScheme.surface,
+        modifier = Modifier.border(1.dp, glassBorderColor(), RoundedCornerShape(28.dp)),
         icon = {
             Surface(
                 modifier = Modifier.size(72.dp),
@@ -76,7 +76,7 @@ fun NetworkErrorDialog(
                 onClick = onRetry,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 containerColor = colorScheme.primary,
-                contentColor = Color.White
+                contentColor = colorScheme.onPrimary
             )
         },
         dismissButton = {

@@ -69,6 +69,8 @@ fun DetailInfoAnakScreen(
     }
 
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -280,7 +282,7 @@ fun DetailInfoAnakScreen(
                                         modifier = Modifier.size(100.dp),
                                         shape = RoundedCornerShape(32.dp),
                                         color = colorScheme.primary.copy(alpha = 0.05f),
-                                        border = BorderStroke(2.dp, Color.White)
+                                        border = BorderStroke(2.dp, colorScheme.surface)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
                                             Text(
@@ -325,7 +327,7 @@ fun DetailInfoAnakScreen(
                                             statusRaw.equals("active", ignoreCase = true)
                                         StatusChip(
                                             text = (statusRaw ?: "AKTIF").uppercase(),
-                                            color = if (statusIsActive) StatusSuccess else StatusWarning
+                                            color = if (statusIsActive) statusSuccess else statusWarning
                                         )
                                     }
                                 }

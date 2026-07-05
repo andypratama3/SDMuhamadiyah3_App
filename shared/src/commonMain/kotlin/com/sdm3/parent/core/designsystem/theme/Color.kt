@@ -103,7 +103,7 @@ fun productSchoolDarkColors() = ProductSchoolColors(
     onError = Color(0xFF690005),
     errorContainer = Color(0xFF93000A),
     onErrorContainer = Color(0xFFFFDAD6),
-    background = Color(0xFF001B3D),
+    background = Color(0xFF000F24),
     onBackground = Color(0xFFE6EFF8),
     surface = Color(0xFF001B3D),
     onSurface = Color(0xFFE6EFF8),
@@ -127,7 +127,40 @@ fun productSchoolDarkColors() = ProductSchoolColors(
     disabled = Color(0xFF616161),
 )
 
-fun ProductSchoolColors.toMaterialColorScheme() = androidx.compose.material3.lightColorScheme(
+fun ProductSchoolColors.toMaterialColorScheme(darkTheme: Boolean) =
+    if (darkTheme) toDarkMaterialColorScheme() else toLightMaterialColorScheme()
+
+private fun ProductSchoolColors.toLightMaterialColorScheme() = androidx.compose.material3.lightColorScheme(
+    primary = primary,
+    onPrimary = onPrimary,
+    primaryContainer = primaryContainer,
+    onPrimaryContainer = onPrimaryContainer,
+    secondary = secondary,
+    onSecondary = onSecondary,
+    secondaryContainer = secondaryContainer,
+    onSecondaryContainer = onSecondaryContainer,
+    tertiary = tertiary,
+    onTertiary = onTertiary,
+    tertiaryContainer = tertiaryContainer,
+    onTertiaryContainer = onTertiaryContainer,
+    error = error,
+    onError = onError,
+    errorContainer = errorContainer,
+    onErrorContainer = onErrorContainer,
+    background = background,
+    onBackground = onBackground,
+    surface = surface,
+    onSurface = onSurface,
+    surfaceVariant = surfaceVariant,
+    onSurfaceVariant = onSurfaceVariant,
+    outline = outline,
+    inverseSurface = inverseSurface,
+    inverseOnSurface = inverseOnSurface,
+    inversePrimary = inversePrimary,
+    scrim = scrim,
+)
+
+private fun ProductSchoolColors.toDarkMaterialColorScheme() = androidx.compose.material3.darkColorScheme(
     primary = primary,
     onPrimary = onPrimary,
     primaryContainer = primaryContainer,

@@ -49,6 +49,9 @@ fun PembayaranSppScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
+    val heroContent = heroContentColor()
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
     val viewModel: PembayaranSppViewModel = koinViewModel()
     val vmState by if (isPreview) {
         remember { mutableStateOf(com.sdm3.parent.feature.pembayaran.PembayaranSppUiState()) }
@@ -246,24 +249,24 @@ fun PembayaranSppScreen(
                                                     style = MaterialTheme.typography.labelSmall,
                                                     fontWeight = FontWeight.Black,
                                                     letterSpacing = 1.sp,
-                                                    color = Color.White.copy(alpha = 0.5f)
+                                                    color = heroContent.copy(alpha = 0.5f)
                                                 )
                                                 Spacer(modifier = Modifier.height(4.dp))
                                                 Text(
                                                     text = displayFee?.paymentTitleName ?: (if (hasActive) "Tagihan Aktif" else "Semua Tagihan Lunas"),
                                                     style = MaterialTheme.typography.titleLarge,
-                                                    color = Color.White,
+                                                    color = heroContent,
                                                     fontWeight = FontWeight.Bold
                                                 )
                                             }
                                             Surface(
                                                 shape = RoundedCornerShape(999.dp),
-                                                color = if (hasActive) colorScheme.error else StatusSuccess
+                                                color = if (hasActive) colorScheme.error else statusSuccess
                                             ) {
                                                 Text(
                                                     text = if (hasActive) " BELUM DIBAYAR " else " LUNAS ",
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = Color.White,
+                                                    color = colorScheme.onPrimary,
                                                     fontWeight = FontWeight.Black,
                                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                                 )
@@ -282,12 +285,12 @@ fun PembayaranSppScreen(
                                                     text = formatCurrency(displayFee?.amount ?: 0.0),
                                                     style = MaterialTheme.typography.displaySmall,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = Color.White
+                                                    color = heroContent
                                                 )
                                                 Text(
                                                     text = displayFee?.dueDate?.takeIf { it.isNotBlank() }?.let { "Jatuh tempo: ${formatTanggal(it)}" } ?: "",
                                                     style = MaterialTheme.typography.bodyMedium,
-                                                    color = Color.White.copy(alpha = 0.6f)
+                                                    color = heroContent.copy(alpha = 0.6f)
                                                 )
                                             }
                                         }
@@ -330,15 +333,15 @@ fun PembayaranSppScreen(
                                             text = "${progressPercent}%",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold,
-                                            color = StatusSuccess
+                                            color = statusSuccess
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(12.dp))
                                     LinearProgressIndicator(
                                         progress = { progress },
                                         modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                                        color = StatusSuccess,
-                                        trackColor = StatusSuccess.copy(alpha = 0.1f)
+                                        color = statusSuccess,
+                                        trackColor = statusSuccess.copy(alpha = 0.1f)
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
@@ -377,9 +380,9 @@ fun PembayaranSppScreen(
                                 else -> "MENUNGGU"
                             }
                             val statusColor = when {
-                                isPaid -> StatusSuccess
+                                isPaid -> statusSuccess
                                 isFailed -> colorScheme.error
-                                else -> StatusWarning
+                                else -> statusWarning
                             }
                             Sdm3Card(
                                 modifier = Modifier
@@ -401,7 +404,7 @@ fun PembayaranSppScreen(
                                                 imageVector = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.History,
                                                 contentDescription = null,
                                                 modifier = Modifier.size(24.dp),
-                                                tint = if (isPaid) StatusSuccess else colorScheme.primary.copy(alpha = 0.4f)
+                                                tint = if (isPaid) statusSuccess else colorScheme.primary.copy(alpha = 0.4f)
                                             )
                                         }
                                     }

@@ -40,7 +40,6 @@ fun Sdm3StatTile(
     trendText: String? = null,
     trendPositive: Boolean? = null,
     isLoading: Boolean = false,
-    containerColor: Color = Color.White,
 ) {
     if (isLoading) {
         Sdm3StatTileSkeleton(modifier = modifier)

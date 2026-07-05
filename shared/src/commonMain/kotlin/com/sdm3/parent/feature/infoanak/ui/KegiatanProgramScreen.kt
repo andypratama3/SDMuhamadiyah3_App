@@ -68,6 +68,8 @@ fun KegiatanProgramScreen(
     }
 
     val colorScheme = MaterialTheme.colorScheme
+    val glassSurface = glassSurfaceColor()
+    val glassBorder = glassBorderColor()
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Ekstrakurikuler", "Program Unggulan")
 
@@ -123,8 +125,8 @@ fun KegiatanProgramScreen(
                         .padding(horizontal = 24.dp, vertical = 12.dp)
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    color = Color.White.copy(alpha = 0.5f),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))
+                    color = glassSurface,
+                    border = BorderStroke(1.dp, glassBorder)
                 ) {
                     Row(modifier = Modifier.padding(6.dp)) {
                         tabs.forEachIndexed { index, label ->

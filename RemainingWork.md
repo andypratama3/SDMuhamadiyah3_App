@@ -28,14 +28,14 @@ Lihat juga: [`Production.md`](Production.md) untuk panduan setup lengkap.
 
 ### Backend
 
-API production: `https://admin.sdm3.sch.id`
+API production: `https://sdmuhammadiyah3smd.cloud`
 
 | Item | Kenapa penting |
 |------|----------------|
 | `DELETE /api/parent/account` harus live | Apple & Google **wajib** hapus akun nyata, bukan cuma logout |
 | `POST /api/parent/fcm/register` + `unregister` | Push notification tidak jalan tanpa endpoint ini |
 | Snap-token mengembalikan `payment_id` | Alur pembayaran Midtrans bisa gagal tanpa field ini |
-| Privacy policy aktif | URL `https://admin.sdm3.sch.id/privacy` — kalau 404, review ditolak |
+| Privacy policy aktif | URL `https://sdmuhammadiyah3smd.cloud/privacy` — kalau 404, review ditolak |
 | Akun demo untuk reviewer | Wajib diisi di Play Console & App Store Connect |
 
 **Kontrak hapus akun:**
@@ -152,7 +152,7 @@ keytool -genkeypair -v \
 // CertificateProvider.kt — isi sebelum rilis production
 object CertificatePins {
     val pins = listOf<String>(
-        // SPKI hash untuk admin.sdm3.sch.id
+        // SPKI hash untuk sdmuhammadiyah3smd.cloud
     )
 }
 ```
@@ -160,7 +160,7 @@ object CertificatePins {
 **Cara ambil pin hash:**
 
 ```bash
-openssl s_client -connect admin.sdm3.sch.id:443 </dev/null 2>/dev/null \
+openssl s_client -connect sdmuhammadiyah3smd.cloud:443 </dev/null 2>/dev/null \
   | openssl x509 -pubkey -noout \
   | openssl pkey -pubin -outform der \
   | openssl dgst -sha256 -binary \

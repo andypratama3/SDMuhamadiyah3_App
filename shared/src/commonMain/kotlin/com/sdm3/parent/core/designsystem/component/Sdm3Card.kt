@@ -37,11 +37,12 @@ fun Sdm3Card(
     border: BorderStroke? = null,
     content: @Composable () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = CardShape,
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = colorScheme.surface
         ),
         border = border,
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -58,11 +59,12 @@ fun Sdm3ElevatedCard(
     padding: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = CardShape,
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp,
@@ -103,11 +105,12 @@ fun Sdm3SurfaceCard(
     padding: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = CardShape,
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -123,11 +126,12 @@ fun Sdm3SubtleCard(
     padding: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = CardShape,
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF8F9FA)
+            containerColor = colorScheme.surfaceVariant.copy(alpha = 0.35f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -170,7 +174,7 @@ private fun Sdm3CardPreview() {
                     modifier = Modifier.fillMaxWidth().height(80.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Sdm3HeroCard", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                    Text("Sdm3HeroCard", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
             Sdm3SurfaceCard {

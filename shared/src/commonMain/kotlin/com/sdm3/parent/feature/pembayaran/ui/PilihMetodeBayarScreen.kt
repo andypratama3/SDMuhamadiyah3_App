@@ -47,6 +47,8 @@ fun PilihMetodeBayarScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
+    val glassSurface = glassSurfaceColor()
+    val glassBorder = glassBorderColor()
     var selectedMethod by remember { mutableStateOf<String?>(null) }
     val viewModel: PilihMetodeBayarViewModel = koinViewModel()
     val vmState by if (isPreview) {
@@ -275,7 +277,7 @@ fun PilihMetodeBayarScreen(
                                                         Icons.Outlined.Payments,
                                                         contentDescription = null,
                                                         modifier = Modifier.size(24.dp),
-                                                        tint = if (isSelected) Color.White else colorScheme.primary
+                                                        tint = if (isSelected) colorScheme.onPrimary else colorScheme.primary
                                                     )
                                                 }
                                             }
@@ -312,8 +314,8 @@ fun PilihMetodeBayarScreen(
                                     .padding(bottom = 24.dp)
                                     .fillMaxWidth(),
                                 shape = RoundedCornerShape(20.dp),
-                                color = Color.White.copy(alpha = 0.7f),
-                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+                                color = glassSurface,
+                                border = BorderStroke(1.dp, glassBorder),
                                 shadowElevation = 8.dp
                             ) {
                                 Box(modifier = Modifier.padding(8.dp)) {

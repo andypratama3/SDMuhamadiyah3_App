@@ -41,7 +41,7 @@ fun ProductSchoolTheme(
         LocalProductSchoolElevation provides ProductSchoolElevation(),
     ) {
         MaterialTheme(
-            colorScheme = colors.toMaterialColorScheme(),
+            colorScheme = colors.toMaterialColorScheme(darkTheme),
             typography = typography.toMaterialTypography(),
             shapes = productSchoolComponentShapes,
             content = content,

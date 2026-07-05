@@ -162,6 +162,10 @@ fun DetailNilaiMapelScreen(
                     val finalScore = if (scoreBasis.isNotEmpty()) scoreBasis.average().toInt() else 0
 
                     val tpList = components.filter { it.tpName != null }
+                    val heroContent = heroContentColor()
+                    val statusSuccess = statusSuccessColor()
+                    val statusWarning = statusWarningColor()
+                    val statusDanger = statusDangerColor()
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize().padding(padding),
@@ -197,25 +201,25 @@ fun DetailNilaiMapelScreen(
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Black,
                                             letterSpacing = 2.sp,
-                                            color = Color.White.copy(alpha = 0.4f)
+                                            color = heroContent.copy(alpha = 0.4f)
                                         )
                                         Spacer(modifier = Modifier.height(16.dp))
                                         Text(
                                             text = "$finalScore",
                                             style = MaterialTheme.typography.displayLarge.copy(fontSize = 56.sp),
                                             fontWeight = FontWeight.Black,
-                                            color = Color.White,
+                                            color = heroContent,
                                             letterSpacing = (-2).sp
                                         )
                                         Spacer(modifier = Modifier.height(12.dp))
                                         val (predicateLabel, predicateColor) = when {
-                                            finalScore >= 90 -> "SANGAT BAIK" to StatusSuccess
+                                            finalScore >= 90 -> "SANGAT BAIK" to statusSuccess
                                             finalScore >= 80 -> "BAIK" to colorScheme.secondary
-                                            finalScore >= 70 -> "CUKUP" to StatusWarning
-                                            else -> "PERLU BIMBINGAN" to StatusDanger
+                                            finalScore >= 70 -> "CUKUP" to statusWarning
+                                            else -> "PERLU BIMBINGAN" to statusDanger
                                         }
                                         Surface(
-                                            color = Color.White.copy(alpha = 0.1f),
+                                            color = heroContent.copy(alpha = 0.1f),
                                             shape = RoundedCornerShape(99.dp),
                                             border = BorderStroke(1.dp, predicateColor.copy(alpha = 0.3f))
                                         ) {
@@ -247,7 +251,7 @@ fun DetailNilaiMapelScreen(
                             item { KomponenBar("Formatif", formatifAvg.toFloat(), 100f, colorScheme.secondary) }
                         }
                         if (componentGroups.containsKey("projek")) {
-                            item { KomponenBar("Projek", projekAvg.toFloat(), 100f, StatusSuccess) }
+                            item { KomponenBar("Projek", projekAvg.toFloat(), 100f, statusSuccess) }
                         }
 
                         if (tpList.isNotEmpty()) {
@@ -262,8 +266,8 @@ fun DetailNilaiMapelScreen(
                                 var expanded by remember { mutableStateOf(false) }
                                 val tpScore = tp.score?.toInt() ?: 0
                                 val tpColor = when {
-                                    tpScore >= 90 -> StatusSuccess
-                                    tpScore >= 75 -> StatusWarning
+                                    tpScore >= 90 -> statusSuccess
+                                    tpScore >= 75 -> statusWarning
                                     else -> colorScheme.error
                                 }
 

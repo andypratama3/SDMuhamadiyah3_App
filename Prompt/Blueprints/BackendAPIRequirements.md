@@ -9,7 +9,7 @@
 
 | Item | Value |
 |---|---|
-| Base URL | `https://admin.sdm3.sch.id` |
+| Base URL | `https://sdmuhammadiyah3smd.cloud` |
 | Auth | Laravel Sanctum (Bearer token via `POST /api/sanctum/token`) |
 | Response Envelope | `{ success: bool, data: T|null, message: string|null, code: int|null }` |
 | Date Format | ISO 8601 (`2025-01-15` or `2025-01-15T08:30:00Z`) |

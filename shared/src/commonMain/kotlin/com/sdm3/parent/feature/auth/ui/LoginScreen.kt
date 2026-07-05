@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +41,8 @@ import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.auth.LoginEffect
 import com.sdm3.parent.feature.auth.LoginIntent
 import com.sdm3.parent.feature.auth.LoginViewModel
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 
 private val PremiumEasing = CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
@@ -84,6 +87,9 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.background)
+            .pointerInput(focusManager) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            }
     ) {
         Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
             drawCircle(
@@ -106,11 +112,12 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .statusBarsPadding()
+                .safeDrawingPadding()
+                .imePadding()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Box(
                 modifier = Modifier
@@ -125,8 +132,8 @@ fun LoginScreen(
                 Surface(
                     modifier = Modifier.size(100.dp).blur(if (startAnimation) 0.dp else 20.dp),
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.5f),
-                    border = BorderStroke(1.5.dp, Color.White.copy(alpha = 0.8f))
+                    color = glassSurfaceColor(),
+                    border = BorderStroke(1.5.dp, glassBorderColor())
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Sdm3Logo(size = 70.dp, showBackground = false)
@@ -274,7 +281,7 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Text(
                 text = "SD Muhammadiyah 3 Samarinda v${com.sdm3.parent.APP_VERSION_NAME}",
@@ -284,7 +291,7 @@ fun LoginScreen(
                 letterSpacing = 1.sp
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

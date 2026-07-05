@@ -16,6 +16,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.serializer
@@ -47,6 +48,11 @@ class HttpClientProvider(
             logger = object : Logger {
                 override fun log(message: String) {
                     if (!enableLogging) return
+                    if (message.contains("CancellationException", ignoreCase = true) ||
+                        message.contains("Job was cancelled", ignoreCase = true)
+                    ) {
+                        return
+                    }
                     if (!message.contains("Authorization", ignoreCase = true) &&
                         !message.contains("password", ignoreCase = true)
                     ) {
@@ -105,11 +111,21 @@ suspend inline fun <reified T> HttpResponse.toApiResult(): ApiResult<T> {
         HttpStatusCode.OK, HttpStatusCode.Created -> {
             val data = root["data"]
             if (data == null || data is JsonNull) {
-                return ApiResult.Error(ApiError.Unknown("Data kosong"))
+                return if (T::class == Unit::class) {
+                    @Suppress("UNCHECKED_CAST")
+                    ApiResult.Success(Unit as T)
+                } else {
+                    ApiResult.Error(ApiError.Unknown("Data kosong"))
+                }
             }
             try {
                 ApiResult.Success(apiJson.decodeFromJsonElement(serializer<T>(), data))
             } catch (e: Exception) {
+                // Backend void endpoints mengembalikan data: {} untuk operasi sukses tanpa payload.
+                if (T::class == Unit::class && data is JsonObject) {
+                    @Suppress("UNCHECKED_CAST")
+                    return ApiResult.Success(Unit as T)
+                }
                 if (isDebugBuild()) {
                     println("[SDM3] Deserialization error for ${T::class.simpleName}: ${e.message}")
                 }

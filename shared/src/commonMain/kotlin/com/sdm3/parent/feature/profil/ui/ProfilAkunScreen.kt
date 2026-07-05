@@ -268,7 +268,7 @@ fun ProfilAkunScreen(
         AlertDialog(
             onDismissRequest = { viewModel.cancelEdit() },
             shape = RoundedCornerShape(24.dp),
-            containerColor = Color.White,
+            containerColor = colorScheme.surface,
             title = {
                 Text(
                     "Edit Profil",
@@ -314,7 +314,7 @@ fun ProfilAkunScreen(
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
             shape = RoundedCornerShape(24.dp),
-            containerColor = Color.White,
+            containerColor = colorScheme.surface,
             title = { 
                 Text(
                     "Konfirmasi Keluar", 
@@ -342,7 +342,7 @@ fun ProfilAkunScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
                 ) {
-                    Text("Keluar", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Keluar", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -483,6 +483,7 @@ private fun ShimmerProfil() {
 @Composable
 private fun ProfileHeader(name: String, phone: String, email: String, onEditClick: () -> Unit) {
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
 
     Sdm3Card(padding = 20.dp) {
         Row(
@@ -530,14 +531,14 @@ private fun ProfileHeader(name: String, phone: String, email: String, onEditClic
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Surface(
-                    color = StatusSuccess.copy(alpha = 0.1f),
+                    color = statusSuccess.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
                         text = " TERVERIFIKASI ",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
-                        color = StatusSuccess,
+                        color = statusSuccess,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
@@ -582,7 +583,7 @@ private fun StudentMiniCard(
                     modifier = Modifier.size(56.dp),
                     shape = CircleShape,
                     color = colorScheme.primaryContainer,
-                    border = BorderStroke(2.dp, Color.White)
+                    border = BorderStroke(2.dp, colorScheme.surface)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(

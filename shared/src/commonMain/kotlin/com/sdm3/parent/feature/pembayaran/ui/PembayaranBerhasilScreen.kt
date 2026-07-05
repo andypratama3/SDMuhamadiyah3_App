@@ -49,6 +49,9 @@ fun PembayaranBerhasilScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
+    val glassSurface = glassSurfaceColor()
+    val glassBorder = glassBorderColor()
     val viewModel: PembayaranBerhasilViewModel = koinViewModel()
     val vmState by if (isPreview) {
         remember { mutableStateOf(com.sdm3.parent.feature.pembayaran.PembayaranBerhasilUiState()) }
@@ -183,7 +186,7 @@ fun PembayaranBerhasilScreen(
                         Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
                             drawCircle(
                                 brush = Brush.radialGradient(
-                                    colors = listOf(StatusSuccess, Color.Transparent),
+                                    colors = listOf(statusSuccess, Color.Transparent),
                                     center = Offset(size.width * 0.5f, size.height * 0.4f),
                                     radius = size.width
                                 )
@@ -201,15 +204,15 @@ fun PembayaranBerhasilScreen(
                             Surface(
                                 modifier = Modifier.size(110.dp),
                                 shape = RoundedCornerShape(36.dp),
-                                color = Color.White.copy(alpha = 0.5f),
-                                border = BorderStroke(2.dp, Color.White.copy(alpha = 0.8f))
+                                color = glassSurface,
+                                border = BorderStroke(2.dp, glassBorder)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Outlined.CheckCircle,
                                         contentDescription = null,
                                         modifier = Modifier.size(56.dp),
-                                        tint = StatusSuccess
+                                        tint = statusSuccess
                                     )
                                 }
                             }

@@ -30,6 +30,7 @@ class FakeAuthRepository : AuthRepositoryContract {
     override suspend fun isLoggedIn(): Boolean = loginResult is ApiResult.Success
 
     override suspend fun logout() {}
+    override suspend fun clearLocalSession() {}
 
     override suspend fun requestOtp(email: String): ApiResult<String> =
         ApiResult.Success("OTP sent")

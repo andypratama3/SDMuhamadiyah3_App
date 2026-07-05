@@ -52,7 +52,7 @@ fun Modifier.shimmerEffect(): Modifier = composed {
 
     val colorScheme = MaterialTheme.colorScheme
     val baseColor = colorScheme.primary.copy(alpha = 0.05f)
-    val highlightColor = Color.White.copy(alpha = 0.4f)
+    val highlightColor = colorScheme.onSurface.copy(alpha = 0.12f)
     val shimmerColors = listOf(baseColor, highlightColor, baseColor)
 
     background(

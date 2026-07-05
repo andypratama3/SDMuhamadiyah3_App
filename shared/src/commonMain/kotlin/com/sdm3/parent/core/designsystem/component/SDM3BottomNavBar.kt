@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
+import com.sdm3.parent.core.designsystem.theme.glassBorderColor
+import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
 import com.sdm3.parent.core.navigation.SDM3BottomTab
 
 @Composable
@@ -33,6 +35,8 @@ fun SDM3BottomNavBar(
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val glassSurface = glassSurfaceColor()
+    val glassBorder = glassBorderColor()
 
     // ProductSchool Floating Glass Navigation
     Box(
@@ -53,11 +57,11 @@ fun SDM3BottomNavBar(
                     ambientShadowColor = colorScheme.primary.copy(alpha = 0.1f)
                     spotShadowColor = colorScheme.primary.copy(alpha = 0.1f)
                 },
-            color = Color.White.copy(alpha = 0.8f),
+            color = glassSurface,
             shape = RoundedCornerShape(36.dp),
             border = BorderStroke(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.6f)
+                color = glassBorder
             )
         ) {
             Row(
@@ -71,7 +75,7 @@ fun SDM3BottomNavBar(
                     val selected = currentTab == item.tab
                     
                     val contentColor by animateColorAsState(
-                        targetValue = if (selected) Color.White else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        targetValue = if (selected) colorScheme.onPrimary else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         animationSpec = tween(400)
                     )
 

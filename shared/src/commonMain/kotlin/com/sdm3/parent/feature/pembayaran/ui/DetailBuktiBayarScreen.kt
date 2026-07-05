@@ -64,6 +64,8 @@ fun DetailBuktiBayarScreen(
         viewModel.uiState.collectAsState()
     }
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
     val snackbarHostState = remember { SnackbarHostState() }
 
     if (!isPreview) {
@@ -256,9 +258,9 @@ fun DetailBuktiBayarScreen(
                             else -> "Menunggu Pembayaran"
                         }
                         val statusColor = when {
-                            isPaid -> StatusSuccess
+                            isPaid -> statusSuccess
                             isFailed -> colorScheme.error
-                            else -> StatusWarning
+                            else -> statusWarning
                         }
                         val statusIcon = when {
                             isPaid -> Icons.Outlined.CheckCircle
@@ -395,7 +397,7 @@ fun DetailBuktiBayarScreen(
                                             Text(
                                                 text = "Lunas & Terverifikasi",
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = StatusSuccess,
+                                                color = statusSuccess,
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }

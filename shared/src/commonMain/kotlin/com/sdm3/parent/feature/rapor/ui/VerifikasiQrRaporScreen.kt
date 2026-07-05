@@ -64,6 +64,7 @@ fun VerifikasiQrRaporScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
     val state by if (isPreview) {
         remember { mutableStateOf(VerifikasiQrRaporUiState()) }
     } else {
@@ -327,14 +328,14 @@ fun VerifikasiQrRaporScreen(
                                                 Surface(
                                                     modifier = Modifier.size(56.dp),
                                                     shape = CircleShape,
-                                                    color = (if (result.valid) StatusSuccess else colorScheme.error).copy(alpha = 0.1f)
+                                                    color = (if (result.valid) statusSuccess else colorScheme.error).copy(alpha = 0.1f)
                                                 ) {
                                                     Box(contentAlignment = Alignment.Center) {
                                                         Icon(
                                                             imageVector = if (result.valid) Icons.Default.Verified else Icons.Default.NewReleases,
                                                             contentDescription = null,
                                                             modifier = Modifier.size(32.dp),
-                                                            tint = if (result.valid) StatusSuccess else colorScheme.error
+                                                            tint = if (result.valid) statusSuccess else colorScheme.error
                                                         )
                                                     }
                                                 }
@@ -345,7 +346,7 @@ fun VerifikasiQrRaporScreen(
                                                         style = MaterialTheme.typography.labelSmall,
                                                         fontWeight = FontWeight.Black,
                                                         letterSpacing = 1.sp,
-                                                        color = if (result.valid) StatusSuccess else colorScheme.error
+                                                        color = if (result.valid) statusSuccess else colorScheme.error
                                                     )
                                                     Text(
                                                         text = if (result.valid) "Terautentikasi" else "Gagal Verifikasi",

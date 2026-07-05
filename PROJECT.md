@@ -302,7 +302,7 @@ docs/
 
 ## API Endpoints
 
-Base URL: `https://admin.sdm3.sch.id`
+Base URL: `https://sdmuhammadiyah3smd.cloud`
 
 ### Authentication
 | Method | Endpoint | Description |
@@ -357,7 +357,7 @@ Base URL: `https://admin.sdm3.sch.id`
 - `CertificatePins` object with SHA-256 certificate hashes
 - Android: OkHttp `CertificatePinner`
 - iOS: Darwin engine configuration
-- **Production:** Add actual hashes from `admin.sdm3.sch.id` before release
+- **Production:** Add actual hashes from `sdmuhammadiyah3smd.cloud` before release
 
 ### Biometric Auth (P9-T3)
 - `BiometricAuthenticator` expect/actual

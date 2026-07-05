@@ -72,12 +72,13 @@ class AuthRepository(
         }
     }
 
-    override suspend fun logout() {
+    override suspend fun clearLocalSession() {
         secureTokenManager.clearAllSecureData()
         cache.clearAll()
-        try {
-            api.getCsrfCookie()
-        } catch (_: Exception) { }
+    }
+
+    override suspend fun logout() {
+        clearLocalSession()
     }
 
     override suspend fun requestOtp(email: String): ApiResult<String> {

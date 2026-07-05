@@ -114,8 +114,8 @@ class VerifikasiOtpViewModel(
 
     fun resetPassword() {
         val state = uiState.value
-        if (state.newPassword.length < 6) {
-            updateState { it.copy(errorMessage = "Password minimal 6 karakter") }
+        if (state.newPassword.length < 8) {
+            updateState { it.copy(errorMessage = "Password minimal 8 karakter") }
             return
         }
         if (state.newPassword != state.newPasswordConfirmation) {

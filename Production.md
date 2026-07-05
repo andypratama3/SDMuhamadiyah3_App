@@ -22,14 +22,14 @@
 | iOS bundle ID | ✅ Diperbaiki | `com.sdm3.parent` (isi `TEAM_ID` di Xcode) |
 | iOS deployment target | ⚠️ Perlu cek | Saat ini mungkin masih tinggi di `pbxproj` |
 | SSL Pinning | ❌ Kosong | Isi hash sertifikat production |
-| Privacy policy URL | ⚠️ Verifikasi | `https://admin.sdm3.sch.id/privacy` harus aktif |
+| Privacy policy URL | ⚠️ Verifikasi | `https://sdmuhammadiyah3smd.cloud/privacy` harus aktif |
 | Data Safety / Nutrition Labels | ❌ Belum diisi | Isi di Play Console & App Store Connect |
 
 ---
 
 ## 1. Backend (Wajib Sebelum Rilis)
 
-API production: `https://admin.sdm3.sch.id`
+API production: `https://sdmuhammadiyah3smd.cloud`
 
 ### 1.1 Endpoint Kritis
 
@@ -133,7 +133,7 @@ Output: `androidApp/build/outputs/bundle/release/androidApp-release.aab`
 - [ ] Upload AAB release (bukan APK)
 - [ ] **Store listing**: judul, deskripsi singkat/panjang, screenshot (min 2), feature graphic 1024×500
 - [ ] **App icon**: 512×512 PNG (ganti icon Android default jika masih template)
-- [ ] **Privacy policy URL**: `https://admin.sdm3.sch.id/privacy`
+- [ ] **Privacy policy URL**: `https://sdmuhammadiyah3smd.cloud/privacy`
 - [ ] **Data Safety** — isi sesuai tabel di Bagian 5
 - [ ] **App content** → Target audience → Usia (kemungkinan "Not designed for children" karena app orang tua, bukan anak)
 - [ ] **App content** → Data deletion → Link ke halaman penghapusan akun
@@ -218,7 +218,7 @@ CURRENT_PROJECT_VERSION=1
 - [ ] Buat app baru di [App Store Connect](https://appstoreconnect.apple.com)
 - [ ] Bundle ID: `com.sdm3.parent`
 - [ ] **App Privacy** → Nutrition Labels (lihat Bagian 5)
-- [ ] **Privacy Policy URL**: `https://admin.sdm3.sch.id/privacy`
+- [ ] **Privacy Policy URL**: `https://sdmuhammadiyah3smd.cloud/privacy`
 - [ ] **User Privacy Choices URL** (opsional tapi disarankan): halaman penghapusan akun
 - [ ] Screenshot iPhone 6.7" dan 6.1" (min 3 per ukuran)
 - [ ] App Preview video (opsional)
@@ -293,7 +293,7 @@ Buat `iosApp/iosApp/PrivacyInfo.xcprivacy` jika menggunakan SDK yang mensyaratka
 
 | Item | Prioritas | Cara |
 |------|-----------|------|
-| SSL Certificate Pinning | Tinggi | Isi `CertificatePins.pins` dengan SPKI hash `admin.sdm3.sch.id` |
+| SSL Certificate Pinning | Tinggi | Isi `CertificatePins.pins` dengan SPKI hash `sdmuhammadiyah3smd.cloud` |
 | iOS SSL Pinning | Tinggi | Implementasi TrustKit atau URLSession delegate |
 | Biometric opt-in | Sedang | Jangan auto-enable; minta persetujuan user |
 | Midtrans client key | N/A | Tidak ada di app (server-side only) ✅ |
@@ -301,7 +301,7 @@ Buat `iosApp/iosApp/PrivacyInfo.xcprivacy` jika menggunakan SDK yang mensyaratka
 **Cara dapat SPKI pin hash:**
 
 ```bash
-openssl s_client -connect admin.sdm3.sch.id:443 </dev/null 2>/dev/null \
+openssl s_client -connect sdmuhammadiyah3smd.cloud:443 </dev/null 2>/dev/null \
   | openssl x509 -pubkey -noout \
   | openssl pkey -pubin -outform der \
   | openssl dgst -sha256 -binary \
@@ -345,8 +345,8 @@ Isi form di Play Console dan App Store Connect berdasarkan data yang **benar-ben
 - [ ] Kontak DPO / admin: email sekolah
 - [ ] Retensi data setelah penghapusan akun
 
-URL yang sudah dipakai di app: `https://admin.sdm3.sch.id/privacy`
-URL bantuan: `https://admin.sdm3.sch.id/help`
+URL yang sudah dipakai di app: `https://sdmuhammadiyah3smd.cloud/privacy`
+URL bantuan: `https://sdmuhammadiyah3smd.cloud/help`
 
 ---
 

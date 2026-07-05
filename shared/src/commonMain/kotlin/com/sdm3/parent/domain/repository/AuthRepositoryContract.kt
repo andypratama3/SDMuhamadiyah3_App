@@ -9,6 +9,7 @@ interface AuthRepositoryContract {
     suspend fun apiLogout(): ApiResult<Unit>
     suspend fun deleteAccount(reason: String): ApiResult<Unit>
     suspend fun isLoggedIn(): Boolean
+    suspend fun clearLocalSession()
     suspend fun logout()
     suspend fun requestOtp(email: String): ApiResult<String>
     suspend fun verifyOtp(email: String, otp: String): ApiResult<String>

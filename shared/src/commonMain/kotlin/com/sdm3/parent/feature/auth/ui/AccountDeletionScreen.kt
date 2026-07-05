@@ -201,7 +201,7 @@ fun AccountDeletionScreen(
                         },
                         isLoading = uiState.isLoading,
                         containerColor = colorScheme.error,
-                        contentColor = Color.White,
+                        contentColor = colorScheme.onPrimary,
                         icon = Icons.Outlined.DeleteForever,
                         modifier = Modifier.fillMaxWidth().height(56.dp)
                     )
@@ -218,7 +218,7 @@ fun AccountDeletionScreen(
                 if (!isPreview) viewModel.dismissConfirmDialog()
             },
             shape = RoundedCornerShape(24.dp),
-            containerColor = Color.White,
+            containerColor = colorScheme.surface,
             title = {
                 Text(
                     text = "Konfirmasi Mutlak",
@@ -242,7 +242,7 @@ fun AccountDeletionScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
                 ) {
-                    Text("Ya, Hapus Akun", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Ya, Hapus Akun", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {

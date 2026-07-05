@@ -250,7 +250,7 @@ fun NotifikasiScreen(
                                 title = n.title.orEmpty(),
                                 body = n.message,
                                 timestamp = n.createdAt ?: "",
-                                isRead = n.readAt != null
+                                isRead = n.isRead == true || n.readAt != null
                             )
                         }
                         val filteredNotifs = if (selectedFilter == 0) notifItems

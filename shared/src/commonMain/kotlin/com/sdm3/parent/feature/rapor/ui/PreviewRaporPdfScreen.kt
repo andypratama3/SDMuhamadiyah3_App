@@ -52,6 +52,7 @@ fun PreviewRaporPdfScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
     val state by if (isPreview) {
         remember { mutableStateOf(PreviewRaporPdfUiState()) }
     } else {
@@ -245,7 +246,7 @@ fun PreviewRaporPdfScreen(
                                     imageVector = if (currentState.isDownloaded) Icons.Outlined.TaskAlt else Icons.Outlined.Sync,
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
-                                    tint = if (currentState.isDownloaded) StatusSuccess else colorScheme.primary.copy(alpha = 0.3f)
+                                    tint = if (currentState.isDownloaded) statusSuccess else colorScheme.primary.copy(alpha = 0.3f)
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Text(

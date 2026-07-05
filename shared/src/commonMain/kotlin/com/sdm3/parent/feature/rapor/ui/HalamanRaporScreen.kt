@@ -96,6 +96,8 @@ fun HalamanRaporScreen(
     }
 
     val colorScheme = MaterialTheme.colorScheme
+    val heroContent = heroContentColor()
+    val statusSuccess = statusSuccessColor()
 
     Scaffold(
         containerColor = colorScheme.background,
@@ -275,7 +277,7 @@ fun HalamanRaporScreen(
                                             label = { Text("Semua", fontWeight = if (selectedSemesterIndex == 0) FontWeight.Bold else FontWeight.Normal) },
                                             colors = FilterChipDefaults.filterChipColors(
                                                 selectedContainerColor = colorScheme.primary,
-                                                selectedLabelColor = Color.White
+                                                selectedLabelColor = colorScheme.onPrimary
                                             )
                                         )
                                         allSemesters.forEachIndexed { index, sem ->
@@ -285,7 +287,7 @@ fun HalamanRaporScreen(
                                                 label = { Text(sem, fontWeight = if (selectedSemesterIndex == index + 1) FontWeight.Bold else FontWeight.Normal) },
                                                 colors = FilterChipDefaults.filterChipColors(
                                                     selectedContainerColor = colorScheme.primary,
-                                                    selectedLabelColor = Color.White
+                                                    selectedLabelColor = colorScheme.onPrimary
                                                 )
                                             )
                                         }
@@ -320,10 +322,10 @@ fun HalamanRaporScreen(
                                                 Surface(
                                                     modifier = Modifier.size(48.dp),
                                                     shape = RoundedCornerShape(14.dp),
-                                                    color = Color.White.copy(alpha = 0.15f)
+                                                    color = heroContent.copy(alpha = 0.15f)
                                                 ) {
                                                     Box(contentAlignment = Alignment.Center) {
-                                                        Icon(Icons.Outlined.AutoStories, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
+                                                        Icon(Icons.Outlined.AutoStories, contentDescription = null, tint = heroContent, modifier = Modifier.size(24.dp))
                                                     }
                                                 }
                                                 Spacer(modifier = Modifier.width(16.dp))
@@ -332,18 +334,18 @@ fun HalamanRaporScreen(
                                                         ?: "Rapor Semester",
                                                     style = MaterialTheme.typography.titleLarge,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = Color.White
+                                                    color = heroContent
                                                 )
                                             }
                                             val statusPublished = isRaporPublished(latestRapor?.status)
                                             Surface(
                                                 shape = RoundedCornerShape(999.dp),
-                                                color = if (statusPublished) colorScheme.secondary else Color.White.copy(alpha = 0.2f)
+                                                color = if (statusPublished) colorScheme.secondary else heroContent.copy(alpha = 0.2f)
                                             ) {
                                                 Text(
                                                     text = " ${raporStatusLabel(latestRapor?.status)} ",
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = if (statusPublished) colorScheme.primary else Color.White,
+                                                    color = if (statusPublished) colorScheme.primary else heroContent,
                                                     fontWeight = FontWeight.Black,
                                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                                 )
@@ -355,13 +357,13 @@ fun HalamanRaporScreen(
                                         Text(
                                             text = if (latestRapor?.approvedAt != null) "Dipublikasi pada ${com.sdm3.parent.core.util.formatTanggal(latestRapor.approvedAt)}" else "Dokumen resmi negara",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.White.copy(alpha = 0.7f),
+                                            color = heroContent.copy(alpha = 0.7f),
                                             fontWeight = FontWeight.Medium
                                         )
                                         Text(
                                             text = if (latestRapor?.documentNumber != null) "Dokumen: ${latestRapor.documentNumber}" else "SDM3 Samarinda",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = Color.White.copy(alpha = 0.5f),
+                                            color = heroContent.copy(alpha = 0.5f),
                                             fontWeight = FontWeight.Bold
                                         )
 
@@ -371,7 +373,7 @@ fun HalamanRaporScreen(
                                             text = "Download PDF Dokumen",
                                             onClick = { latestRapor?.let { onPreviewClick(it.id, it.pdfUrl ?: it.generatedPdfUrl ?: "") } },
                                             icon = Icons.Outlined.FileDownload,
-                                            containerColor = Color.White,
+                                            containerColor = colorScheme.surface,
                                             contentColor = colorScheme.primary,
                                             modifier = Modifier.fillMaxWidth().height(54.dp)
                                         )
@@ -387,7 +389,7 @@ fun HalamanRaporScreen(
                                                     text = "Pratinjau",
                                                     onClick = { onPreviewClick(latestRapor?.id ?: "", latestRapor?.pdfUrl ?: latestRapor?.generatedPdfUrl ?: "") },
                                                     icon = Icons.Outlined.Visibility,
-                                                    contentColor = Color.White
+                                                    contentColor = heroContent
                                                 )
                                             }
                                             Box(modifier = Modifier.weight(1f)) {
@@ -395,7 +397,7 @@ fun HalamanRaporScreen(
                                                     text = "Verifikasi",
                                                     onClick = { onVerifikasiClick(latestRapor?.verificationCode ?: latestRapor?.id ?: "") },
                                                     icon = Icons.Outlined.QrCodeScanner,
-                                                    contentColor = Color.White
+                                                    contentColor = heroContent
                                                 )
                                             }
                                         }
@@ -404,7 +406,7 @@ fun HalamanRaporScreen(
 
                                         Surface(
                                             shape = RoundedCornerShape(12.dp),
-                                            color = Color.White.copy(alpha = 0.08f)
+                                            color = heroContent.copy(alpha = 0.08f)
                                         ) {
                                             Row(
                                                 modifier = Modifier.padding(12.dp),
@@ -414,13 +416,13 @@ fun HalamanRaporScreen(
                                                     Icons.Outlined.Verified,
                                                     contentDescription = null,
                                                     modifier = Modifier.size(18.dp),
-                                                    tint = StatusSuccess
+                                                    tint = statusSuccess
                                                 )
                                                 Spacer(modifier = Modifier.width(10.dp))
                                                 Text(
                                                     text = "Digital Signature Terautentikasi",
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = Color.White,
+                                                    color = heroContent,
                                                     fontWeight = FontWeight.Bold
                                                 )
                                             }

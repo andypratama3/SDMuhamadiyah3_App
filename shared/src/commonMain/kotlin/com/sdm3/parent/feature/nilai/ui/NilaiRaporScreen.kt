@@ -159,7 +159,7 @@ fun NilaiRaporScreen(
                             val selected = opt == activeSemester
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
-                                color = if (selected) colorScheme.primary else Color.White.copy(alpha = 0.6f),
+                                color = if (selected) colorScheme.primary else glassSurfaceColor(),
                                 border = BorderStroke(
                                     1.dp,
                                     if (selected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.15f)
@@ -285,6 +285,10 @@ private fun SumatifTabContent(
     onDetailMapel: ((subjectId: String) -> Unit)?
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
+    val statusDanger = statusDangerColor()
+    val heroContent = heroContentColor()
     val subjects = grades.map { grade ->
         SubjectGrade(
             name = grade.subjectName,
@@ -342,13 +346,13 @@ private fun SumatifTabContent(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         val (predicateLabel, predicateColor) = when {
-                            avgScore >= 90 -> "SANGAT BAIK" to StatusSuccess
+                            avgScore >= 90 -> "SANGAT BAIK" to statusSuccess
                             avgScore >= 80 -> "BAIK" to colorScheme.secondary
-                            avgScore >= 70 -> "CUKUP" to StatusWarning
-                            else -> "PERLU BIMBINGAN" to StatusDanger
+                            avgScore >= 70 -> "CUKUP" to statusWarning
+                            else -> "PERLU BIMBINGAN" to statusDanger
                         }
                         Surface(
-                            color = Color.White.copy(alpha = 0.1f),
+                            color = heroContent.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(99.dp),
                             border = BorderStroke(1.dp, predicateColor.copy(alpha = 0.3f))
                         ) {
@@ -377,14 +381,14 @@ private fun SumatifTabContent(
                         icon = Icons.AutoMirrored.Outlined.TrendingUp,
                         label = "TERTINGGI",
                         value = "${subjects.maxOf { it.score }}",
-                        color = StatusSuccess
+                        color = statusSuccess
                     )
                     StatMiniCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.AutoMirrored.Outlined.TrendingDown,
                         label = "TERENDAH",
                         value = "${subjects.minOf { it.score }}",
-                        color = StatusWarning
+                        color = statusWarning
                     )
                 }
             }
@@ -414,10 +418,13 @@ private fun SubjectCard(
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
+    val statusDanger = statusDangerColor()
     val scoreColor = when {
-        subject.score >= 90 -> StatusSuccess
-        subject.score >= 75 -> StatusWarning
-        else -> StatusDanger
+        subject.score >= 90 -> statusSuccess
+        subject.score >= 75 -> statusWarning
+        else -> statusDanger
     }
 
     Sdm3Card(

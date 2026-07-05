@@ -23,9 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
-import com.sdm3.parent.core.designsystem.theme.StatusDanger
-import com.sdm3.parent.core.designsystem.theme.StatusSuccess
-import com.sdm3.parent.core.designsystem.theme.StatusWarning
+import com.sdm3.parent.core.designsystem.theme.statusDangerColor
+import com.sdm3.parent.core.designsystem.theme.statusSuccessColor
+import com.sdm3.parent.core.designsystem.theme.statusWarningColor
 
 @Composable
 fun StatusChip(
@@ -61,17 +61,20 @@ fun StatusChip(
 @Composable
 private fun StatusChipPreview() {
     SDM3Theme {
+        val success = statusSuccessColor()
+        val warning = statusWarningColor()
+        val danger = statusDangerColor()
         Column(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            StatusChip(text = "Hadir", color = StatusSuccess)
-            StatusChip(text = "Sakit", color = StatusWarning)
+            StatusChip(text = "Hadir", color = success)
+            StatusChip(text = "Sakit", color = warning)
             StatusChip(text = "Izin", color = Color(0xFF001B3D))
-            StatusChip(text = "Alpa", color = StatusDanger)
+            StatusChip(text = "Alpa", color = danger)
             Spacer(modifier = Modifier.height(8.dp))
-            StatusChip(text = "Lunas", color = StatusSuccess)
-            StatusChip(text = "Pending", color = StatusDanger)
+            StatusChip(text = "Lunas", color = success)
+            StatusChip(text = "Pending", color = danger)
         }
     }
 }

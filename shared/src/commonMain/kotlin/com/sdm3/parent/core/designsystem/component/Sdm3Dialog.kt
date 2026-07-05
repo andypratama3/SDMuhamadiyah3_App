@@ -49,8 +49,8 @@ fun Sdm3Dialog(
     AlertDialog(
         onDismissRequest = { onDismiss?.invoke() },
         shape = DialogShape,
-        containerColor = Color.White.copy(alpha = 0.9f),
-        modifier = Modifier.border(1.dp, GlassOutline, DialogShape),
+        containerColor = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.border(1.dp, ProductSchoolTheme.colors.glassOutline, DialogShape),
         icon = if (icon != null) {
             {
                 Surface(

@@ -27,7 +27,7 @@
 ## Remediation Plan
 
 ### M3 - Insecure Communication
-1. Obtain production certificate hashes for `admin.sdm3.sch.id`
+1. Obtain production certificate hashes for `sdmuhammadiyah3smd.cloud`
 2. Add SHA-256 hashes to `CertificatePins.pins` in `CertificateProvider.kt`
 3. Validate pinning in staging before release
 4. Implement iOS `NSURLSessionDelegate`-based pinning for production

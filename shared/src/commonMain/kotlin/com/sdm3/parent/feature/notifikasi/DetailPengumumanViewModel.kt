@@ -38,7 +38,7 @@ class DetailPengumumanViewModel(
                             content = cleanHtml(article.content.orEmpty()),
                             author = article.authorName ?: article.category.orEmpty(),
                             date = formatArticleDate(article.publishedAt ?: article.createdAt.orEmpty()),
-                            imageUrl = article.image,
+                            imageUrl = article.image ?: article.photo,
                             attachments = article.attachments.orEmpty()
                         )
                     }

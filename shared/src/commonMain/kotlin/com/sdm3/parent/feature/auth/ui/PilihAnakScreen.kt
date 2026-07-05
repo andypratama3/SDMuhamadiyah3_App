@@ -41,6 +41,8 @@ import coil3.compose.AsyncImage
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.core.designsystem.theme.glassBorderColor
+import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
 import com.sdm3.parent.data.remote.dto.StudentDto
 import com.sdm3.parent.feature.auth.PilihAnakViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -90,10 +92,10 @@ fun PilihAnakScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = glassSurfaceColor(),
                     shadowElevation = 8.dp,
                     tonalElevation = 2.dp,
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                    border = BorderStroke(1.dp, glassBorderColor())
                 ) {
                     Box(modifier = Modifier.padding(Spacing.xs)) {
                         Sdm3Button(
@@ -226,9 +228,11 @@ private fun StudentItem(
     onClick: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
+    val glassSurface = glassSurfaceColor()
+    val glassBorder = glassBorderColor()
 
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.secondary else Color.White.copy(alpha = 0.5f),
+        targetValue = if (isSelected) MaterialTheme.colorScheme.secondary else glassBorder,
         animationSpec = tween(durationMillis = 400, easing = PremiumEasing),
         label = "borderColor"
     )
@@ -244,7 +248,7 @@ private fun StudentItem(
             }
             .background(
                 if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.05f)
-                else Color.White.copy(alpha = 0.4f)
+                else glassSurface.copy(alpha = 0.4f)
             )
             .border(
                 width = 1.dp,
@@ -256,7 +260,7 @@ private fun StudentItem(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(15.dp),
-            color = if (isSelected) Color.White.copy(alpha = 0.9f) else Color.White.copy(alpha = 0.6f),
+            color = if (isSelected) glassSurface.copy(alpha = 0.9f) else glassSurface,
             tonalElevation = if (isSelected) 2.dp else 0.dp
         ) {
             Row(

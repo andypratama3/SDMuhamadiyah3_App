@@ -37,12 +37,8 @@ private data class AccountDeletionRequest(
 class AuthApi(private val provider: HttpClientProvider) {
 
     suspend fun login(email: String, password: String): ApiResult<LoginResponse> {
-        provider.client.get {
-            url(Endpoints.SANCTUM_CSRF_COOKIE)
-        }
         val response = provider.client.post {
             url(Endpoints.API_TOKEN)
-            provider.applyAuthHeader(this)
             setBody(LoginRequest(email = email, password = password, deviceName = "mobile"))
         }
         provider.handleSessionExpiredIfNeeded(response)
@@ -75,12 +71,6 @@ class AuthApi(private val provider: HttpClientProvider) {
         }
         provider.handleSessionExpiredIfNeeded(response)
         return response.toApiResult()
-    }
-
-    suspend fun getCsrfCookie() {
-        provider.client.get {
-            url(Endpoints.SANCTUM_CSRF_COOKIE)
-        }
     }
 
     suspend fun requestOtp(email: String): ApiResult<ForgotPasswordResponse> {

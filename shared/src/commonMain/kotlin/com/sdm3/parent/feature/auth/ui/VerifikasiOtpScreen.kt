@@ -89,8 +89,8 @@ fun VerifikasiOtpScreen(
             Surface(
                 modifier = Modifier.size(90.dp),
                 shape = RoundedCornerShape(24.dp),
-                color = Color.White.copy(alpha = 0.5f),
-                border = BorderStroke(1.5.dp, Color.White.copy(alpha = 0.8f))
+                color = glassSurfaceColor(),
+                border = BorderStroke(1.5.dp, glassBorderColor())
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -271,19 +271,20 @@ fun VerifikasiOtpScreen(
             }
 
             AnimatedVisibility(visible = state.resetSuccessMessage != null) {
+                val successColor = statusSuccessColor()
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 24.dp)) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        color = StatusSuccess.copy(alpha = 0.1f),
+                        color = successColor.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = StatusSuccess, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = successColor, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(12.dp))
-                            Text(state.resetSuccessMessage ?: "", color = StatusSuccess, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text(state.resetSuccessMessage ?: "", color = successColor, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))
@@ -308,6 +309,8 @@ private fun OtpDigitInput(
 ) {
     val focusRequester = remember { FocusRequester() }
     val isPreview = LocalInspectionMode.current
+    val glassSurface = glassSurfaceColor()
+    val glassBorder = glassBorderColor()
 
     LaunchedEffect(Unit) {
         if (!isPreview) {
@@ -343,11 +346,11 @@ private fun OtpDigitInput(
                             .clip(RoundedCornerShape(14.dp))
                             .background(
                                 if (isFocused) colorScheme.primary.copy(alpha = 0.05f)
-                                else Color.White.copy(alpha = 0.5f)
+                                else glassSurface
                             )
                             .border(
                                 width = if (isFocused) 2.dp else 1.dp,
-                                color = if (isFocused) colorScheme.primary else Color.White.copy(alpha = 0.5f),
+                                color = if (isFocused) colorScheme.primary else glassBorder,
                                 shape = RoundedCornerShape(14.dp)
                             ),
                         contentAlignment = Alignment.Center
@@ -379,6 +382,7 @@ private fun VerifikasiOtpScreenPreview() {
             override suspend fun apiLogout() = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
             override suspend fun deleteAccount(reason: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
             override suspend fun isLoggedIn() = false
+            override suspend fun clearLocalSession() {}
             override suspend fun logout() {}
             override suspend fun requestOtp(email: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
             override suspend fun verifyOtp(email: String, otp: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))

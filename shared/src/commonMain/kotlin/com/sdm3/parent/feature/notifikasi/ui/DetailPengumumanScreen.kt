@@ -57,6 +57,7 @@ fun DetailPengumumanScreen(
         viewModel.uiState.collectAsState()
     }
     val colorScheme = MaterialTheme.colorScheme
+    val glassBorder = glassBorderColor()
 
     val errorMessage = vmUiState.errorMessage
 
@@ -186,7 +187,7 @@ fun DetailPengumumanScreen(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .clip(RoundedCornerShape(32.dp))
-                                        .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(32.dp)),
+                                        .border(1.dp, glassBorder, RoundedCornerShape(32.dp)),
                                     contentScale = ContentScale.Crop
                                 )
                                 Box(

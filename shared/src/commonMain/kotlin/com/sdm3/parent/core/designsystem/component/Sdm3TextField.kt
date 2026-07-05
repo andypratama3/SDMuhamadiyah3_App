@@ -20,7 +20,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
+import com.sdm3.parent.core.designsystem.theme.glassBorderColor
+import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
 import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.getPlatformName
 
 @Composable
 fun Sdm3TextField(
@@ -44,7 +47,7 @@ fun Sdm3TextField(
     val haptic = LocalHapticFeedback.current
     val isPreview = LocalInspectionMode.current
 
-    if (!isPreview) {
+    if (!isPreview && getPlatformName() != "iOS") {
         LaunchedEffect(isError) {
             if (isError) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -108,14 +111,14 @@ fun Sdm3TextField(
             singleLine = singleLine,
             textStyle = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Medium,
-                color = colorScheme.primary
+                color = colorScheme.onSurface
             ),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = colorScheme.primary,
-                unfocusedBorderColor = Color.White.copy(alpha = 0.6f),
+                unfocusedBorderColor = glassBorderColor(),
                 cursorColor = colorScheme.primary,
-                unfocusedContainerColor = Color.White.copy(alpha = 0.5f), // Semi-transparent white
-                focusedContainerColor = Color.White.copy(alpha = 0.8f),
+                unfocusedContainerColor = glassSurfaceColor(),
+                focusedContainerColor = glassSurfaceColor().copy(alpha = 0.95f),
                 errorBorderColor = colorScheme.error,
                 errorContainerColor = colorScheme.error.copy(alpha = 0.05f),
                 disabledBorderColor = Color.Transparent,

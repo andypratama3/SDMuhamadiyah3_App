@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import com.sdm3.parent.core.designsystem.ApplySystemBars
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.navigation.SDM3NavHost
 import com.sdm3.parent.core.navigation.SDM3Route
@@ -15,6 +16,7 @@ import com.sdm3.parent.core.notification.FcmRegistrationCoordinator
 import com.sdm3.parent.core.notification.FcmTokenProvider
 import com.sdm3.parent.core.security.InstallState
 import com.sdm3.parent.core.security.SecureTokenManager
+import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 
 @Composable
@@ -42,16 +44,23 @@ fun App() {
 
         LaunchedEffect(fcmTokenProvider) {
             fcmTokenProvider.requestPermissionIfNeeded()
-            // Debug saja: cetak FCM token ke log agar mudah diuji dari Firebase Console.
-            // Cari baris "SDM3_FCM_TOKEN" di Logcat (Android) / konsol Xcode (iOS).
-            if (isDebugBuild()) {
+            // Debug Android: cetak FCM token ke Logcat. iOS dicetak dari AppDelegate Swift.
+            if (isDebugBuild() && getPlatformName() == "Android") {
+                delay(1500)
                 val token = fcmTokenProvider.getToken()
-                println("SDM3_FCM_TOKEN => $token")
+                println(
+                    if (token.isNullOrBlank()) {
+                        "SDM3_FCM_TOKEN => null (menunggu callback Firebase)"
+                    } else {
+                        "SDM3_FCM_TOKEN => $token"
+                    }
+                )
             }
         }
     }
 
     SDM3Theme {
+        ApplySystemBars()
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background

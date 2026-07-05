@@ -467,8 +467,8 @@ private fun LayananSekolahShimmer() {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            color = Color.White,
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, glassBorderColor())
         ) {
             Column(modifier = Modifier.padding(vertical = 16.dp)) {
                 repeat(3) {
@@ -616,6 +616,7 @@ private fun ShortcutFavoritSection(
     onAbsensiClick: () -> Unit,
     onELibraryClick: () -> Unit
 ) {
+    val statusSuccess = statusSuccessColor()
     Column {
         Text(
             text = "Shortcut Favorit",
@@ -635,7 +636,7 @@ private fun ShortcutFavoritSection(
                 ShortcutCard(
                     title = "SPP & Biaya",
                     icon = Icons.Outlined.AccountBalanceWallet,
-                    iconColor = StatusSuccess,
+                    iconColor = statusSuccess,
                     onClick = onSppClick
                 )
             }
@@ -843,6 +844,7 @@ private fun PengumumanSection(
     time: String,
     onClick: () -> Unit
 ) {
+    val successColor = statusSuccessColor()
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Sdm3Card(
             modifier = Modifier
@@ -852,13 +854,13 @@ private fun PengumumanSection(
         ) {
             Column {
                 Surface(
-                    color = StatusSuccess.copy(alpha = 0.1f),
+                    color = successColor.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(999.dp)
                 ) {
                     Text(
                         text = "PENGUMUMAN",
                         style = MaterialTheme.typography.labelSmall,
-                        color = StatusSuccess,
+                        color = successColor,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         letterSpacing = 0.5.sp
@@ -894,6 +896,8 @@ private fun PengumumanSection(
 @Composable
 private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarClick: () -> Unit) {
     val colorScheme = MaterialTheme.colorScheme
+    val heroContent = heroContentColor()
+    val statusSuccess = statusSuccessColor()
     val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
 
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -917,14 +921,14 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
                     Text(
                         text = if (hasBills) "Total Tagihan Aktif" else "Tagihan Sekolah",
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.White.copy(alpha = 0.6f),
+                        color = heroContent.copy(alpha = 0.6f),
                         fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (hasBills) amount else "Lunas",
                         style = MaterialTheme.typography.displayMedium,
-                        color = Color.White,
+                        color = heroContent,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(20.dp))
@@ -933,9 +937,9 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
                         onClick = onBayarClick,
                         modifier = Modifier.fillMaxWidth(0.4f).height(46.dp),
                         shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = StatusSuccess)
+                        colors = ButtonDefaults.buttonColors(containerColor = statusSuccess)
                     ) {
-                        Text(if (hasBills) "Bayar" else "Riwayat", fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(if (hasBills) "Bayar" else "Riwayat", fontWeight = FontWeight.Bold, color = colorScheme.onPrimary)
                     }
                 }
             }

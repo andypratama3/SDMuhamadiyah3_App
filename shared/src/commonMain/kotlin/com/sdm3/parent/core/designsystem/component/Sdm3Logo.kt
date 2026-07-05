@@ -26,6 +26,10 @@ import org.jetbrains.compose.resources.painterResource
 import sdmuhammadiyah3samarinda.shared.generated.resources.Res
 import sdmuhammadiyah3samarinda.shared.generated.resources.logo_sd
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
+import com.sdm3.parent.core.designsystem.theme.glassBorderColor
+import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
+import com.sdm3.parent.core.designsystem.theme.heroContentColor
+import com.sdm3.parent.core.designsystem.theme.heroContentColor
 
 @Composable
 fun Sdm3Logo(
@@ -34,6 +38,9 @@ fun Sdm3Logo(
     useTextFallback: Boolean = false,
     showBackground: Boolean = true
 ) {
+    val glassSurface = glassSurfaceColor()
+    val glassBorder = glassBorderColor()
+
     Box(
         modifier = modifier.size(size),
         contentAlignment = Alignment.Center
@@ -45,16 +52,16 @@ fun Sdm3Logo(
                     .background(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.4f),
-                                Color.White.copy(alpha = 0.1f),
-                                Color.White.copy(alpha = 0.3f)
+                                glassSurface.copy(alpha = 0.4f),
+                                glassSurface.copy(alpha = 0.1f),
+                                glassSurface.copy(alpha = 0.3f)
                             )
                         ),
                         shape = RoundedCornerShape(size / 3f)
                     )
                     .padding(2.dp)
                     .background(
-                        color = Color.White.copy(alpha = 0.05f),
+                        color = glassSurface.copy(alpha = 0.05f),
                         shape = RoundedCornerShape(size / 3.2f)
                     )
             )
@@ -66,8 +73,8 @@ fun Sdm3Logo(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.25f),
-                                Color.White.copy(alpha = 0.15f)
+                                glassSurface.copy(alpha = 0.25f),
+                                glassSurface.copy(alpha = 0.15f)
                             )
                         )
                     )
@@ -75,9 +82,9 @@ fun Sdm3Logo(
                         width = 1.dp,
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.4f),
+                                glassBorder.copy(alpha = 0.4f),
                                 Color.Transparent,
-                                Color.White.copy(alpha = 0.2f)
+                                glassBorder.copy(alpha = 0.2f)
                             )
                         ),
                         shape = RoundedCornerShape(size / 4f)
@@ -89,7 +96,7 @@ fun Sdm3Logo(
             Box(
                 modifier = Modifier
                     .size(size / 2)
-                    .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(100))
+                    .background(glassSurface.copy(alpha = 0.1f), RoundedCornerShape(100))
             )
         } else {
             LogoContent(useTextFallback, size)
@@ -99,6 +106,7 @@ fun Sdm3Logo(
 
 @Composable
 private fun LogoContent(useTextFallback: Boolean, size: Dp) {
+    val heroContent = heroContentColor()
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -114,7 +122,7 @@ private fun LogoContent(useTextFallback: Boolean, size: Dp) {
             )
             Text(
                 text = "SDM3",
-                color = Color.White,
+                color = heroContent,
                 fontSize = (size.value / 4.5f).sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp

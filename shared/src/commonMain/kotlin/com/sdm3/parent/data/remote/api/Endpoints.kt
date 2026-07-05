@@ -1,7 +1,6 @@
 package com.sdm3.parent.data.remote.api
 
 object Endpoints {
-    const val SANCTUM_CSRF_COOKIE = "/sanctum/csrf-cookie"
     const val LOGOUT = "/api/parent/logout"
     const val API_TOKEN = "/api/sanctum/token"
     const val API_USER = "/api/user"
