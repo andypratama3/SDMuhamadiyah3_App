@@ -10,13 +10,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.sdm3.parent.core.di.allAppModules
 import com.sdm3.parent.core.notification.PushDeepLinkHolder
 import com.sdm3.parent.core.notification.PushNotificationDisplay
 import com.sdm3.parent.platform.AndroidPlatformBootstrap
 import com.sdm3.parent.platform.installAndroidPlatformBindings
-import org.koin.android.ext.koin.androidContext
-import org.koin.compose.KoinApplication
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,13 +33,7 @@ class MainActivity : AppCompatActivity() {
         handlePushIntent(intent)
 
         setContent {
-            @Suppress("DEPRECATION")
-            KoinApplication(application = {
-                androidContext(this@MainActivity)
-                modules(allAppModules)
-            }) {
-                App()
-            }
+            App()
         }
     }
 

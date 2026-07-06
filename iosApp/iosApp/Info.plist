@@ -32,5 +32,9 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Kamera digunakan untuk memindai QR Code rapor siswa.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Lokasi digunakan untuk absensi pegawai (check-in/out) di area sekolah. Koordinat GPS dikirim saat Anda menekan tombol absensi.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Lokasi digunakan untuk absensi pegawai (check-in/out) di area sekolah.</string>
 </dict>
 </plist>

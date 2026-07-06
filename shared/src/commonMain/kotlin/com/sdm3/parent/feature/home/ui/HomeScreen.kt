@@ -41,8 +41,7 @@ import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.navigation.SDM3Route
 import org.jetbrains.compose.resources.stringResource
-import sdmuhammadiyah3samarinda.shared.generated.resources.Res
-import sdmuhammadiyah3samarinda.shared.generated.resources.school_name
+import sdmuhammadiyah3samarinda.shared.generated.resources.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.sdm3.parent.core.navigation.SDM3BottomTab
 import com.sdm3.parent.feature.home.HomeEffect
@@ -65,7 +64,7 @@ sealed class HomeScreenUiState {
 fun HomeScreen(
     studentId: String,
     navController: NavHostController,
-    viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     val colorScheme = MaterialTheme.colorScheme
@@ -111,7 +110,7 @@ fun HomeScreen(
 
     // Penukar anak aktif (1 orang tua bisa punya banyak anak).
     val secureTokenManager = if (isPreview) null else koinInject<SecureTokenManager>()
-    var showStudentSheet by remember { mutableStateOf(false) }
+    var showStudentSheet by remember { mutableStateOf(value = false) }
     val switchStudent: (String) -> Unit = { newId ->
         showStudentSheet = false
         if (newId != state.studentId) {
@@ -127,10 +126,10 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             HomeHeader(
-                navController = navController,
-                unreadCount = state.unreadNotificationCount,
-                onNotificationClick = { navController.navigate(SDM3Route.Notifikasi) }
-            )
+                unreadCount = state.unreadNotificationCount
+            ) {
+                navController.navigate(SDM3Route.Notifikasi)
+            }
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
@@ -240,7 +239,7 @@ fun HomeScreen(
         }
     }
 
-    if (showStudentSheet && state.students.size > 1) {
+    if (showStudentSheet && (state.students.size > 1)) {
         PilihAnakBottomSheet(
             students = state.students,
             selectedStudentId = state.studentId,
@@ -255,7 +254,7 @@ private fun StudentSwitcherBar(
     name: String,
     className: String,
     childCount: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val colorScheme = MaterialTheme.colorScheme
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -338,7 +337,6 @@ private fun StudentSwitcherBar(
 
 @Composable
 private fun HomeHeader(
-    navController: NavHostController,
     unreadCount: Int,
     onNotificationClick: () -> Unit
 ) {

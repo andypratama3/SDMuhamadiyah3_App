@@ -48,4 +48,7 @@ object Endpoints {
     const val TEACHER_CLASSROOMS = "/api/teacher/classrooms"
     const val TEACHER_CLASSROOM_ROSTER = "/api/teacher/classrooms/{classroomId}/roster"
     const val TEACHER_ATTENDANCES_BULK = "/api/teacher/attendances/bulk"
+    const val TEACHER_MY_ATTENDANCE_TODAY = "/api/teacher/my-attendance"
+    const val TEACHER_MY_ATTENDANCE_CHECK_IN = "/api/teacher/my-attendance/check-in"
+    const val TEACHER_MY_ATTENDANCE_CHECK_OUT = "/api/teacher/my-attendance/check-out"
 }

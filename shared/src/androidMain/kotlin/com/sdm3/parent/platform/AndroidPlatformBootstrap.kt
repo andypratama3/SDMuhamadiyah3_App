@@ -1,16 +1,31 @@
 package com.sdm3.parent.platform
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.sdm3.parent.core.security.AndroidBiometricProvider
+import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 class AndroidPlatformBootstrap(private val activity: AppCompatActivity) {
 
     private var pendingQrCallback: ((String?) -> Unit)? = null
     private var pendingAvatarCallback: ((PickedImage?) -> Unit)? = null
+    private var locationPermissionContinuation: ((Boolean) -> Unit)? = null
+
+    private val locationPermissionLauncher = activity.registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { results ->
+        val granted = results[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            results[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        locationPermissionContinuation?.invoke(granted)
+        locationPermissionContinuation = null
+    }
 
     private val qrScanLauncher = activity.registerForActivityResult(ScanContract()) { result ->
         pendingQrCallback?.invoke(result.contents)
@@ -43,6 +58,30 @@ class AndroidPlatformBootstrap(private val activity: AppCompatActivity) {
             pendingAvatarCallback = callback
             pickAvatarLauncher.launch("image/*")
         }
+        AndroidPlatformProvider.requestLocationPermission = {
+            if (hasLocationPermission()) {
+                true
+            } else {
+                suspendCancellableCoroutine { continuation ->
+                    AndroidPlatformProvider.locationPermissionRequested = true
+                    locationPermissionContinuation = { granted ->
+                        if (continuation.isActive) continuation.resume(granted)
+                    }
+                    locationPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
+    private fun hasLocationPermission(): Boolean {
+        val fine = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarse = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        return fine == PackageManager.PERMISSION_GRANTED || coarse == PackageManager.PERMISSION_GRANTED
     }
 
     private fun readPickedImage(uri: Uri): PickedImage? {
@@ -70,6 +109,7 @@ class AndroidPlatformBootstrap(private val activity: AppCompatActivity) {
             AndroidPlatformProvider.activity = null
             AndroidPlatformProvider.launchQrScan = null
             AndroidPlatformProvider.launchPickAvatar = null
+            AndroidPlatformProvider.requestLocationPermission = null
         }
     }
 }

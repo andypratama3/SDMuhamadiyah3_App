@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,6 +34,7 @@ import sdmuhammadiyah3samarinda.shared.generated.resources.teacher_panel_title
 @Composable
 fun TeacherHomeScreen(
     onOpenAbsensi: (String, String) -> Unit,
+    onOpenAbsensiSaya: () -> Unit,
     onLogout: () -> Unit,
     onBackToParent: (() -> Unit)? = null,
     viewModel: TeacherHomeViewModel = koinViewModel(),
@@ -120,6 +122,9 @@ fun TeacherHomeScreen(
                             )
                             Spacer(modifier = Modifier.height(Spacing.sm))
                         }
+                        item {
+                            TeacherAbsensiSayaCard(onClick = onOpenAbsensiSaya)
+                        }
                         items(state.classrooms, key = { it.id }) { classroom ->
                             TeacherClassroomCard(
                                 classroom = classroom,
@@ -129,6 +134,39 @@ fun TeacherHomeScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TeacherAbsensiSayaCard(onClick: () -> Unit) {
+    val colorScheme = MaterialTheme.colorScheme
+    Sdm3Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        padding = Spacing.lg,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = colorScheme.secondary.copy(alpha = 0.15f),
+                modifier = Modifier.size(48.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = colorScheme.secondary)
+                }
+            }
+            Spacer(modifier = Modifier.width(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Absensi Saya", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    "Check-in/out dengan GPS realtime",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colorScheme.onSurface.copy(alpha = 0.6f),
+                )
+            }
+            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary)
         }
     }
 }

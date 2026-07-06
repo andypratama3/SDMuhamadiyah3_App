@@ -52,6 +52,7 @@ import com.sdm3.parent.core.navigation.PostAuthNavigator
 import com.sdm3.parent.core.navigation.isDeepLinkAllowed
 import com.sdm3.parent.core.auth.SessionLogoutCoordinator
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
+import com.sdm3.parent.feature.guru.ui.AbsensiSayaScreen
 import com.sdm3.parent.feature.guru.ui.GuruAbsensiScreen
 import com.sdm3.parent.feature.guru.ui.TeacherHomeScreen
 
@@ -439,6 +440,11 @@ fun SDM3NavHost(
                     } else {
                         null
                     },
+                    onOpenAbsensiSaya = if (secureTokenManager.getRoleContext().hasTeacherAccess) {
+                        { navController.navigate(SDM3Route.AbsensiSaya) }
+                    } else {
+                        null
+                    },
                 )
             }
 
@@ -485,6 +491,9 @@ fun SDM3NavHost(
                     onOpenAbsensi = { classroomId, classroomName ->
                         navController.navigate(SDM3Route.GuruAbsensi(classroomId, classroomName))
                     },
+                    onOpenAbsensiSaya = {
+                        navController.navigate(SDM3Route.AbsensiSaya)
+                    },
                     onBackToParent = if (roleContext.hasParentAccess) {
                         {
                             navController.navigate(SDM3Route.Main(studentId)) {
@@ -510,6 +519,12 @@ fun SDM3NavHost(
                 GuruAbsensiScreen(
                     classroomId = route.classroomId,
                     classroomName = route.classroomName,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+            composable<SDM3Route.AbsensiSaya> {
+                AbsensiSayaScreen(
                     onBack = { navController.popBackStack() },
                 )
             }

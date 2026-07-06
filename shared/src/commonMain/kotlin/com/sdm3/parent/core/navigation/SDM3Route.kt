@@ -99,4 +99,7 @@ sealed interface SDM3Route {
         val classroomId: String,
         val classroomName: String,
     ) : SDM3Route
+
+    @Serializable
+    data object AbsensiSaya : SDM3Route
 }

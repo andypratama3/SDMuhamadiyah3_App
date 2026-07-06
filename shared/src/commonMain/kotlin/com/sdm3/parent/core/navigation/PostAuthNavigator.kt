@@ -20,19 +20,23 @@ object PostAuthNavigator {
     }
 
     fun isPublicRoute(routeStr: String): Boolean =
-        routeStr.contains("Splash") ||
+        routeStr.isBlank() ||
+            routeStr.contains("Splash") ||
             routeStr.contains("Onboarding") ||
             routeStr.contains("Login") ||
             routeStr.contains("VerifikasiOtp")
 
     fun requiresTeacherCapability(route: SDM3Route): Boolean = when (route) {
         is SDM3Route.TeacherHome,
-        is SDM3Route.GuruAbsensi -> true
+        is SDM3Route.GuruAbsensi,
+        is SDM3Route.AbsensiSaya -> true
         else -> false
     }
 
     fun requiresTeacherCapability(routeStr: String): Boolean =
-        routeStr.contains("TeacherHome") || routeStr.contains("GuruAbsensi")
+        routeStr.contains("TeacherHome") ||
+            routeStr.contains("GuruAbsensi") ||
+            routeStr.contains("AbsensiSaya")
 
     fun requiresParentCapability(route: SDM3Route): Boolean = when (route) {
         is SDM3Route.Splash,
@@ -40,10 +44,11 @@ object PostAuthNavigator {
         is SDM3Route.Login,
         is SDM3Route.VerifikasiOtp,
         is SDM3Route.TeacherHome,
-        is SDM3Route.GuruAbsensi -> false
+        is SDM3Route.GuruAbsensi,
+        is SDM3Route.AbsensiSaya -> false
         else -> true
     }
 
     fun requiresParentCapability(routeStr: String): Boolean =
-        !isPublicRoute(routeStr) && !requiresTeacherCapability(routeStr)
+        routeStr.isNotBlank() && !isPublicRoute(routeStr) && !requiresTeacherCapability(routeStr)
 }

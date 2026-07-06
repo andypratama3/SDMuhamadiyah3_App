@@ -148,7 +148,21 @@ suspend inline fun <reified T> HttpResponse.toApiResult(): ApiResult<T> {
         }
         HttpStatusCode.Unauthorized -> ApiResult.Error(ApiError.Unauthorized(sanitizeUserFacingMessage(message)))
         HttpStatusCode.Forbidden -> ApiResult.Error(ApiError.Forbidden(sanitizeUserFacingMessage(message)))
-        HttpStatusCode.NotFound -> ApiResult.Error(ApiError.NotFound)
+        HttpStatusCode.NotFound -> {
+            val detail = message?.takeIf { it.isNotBlank() }
+            if (detail != null) {
+                ApiResult.Error(ApiError.Unknown(sanitizeUserFacingMessage(detail)))
+            } else {
+                ApiResult.Error(ApiError.NotFound)
+            }
+        }
+        HttpStatusCode.BadRequest -> {
+            ApiResult.Error(
+                ApiError.Unknown(
+                    sanitizeUserFacingMessage(message ?: "Permintaan tidak dapat diproses"),
+                ),
+            )
+        }
         HttpStatusCode.UnprocessableEntity -> {
             val errors = try {
                 val errorsElement = root["data"]?.jsonObject?.get("errors")

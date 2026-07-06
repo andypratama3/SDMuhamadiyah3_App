@@ -5,6 +5,7 @@
     <string name="school_name_short">SD Muhammadiyah 3</string>
     <string name="teacher_panel_title">Panel Guru • Absensi</string>
     <string name="teacher_panel_menu">Panel Absensi Guru</string>
+    <string name="teacher_absensi_saya_menu">Absensi Saya (GPS)</string>
     <string name="biometric_login_prompt">Masuk ke SD Muhammadiyah 3 Samarinda</string>
     <string name="help_url">https://sdmuhammadiyah3smd.cloud</string>
     <string name="privacy_url">https://sdmuhammadiyah3smd.cloud/privacy</string>

@@ -23,6 +23,7 @@ import com.sdm3.parent.data.remote.api.DashboardApi
 import com.sdm3.parent.data.remote.api.ExtracurricularApi
 import com.sdm3.parent.data.remote.api.FcmApi
 import com.sdm3.parent.data.remote.api.NotificationPreferencesApi
+import com.sdm3.parent.data.remote.api.EmployeeSelfAttendanceApi
 import com.sdm3.parent.data.remote.api.TeacherAttendanceApi
 import com.sdm3.parent.data.remote.api.GradeApi
 import com.sdm3.parent.data.remote.api.NotificationApi
@@ -42,6 +43,7 @@ import com.sdm3.parent.data.repository.ProfileRepository
 import com.sdm3.parent.data.repository.RaporRepository
 import com.sdm3.parent.data.repository.SettingsRepository
 import com.sdm3.parent.data.repository.StudentRepository
+import com.sdm3.parent.data.repository.EmployeeSelfAttendanceRepository
 import com.sdm3.parent.data.repository.TeacherAttendanceRepository
 import com.sdm3.parent.domain.repository.ArticleRepositoryContract
 import com.sdm3.parent.domain.repository.AttendanceRepositoryContract
@@ -55,11 +57,13 @@ import com.sdm3.parent.domain.repository.ProfileRepositoryContract
 import com.sdm3.parent.domain.repository.RaporRepositoryContract
 import com.sdm3.parent.domain.repository.SettingsRepositoryContract
 import com.sdm3.parent.domain.repository.StudentRepositoryContract
+import com.sdm3.parent.domain.repository.EmployeeSelfAttendanceRepositoryContract
 import com.sdm3.parent.domain.repository.TeacherAttendanceRepositoryContract
 import com.sdm3.parent.feature.auth.AccountDeletionViewModel
 import com.sdm3.parent.feature.auth.LoginViewModel
 import com.sdm3.parent.feature.auth.PilihAnakViewModel
 import com.sdm3.parent.feature.auth.VerifikasiOtpViewModel
+import com.sdm3.parent.feature.guru.AbsensiSayaViewModel
 import com.sdm3.parent.feature.guru.GuruAbsensiViewModel
 import com.sdm3.parent.feature.guru.TeacherHomeViewModel
 import com.sdm3.parent.feature.home.HomeViewModel
@@ -93,14 +97,14 @@ val securityModule = module {
 
 val networkModule = module {
     single {
+        val koin = getKoin()
         val secureTokenManager = get<SecureTokenManager>()
         val cache = get<CacheDataSource>()
-        val fcmRegistrar = get<FcmRegistrar>()
         HttpClientProvider(
             baseUrl = get<SDM3Config>().baseUrl,
             tokenProvider = { secureTokenManager.getBearerToken() },
             onSessionExpired = {
-                runCatching { fcmRegistrar.unregisterIfNeeded() }
+                runCatching { koin.get<FcmRegistrar>().unregisterIfNeeded() }
                 secureTokenManager.clearAllSecureData()
                 cache.clearAll()
             },
@@ -134,6 +138,7 @@ val apiModule = module {
     single { FcmApi(get()) }
     single { NotificationPreferencesApi(get()) }
     single { TeacherAttendanceApi(get()) }
+    single { EmployeeSelfAttendanceApi(get()) }
 }
 
 val repositoryModule = module {
@@ -151,6 +156,7 @@ val repositoryModule = module {
     single<ExtracurricularRepositoryContract> { ExtracurricularRepository(get(), get()) }
     single<SettingsRepositoryContract> { SettingsRepository(get(), get()) }
     single<TeacherAttendanceRepositoryContract> { TeacherAttendanceRepository(get()) }
+    single<EmployeeSelfAttendanceRepositoryContract> { EmployeeSelfAttendanceRepository(get()) }
 }
 
 val viewModelModule = module {
@@ -179,6 +185,7 @@ val viewModelModule = module {
     viewModelOf(::VerifikasiQrRaporViewModel)
     viewModel { TeacherHomeViewModel(get(), get()) }
     viewModel { GuruAbsensiViewModel(get()) }
+    viewModel { AbsensiSayaViewModel(get()) }
 }
 
 val notificationModule = module {

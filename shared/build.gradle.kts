@@ -97,6 +97,7 @@ kotlin {
             implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.firebase.messaging)
             implementation(libs.kotlinx.coroutines.play.services)
+            implementation(libs.play.services.location)
 
             // Note: debugImplementation is not supported in KMP androidMain source set with the new plugin
             implementation(libs.compose.uiTooling)

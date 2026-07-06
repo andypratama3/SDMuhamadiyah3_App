@@ -16,22 +16,23 @@ fun RouteAccessGate(
     val roleContext = secureTokenManager.getRoleContext()
     val redirect = resolveUnauthorizedRedirect(currentRouteStr, roleContext)
 
-    if (redirect != null) {
-        LaunchedEffect(currentRouteStr, roleContext) {
-            navController.navigate(redirect) {
-                popUpTo(0) { inclusive = true }
-            }
+    LaunchedEffect(currentRouteStr, roleContext, redirect) {
+        if (redirect == null) return@LaunchedEffect
+        if (currentRouteStr.isBlank()) return@LaunchedEffect
+        if (navController.currentBackStackEntry == null) return@LaunchedEffect
+        navController.navigate(redirect) {
+            popUpTo(0) { inclusive = true }
         }
-    } else {
-        content()
     }
+
+    content()
 }
 
 fun resolveUnauthorizedRedirect(
     routeStr: String,
     roleContext: RoleContext,
 ): SDM3Route? {
-    if (PostAuthNavigator.isPublicRoute(routeStr)) return null
+    if (routeStr.isBlank() || PostAuthNavigator.isPublicRoute(routeStr)) return null
 
     if (PostAuthNavigator.requiresTeacherCapability(routeStr) && !roleContext.hasTeacherAccess) {
         return if (roleContext.hasParentAccess) {

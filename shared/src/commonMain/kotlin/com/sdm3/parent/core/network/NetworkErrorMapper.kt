@@ -24,7 +24,17 @@ fun sanitizeUserFacingMessage(raw: String?): String {
             "Permintaan terlalu lama. Silakan coba lagi."
         lower.contains("ssl") || lower.contains("certificate") ->
             "Koneksi aman gagal. Silakan coba lagi."
-        else -> "Terjadi kesalahan. Silakan coba lagi."
+        else -> {
+            if (message.length <= 280 &&
+                !IP_PATTERN.containsMatchIn(message) &&
+                !URL_PATTERN.containsMatchIn(message) &&
+                message.any { it.isLetter() }
+            ) {
+                message
+            } else {
+                "Terjadi kesalahan. Silakan coba lagi."
+            }
+        }
     }
 }
 

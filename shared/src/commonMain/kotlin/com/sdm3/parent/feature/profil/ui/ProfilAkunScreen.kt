@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import sdmuhammadiyah3samarinda.shared.generated.resources.Res
+import sdmuhammadiyah3samarinda.shared.generated.resources.teacher_absensi_saya_menu
 import sdmuhammadiyah3samarinda.shared.generated.resources.teacher_panel_menu
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
@@ -66,6 +67,7 @@ fun ProfilAkunScreen(
     onAccountDeletion: () -> Unit,
     onLogout: () -> Unit,
     onOpenTeacherPanel: (() -> Unit)? = null,
+    onOpenAbsensiSaya: (() -> Unit)? = null,
     selectedStudentId: String = "",
     onSwitchStudent: (String) -> Unit = {},
     viewModel: ProfilAkunViewModel = koinViewModel()
@@ -237,6 +239,9 @@ fun ProfilAkunScreen(
                                 val settingsItems = buildList {
                                     if (hasTeacherAccess && onOpenTeacherPanel != null) {
                                         add(SettingsItem(stringResource(Res.string.teacher_panel_menu), Icons.Outlined.Groups, colorScheme.primary, onOpenTeacherPanel))
+                                    }
+                                    if (hasTeacherAccess && onOpenAbsensiSaya != null) {
+                                        add(SettingsItem(stringResource(Res.string.teacher_absensi_saya_menu), Icons.Outlined.LocationOn, colorScheme.secondary, onOpenAbsensiSaya))
                                     }
                                     add(SettingsItem("Notifikasi", Icons.Outlined.Notifications, colorScheme.primary, onNotifikasiSetting))
                                     add(SettingsItem("Preferensi Bahasa", Icons.Outlined.Language, colorScheme.primary, { showInfo("Bahasa Indonesia aktif") }))

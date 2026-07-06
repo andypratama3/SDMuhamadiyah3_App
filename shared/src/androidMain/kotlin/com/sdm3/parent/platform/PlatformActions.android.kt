@@ -18,6 +18,12 @@ object AndroidPlatformProvider {
 
     @Volatile
     var launchPickAvatar: ((onResult: (PickedImage?) -> Unit) -> Unit)? = null
+
+    @Volatile
+    var requestLocationPermission: (suspend () -> Boolean)? = null
+
+    @Volatile
+    var locationPermissionRequested: Boolean = false
 }
 
 actual object PlatformActions {

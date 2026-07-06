@@ -48,11 +48,12 @@ fun App() {
             if (getPlatformName() == "Android") {
                 fcmTokenProvider.requestPermissionIfNeeded()
             }
-            // Debug Android: cetak FCM token ke Logcat. iOS dicetak dari AppDelegate Swift.
             if (isDebugBuild() && getPlatformName() == "Android") {
                 delay(1500)
-                val hasToken = !fcmTokenProvider.getToken().isNullOrBlank()
-                println(if (hasToken) "SDM3_FCM_TOKEN => registered" else "SDM3_FCM_TOKEN => pending")
+                runCatching {
+                    val hasToken = !fcmTokenProvider.getToken().isNullOrBlank()
+                    println(if (hasToken) "SDM3_FCM_TOKEN => registered" else "SDM3_FCM_TOKEN => pending")
+                }
             }
         }
     }
