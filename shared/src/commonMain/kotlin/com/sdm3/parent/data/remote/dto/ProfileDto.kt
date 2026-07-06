@@ -9,5 +9,7 @@ data class ProfileDto(
     val name: String,
     val email: String,
     val phone: String? = null,
-    val avatar: String? = null
+    val avatar: String? = null,
+    val role: String? = null,
+    val roles: List<String> = emptyList(),
 )

@@ -1,8 +1,10 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.core.network.safeApiCall
+import com.sdm3.parent.core.network.safeApiCallWithCache
+import com.sdm3.parent.core.security.SecureTokenManager
 import com.sdm3.parent.data.remote.api.ProfileApi
 import com.sdm3.parent.data.remote.dto.ProfileDto
 import com.sdm3.parent.domain.repository.ProfileRepositoryContract
@@ -10,41 +12,39 @@ import com.sdm3.parent.domain.repository.ProfileRepositoryContract
 class ProfileRepository(
     private val api: ProfileApi,
     private val cache: CacheDataSource,
+    private val secureTokenManager: SecureTokenManager,
 ) : ProfileRepositoryContract {
 
-    override suspend fun getProfile(): ApiResult<ProfileDto> {
-        return try {
-            val result = api.getProfile()
-            if (result is ApiResult.Success) cache.cacheProfile(result.data)
-            result
-        } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data profil"))
-        }
-    }
-
-    override suspend fun getMe(): ApiResult<ProfileDto> {
-        return try {
-            val result = api.getMe()
-            if (result is ApiResult.Success) cache.cacheProfile(result.data)
-            result
-        } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data user"))
-        }
-    }
+    override suspend fun getProfile(): ApiResult<ProfileDto> =
+        safeApiCallWithCache(
+            fallback = "Gagal mengambil data profil",
+            block = {
+                when (val result = api.getProfile()) {
+                    is ApiResult.Success -> {
+                        cache.cacheProfile(result.data)
+                        result
+                    }
+                    is ApiResult.Error -> result
+                }
+            },
+            cacheFallback = {
+                secureTokenManager.getUserId()?.let { cache.getProfile(it) }
+            },
+        )
 
     override suspend fun updateProfile(
         name: String?,
         email: String?,
         phone: String?,
         password: String?,
-        passwordConfirmation: String?
-    ): ApiResult<ProfileDto> {
-        return try {
-            val result = api.updateProfile(name, email, phone, password, passwordConfirmation)
-            if (result is ApiResult.Success) cache.cacheProfile(result.data)
-            result
-        } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal memperbarui profil"))
+        passwordConfirmation: String?,
+    ): ApiResult<ProfileDto> = safeApiCall("Gagal memperbarui profil") {
+        when (val result = api.updateProfile(name, email, phone, password, passwordConfirmation)) {
+            is ApiResult.Success -> {
+                cache.cacheProfile(result.data)
+                result
+            }
+            is ApiResult.Error -> result
         }
     }
 
@@ -52,13 +52,13 @@ class ProfileRepository(
         bytes: ByteArray,
         fileName: String,
         mimeType: String,
-    ): ApiResult<ProfileDto> {
-        return try {
-            val result = api.uploadAvatar(bytes, fileName, mimeType)
-            if (result is ApiResult.Success) cache.cacheProfile(result.data)
-            result
-        } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengunggah foto profil"))
+    ): ApiResult<ProfileDto> = safeApiCall("Gagal mengunggah foto profil") {
+        when (val result = api.uploadAvatar(bytes, fileName, mimeType)) {
+            is ApiResult.Success -> {
+                cache.cacheProfile(result.data)
+                result
+            }
+            is ApiResult.Error -> result
         }
     }
 }

@@ -196,7 +196,7 @@ fun DetailPengumumanScreen(
                                         .clip(RoundedCornerShape(32.dp))
                                         .background(
                                             Brush.verticalGradient(
-                                                listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))
+                                                listOf(Color.Transparent, overlayScrimColor(alpha = 0.75f))
                                             )
                                         )
                                 )

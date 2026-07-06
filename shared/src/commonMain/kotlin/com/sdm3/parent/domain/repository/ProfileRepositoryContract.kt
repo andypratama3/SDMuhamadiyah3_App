@@ -5,7 +5,6 @@ import com.sdm3.parent.data.remote.dto.ProfileDto
 
 interface ProfileRepositoryContract {
     suspend fun getProfile(): ApiResult<ProfileDto>
-    suspend fun getMe(): ApiResult<ProfileDto>
     suspend fun updateProfile(
         name: String? = null,
         email: String? = null,

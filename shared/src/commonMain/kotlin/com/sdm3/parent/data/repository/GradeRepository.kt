@@ -1,8 +1,9 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.core.network.safeApiCall
+import com.sdm3.parent.core.network.safeApiCallWithCache
 import com.sdm3.parent.data.remote.api.GradeApi
 import com.sdm3.parent.data.remote.dto.GradeComponentDto
 import com.sdm3.parent.data.remote.dto.GradeDto
@@ -14,37 +15,46 @@ class GradeRepository(
     private val cache: CacheDataSource,
 ) : GradeRepositoryContract {
 
-    override suspend fun getGrades(studentId: String, semester: String?): ApiResult<List<GradeDto>> {
-        return try {
-            val result = api.getGrades(studentId, semester)
-            if (result is ApiResult.Success) cache.cacheGrades(studentId, result.data)
-            result
-        } catch (e: Exception) {
-            val semesterFilter = semester ?: ""
-            val cached = if (semesterFilter.isNotEmpty()) cache.getGradesBySemester(studentId, semesterFilter)
-                          else cache.getGrades(studentId)
-            if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data nilai"))
-        }
-    }
+    override suspend fun getGrades(studentId: String, semester: String?): ApiResult<List<GradeDto>> =
+        safeApiCallWithCache(
+            fallback = "Gagal mengambil data nilai",
+            block = {
+                when (val result = api.getGrades(studentId, semester)) {
+                    is ApiResult.Success -> {
+                        cache.cacheGrades(studentId, result.data)
+                        result
+                    }
+                    is ApiResult.Error -> result
+                }
+            },
+            cacheFallback = {
+                val semesterFilter = semester.orEmpty()
+                val cached = if (semesterFilter.isNotEmpty()) {
+                    cache.getGradesBySemester(studentId, semesterFilter)
+                } else {
+                    cache.getGrades(studentId)
+                }
+                cached.takeIf { it.isNotEmpty() }
+            },
+        )
 
-    override suspend fun getGradeComponents(studentId: String, subjectId: String): ApiResult<List<GradeComponentDto>> {
-        return try {
-            val result = api.getGradeComponents(studentId, subjectId)
-            if (result is ApiResult.Success) cache.cacheGradeComponents(studentId, result.data)
-            result
-        } catch (e: Exception) {
-            val cached = cache.getGradeComponents(subjectId, studentId)
-            if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil komponen nilai"))
-        }
-    }
+    override suspend fun getGradeComponents(studentId: String, subjectId: String): ApiResult<List<GradeComponentDto>> =
+        safeApiCallWithCache(
+            fallback = "Gagal mengambil komponen nilai",
+            block = {
+                when (val result = api.getGradeComponents(studentId, subjectId)) {
+                    is ApiResult.Success -> {
+                        cache.cacheGradeComponents(studentId, result.data)
+                        result
+                    }
+                    is ApiResult.Error -> result
+                }
+            },
+            cacheFallback = {
+                cache.getGradeComponents(subjectId, studentId).takeIf { it.isNotEmpty() }
+            },
+        )
 
-    override suspend fun getTranscript(studentId: String): ApiResult<TranscriptDto> {
-        return try {
-            api.getTranscript(studentId)
-        } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil transkrip nilai"))
-        }
-    }
+    override suspend fun getTranscript(studentId: String): ApiResult<TranscriptDto> =
+        safeApiCall("Gagal mengambil transkrip nilai") { api.getTranscript(studentId) }
 }

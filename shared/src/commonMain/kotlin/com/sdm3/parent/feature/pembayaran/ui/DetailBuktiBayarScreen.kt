@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.AppBranding
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarUiState
@@ -285,7 +286,7 @@ fun DetailBuktiBayarScreen(
                             )
                             Spacer(modifier = Modifier.height(Spacing.md))
                             Text(
-                                text = "SD MUHAMMADIYAH 3 SAMARINDA",
+                                text = AppBranding.SCHOOL_NAME.uppercase(),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Black,
                                 color = colorScheme.primary,

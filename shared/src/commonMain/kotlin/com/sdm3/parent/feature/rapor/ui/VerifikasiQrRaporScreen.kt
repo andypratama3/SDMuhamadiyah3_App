@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -103,7 +104,7 @@ fun VerifikasiQrRaporScreen(
                         valid = result.valid,
                         studentName = result.studentName,
                         nisn = result.nisn,
-                        message = result.message
+                        message = sanitizeUserFacingMessage(result.message)
                     )
                 }
             )
@@ -360,7 +361,7 @@ fun VerifikasiQrRaporScreen(
                                             result.message?.takeIf { it.isNotBlank() }?.let { msg ->
                                                 Spacer(modifier = Modifier.height(16.dp))
                                                 Text(
-                                                    text = msg,
+                                                    text = sanitizeUserFacingMessage(msg),
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = colorScheme.primary.copy(alpha = 0.7f),
                                                     lineHeight = 20.sp

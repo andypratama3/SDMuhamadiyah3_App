@@ -380,6 +380,11 @@ private fun VerifikasiOtpScreenPreview() {
         object : com.sdm3.parent.domain.repository.AuthRepositoryContract {
             override suspend fun login(email: String, password: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
             override suspend fun getAuthenticatedUser() = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
+            override fun resolveStoredRoleContext() = com.sdm3.parent.domain.model.RoleContext(
+                com.sdm3.parent.domain.model.UserRole.PARENT,
+                hasParentAccess = true,
+                hasTeacherAccess = false,
+            )
             override suspend fun apiLogout() = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
             override suspend fun deleteAccount(reason: String) = com.sdm3.parent.core.network.ApiResult.Error(com.sdm3.parent.core.network.ApiError.Unknown("preview"))
             override suspend fun isLoggedIn() = false

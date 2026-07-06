@@ -3,6 +3,7 @@ package com.sdm3.parent.feature.profil
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.notification.FcmRegistrar
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import com.sdm3.parent.domain.repository.SettingsRepositoryContract
 
 data class PengaturanNotifikasiUiState(
@@ -20,7 +21,7 @@ class PengaturanNotifikasiViewModel(
     fun loadSettings() {
         launchSafely(
             onError = { error ->
-                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Gagal memuat pengaturan") }
+                updateState { it.copy(isLoading = false, errorMessage = sanitizeUserFacingMessage(error.message)) }
             }
         ) {
             updateState { it.copy(isLoading = true, errorMessage = null) }
@@ -32,7 +33,7 @@ class PengaturanNotifikasiViewModel(
     fun saveSettings() {
         launchSafely(
             onError = { error ->
-                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Gagal menyimpan pengaturan") }
+                updateState { it.copy(isLoading = false, errorMessage = sanitizeUserFacingMessage(error.message)) }
             }
         ) {
             updateState { it.copy(isLoading = true, errorMessage = null) }
@@ -91,7 +92,7 @@ class PengaturanNotifikasiViewModel(
     private fun persistSettings(onSuccess: suspend () -> Unit = {}) {
         launchSafely(
             onError = { error ->
-                updateState { it.copy(errorMessage = error.message ?: "Gagal menyimpan pengaturan") }
+                updateState { it.copy(errorMessage = sanitizeUserFacingMessage(error.message)) }
             }
         ) {
             settingsRepository.saveNotificationSettings(uiState.value.settings)

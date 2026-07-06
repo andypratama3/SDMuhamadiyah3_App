@@ -23,6 +23,7 @@ import kotlinx.serialization.serializer
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.encodedPath
 import com.sdm3.parent.core.event.SessionEventBus
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import com.sdm3.parent.isDebugBuild
 
 class HttpClientProvider(
@@ -142,11 +143,11 @@ suspend inline fun <reified T> HttpResponse.toApiResult(): ApiResult<T> {
                 if (isDebugBuild()) {
                     println("[SDM3] Deserialization error for ${T::class.simpleName}: ${e.message}")
                 }
-                ApiResult.Error(ApiError.Unknown("Gagal memproses data: ${e.message}"))
+                ApiResult.Error(ApiError.Unknown(sanitizeUserFacingMessage("Gagal memproses data")))
             }
         }
-        HttpStatusCode.Unauthorized -> ApiResult.Error(ApiError.Unauthorized(message ?: "Sesi tidak valid, silakan login kembali."))
-        HttpStatusCode.Forbidden -> ApiResult.Error(ApiError.Forbidden(message ?: "Anda tidak memiliki akses ke data ini."))
+        HttpStatusCode.Unauthorized -> ApiResult.Error(ApiError.Unauthorized(sanitizeUserFacingMessage(message)))
+        HttpStatusCode.Forbidden -> ApiResult.Error(ApiError.Forbidden(sanitizeUserFacingMessage(message)))
         HttpStatusCode.NotFound -> ApiResult.Error(ApiError.NotFound)
         HttpStatusCode.UnprocessableEntity -> {
             val errors = try {
@@ -167,7 +168,7 @@ suspend inline fun <reified T> HttpResponse.toApiResult(): ApiResult<T> {
             if (status.value >= 500) {
                 ApiResult.Error(ApiError.ServerError(status.value))
             } else {
-                ApiResult.Error(ApiError.Unknown(message ?: "Terjadi kesalahan tidak terduga (${status.value})"))
+                ApiResult.Error(ApiError.Unknown(sanitizeUserFacingMessage(message)))
             }
         }
     }

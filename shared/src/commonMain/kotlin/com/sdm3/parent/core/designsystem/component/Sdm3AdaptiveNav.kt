@@ -15,6 +15,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import sdmuhammadiyah3samarinda.shared.generated.resources.Res
+import sdmuhammadiyah3samarinda.shared.generated.resources.school_name
+import sdmuhammadiyah3samarinda.shared.generated.resources.school_name_short
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
 import com.sdm3.parent.core.navigation.SDM3BottomTab
@@ -203,14 +207,14 @@ private fun Sdm3DrawerContent(
         Spacer(Modifier.height(48.dp))
 
         Text(
-            text = "SD Muhammadiyah 3",
+            text = stringResource(Res.string.school_name_short),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = colorScheme.primary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
         Text(
-            text = "Portal Orang Tua",
+            text = stringResource(Res.string.school_name),
             style = MaterialTheme.typography.bodySmall,
             color = colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)

@@ -8,6 +8,8 @@ import com.sdm3.parent.core.security.SecureTokenManager
 import com.sdm3.parent.core.security.SecureStorage
 import com.sdm3.parent.core.test.TestDispatcher
 import com.sdm3.parent.data.remote.dto.UserDto
+import com.sdm3.parent.domain.model.RoleContext
+import com.sdm3.parent.domain.model.UserRole
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,6 +24,9 @@ class FakeAuthRepository : AuthRepositoryContract {
     override suspend fun login(email: String, password: String): ApiResult<UserDto> = loginResult
 
     override suspend fun getAuthenticatedUser(): ApiResult<UserDto> = loginResult
+
+    override fun resolveStoredRoleContext(): RoleContext =
+        RoleContext(UserRole.PARENT, hasParentAccess = true, hasTeacherAccess = false)
 
     override suspend fun deleteAccount(reason: String): ApiResult<Unit> = ApiResult.Success(Unit)
 

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.domain.model.AttendanceStatus
 import com.sdm3.parent.feature.kehadiran.KehadiranSiswaUiState
 import com.sdm3.parent.feature.kehadiran.KehadiranSiswaViewModel
 import kotlinx.datetime.LocalDate
@@ -206,13 +207,8 @@ fun KehadiranSiswaScreen(
                     // "Status hari ini" hanya valid bila ada catatan untuk tanggal hari
                     // ini yang sebenarnya — jangan memalsukan "Hadir" sebagai default.
                     val todayAttendance = attendances.firstOrNull { it.date == todayIso }
-                    val todayStatusLabel = when (todayAttendance?.status) {
-                        "hadir" -> "Terverifikasi Hadir"
-                        "sakit" -> "Sedang Sakit"
-                        "izin" -> "Izin Tidak Hadir"
-                        "alpa" -> "Tanpa Keterangan"
-                        else -> "Belum Ada Data Hari Ini"
-                    }
+                    val todayStatusLabel = AttendanceStatus.fromApi(todayAttendance?.status)?.parentTodayLabel
+                        ?: "Belum Ada Data Hari Ini"
                     val todayNotes = todayAttendance?.notes
                     val todayTimeLocation = when {
                         !todayNotes.isNullOrBlank() -> todayNotes
@@ -419,22 +415,25 @@ fun KehadiranSiswaScreen(
                             }
 
                             itemsIndexed(attendances) { _, att ->
+                                val parsedStatus = AttendanceStatus.fromApi(att.status)
                                 val logStatus = att.status
-                                val (logColor, logIcon) = when (logStatus) {
-                                    "hadir" -> statusSuccess to Icons.Outlined.CheckCircle
-                                    "sakit" -> statusWarning to Icons.Outlined.MedicalServices
-                                    "izin" -> colorScheme.primary to Icons.Outlined.EventAvailable
-                                    "alpa" -> colorScheme.error to Icons.Outlined.Cancel
-                                    else -> colorScheme.onSurfaceVariant.copy(alpha = 0.3f) to Icons.Outlined.Info
+                                val (logColor, logIcon) = when (parsedStatus) {
+                                    AttendanceStatus.HADIR -> statusSuccess to Icons.Outlined.CheckCircle
+                                    AttendanceStatus.SAKIT -> statusWarning to Icons.Outlined.MedicalServices
+                                    AttendanceStatus.IZIN -> colorScheme.primary to Icons.Outlined.EventAvailable
+                                    AttendanceStatus.ALPA -> colorScheme.error to Icons.Outlined.Cancel
+                                    AttendanceStatus.PULANG -> colorScheme.secondary to Icons.Outlined.Logout
+                                    null -> colorScheme.onSurfaceVariant.copy(alpha = 0.3f) to Icons.Outlined.Info
                                 }
-                                val logNote = att.notes ?: when (logStatus) {
-                                    "hadir" -> "Hadir sesuai jadwal."
-                                    "sakit" -> "Tidak hadir karena sakit."
-                                    "izin" -> "Izin tidak hadir."
-                                    "alpa" -> "Tanpa keterangan."
-                                    else -> ""
+                                val logNote = att.notes ?: when (parsedStatus) {
+                                    AttendanceStatus.HADIR -> "Hadir sesuai jadwal."
+                                    AttendanceStatus.SAKIT -> "Tidak hadir karena sakit."
+                                    AttendanceStatus.IZIN -> "Izin tidak hadir."
+                                    AttendanceStatus.ALPA -> "Tanpa keterangan."
+                                    AttendanceStatus.PULANG -> "Pulang dari sekolah."
+                                    null -> ""
                                 }
-                                val displayStatus = logStatus.replaceFirstChar { it.uppercase() }
+                                val displayStatus = parsedStatus?.label ?: logStatus.replaceFirstChar { it.uppercase() }
                                 AttendanceLogRow(att.date, displayStatus, logNote, "", logColor, logIcon)
                             }
                         }
@@ -687,12 +686,13 @@ private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onP
     val heroContent = heroContentColor()
     val statusSuccess = statusSuccessColor()
     val statusWarning = statusWarningColor()
-    val dotColor = when (status) {
-        "hadir" -> if (onPrimary) heroContent else statusSuccess
-        "sakit" -> statusWarning
-        "izin" -> colorScheme.primary
-        "alpa" -> colorScheme.error
-        else -> null
+    val dotColor = when (AttendanceStatus.fromApi(status)) {
+        AttendanceStatus.HADIR -> if (onPrimary) heroContent else statusSuccess
+        AttendanceStatus.SAKIT -> statusWarning
+        AttendanceStatus.IZIN -> colorScheme.primary
+        AttendanceStatus.ALPA -> colorScheme.error
+        AttendanceStatus.PULANG -> colorScheme.secondary
+        null -> null
     }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

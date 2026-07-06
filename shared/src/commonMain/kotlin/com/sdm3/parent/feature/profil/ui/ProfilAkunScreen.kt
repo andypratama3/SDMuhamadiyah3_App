@@ -30,6 +30,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
+import sdmuhammadiyah3samarinda.shared.generated.resources.Res
+import sdmuhammadiyah3samarinda.shared.generated.resources.teacher_panel_menu
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
 import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
@@ -43,7 +46,9 @@ import com.sdm3.parent.data.remote.dto.StudentDto
 import com.sdm3.parent.feature.auth.ui.PilihAnakBottomSheet
 import com.sdm3.parent.feature.profil.ProfilAkunUiState
 import com.sdm3.parent.feature.profil.ProfilAkunViewModel
+import com.sdm3.parent.core.AppBranding
 import com.sdm3.parent.platform.PlatformActions
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.coroutines.launch
 
@@ -60,11 +65,14 @@ fun ProfilAkunScreen(
     onNotifikasiSetting: () -> Unit,
     onAccountDeletion: () -> Unit,
     onLogout: () -> Unit,
+    onOpenTeacherPanel: (() -> Unit)? = null,
     selectedStudentId: String = "",
     onSwitchStudent: (String) -> Unit = {},
     viewModel: ProfilAkunViewModel = koinViewModel()
 ) {
     val isPreview = LocalInspectionMode.current
+    val secureTokenManager: com.sdm3.parent.core.security.SecureTokenManager? = if (isPreview) null else koinInject()
+    val hasTeacherAccess = secureTokenManager?.getRoleContext()?.hasTeacherAccess == true
     val uiState by if (isPreview) {
         remember { mutableStateOf(ProfilAkunUiState()) }
     } else {
@@ -226,15 +234,19 @@ fun ProfilAkunScreen(
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     color = colorScheme.primary.copy(alpha = 0.05f)
                                 )
-                                listOf(
-                                    SettingsItem("Notifikasi Portal", Icons.Outlined.Notifications, colorScheme.primary, onNotifikasiSetting),
-                                    SettingsItem("Preferensi Bahasa", Icons.Outlined.Language, colorScheme.primary, { showInfo("Bahasa Indonesia aktif") }),
-                                    SettingsItem("Pusat Bantuan", Icons.AutoMirrored.Outlined.Chat, colorScheme.primary, { PlatformActions.openUrl("https://sdmuhammadiyah3smd.cloud") }),
-                                    SettingsItem("Kebijakan Privasi", Icons.Outlined.VerifiedUser, colorScheme.primary, { PlatformActions.openUrl("https://sdmuhammadiyah3smd.cloud/privacy") }),
-                                    SettingsItem("Tentang Aplikasi", Icons.Outlined.Info, colorScheme.primary, { showInfo("SD Muhammadiyah 3 Samarinda v${com.sdm3.parent.APP_VERSION_NAME}") })
-                                ).forEachIndexed { index, item ->
-                                    SettingsItemRow(item = item, trailing = if (index == 1) "ID" else null)
-                                    if (index < 4) {
+                                val settingsItems = buildList {
+                                    if (hasTeacherAccess && onOpenTeacherPanel != null) {
+                                        add(SettingsItem(stringResource(Res.string.teacher_panel_menu), Icons.Outlined.Groups, colorScheme.primary, onOpenTeacherPanel))
+                                    }
+                                    add(SettingsItem("Notifikasi", Icons.Outlined.Notifications, colorScheme.primary, onNotifikasiSetting))
+                                    add(SettingsItem("Preferensi Bahasa", Icons.Outlined.Language, colorScheme.primary, { showInfo("Bahasa Indonesia aktif") }))
+                                    add(SettingsItem("Tentang Aplikasi", Icons.Outlined.Info, colorScheme.primary, { showInfo("${AppBranding.SCHOOL_NAME} v${com.sdm3.parent.APP_VERSION_NAME}") }))
+                                    add(SettingsItem("Pusat Bantuan", Icons.AutoMirrored.Outlined.Chat, colorScheme.primary, { PlatformActions.openUrl(AppBranding.HELP_URL) }))
+                                    add(SettingsItem("Kebijakan Privasi", Icons.Outlined.VerifiedUser, colorScheme.primary, { PlatformActions.openUrl(AppBranding.PRIVACY_URL) }))
+                                }
+                                settingsItems.forEachIndexed { index, item ->
+                                    SettingsItemRow(item = item, trailing = if (item.label == "Preferensi Bahasa") "ID" else null)
+                                    if (index < settingsItems.lastIndex) {
                                         HorizontalDivider(
                                             modifier = Modifier.padding(horizontal = 16.dp),
                                             color = colorScheme.primary.copy(alpha = 0.05f)
@@ -274,14 +286,14 @@ fun ProfilAkunScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "PORTAL WALI MURID v${com.sdm3.parent.APP_VERSION_NAME}",
+                                text = "${AppBranding.SCHOOL_NAME.uppercase()} v${com.sdm3.parent.APP_VERSION_NAME}",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
                                 color = colorScheme.primary.copy(alpha = 0.3f),
                                 letterSpacing = 1.sp
                             )
                             Text(
-                                text = "SD Muhammadiyah 3 Samarinda",
+                                text = AppBranding.SCHOOL_NAME,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.primary.copy(alpha = 0.2f)
                             )
@@ -355,7 +367,7 @@ fun ProfilAkunScreen(
             },
             text = { 
                 Text(
-                    "Anda akan mengakhiri sesi aktif pada perangkat ini. Perlu masuk kembali untuk akses portal.",
+                    "Anda akan mengakhiri sesi aktif pada perangkat ini. Perlu masuk kembali untuk mengakses aplikasi.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = colorScheme.onSurfaceVariant
                 ) 
@@ -561,12 +573,12 @@ private fun ProfileHeader(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.35f)),
+                            .background(overlayScrimColor(alpha = 0.35f)),
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = Color.White,
+                            color = colorScheme.onPrimary,
                             strokeWidth = 2.dp,
                         )
                     }
@@ -685,7 +697,7 @@ private fun StudentMiniCard(
                     }
                     if (student?.portalId != null) {
                         Text(
-                            text = "ID Portal: ${student.portalId}",
+                            text = "ID Akun: ${student.portalId}",
                             style = MaterialTheme.typography.labelSmall,
                             color = colorScheme.primary.copy(alpha = 0.6f),
                             fontWeight = FontWeight.Bold

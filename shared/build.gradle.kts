@@ -37,6 +37,9 @@ kotlin {
             baseName = "Shared"
             isStatic = true
             linkerOpts("-lsqlite3")
+            freeCompilerArgs += listOf(
+                "-Xoverride-konan-properties=minVersion.ios=15.0;minVersionSinceXcode15.ios=15.0;osVersionMin.ios_simulator_arm64=15.0;osVersionMin.ios_arm64=15.0",
+            )
         }
         iosTarget.compilations.getByName("main").compilerOptions.configure {
             freeCompilerArgs.add("-Xbinary=bundleId=com.sdm3.parent")

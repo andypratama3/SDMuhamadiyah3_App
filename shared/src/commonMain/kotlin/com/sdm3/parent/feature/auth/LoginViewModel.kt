@@ -8,6 +8,8 @@ import com.sdm3.parent.core.security.BiometricAuthGate
 import com.sdm3.parent.core.security.BiometricResult
 import com.sdm3.parent.core.security.SecureTokenManager
 import com.sdm3.parent.core.notification.FcmRegistrar
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
+import com.sdm3.parent.core.AppBranding
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
 
 
@@ -78,14 +80,16 @@ class LoginViewModel(
         }
         launchSafely(
             onError = { error ->
-                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Terjadi kesalahan") }
+                updateState { it.copy(isLoading = false, errorMessage = sanitizeUserFacingMessage(error.message)) }
             }
         ) {
             updateState { it.copy(isLoading = true, errorMessage = null) }
 
             when (val result = authRepository.login(state.email.trim(), state.password)) {
                 is ApiResult.Success -> {
-                    fcmRegistration.registerIfAvailable()
+                    if (secureTokenManager.getRoleContext().hasParentAccess) {
+                        fcmRegistration.registerIfAvailable()
+                    }
                     updateState { it.copy(isLoading = false, isLoggedIn = true) }
                     sendEffect(LoginEffect.LoginSuccess)
                 }
@@ -105,15 +109,17 @@ class LoginViewModel(
         }
         launchSafely(
             onError = { error ->
-                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Autentikasi biometrik gagal") }
+                updateState { it.copy(isLoading = false, errorMessage = sanitizeUserFacingMessage(error.message)) }
             }
         ) {
             updateState { it.copy(isLoading = true, errorMessage = null) }
-            when (val result = biometricAuth.authenticate("Masuk ke Portal Orang Tua")) {
+            when (val result = biometricAuth.authenticate(AppBranding.BIOMETRIC_LOGIN_PROMPT)) {
                 BiometricResult.Success -> {
                     when (val userResult = authRepository.getAuthenticatedUser()) {
                         is ApiResult.Success -> {
-                            fcmRegistration.registerIfAvailable()
+                            if (secureTokenManager.getRoleContext().hasParentAccess) {
+                                fcmRegistration.registerIfAvailable()
+                            }
                             updateState { it.copy(isLoading = false) }
                             sendEffect(LoginEffect.LoginSuccess)
                         }
@@ -132,7 +138,7 @@ class LoginViewModel(
                     updateState { it.copy(isLoading = false, errorMessage = "Biometrik tidak tersedia di perangkat ini") }
                 }
                 is BiometricResult.Error -> {
-                    updateState { it.copy(isLoading = false, errorMessage = result.message) }
+                    updateState { it.copy(isLoading = false, errorMessage = sanitizeUserFacingMessage(result.message)) }
                 }
             }
         }

@@ -184,7 +184,7 @@ fun PilihAnakScreen(
                                         )
                                     }
                                     Text(
-                                        text = "Silakan pilih data anak untuk mengakses portal akademik.",
+                                        text = "Silakan pilih data anak untuk melanjutkan.",
                                         style = MaterialTheme.typography.bodyLarge,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         lineHeight = 24.sp

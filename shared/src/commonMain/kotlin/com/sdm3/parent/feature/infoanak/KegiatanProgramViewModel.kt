@@ -5,6 +5,7 @@ import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.AcademicProgramDto
 import com.sdm3.parent.data.remote.dto.ExtracurricularDto
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import com.sdm3.parent.domain.repository.ExtracurricularRepositoryContract
 
 data class KegiatanProgramUiState(
@@ -22,7 +23,7 @@ class KegiatanProgramViewModel(
     fun loadActivities(studentId: String) {
         launchSafely(
             onError = { error ->
-                updateState { it.copy(isLoading = false, errorMessage = error.message ?: "Gagal memuat aktivitas") }
+                updateState { it.copy(isLoading = false, errorMessage = sanitizeUserFacingMessage(error.message)) }
             }
         ) {
             updateState { it.copy(isLoading = true, errorMessage = null) }

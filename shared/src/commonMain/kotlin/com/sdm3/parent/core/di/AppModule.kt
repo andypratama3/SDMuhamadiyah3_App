@@ -6,6 +6,7 @@ import com.sdm3.parent.isDebugBuild
 import com.sdm3.parent.core.notification.FcmRegistrar
 import com.sdm3.parent.core.notification.FcmRegistrationService
 import com.sdm3.parent.core.notification.FcmTokenProvider
+import com.sdm3.parent.core.auth.SessionLogoutCoordinator
 import com.sdm3.parent.core.security.BiometricAuthGate
 import com.sdm3.parent.core.security.BiometricAuthenticator
 import com.sdm3.parent.core.security.CertificatePins
@@ -22,6 +23,7 @@ import com.sdm3.parent.data.remote.api.DashboardApi
 import com.sdm3.parent.data.remote.api.ExtracurricularApi
 import com.sdm3.parent.data.remote.api.FcmApi
 import com.sdm3.parent.data.remote.api.NotificationPreferencesApi
+import com.sdm3.parent.data.remote.api.TeacherAttendanceApi
 import com.sdm3.parent.data.remote.api.GradeApi
 import com.sdm3.parent.data.remote.api.NotificationApi
 import com.sdm3.parent.data.remote.api.PaymentApi
@@ -40,6 +42,7 @@ import com.sdm3.parent.data.repository.ProfileRepository
 import com.sdm3.parent.data.repository.RaporRepository
 import com.sdm3.parent.data.repository.SettingsRepository
 import com.sdm3.parent.data.repository.StudentRepository
+import com.sdm3.parent.data.repository.TeacherAttendanceRepository
 import com.sdm3.parent.domain.repository.ArticleRepositoryContract
 import com.sdm3.parent.domain.repository.AttendanceRepositoryContract
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
@@ -52,10 +55,13 @@ import com.sdm3.parent.domain.repository.ProfileRepositoryContract
 import com.sdm3.parent.domain.repository.RaporRepositoryContract
 import com.sdm3.parent.domain.repository.SettingsRepositoryContract
 import com.sdm3.parent.domain.repository.StudentRepositoryContract
+import com.sdm3.parent.domain.repository.TeacherAttendanceRepositoryContract
 import com.sdm3.parent.feature.auth.AccountDeletionViewModel
 import com.sdm3.parent.feature.auth.LoginViewModel
 import com.sdm3.parent.feature.auth.PilihAnakViewModel
 import com.sdm3.parent.feature.auth.VerifikasiOtpViewModel
+import com.sdm3.parent.feature.guru.GuruAbsensiViewModel
+import com.sdm3.parent.feature.guru.TeacherHomeViewModel
 import com.sdm3.parent.feature.home.HomeViewModel
 import com.sdm3.parent.feature.infoanak.DetailInfoAnakViewModel
 import com.sdm3.parent.feature.infoanak.KegiatanProgramViewModel
@@ -89,10 +95,12 @@ val networkModule = module {
     single {
         val secureTokenManager = get<SecureTokenManager>()
         val cache = get<CacheDataSource>()
+        val fcmRegistrar = get<FcmRegistrar>()
         HttpClientProvider(
             baseUrl = get<SDM3Config>().baseUrl,
             tokenProvider = { secureTokenManager.getBearerToken() },
             onSessionExpired = {
+                runCatching { fcmRegistrar.unregisterIfNeeded() }
                 secureTokenManager.clearAllSecureData()
                 cache.clearAll()
             },
@@ -125,10 +133,12 @@ val apiModule = module {
     single { ExtracurricularApi(get()) }
     single { FcmApi(get()) }
     single { NotificationPreferencesApi(get()) }
+    single { TeacherAttendanceApi(get()) }
 }
 
 val repositoryModule = module {
     single<AuthRepositoryContract> { AuthRepository(get(), get(), get()) }
+    single { SessionLogoutCoordinator(authRepository = get(), fcmRegistrar = get()) }
     single<StudentRepositoryContract> { StudentRepository(get(), get()) }
     single<GradeRepositoryContract> { GradeRepository(get(), get()) }
     single<AttendanceRepositoryContract> { AttendanceRepository(get(), get()) }
@@ -137,9 +147,10 @@ val repositoryModule = module {
     single<ArticleRepositoryContract> { ArticleRepository(get(), get()) }
     single<RaporRepositoryContract> { RaporRepository(get(), get()) }
     single<DashboardRepositoryContract> { DashboardRepository(get(), get()) }
-    single<ProfileRepositoryContract> { ProfileRepository(get(), get()) }
+    single<ProfileRepositoryContract> { ProfileRepository(get(), get(), get()) }
     single<ExtracurricularRepositoryContract> { ExtracurricularRepository(get(), get()) }
     single<SettingsRepositoryContract> { SettingsRepository(get(), get()) }
+    single<TeacherAttendanceRepositoryContract> { TeacherAttendanceRepository(get()) }
 }
 
 val viewModelModule = module {
@@ -166,6 +177,8 @@ val viewModelModule = module {
     viewModelOf(::KehadiranSiswaViewModel)
     viewModelOf(::PreviewRaporPdfViewModel)
     viewModelOf(::VerifikasiQrRaporViewModel)
+    viewModel { TeacherHomeViewModel(get(), get()) }
+    viewModel { GuruAbsensiViewModel(get()) }
 }
 
 val notificationModule = module {

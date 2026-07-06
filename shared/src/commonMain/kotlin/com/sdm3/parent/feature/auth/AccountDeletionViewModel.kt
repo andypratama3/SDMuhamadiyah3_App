@@ -5,6 +5,7 @@ import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.notification.FcmRegistrar
 import com.sdm3.parent.core.security.SecureTokenManager
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
 
 data class AccountDeletionUiState(
@@ -46,7 +47,7 @@ class AccountDeletionViewModel(
                     it.copy(
                         isLoading = false,
                         isConfirmDialogShown = false,
-                        errorMessage = error.message ?: "Gagal mengajukan penghapusan akun"
+                        errorMessage = sanitizeUserFacingMessage(error.message)
                     )
                 }
             }

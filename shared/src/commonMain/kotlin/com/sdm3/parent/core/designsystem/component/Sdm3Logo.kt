@@ -25,11 +25,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.painterResource
 import sdmuhammadiyah3samarinda.shared.generated.resources.Res
 import sdmuhammadiyah3samarinda.shared.generated.resources.logo_sd
+import androidx.compose.material3.MaterialTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.glassBorderColor
 import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
 import com.sdm3.parent.core.designsystem.theme.heroContentColor
-import com.sdm3.parent.core.designsystem.theme.heroContentColor
+import com.sdm3.parent.core.designsystem.theme.overlayScrimColor
 
 @Composable
 fun Sdm3Logo(
@@ -114,7 +115,7 @@ private fun LogoContent(useTextFallback: Boolean, size: Dp) {
         if (useTextFallback) {
             Text(
                 text = "SDM3",
-                color = Color.Black.copy(alpha = 0.2f),
+                color = overlayScrimColor(alpha = 0.2f),
                 fontSize = (size.value / 4.5f).sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp,
@@ -144,7 +145,7 @@ private fun LogoContent(useTextFallback: Boolean, size: Dp) {
 private fun Sdm3LogoPreview() {
     SDM3Theme(darkTheme = true) {
         Box(
-            modifier = Modifier.fillMaxSize().background(Color(0xFF001B3D)),
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.dp)) {

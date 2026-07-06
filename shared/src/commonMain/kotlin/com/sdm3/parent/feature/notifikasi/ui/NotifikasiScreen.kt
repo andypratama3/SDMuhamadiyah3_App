@@ -130,7 +130,7 @@ fun NotifikasiScreen(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "Notifikasi Portal",
+                            "Notifikasi",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary,

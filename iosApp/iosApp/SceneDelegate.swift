@@ -14,6 +14,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         let composeController = MainViewControllerKt.MainViewController()
+        composeController.view.backgroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark
+                ? UIColor.black
+                : UIColor(red: 0.969, green: 0.973, blue: 0.980, alpha: 1.0)
+        }
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = composeController
         window.makeKeyAndVisible()

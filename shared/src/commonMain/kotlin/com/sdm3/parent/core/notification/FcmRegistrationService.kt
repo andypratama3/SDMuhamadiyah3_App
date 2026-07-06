@@ -10,6 +10,7 @@ class FcmRegistrationService(
     private val secureTokenManager: SecureTokenManager,
 ) : FcmRegistrar {
     override suspend fun registerIfAvailable() {
+        if (!secureTokenManager.getRoleContext().hasParentAccess) return
         val token = fcmTokenProvider.getToken() ?: secureTokenManager.getFcmToken() ?: return
         when (fcmApi.register(token)) {
             is ApiResult.Success -> secureTokenManager.saveFcmToken(token)

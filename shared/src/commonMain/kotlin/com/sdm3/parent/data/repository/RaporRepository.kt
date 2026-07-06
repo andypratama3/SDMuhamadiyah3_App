@@ -1,8 +1,9 @@
 package com.sdm3.parent.data.repository
 
 import com.sdm3.parent.cache.CacheDataSource
-import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.core.network.safeApiCall
+import com.sdm3.parent.core.network.safeApiCallWithCache
 import com.sdm3.parent.data.remote.api.RaporApi
 import com.sdm3.parent.data.remote.dto.RaporInstanceDto
 import com.sdm3.parent.data.remote.dto.RaporVerifyResponse
@@ -13,31 +14,24 @@ class RaporRepository(
     private val cache: CacheDataSource,
 ) : RaporRepositoryContract {
 
-    override suspend fun getRaporInstances(studentId: String): ApiResult<List<RaporInstanceDto>> {
-        return try {
-            val result = api.getRaporInstances(studentId)
-            if (result is ApiResult.Success) cache.cacheRaporInstances(studentId, result.data)
-            result
-        } catch (e: Exception) {
-            val cached = cache.getRaporInstances(studentId)
-            if (cached.isNotEmpty()) ApiResult.Success(cached)
-            else ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mengambil data rapor"))
-        }
-    }
+    override suspend fun getRaporInstances(studentId: String): ApiResult<List<RaporInstanceDto>> =
+        safeApiCallWithCache(
+            fallback = "Gagal mengambil data rapor",
+            block = {
+                when (val result = api.getRaporInstances(studentId)) {
+                    is ApiResult.Success -> {
+                        cache.cacheRaporInstances(studentId, result.data)
+                        result
+                    }
+                    is ApiResult.Error -> result
+                }
+            },
+            cacheFallback = { cache.getRaporInstances(studentId).takeIf { it.isNotEmpty() } },
+        )
 
-    override suspend fun getDownloadUrl(id: String): ApiResult<String> {
-        return try {
-            api.getDownloadUrl(id)
-        } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal mendapatkan URL unduhan"))
-        }
-    }
+    override suspend fun getDownloadUrl(id: String): ApiResult<String> =
+        safeApiCall("Gagal mendapatkan URL unduhan") { api.getDownloadUrl(id) }
 
-    override suspend fun verifyQr(qrData: String): ApiResult<RaporVerifyResponse> {
-        return try {
-            api.verifyQr(qrData)
-        } catch (e: Exception) {
-            ApiResult.Error(ApiError.Unknown(e.message ?: "Gagal memverifikasi QR"))
-        }
-    }
+    override suspend fun verifyQr(qrData: String): ApiResult<RaporVerifyResponse> =
+        safeApiCall("Gagal memverifikasi QR") { api.verifyQr(qrData) }
 }

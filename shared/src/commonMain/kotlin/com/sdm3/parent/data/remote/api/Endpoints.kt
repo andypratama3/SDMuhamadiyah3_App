@@ -1,9 +1,9 @@
 package com.sdm3.parent.data.remote.api
 
 object Endpoints {
+    const val MOBILE_LOGOUT = "/api/mobile/logout"
     const val LOGOUT = "/api/parent/logout"
     const val API_TOKEN = "/api/sanctum/token"
-    const val API_USER = "/api/user"
 
     const val PARENT_STUDENTS = "/api/parent/students"
     const val PARENT_STUDENT_DETAIL = "/api/parent/students/{id}"
@@ -25,14 +25,13 @@ object Endpoints {
     const val PARENT_ARTICLE_DETAIL = "/api/parent/articles/{id}"
     const val PARENT_ARTICLE_BY_SLUG = "/api/parent/articles/slug/{slug}"
     const val PARENT_RAPOR_INSTANCES = "/api/parent/rapors"
-    const val PARENT_RAPOR_DETAIL = "/api/parent/rapors/{id}"
     const val PARENT_RAPOR_DOWNLOAD = "/api/parent/rapor/{id}/download"
     const val PARENT_RAPOR_VERIFY = "/api/parent/rapor/verify"
     const val PARENT_EXTRACURRICULARS = "/api/parent/extracurriculars"
     const val PARENT_ACADEMIC_PROGRAMS = "/api/parent/academic-programs"
     const val PARENT_PROFILE = "/api/parent/profile"
     const val PARENT_PROFILE_AVATAR = "/api/parent/profile/avatar"
-    const val PARENT_ME = "/api/parent/me"
+    const val MOBILE_ME = "/api/mobile/me"
     const val PARENT_NOTIFICATION_PREFERENCES = "/api/parent/notification-preferences"
     const val PARENT_ACCOUNT_DELETE = "/api/parent/account"
     const val PARENT_FCM_REGISTER = "/api/parent/fcm/register"
@@ -45,4 +44,8 @@ object Endpoints {
     const val MIDTRANS_SNAP_TOKEN = "/api/parent/midtrans/snap-token/{payment}"
     const val MIDTRANS_STATUS = "/api/parent/midtrans/status/{chargeId}"
     const val MIDTRANS_PAYMENT_METHODS = "/api/parent/midtrans/payment-methods"
+
+    const val TEACHER_CLASSROOMS = "/api/teacher/classrooms"
+    const val TEACHER_CLASSROOM_ROSTER = "/api/teacher/classrooms/{classroomId}/roster"
+    const val TEACHER_ATTENDANCES_BULK = "/api/teacher/attendances/bulk"
 }

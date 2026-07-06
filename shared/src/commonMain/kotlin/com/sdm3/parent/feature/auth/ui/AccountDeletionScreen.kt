@@ -229,7 +229,7 @@ fun AccountDeletionScreen(
             },
             text = {
                 Text(
-                    text = "Tindakan ini akan mengakhiri seluruh hak akses digital Anda pada portal ini. Apakah Anda yakin?",
+                    text = "Tindakan ini akan mengakhiri seluruh hak akses digital Anda pada aplikasi ini. Apakah Anda yakin?",
                     style = MaterialTheme.typography.bodyLarge,
                     color = colorScheme.onSurfaceVariant
                 )

@@ -299,7 +299,7 @@ fun PembayaranBerhasilScreen(
                                 Spacer(modifier = Modifier.height(Spacing.md))
 
                                 Sdm3OutlinedButton(
-                                    text = "Kembali Ke Portal",
+                                    text = "Kembali",
                                     onClick = onKembali,
                                     contentColor = colorScheme.primary
                                 )

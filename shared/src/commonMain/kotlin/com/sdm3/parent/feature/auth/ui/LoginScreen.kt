@@ -44,6 +44,9 @@ import com.sdm3.parent.feature.auth.LoginViewModel
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.stringResource
+import sdmuhammadiyah3samarinda.shared.generated.resources.Res
+import sdmuhammadiyah3samarinda.shared.generated.resources.school_name
 
 private val PremiumEasing = CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
 
@@ -158,11 +161,12 @@ fun LoginScreen(
                 }
             ) {
                 Text(
-                    text = "Portal Orang Tua",
+                    text = stringResource(Res.string.school_name),
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary,
-                    letterSpacing = (-0.5).sp
+                    letterSpacing = (-0.5).sp,
+                    textAlign = TextAlign.Center,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Surface(
@@ -170,7 +174,7 @@ fun LoginScreen(
                     shape = RoundedCornerShape(999.dp)
                 ) {
                     Text(
-                        text = " SD MUHAMMADIYAH 3 SAMARINDA ",
+                        text = " ORANG TUA & GURU ",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
@@ -270,7 +274,7 @@ fun LoginScreen(
                 }
             ) {
                 Sdm3Button(
-                    text = "Masuk Ke Portal",
+                    text = "Masuk",
                     onClick = handleLogin,
                     isLoading = uiState.isLoading,
                     modifier = Modifier.fillMaxWidth().height(56.dp)
@@ -291,7 +295,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "SD Muhammadiyah 3 Samarinda v${com.sdm3.parent.APP_VERSION_NAME}",
+                text = "${stringResource(Res.string.school_name)} v${com.sdm3.parent.APP_VERSION_NAME}",
                 style = MaterialTheme.typography.labelSmall,
                 color = colorScheme.primary.copy(alpha = 0.3f),
                 fontWeight = FontWeight.Bold,

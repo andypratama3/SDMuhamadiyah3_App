@@ -210,7 +210,7 @@ fun OnboardingScreen(
                     val isLastPage = pagerState.currentPage == onboardingPages.size - 1
 
                     Sdm3Button(
-                        text = if (isLastPage) "Mulai Sekarang" else "Lanjutkan Ke Portal",
+                        text = if (isLastPage) "Mulai Sekarang" else "Lanjutkan",
                         onClick = {
                             if (!isPreview && getPlatformName() != "iOS") {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)

@@ -325,9 +325,12 @@ private fun RaporInstanceEntity.toDto() = RaporInstanceDto(
 
 private fun ProfileDto.toEntity(cachedAt: Long) = ProfileEntity(
     id = id, name = name, email = email, phone = phone,
-    avatar_url = avatar, cached_at = cachedAt,
+    avatar_url = avatar, role = role, roles_csv = roles.joinToString(","),
+    cached_at = cachedAt,
 )
 
 private fun ProfileEntity.toDto() = ProfileDto(
     id = id, name = name, email = email, phone = phone, avatar = avatar_url,
+    role = role,
+    roles = roles_csv.split(",").filter { it.isNotBlank() },
 )

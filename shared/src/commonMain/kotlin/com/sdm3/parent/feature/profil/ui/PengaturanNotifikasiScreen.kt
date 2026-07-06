@@ -103,7 +103,7 @@ fun PengaturanNotifikasiScreen(
                             letterSpacing = (-0.5).sp
                         )
                         Text(
-                            text = "PREFERENSI PUSH PORTAL",
+                            text = "PREFERENSI NOTIFIKASI",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
                             color = colorScheme.primary.copy(alpha = 0.4f),
@@ -326,7 +326,7 @@ private fun ToggleRow(
             onCheckedChange = { if (enabled) onToggle(it) },
             enabled = enabled,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
+                checkedThumbColor = colorScheme.onPrimary,
                 checkedTrackColor = colorScheme.secondary,
                 uncheckedThumbColor = colorScheme.primary.copy(alpha = 0.1f),
                 uncheckedTrackColor = colorScheme.primary.copy(alpha = 0.05f),

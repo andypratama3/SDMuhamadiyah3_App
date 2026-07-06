@@ -27,15 +27,6 @@ class ProfileApi(private val provider: HttpClientProvider) {
         return response.toApiResult()
     }
 
-    suspend fun getMe(): ApiResult<ProfileDto> {
-        val response = provider.client.get {
-            url(Endpoints.PARENT_ME)
-            provider.applyAuthHeader(this)
-        }
-        provider.handleSessionExpiredIfNeeded(response)
-        return response.toApiResult()
-    }
-
     suspend fun updateProfile(
         name: String? = null,
         email: String? = null,

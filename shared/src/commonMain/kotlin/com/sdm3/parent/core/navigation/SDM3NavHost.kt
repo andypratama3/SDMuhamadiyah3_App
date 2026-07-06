@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -46,8 +47,15 @@ import com.sdm3.parent.feature.infoanak.ui.KegiatanProgramScreen
 import com.sdm3.parent.feature.rapor.ui.HalamanRaporScreen
 import com.sdm3.parent.feature.rapor.ui.PreviewRaporPdfScreen
 import com.sdm3.parent.feature.rapor.ui.VerifikasiQrRaporScreen
+import kotlinx.coroutines.launch
+import com.sdm3.parent.core.navigation.PostAuthNavigator
+import com.sdm3.parent.core.navigation.isDeepLinkAllowed
+import com.sdm3.parent.core.auth.SessionLogoutCoordinator
+import com.sdm3.parent.domain.repository.AuthRepositoryContract
+import com.sdm3.parent.feature.guru.ui.GuruAbsensiScreen
+import com.sdm3.parent.feature.guru.ui.TeacherHomeScreen
 
-private val PremiumEasing = androidx.compose.animation.core.CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
+private val PremiumEasing = com.sdm3.parent.core.designsystem.theme.Sdm3Motion.easing
 
 @Composable
 fun SDM3NavHost(
@@ -72,6 +80,10 @@ fun SDM3NavHost(
         val link = pendingDeepLink ?: return@LaunchedEffect
         if (!PushDeepLinkNavigator.isAuthenticatedDestination(currentRouteStr)) return@LaunchedEffect
         val route = PushDeepLinkNavigator.toRoute(link, secureTokenManager) ?: return@LaunchedEffect
+        if (!isDeepLinkAllowed(route, secureTokenManager.getRoleContext())) {
+            PushDeepLinkHolder.consume()
+            return@LaunchedEffect
+        }
         PushDeepLinkHolder.consume()
         navController.navigate(route) {
             popUpTo<SDM3Route.Main> {
@@ -81,29 +93,14 @@ fun SDM3NavHost(
         }
     }
 
-    val showBottomBar = when {
-        currentRouteStr.contains("Main") -> true
-        currentRouteStr.contains("Home") -> true
-        currentRouteStr.contains("NilaiRapor") -> true
-        currentRouteStr.contains("PembayaranSpp") -> true
-        currentRouteStr.contains("HalamanRapor") -> true
-        currentRouteStr.contains("ProfilAkun") -> true
-        else -> false
-    }
+    val roleContext = secureTokenManager.getRoleContext()
+    val showBottomBar = roleContext.hasParentAccess && isParentBottomNavRoute(currentRouteStr)
 
-    val currentTab = when {
-        currentRouteStr.contains("Home") || currentRouteStr.contains("Main") -> SDM3BottomTab.Beranda
-        currentRouteStr.contains("NilaiRapor") -> SDM3BottomTab.Nilai
-        currentRouteStr.contains("PembayaranSpp") -> SDM3BottomTab.Bayar
-        currentRouteStr.contains("HalamanRapor") -> SDM3BottomTab.Rapor
-        currentRouteStr.contains("ProfilAkun") -> SDM3BottomTab.Profil
-        else -> null
-    }
+    val currentTab = parentBottomTabForRoute(currentRouteStr)
     val savedStudentId = secureTokenManager.getSelectedStudentId() ?: ""
     val argStudentId = try {
         when {
-            currentRouteStr.contains("Home") -> navBackStackEntry?.toRoute<SDM3Route.Home>()?.studentId
-            currentRouteStr.contains("Main") -> navBackStackEntry?.toRoute<SDM3Route.Main>()?.studentId
+            isParentMainRoute(currentRouteStr) -> navBackStackEntry?.toRoute<SDM3Route.Main>()?.studentId
             currentRouteStr.contains("NilaiRapor") -> navBackStackEntry?.toRoute<SDM3Route.NilaiRapor>()?.studentId
             currentRouteStr.contains("PembayaranSpp") -> navBackStackEntry?.toRoute<SDM3Route.PembayaranSpp>()?.studentId
             currentRouteStr.contains("HalamanRapor") -> navBackStackEntry?.toRoute<SDM3Route.HalamanRapor>()?.studentId
@@ -117,8 +114,13 @@ fun SDM3NavHost(
         argStudentId
     } else {
         savedStudentId
-    }
+    }.orEmpty()
 
+    RouteAccessGate(
+        currentRouteStr = currentRouteStr,
+        secureTokenManager = secureTokenManager,
+        navController = navController,
+    ) {
     Sdm3AdaptiveLayout(
         selectedTab = currentTab,
         showNav = showBottomBar,
@@ -211,15 +213,13 @@ fun SDM3NavHost(
                 LoginScreen(
                     viewModel = loginViewModel,
                     onLoginSuccess = {
-                        val studentId = secureTokenManager.getSelectedStudentId()
-                        if (!studentId.isNullOrBlank()) {
-                            navController.navigate(SDM3Route.Main(studentId)) {
-                                popUpTo<SDM3Route.Login> { inclusive = true }
-                            }
-                        } else {
-                            navController.navigate(SDM3Route.PilihAnak) {
-                                popUpTo<SDM3Route.Login> { inclusive = true }
-                            }
+                        val destination = PostAuthNavigator.resolveRoute(
+                            roleContext = secureTokenManager.getRoleContext(),
+                            selectedStudentId = secureTokenManager.getSelectedStudentId(),
+                            onboardingCompleted = secureTokenManager.isOnboardingCompleted(),
+                        )
+                        navController.navigate(destination) {
+                            popUpTo<SDM3Route.Login> { inclusive = true }
                         }
                     },
                     onForgotPassword = { email ->
@@ -262,14 +262,6 @@ fun SDM3NavHost(
             composable<SDM3Route.Main> { backStackEntry ->
                 val route = backStackEntry.toRoute<SDM3Route.Main>()
                 MainScreen(
-                    studentId = route.studentId,
-                    navController = navController
-                )
-            }
-
-            composable<SDM3Route.Home> { backStackEntry ->
-                val route = backStackEntry.toRoute<SDM3Route.Home>()
-                HomeScreen(
                     studentId = route.studentId,
                     navController = navController
                 )
@@ -441,7 +433,12 @@ fun SDM3NavHost(
                         navController.navigate(SDM3Route.Login) {
                             popUpTo(0) { inclusive = true }
                         }
-                    }
+                    },
+                    onOpenTeacherPanel = if (secureTokenManager.getRoleContext().hasTeacherAccess) {
+                        { navController.navigate(SDM3Route.TeacherHome) }
+                    } else {
+                        null
+                    },
                 )
             }
 
@@ -478,7 +475,46 @@ fun SDM3NavHost(
                     onBack = { navController.popBackStack() }
                 )
             }
+
+            composable<SDM3Route.TeacherHome> {
+                val authRepository: AuthRepositoryContract = org.koin.compose.koinInject()
+                val sessionLogout: SessionLogoutCoordinator = org.koin.compose.koinInject()
+                val scope = rememberCoroutineScope()
+                val roleContext = authRepository.resolveStoredRoleContext()
+                TeacherHomeScreen(
+                    onOpenAbsensi = { classroomId, classroomName ->
+                        navController.navigate(SDM3Route.GuruAbsensi(classroomId, classroomName))
+                    },
+                    onBackToParent = if (roleContext.hasParentAccess) {
+                        {
+                            navController.navigate(SDM3Route.Main(studentId)) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    } else {
+                        null
+                    },
+                    onLogout = {
+                        scope.launch {
+                            sessionLogout.logout()
+                            navController.navigate(SDM3Route.Login) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    },
+                )
+            }
+
+            composable<SDM3Route.GuruAbsensi> { backStackEntry ->
+                val route = backStackEntry.toRoute<SDM3Route.GuruAbsensi>()
+                GuruAbsensiScreen(
+                    classroomId = route.classroomId,
+                    classroomName = route.classroomName,
+                    onBack = { navController.popBackStack() },
+                )
+            }
         }
+    }
     }
 }
 

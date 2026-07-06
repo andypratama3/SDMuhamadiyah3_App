@@ -1,5 +1,6 @@
 package com.sdm3.parent.core.notification
 
+import com.sdm3.parent.isDebugBuild
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
@@ -9,7 +10,7 @@ actual class FcmTokenProvider {
         FcmTokenStore.getCachedToken()?.let { return it }
         return try {
             val token = FirebaseMessaging.getInstance().token.await()
-            Log.d(TAG, "FCM token retrieved: $token")
+            if (isDebugBuild()) Log.d(TAG, "FCM token retrieved")
             FcmTokenStore.updateToken(token)
             token
         } catch (e: Exception) {
@@ -19,7 +20,7 @@ actual class FcmTokenProvider {
     }
 
     actual fun onNewToken(token: String) {
-        Log.d(TAG, "FCM token refreshed: $token")
+        if (isDebugBuild()) Log.d(TAG, "FCM token refreshed")
         FcmTokenStore.updateToken(token)
         FcmRegistrationCoordinator.onTokenRefresh(token)
     }

@@ -349,7 +349,7 @@ fun DetailInfoAnakScreen(
                                     HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
                                     InfoRow("Wali Kelas", biodata?.waliKelas ?: "-")
                                     HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                                    InfoRow("ID Portal", biodata?.portalId ?: "-")
+                                    InfoRow("ID Akun Siswa", biodata?.portalId ?: "-")
                                 }
                             }
                         }

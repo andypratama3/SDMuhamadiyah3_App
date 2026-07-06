@@ -23,6 +23,7 @@ sealed interface SDM3Route {
     @Serializable
     data object PilihAnak : SDM3Route
 
+    @Deprecated("Use Main route", ReplaceWith("Main(studentId)"))
     @Serializable
     data class Home(val studentId: String) : SDM3Route
 
@@ -89,4 +90,13 @@ sealed interface SDM3Route {
 
     @Serializable
     data class VerifikasiQrRapor(val raporId: String) : SDM3Route
+
+    @Serializable
+    data object TeacherHome : SDM3Route
+
+    @Serializable
+    data class GuruAbsensi(
+        val classroomId: String,
+        val classroomName: String,
+    ) : SDM3Route
 }

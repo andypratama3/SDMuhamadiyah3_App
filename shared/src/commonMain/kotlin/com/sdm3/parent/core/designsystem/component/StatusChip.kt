@@ -70,7 +70,7 @@ private fun StatusChipPreview() {
         ) {
             StatusChip(text = "Hadir", color = success)
             StatusChip(text = "Sakit", color = warning)
-            StatusChip(text = "Izin", color = Color(0xFF001B3D))
+            StatusChip(text = "Izin", color = MaterialTheme.colorScheme.primary)
             StatusChip(text = "Alpa", color = danger)
             Spacer(modifier = Modifier.height(8.dp))
             StatusChip(text = "Lunas", color = success)

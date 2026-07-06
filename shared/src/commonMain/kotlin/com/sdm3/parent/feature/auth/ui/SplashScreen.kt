@@ -16,6 +16,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.sdm3.parent.core.AppBranding
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,8 +29,10 @@ import com.sdm3.parent.core.designsystem.component.Sdm3Logo
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.network.ApiError
 import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.core.navigation.PostAuthNavigator
 import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.core.security.SecureTokenManager
+import com.sdm3.parent.domain.model.RoleContext
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
 import kotlinx.coroutines.delay
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,12 +64,13 @@ fun SplashScreen(
                 auth != null -> {
                     when (val result = auth.getAuthenticatedUser()) {
                         is ApiResult.Success -> {
-                            val studentId = tokenManager.getSelectedStudentId()
-                            if (!studentId.isNullOrBlank()) {
-                                onNavigate(SDM3Route.Main(studentId))
-                            } else {
-                                onNavigate(SDM3Route.PilihAnak)
-                            }
+                            onNavigate(
+                                PostAuthNavigator.resolveRoute(
+                                    roleContext = RoleContext.fromUser(result.data),
+                                    selectedStudentId = tokenManager.getSelectedStudentId(),
+                                    onboardingCompleted = tokenManager.isOnboardingCompleted(),
+                                )
+                            )
                         }
                         is ApiResult.Error -> {
                             when (result.error) {
@@ -78,14 +83,24 @@ fun SplashScreen(
                                         else SDM3Route.Onboarding
                                     )
                                 }
+                                is ApiError.NoInternet,
+                                is ApiError.Timeout -> {
+                                    onNavigate(
+                                        PostAuthNavigator.resolveRoute(
+                                            roleContext = auth.resolveStoredRoleContext(),
+                                            selectedStudentId = tokenManager.getSelectedStudentId(),
+                                            onboardingCompleted = tokenManager.isOnboardingCompleted(),
+                                        )
+                                    )
+                                }
                                 else -> {
-                                    // Jaringan/server down: jangan hapus token yang masih valid.
-                                    val studentId = tokenManager.getSelectedStudentId()
-                                    if (!studentId.isNullOrBlank()) {
-                                        onNavigate(SDM3Route.Main(studentId))
-                                    } else {
-                                        onNavigate(SDM3Route.PilihAnak)
-                                    }
+                                    onNavigate(
+                                        PostAuthNavigator.resolveRoute(
+                                            roleContext = auth.resolveStoredRoleContext(),
+                                            selectedStudentId = tokenManager.getSelectedStudentId(),
+                                            onboardingCompleted = tokenManager.isOnboardingCompleted(),
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -104,6 +119,7 @@ private fun SplashContent(
 ) {
     val isPreview = LocalInspectionMode.current
     val reducedMotion = LocalReducedMotion.current
+    val isDark = isSystemInDarkTheme()
     val colorScheme = MaterialTheme.colorScheme
     val heroContent = heroContentColor()
     val glassSurface = glassSurfaceColor()
@@ -180,14 +196,7 @@ private fun SplashContent(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        colorScheme.primary,
-                        colorScheme.primaryContainer.copy(alpha = 0.85f)
-                    )
-                )
-            )
+            .background(splashBackgroundBrush())
             .safeDrawingPadding(),
         contentAlignment = Alignment.Center
     ) {
@@ -206,7 +215,10 @@ private fun SplashContent(
             // Orb 1: Academic Gold Glow
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.secondary.copy(alpha = 0.15f), Color.Transparent),
+                    colors = listOf(
+                        colorScheme.secondary.copy(alpha = if (isDark) 0.12f else 0.15f),
+                        Color.Transparent,
+                    ),
                     center = Offset(canvasWidth * phase1, canvasHeight * 0.2f),
                     radius = maxRadius
                 ),
@@ -217,7 +229,10 @@ private fun SplashContent(
             // Orb 2: Soft Navy Glow
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.primary.copy(alpha = 0.1f), Color.Transparent),
+                    colors = listOf(
+                        colorScheme.primary.copy(alpha = if (isDark) 0.18f else 0.1f),
+                        Color.Transparent,
+                    ),
                     center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.8f),
                     radius = maxRadius * 0.7f
                 ),
@@ -312,7 +327,13 @@ private fun SplashContent(
                     .width(160.dp)
                     .height(3.dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(glassSurface.copy(alpha = 0.1f)),
+                    .background(
+                        if (isDark) {
+                            Color.White.copy(alpha = 0.08f)
+                        } else {
+                            glassSurface.copy(alpha = 0.1f)
+                        },
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
@@ -330,8 +351,8 @@ private fun SplashContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "PORTAL WALI MURID • SD MUHAMMADIYAH 3 SAMARINDA",
-                color = heroContent.copy(alpha = 0.4f),
+                text = AppBranding.SCHOOL_NAME.uppercase(),
+                color = heroContent.copy(alpha = if (isDark) 0.55f else 0.4f),
                 style = MaterialTheme.typography.labelSmall.copy(
                     letterSpacing = if (isCompact) 1.sp else 2.sp,
                     fontWeight = FontWeight.Bold
@@ -349,8 +370,16 @@ private fun SplashContent(
 
 @Preview
 @Composable
-private fun SplashContentPreview() {
-    SDM3Theme {
+private fun SplashContentLightPreview() {
+    SDM3Theme(darkTheme = false) {
+        SplashContent(onAnimationFinished = {})
+    }
+}
+
+@Preview
+@Composable
+private fun SplashContentDarkPreview() {
+    SDM3Theme(darkTheme = true) {
         SplashContent(onAnimationFinished = {})
     }
 }

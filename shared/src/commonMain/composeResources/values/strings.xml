@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">SD Muhammadiyah 3 Samarinda</string>
-    <string name="splash_subtitle">Sistem Informasi Orang Tua &amp; Siswa</string>
+    <string name="splash_subtitle">Aplikasi Resmi SD Muhammadiyah 3 Samarinda</string>
+    <string name="school_name">SD Muhammadiyah 3 Samarinda</string>
+    <string name="school_name_short">SD Muhammadiyah 3</string>
+    <string name="teacher_panel_title">Panel Guru • Absensi</string>
+    <string name="teacher_panel_menu">Panel Absensi Guru</string>
+    <string name="biometric_login_prompt">Masuk ke SD Muhammadiyah 3 Samarinda</string>
+    <string name="help_url">https://sdmuhammadiyah3smd.cloud</string>
+    <string name="privacy_url">https://sdmuhammadiyah3smd.cloud/privacy</string>
 </resources>

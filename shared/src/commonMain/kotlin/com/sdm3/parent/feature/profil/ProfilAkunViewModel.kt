@@ -3,9 +3,10 @@ package com.sdm3.parent.feature.profil
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiResult
-import com.sdm3.parent.core.notification.FcmRegistrar
+import com.sdm3.parent.core.auth.SessionLogoutCoordinator
 import com.sdm3.parent.core.security.BiometricAuthGate
 import com.sdm3.parent.core.security.BiometricResult
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import com.sdm3.parent.core.security.SecureTokenManager
 import com.sdm3.parent.data.remote.dto.StudentDto
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
@@ -36,7 +37,7 @@ class ProfilAkunViewModel(
     private val profileRepository: ProfileRepositoryContract,
     private val studentRepository: StudentRepositoryContract,
     private val authRepository: AuthRepositoryContract,
-    private val fcmRegistration: FcmRegistrar,
+    private val sessionLogout: SessionLogoutCoordinator,
     private val secureTokenManager: SecureTokenManager,
     private val biometricAuth: BiometricAuthGate,
 ) : BaseViewModel<ProfilAkunUiState>(ProfilAkunUiState()) {
@@ -61,7 +62,7 @@ class ProfilAkunViewModel(
                     updateState { it.copy(biometricEnabled = true, biometricMessage = "Login biometrik diaktifkan") }
                 }
                 is BiometricResult.Error -> {
-                    updateState { it.copy(biometricEnabled = false, biometricMessage = result.message) }
+                    updateState { it.copy(biometricEnabled = false, biometricMessage = sanitizeUserFacingMessage(result.message)) }
                 }
                 BiometricResult.NotAvailable -> {
                     updateState {
@@ -199,15 +200,8 @@ class ProfilAkunViewModel(
 
     fun logout() {
         launchSafely {
-            try {
-                fcmRegistration.unregisterIfNeeded()
-                authRepository.apiLogout()
-            } catch (_: Exception) {
-                // Best-effort server logout; always clear local session.
-            } finally {
-                authRepository.logout()
-                logoutCompleted.send(Unit)
-            }
+            sessionLogout.logout()
+            logoutCompleted.send(Unit)
         }
     }
 }

@@ -2,10 +2,12 @@ package com.sdm3.parent.domain.repository
 
 import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.data.remote.dto.UserDto
+import com.sdm3.parent.domain.model.RoleContext
 
 interface AuthRepositoryContract {
     suspend fun login(email: String, password: String): ApiResult<UserDto>
     suspend fun getAuthenticatedUser(): ApiResult<UserDto>
+    fun resolveStoredRoleContext(): RoleContext
     suspend fun apiLogout(): ApiResult<Unit>
     suspend fun deleteAccount(reason: String): ApiResult<Unit>
     suspend fun isLoggedIn(): Boolean

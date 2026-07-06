@@ -232,7 +232,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Kamera diperlukan untuk memindai QR Code pada dokumen rapor.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "Face ID digunakan untuk masuk ke portal orang tua dengan aman.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Face ID digunakan untuk masuk ke SD Muhammadiyah 3 Samarinda dengan aman.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -275,7 +275,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Kamera diperlukan untuk memindai QR Code pada dokumen rapor.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "Face ID digunakan untuk masuk ke portal orang tua dengan aman.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Face ID digunakan untuk masuk ke SD Muhammadiyah 3 Samarinda dengan aman.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -88,6 +88,8 @@ final class QrCodeScannerViewController: UIViewController, AVCaptureMetadataOutp
             finish(with: nil)
             return
         }
+        
+        
 
         captureSession.addOutput(metadataOutput)
         metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)

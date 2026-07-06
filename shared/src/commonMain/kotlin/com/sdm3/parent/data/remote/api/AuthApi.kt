@@ -9,7 +9,7 @@ import com.sdm3.parent.data.remote.dto.ForgotPasswordRequest
 import com.sdm3.parent.data.remote.dto.ForgotPasswordResponse
 import com.sdm3.parent.data.remote.dto.LoginRequest
 import com.sdm3.parent.data.remote.dto.LoginResponse
-import com.sdm3.parent.data.remote.dto.ProfileDto
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import com.sdm3.parent.data.remote.dto.ResetPasswordRequest
 import com.sdm3.parent.data.remote.dto.ResetPasswordResponse
 import com.sdm3.parent.data.remote.dto.UserDto
@@ -48,22 +48,11 @@ class AuthApi(private val provider: HttpClientProvider) {
 
     suspend fun getUser(): ApiResult<UserDto> {
         val response = provider.client.get {
-            url(Endpoints.PARENT_ME)
+            url(Endpoints.MOBILE_ME)
             provider.applyAuthHeader(this)
         }
         provider.handleSessionExpiredIfNeeded(response)
-        return when (val result = response.toApiResult<ProfileDto>()) {
-            is ApiResult.Success -> ApiResult.Success(
-                UserDto(
-                    id = result.data.id,
-                    name = result.data.name,
-                    email = result.data.email,
-                    phone = result.data.phone,
-                    avatar = result.data.avatar,
-                )
-            )
-            is ApiResult.Error -> result
-        }
+        return response.toApiResult()
     }
 
     suspend fun deleteAccount(reason: String): ApiResult<Unit> {
@@ -77,12 +66,21 @@ class AuthApi(private val provider: HttpClientProvider) {
     }
 
     suspend fun logout(): ApiResult<Unit> {
-        val response = provider.client.post {
+        val mobileResponse = provider.client.post {
+            url(Endpoints.MOBILE_LOGOUT)
+            provider.applyAuthHeader(this)
+        }
+        provider.handleSessionExpiredIfNeeded(mobileResponse)
+        if (mobileResponse.status.value != 404) {
+            return mobileResponse.toApiResult()
+        }
+
+        val parentResponse = provider.client.post {
             url(Endpoints.LOGOUT)
             provider.applyAuthHeader(this)
         }
-        provider.handleSessionExpiredIfNeeded(response)
-        return response.toApiResult()
+        provider.handleSessionExpiredIfNeeded(parentResponse)
+        return parentResponse.toApiResult()
     }
 
     suspend fun requestOtp(email: String): ApiResult<ForgotPasswordResponse> {
@@ -135,16 +133,6 @@ private suspend inline fun HttpResponse.parseLoginResponse(): ApiResult<LoginRes
     }
 }
 
-private suspend inline fun HttpResponse.parseUserResponse(): ApiResult<UserDto> {
-    val text = body<String>()
-    if (status.value == 419) return ApiResult.Error(ApiError.SessionExpired)
-    return when (status) {
-        HttpStatusCode.OK -> parseDirectOrEnvelope(text)
-        HttpStatusCode.Unauthorized -> ApiResult.Error(ApiError.Unauthorized("Sesi tidak valid, silakan login kembali."))
-        else -> toApiResult()
-    }
-}
-
 private inline fun <reified T> parseDirectOrEnvelope(text: String): ApiResult<T> {
     return try {
         val root = apiJson.parseToJsonElement(text).jsonObject
@@ -158,6 +146,6 @@ private inline fun <reified T> parseDirectOrEnvelope(text: String): ApiResult<T>
             }
         }
     } catch (e: Exception) {
-        ApiResult.Error(ApiError.Unknown("Gagal memproses respons server: ${e.message}"))
+        ApiResult.Error(ApiError.Unknown(sanitizeUserFacingMessage(null)))
     }
 }

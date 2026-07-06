@@ -23,6 +23,7 @@ object FcmRegistrationCoordinator {
         FcmTokenStore.updateToken(token)
         val manager = secureTokenManager ?: return
         if (manager.getBearerToken().isNullOrBlank()) return
+        if (!manager.getRoleContext().hasParentAccess) return
         scope.launch {
             registrar?.registerIfAvailable()
         }

@@ -3,6 +3,7 @@ package com.sdm3.parent.feature.rapor
 import com.sdm3.parent.core.base.BaseViewModel
 import com.sdm3.parent.core.base.ScreenState
 import com.sdm3.parent.core.network.ApiResult
+import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import com.sdm3.parent.domain.repository.RaporRepositoryContract
 
 data class PreviewRaporPdfUiState(
@@ -41,7 +42,7 @@ class PreviewRaporPdfViewModel(
                 if (existing.isNotBlank()) {
                     updateState { it.copy(isDownloading = false, isDownloaded = true, downloadProgress = 1f, errorMessage = null) }
                 } else {
-                    updateState { it.copy(isDownloading = false, errorMessage = error.message ?: "Gagal mengunduh") }
+                    updateState { it.copy(isDownloading = false, errorMessage = sanitizeUserFacingMessage(error.message)) }
                 }
             }
         ) {

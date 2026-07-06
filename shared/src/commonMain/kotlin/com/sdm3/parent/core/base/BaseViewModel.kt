@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sdm3.parent.core.event.SessionEventBus
 import com.sdm3.parent.core.network.ApiError
+import com.sdm3.parent.core.network.userMessage
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,25 +40,12 @@ abstract class BaseViewModel<S : ScreenState>(initialState: S) : ViewModel() {
         }
     }
 
-    protected fun ApiError.toUserMessage(): String = when (this) {
-        ApiError.NoInternet -> "Tidak ada koneksi internet. Periksa jaringan Anda."
-        ApiError.Timeout -> "Permintaan terlalu lama. Silakan coba lagi."
-        is ApiError.Unauthorized -> {
+    protected fun ApiError.toUserMessage(): String {
+        val message = userMessage()
+        if (this is ApiError.Unauthorized || this is ApiError.SessionExpired) {
             _sessionExpiredEvent.update { it + 1 }
             SessionEventBus.emit()
-            "Sesi Anda tidak valid. Silakan masuk kembali."
         }
-        is ApiError.Forbidden -> "Anda tidak memiliki akses untuk data ini."
-        ApiError.NotFound -> "Data tidak ditemukan."
-        ApiError.SessionExpired -> {
-            _sessionExpiredEvent.update { it + 1 }
-            SessionEventBus.emit()
-            "Sesi Anda telah berakhir. Silakan masuk kembali."
-        }
-        is ApiError.Validation -> fieldErrors.values.flatten().firstOrNull()
-            ?: "Data yang dimasukkan tidak valid."
-        is ApiError.RateLimited -> "Terlalu banyak percobaan. Silakan coba lagi nanti."
-        is ApiError.ServerError -> "Server sedang bermasalah. Silakan coba lagi."
-        is ApiError.Unknown -> message.ifEmpty { "Terjadi kesalahan. Silakan coba lagi." }
+        return message
     }
 }

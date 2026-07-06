@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -53,7 +54,7 @@ fun Sdm3Snackbar(
         SnackbarStyle.Warning -> ProductSchoolTheme.colors.warning
         SnackbarStyle.Danger -> ProductSchoolTheme.colors.danger
     }
-    val textColor = Color.White
+    val textColor = MaterialTheme.colorScheme.onPrimary
 
     AnimatedVisibility(
         visible = visible,

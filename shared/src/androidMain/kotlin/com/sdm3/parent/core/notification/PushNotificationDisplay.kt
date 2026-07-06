@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.sdm3.parent.core.AppBranding
+import com.sdm3.parent.core.notification.PushAccessGate
 import com.google.firebase.messaging.RemoteMessage
 import com.sdm3.parent.shared.R
 
@@ -29,10 +31,11 @@ object PushNotificationDisplay {
     }
 
     fun show(context: Context, message: RemoteMessage) {
+        if (!PushAccessGate.hasParentAccess()) return
         ensureChannel(context)
         val title = message.notification?.title
             ?: message.data["title"]
-            ?: "SD Muhammadiyah 3 Samarinda"
+            ?: AppBranding.SCHOOL_NAME
         val body = message.notification?.body
             ?: message.data["message"]
             ?: message.data["body"]

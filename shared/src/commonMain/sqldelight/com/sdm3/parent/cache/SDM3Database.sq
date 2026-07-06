@@ -137,6 +137,8 @@ CREATE TABLE ProfileEntity (
     email TEXT NOT NULL,
     phone TEXT,
     avatar_url TEXT,
+    role TEXT,
+    roles_csv TEXT NOT NULL DEFAULT '',
     cached_at INTEGER NOT NULL DEFAULT 0
 );
 

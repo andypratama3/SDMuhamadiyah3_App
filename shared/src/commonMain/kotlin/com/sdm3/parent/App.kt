@@ -13,6 +13,7 @@ import com.sdm3.parent.core.navigation.SDM3NavHost
 import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.core.notification.FcmRegistrar
 import com.sdm3.parent.core.notification.FcmRegistrationCoordinator
+import com.sdm3.parent.core.notification.PushAccessGate
 import com.sdm3.parent.core.notification.FcmTokenProvider
 import com.sdm3.parent.core.security.InstallState
 import com.sdm3.parent.core.security.SecureTokenManager
@@ -40,6 +41,7 @@ fun App() {
 
         LaunchedEffect(fcmRegistrar, secureTokenManager) {
             FcmRegistrationCoordinator.bind(fcmRegistrar, secureTokenManager)
+            PushAccessGate.hasParentAccess = { secureTokenManager.getRoleContext().hasParentAccess }
         }
 
         LaunchedEffect(fcmTokenProvider) {
@@ -49,14 +51,8 @@ fun App() {
             // Debug Android: cetak FCM token ke Logcat. iOS dicetak dari AppDelegate Swift.
             if (isDebugBuild() && getPlatformName() == "Android") {
                 delay(1500)
-                val token = fcmTokenProvider.getToken()
-                println(
-                    if (token.isNullOrBlank()) {
-                        "SDM3_FCM_TOKEN => null (menunggu callback Firebase)"
-                    } else {
-                        "SDM3_FCM_TOKEN => $token"
-                    }
-                )
+                val hasToken = !fcmTokenProvider.getToken().isNullOrBlank()
+                println(if (hasToken) "SDM3_FCM_TOKEN => registered" else "SDM3_FCM_TOKEN => pending")
             }
         }
     }

@@ -40,6 +40,9 @@ import androidx.navigation.compose.rememberNavController
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.navigation.SDM3Route
+import org.jetbrains.compose.resources.stringResource
+import sdmuhammadiyah3samarinda.shared.generated.resources.Res
+import sdmuhammadiyah3samarinda.shared.generated.resources.school_name
 import androidx.compose.ui.tooling.preview.Preview
 import com.sdm3.parent.core.navigation.SDM3BottomTab
 import com.sdm3.parent.feature.home.HomeEffect
@@ -184,7 +187,7 @@ fun HomeScreen(
                     ) {
                         item {
                             GreetingSection(
-                                name = state.studentName.trim().split(" ").firstOrNull()?.takeIf { it.isNotBlank() } ?: "Wali Murid",
+                                name = state.studentName.trim().split(" ").firstOrNull()?.takeIf { it.isNotBlank() } ?: "Pengguna",
                                 info = state.className.takeIf { it.isNotBlank() }?.let { com.sdm3.parent.core.util.formatClassName(it) } ?: "",
                                 onClick = { navController.navigate(SDM3Route.DetailInfoAnak(studentId)) }
                             )
@@ -358,7 +361,7 @@ private fun HomeHeader(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = "SD Muhammadiyah 3 Samarinda",
+                text = stringResource(Res.string.school_name),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
