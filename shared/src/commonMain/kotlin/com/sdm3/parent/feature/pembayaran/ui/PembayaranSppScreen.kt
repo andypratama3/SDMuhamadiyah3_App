@@ -1,36 +1,22 @@
 package com.sdm3.parent.feature.pembayaran.ui
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.HourglassEmpty
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
-import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.designsystem.theme.SDM3Theme
+import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.feature.pembayaran.PembayaranSppViewModel
+import com.sdm3.parent.feature.pembayaran.currentYear
+import com.sdm3.parent.feature.pembayaran.isPaid
 import org.koin.compose.viewmodel.koinViewModel
-import androidx.compose.ui.platform.LocalInspectionMode
 
 sealed class PembayaranSppUiState {
     data object Loading : PembayaranSppUiState()
@@ -39,415 +25,233 @@ sealed class PembayaranSppUiState {
     data object Success : PembayaranSppUiState()
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PembayaranSppScreen(
     studentId: String,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     onBayarSekarang: (String) -> Unit,
-    onDetailBukti: (String) -> Unit
+    onDetailBukti: (String) -> Unit,
 ) {
     val isPreview = LocalInspectionMode.current
-    val colorScheme = MaterialTheme.colorScheme
-    val heroContent = heroContentColor()
-    val statusSuccess = statusSuccessColor()
-    val statusWarning = statusWarningColor()
     val viewModel: PembayaranSppViewModel = koinViewModel()
     val vmState by if (isPreview) {
         remember { mutableStateOf(com.sdm3.parent.feature.pembayaran.PembayaranSppUiState()) }
     } else {
         viewModel.uiState.collectAsState()
     }
-    val uiState: PembayaranSppUiState = remember(vmState) {
-        val s = vmState
+    val uiState: PembayaranSppUiState = remember(vmState.isLoading, vmState.errorMessage, vmState.isEmpty) {
         when {
-            s.isLoading -> PembayaranSppUiState.Loading
-            s.errorMessage != null -> PembayaranSppUiState.Error(s.errorMessage)
-            s.isEmpty -> PembayaranSppUiState.Empty
+            vmState.isLoading -> PembayaranSppUiState.Loading
+            vmState.errorMessage != null -> PembayaranSppUiState.Error(vmState.errorMessage!!)
+            vmState.isEmpty -> PembayaranSppUiState.Empty
             else -> PembayaranSppUiState.Success
         }
     }
+
     if (!isPreview) {
         LaunchedEffect(studentId) {
             viewModel.loadData(studentId)
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "Administrasi Keuangan",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "STATUS PEMBAYARAN SPP",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.primary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
-    ) { padding ->
+    var selectedTab by remember { mutableStateOf(PaymentTab.Tagihan) }
+    val currentYear = remember { currentYear() }
+    val yearExpansion = remember { mutableStateMapOf<Int, Boolean>() }
+
+    PaymentScreenScaffold(onBack = onBack) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.4f), Color.Transparent),
-                        center = Offset(size.width, size.height * 0.3f),
-                        radius = size.width
-                    )
-                )
-            }
+            PaymentScreenBackground()
 
             when (val state = uiState) {
-                is PembayaranSppUiState.Loading -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(220.dp)
-                                    .clip(RoundedCornerShape(28.dp))
-                                    .shimmerEffect()
-                            )
-                        }
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(24.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .shimmerEffect()
-                            )
-                        }
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .shimmerEffect()
-                            )
-                        }
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(24.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .shimmerEffect()
-                            )
-                        }
-                        items(4) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(72.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .shimmerEffect()
-                            )
-                        }
-                    }
-                }
+                is PembayaranSppUiState.Loading -> PaymentLoadingContent(
+                    modifier = Modifier.padding(padding),
+                )
 
-                is PembayaranSppUiState.Empty -> {
-                    Sdm3EmptyState(
-                        title = "Belum Ada Riwayat",
-                        message = "Belum ada transaksi pembayaran SPP yang tercatat.",
-                        style = EmptyStateStyle.Neutral,
-                        modifier = Modifier.padding(padding),
-                        action = {
-                            Sdm3Button(
-                                text = "Muat Ulang",
-                                onClick = { viewModel.refresh() },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    )
-                }
+                is PembayaranSppUiState.Empty -> Sdm3EmptyState(
+                    title = "Belum Ada Data",
+                    message = "Belum ada tagihan atau riwayat pembayaran SPP yang tercatat.",
+                    style = EmptyStateStyle.Neutral,
+                    modifier = Modifier.padding(padding),
+                    action = {
+                        Sdm3Button(
+                            text = "Muat Ulang",
+                            onClick = { viewModel.refresh() },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    },
+                )
 
-                is PembayaranSppUiState.Error -> {
-                    Sdm3ErrorState(
-                        title = "Gagal Memuat Data",
-                        message = state.message,
-                        style = ErrorStateStyle.Generic,
-                        modifier = Modifier.padding(padding),
-                        primaryAction = {
-                            Sdm3Button(
-                                text = "Coba Lagi",
-                                onClick = { viewModel.refresh() },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    )
-                }
+                is PembayaranSppUiState.Error -> Sdm3ErrorState(
+                    title = "Gagal Memuat Data",
+                    message = state.message,
+                    style = ErrorStateStyle.Generic,
+                    modifier = Modifier.padding(padding),
+                    primaryAction = {
+                        Sdm3Button(
+                            text = "Coba Lagi",
+                            onClick = { viewModel.refresh() },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    },
+                )
 
                 is PembayaranSppUiState.Success -> {
-                    val paidStatuses = listOf("lunas", "paid", "success", "settlement")
-                    val totalFees = vmState.fees.size
-                    val paidFees = vmState.fees.count { it.status.lowercase() in paidStatuses }
-                    val progress = if (totalFees > 0) paidFees.toFloat() / totalFees.toFloat() else 0f
-                    val progressPercent = (progress * 100).toInt()
-                    // Tagihan aktif = tagihan pertama yang BELUM lunas (bukan sekadar item pertama).
-                    val activeFee = vmState.fees.firstOrNull { it.status.lowercase() !in paidStatuses }
-                    val displayFee = activeFee ?: vmState.fees.firstOrNull()
-                    val hasActive = activeFee != null
-                    LazyColumn(
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        item {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(28.dp),
-                                colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
-                            ) {
-                                Column {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(
-                                                brush = Brush.horizontalGradient(
-                                                colors = listOf(colorScheme.primary, colorScheme.inversePrimary.copy(alpha = 0.5f))
+                        PaymentTabSelector(
+                            selectedTab = selectedTab,
+                            onTabSelected = { selectedTab = it },
+                            modifier = Modifier.padding(top = Spacing.xs),
+                        )
+
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(
+                                horizontal = Spacing.xl,
+                                vertical = Spacing.sm,
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                        ) {
+                            when (selectedTab) {
+                                PaymentTab.Tagihan -> {
+                                    item(key = "hero") {
+                                        PaymentHeroCard(
+                                            activeFee = vmState.activeFee,
+                                            studentName = vmState.studentName,
+                                            onBayarSekarang = {
+                                                vmState.activeFee?.let { onBayarSekarang(it.id) }
+                                            },
+                                        )
+                                    }
+
+                                    if (vmState.progress.total > 0) {
+                                        item(key = "progress-header") {
+                                            SectionHeader(
+                                                title = "Progress Tahunan",
+                                                modifier = Modifier.padding(top = Spacing.xs),
                                             )
-                                            )
-                                            .padding(24.dp)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.Top
-                                        ) {
-                                            Column {
-                                                Text(
-                                                    text = "TAGIHAN AKTIF",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.Black,
-                                                    letterSpacing = 1.sp,
-                                                    color = heroContent.copy(alpha = 0.5f)
-                                                )
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    text = displayFee?.paymentTitleName ?: (if (hasActive) "Tagihan Aktif" else "Semua Tagihan Lunas"),
-                                                    style = MaterialTheme.typography.titleLarge,
-                                                    color = heroContent,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                            Surface(
-                                                shape = RoundedCornerShape(999.dp),
-                                                color = if (hasActive) colorScheme.error else statusSuccess
-                                            ) {
-                                                Text(
-                                                    text = if (hasActive) " BELUM DIBAYAR " else " LUNAS ",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = colorScheme.onPrimary,
-                                                    fontWeight = FontWeight.Black,
-                                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                                )
-                                            }
+                                        }
+                                        item(key = "progress") {
+                                            PaymentProgressCard(progress = vmState.progress)
                                         }
                                     }
 
-                                    Column(modifier = Modifier.padding(24.dp)) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.Bottom
-                                        ) {
-                                            Column {
-                                                Text(
-                                                    text = formatCurrency(displayFee?.amount ?: 0.0),
-                                                    style = MaterialTheme.typography.displaySmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = heroContent
-                                                )
-                                                Text(
-                                                    text = displayFee?.dueDate?.takeIf { it.isNotBlank() }?.let { "Jatuh tempo: ${formatTanggal(it)}" } ?: "",
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = heroContent.copy(alpha = 0.6f)
-                                                )
-                                            }
+                                    if (vmState.feeYearGroups.isEmpty()) {
+                                        item(key = "empty-tagihan") {
+                                            Sdm3EmptyState(
+                                                title = "Belum Ada Tagihan",
+                                                message = "Tidak ada tagihan SPP yang perlu ditampilkan.",
+                                                style = EmptyStateStyle.Neutral,
+                                            )
+                                        }
+                                    } else {
+                                        item(key = "tagihan-header") {
+                                            SectionHeader(
+                                                title = "Daftar Tagihan",
+                                                modifier = Modifier.padding(top = Spacing.xs),
+                                            )
                                         }
 
-                                        Spacer(modifier = Modifier.height(24.dp))
+                                        vmState.feeYearGroups.forEach { yearGroup ->
+                                            val yearKey = yearGroup.year
+                                            val isExpanded = yearExpansion.getOrPut(yearKey) {
+                                                yearKey == currentYear || yearKey == 0
+                                            }
 
-                                        Sdm3Button(
-                                            text = if (hasActive) "Bayar Sekarang" else "Tidak Ada Tagihan",
-                                            onClick = { activeFee?.let { onBayarSekarang(it.id) } },
-                                            enabled = hasActive,
-                                            icon = Icons.Outlined.CreditCard,
-                                            containerColor = colorScheme.secondary,
-                                            contentColor = colorScheme.primary,
-                                            modifier = Modifier.fillMaxWidth().height(54.dp)
-                                        )
+                                            item(key = "fee-year-$yearKey") {
+                                                PaymentGroupedYearSection(
+                                                    year = yearKey,
+                                                    itemCount = yearGroup.itemCount,
+                                                    expanded = isExpanded,
+                                                    onToggle = {
+                                                        yearExpansion[yearKey] = !isExpanded
+                                                    },
+                                                ) {
+                                                    yearGroup.months.forEach { monthGroup ->
+                                                        PaymentMonthHeader(
+                                                            monthName = monthGroup.monthName,
+                                                            itemCount = monthGroup.items.size,
+                                                        )
+                                                        monthGroup.items.forEach { fee ->
+                                                            val canPay = !fee.isPaid()
+                                                            FeeItemCard(
+                                                                fee = fee,
+                                                                onClick = if (canPay) {
+                                                                    { onBayarSekarang(fee.id) }
+                                                                } else {
+                                                                    null
+                                                                },
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
-                            }
-                        }
 
-                        item {
-                            SectionHeader(
-                                title = "Progress Tahunan",
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Sdm3Card(padding = 20.dp) {
-                                Column {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            text = "Kelancaran Pembayaran",
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = colorScheme.primary
-                                        )
-                                        Text(
-                                            text = "${progressPercent}%",
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = statusSuccess
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    LinearProgressIndicator(
-                                        progress = { progress },
-                                        modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                                        color = statusSuccess,
-                                        trackColor = statusSuccess.copy(alpha = 0.1f)
-                                    )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Text(
-                                        text = "$paidFees dari $totalFees tagihan telah diselesaikan.",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                    )
-                                }
-                            }
-                        }
-
-                        item {
-                            SectionHeader(
-                                title = "Riwayat Transaksi",
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
-                        }
-
-                        val history = vmState.payments.map { payment ->
-                            PaymentHistory(
-                                id = payment.id,
-                                title = payment.orderId,
-                                date = formatTanggal(payment.paidAt ?: payment.createdAt ?: ""),
-                                amount = payment.grossAmount?.toInt() ?: 0,
-                                status = payment.status
-                            )
-                        }
-
-                        items(history) { payment ->
-                            val statusLower = payment.status.lowercase()
-                            val isPaid = statusLower in listOf("success", "settlement", "lunas", "paid", "capture", "completed")
-                            val isFailed = statusLower in listOf("failed", "failure", "expire", "expired", "deny", "cancel", "cancelled", "refunded")
-                            val statusLabel = when {
-                                isPaid -> "LUNAS"
-                                isFailed -> "GAGAL"
-                                else -> "MENUNGGU"
-                            }
-                            val statusColor = when {
-                                isPaid -> statusSuccess
-                                isFailed -> colorScheme.error
-                                else -> statusWarning
-                            }
-                            Sdm3Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onDetailBukti(payment.id) },
-                                padding = 16.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Surface(
-                                        modifier = Modifier.size(48.dp),
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = colorScheme.primary.copy(alpha = 0.05f)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.History,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(24.dp),
-                                                tint = if (isPaid) statusSuccess else colorScheme.primary.copy(alpha = 0.4f)
+                                PaymentTab.Riwayat -> {
+                                    if (vmState.paymentYearGroups.isEmpty()) {
+                                        item(key = "empty-riwayat") {
+                                            Sdm3EmptyState(
+                                                title = "Belum Ada Riwayat",
+                                                message = "Belum ada transaksi pembayaran SPP yang tercatat.",
+                                                style = EmptyStateStyle.Neutral,
                                             )
                                         }
-                                    }
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = payment.title,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = colorScheme.primary
-                                        )
-                                        Text(
-                                            text = payment.date,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                                        )
-                                    }
-                                    Column(horizontalAlignment = Alignment.End) {
-                                        Text(
-                                            text = formatCurrency(payment.amount),
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = colorScheme.primary
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Surface(
-                                            color = statusColor.copy(alpha = 0.1f),
-                                            shape = RoundedCornerShape(4.dp)
-                                        ) {
-                                            Text(
-                                                text = " $statusLabel ",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Black,
-                                                color = statusColor,
-                                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                    } else {
+                                        item(key = "riwayat-header") {
+                                            SectionHeader(
+                                                title = "Riwayat Transaksi",
+                                                modifier = Modifier.padding(top = Spacing.xs),
                                             )
+                                        }
+
+                                        vmState.paymentYearGroups.forEach { yearGroup ->
+                                            val yearKey = yearGroup.year
+                                            val isExpanded = yearExpansion.getOrPut(-yearKey) {
+                                                yearKey == currentYear || yearKey == 0
+                                            }
+
+                                            item(key = "payment-year-$yearKey") {
+                                                PaymentGroupedYearSection(
+                                                    year = yearKey,
+                                                    itemCount = yearGroup.itemCount,
+                                                    expanded = isExpanded,
+                                                    onToggle = {
+                                                        yearExpansion[-yearKey] = !isExpanded
+                                                    },
+                                                ) {
+                                                    yearGroup.months.forEach { monthGroup ->
+                                                        PaymentMonthHeader(
+                                                            monthName = monthGroup.monthName,
+                                                            itemCount = monthGroup.items.size,
+                                                        )
+                                                        monthGroup.items.forEach { payment ->
+                                                            PaymentHistoryCard(
+                                                                payment = payment,
+                                                                onClick = { onDetailBukti(payment.id) },
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        item { Spacer(modifier = Modifier.height(100.dp)) }
+                            item(key = "bottom-safe") {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .paymentBottomSafePadding(),
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -455,31 +259,57 @@ fun PembayaranSppScreen(
     }
 }
 
-data class PaymentHistory(
-    val id: String = "pay_${kotlin.random.Random.nextInt()}",
-    val title: String,
-    val date: String,
-    val amount: Int,
-    val status: String
-)
-
-private fun formatCurrency(amount: Number): String = com.sdm3.parent.core.util.formatRupiah(amount)
-
-private val bulanSingkat = listOf(
-    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
-)
-
-/** Ubah tanggal ISO (yyyy-MM-dd atau yyyy-MM-ddTHH:mm) menjadi "15 Jul 2026". */
-private fun formatTanggal(raw: String): String {
-    if (raw.isBlank()) return raw
-    val datePart = raw.substringBefore('T').substringBefore(' ')
-    val parts = datePart.split('-')
-    if (parts.size < 3) return raw
-    val year = parts[0].toIntOrNull() ?: return raw
-    val month = parts[1].toIntOrNull() ?: return raw
-    val day = parts[2].take(2).toIntOrNull() ?: return raw
-    if (month !in 1..12) return raw
-    return "$day ${bulanSingkat[month - 1]} $year"
+@Composable
+private fun PaymentLoadingContent(modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .shimmerEffect(),
+            )
+        }
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .shimmerEffect(),
+            )
+        }
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect(),
+            )
+        }
+        items(4) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shimmerEffect(),
+            )
+        }
+        item {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .paymentBottomSafePadding(),
+            )
+        }
+    }
 }
 
 @Preview
@@ -490,7 +320,7 @@ private fun PembayaranSppScreenPreview() {
             studentId = "",
             onBack = {},
             onBayarSekarang = {},
-            onDetailBukti = {}
+            onDetailBukti = {},
         )
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.getPlatformName
 import kotlinx.coroutines.launch
 
 private val PremiumEasing = CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
@@ -91,6 +92,7 @@ fun OnboardingScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .safeDrawingPadding()
             ) {
                 // Header Skip Button
                 Box(
@@ -120,7 +122,6 @@ fun OnboardingScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
                             .padding(horizontal = 32.dp, vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
@@ -148,12 +149,13 @@ fun OnboardingScreen(
 
                         Text(
                             text = onboardingPages[page].title,
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary,
                             letterSpacing = (-0.5).sp,
-                            lineHeight = 32.sp
+                            lineHeight = 30.sp,
+                            maxLines = 3,
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -210,7 +212,9 @@ fun OnboardingScreen(
                     Sdm3Button(
                         text = if (isLastPage) "Mulai Sekarang" else "Lanjutkan Ke Portal",
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (!isPreview && getPlatformName() != "iOS") {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            }
                             if (isLastPage) {
                                 onComplete()
                             } else {

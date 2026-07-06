@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.util.formatTanggal
 import com.sdm3.parent.platform.PlatformActions
 import com.sdm3.parent.feature.pembayaran.PilihMetodeBayarViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -124,6 +125,38 @@ fun PilihMetodeBayarScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
+        },
+        bottomBar = {
+            if (uiState is PilihMetodeBayarUiState.Success) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.xl, vertical = Spacing.md)
+                        .navigationBarsPadding()
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = glassSurface,
+                        border = BorderStroke(1.dp, glassBorder),
+                        shadowElevation = 8.dp
+                    ) {
+                        Box(modifier = Modifier.padding(Spacing.xs)) {
+                            Sdm3Button(
+                                text = "Lanjutkan Pembayaran",
+                                onClick = {
+                                    selectedMethod?.let { method ->
+                                        viewModel.requestSnapToken(studentFeeId, method)
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth().height(54.dp),
+                                enabled = selectedMethod != null && !vmState.isLoading,
+                                isLoading = vmState.isLoading
+                            )
+                        }
+                    }
+                }
+            }
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
@@ -143,9 +176,10 @@ fun PilihMetodeBayarScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(horizontal = 24.dp)
+                            .safeDrawingPadding()
+                            .paymentHorizontalPadding()
                     ) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(Spacing.sm))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -153,25 +187,25 @@ fun PilihMetodeBayarScreen(
                                 .clip(RoundedCornerShape(20.dp))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xxl))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(24.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(Spacing.xs))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(Spacing.sm))
                         repeat(4) {
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(Spacing.xxs))
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(72.dp)
-                                    .clip(RoundedCornerShape(16.dp))
+                                    .clip(RoundedCornerShape(Spacing.md))
                                     .shimmerEffect()
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                         }
                     }
                 }
@@ -181,7 +215,9 @@ fun PilihMetodeBayarScreen(
                         title = "Tidak Ada Metode Pembayaran",
                         message = "Belum tersedia metode pembayaran saat ini.",
                         style = EmptyStateStyle.Neutral,
-                        modifier = Modifier.padding(padding)
+                        modifier = Modifier
+                            .padding(padding)
+                            .safeDrawingPadding()
                     )
                 }
 
@@ -190,7 +226,9 @@ fun PilihMetodeBayarScreen(
                         title = "Gagal Memuat Metode",
                         message = state.message,
                         style = ErrorStateStyle.Generic,
-                        modifier = Modifier.padding(padding),
+                        modifier = Modifier
+                            .padding(padding)
+                            .safeDrawingPadding(),
                         primaryAction = {
                             Sdm3Button(
                                 text = "Coba Lagi",
@@ -202,138 +240,120 @@ fun PilihMetodeBayarScreen(
                 }
 
                 is PilihMetodeBayarUiState.Success -> {
-                    Column(
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(horizontal = 24.dp)
+                            .safeDrawingPadding()
+                            .paymentHorizontalPadding(),
+                        contentPadding = PaddingValues(
+                            vertical = Spacing.sm
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Sdm3Card(padding = 24.dp) {
-                            Column {
-                                Text(
-                                    text = "RINGKASAN TAGIHAN",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.5.sp,
-                                    color = colorScheme.primary.copy(alpha = 0.4f)
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = vmState.selectedFee?.paymentTitleName ?: "Tagihan",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f))
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
+                        item {
+                            Sdm3Card(padding = Spacing.xl) {
+                                Column {
                                     Text(
-                                        text = "TOTAL BAYAR",
+                                        text = "RINGKASAN TAGIHAN",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
-                                        color = colorScheme.primary.copy(alpha = 0.5f)
+                                        letterSpacing = 1.5.sp,
+                                        color = colorScheme.primary.copy(alpha = 0.4f)
                                     )
+                                    Spacer(modifier = Modifier.height(Spacing.md))
                                     Text(
-                                        text = vmState.selectedFee?.let { formatCurrency(it.amount) } ?: "Rp0",
-                                        style = MaterialTheme.typography.headlineSmall,
+                                        text = vmState.selectedFee?.paymentTitleName ?: "Tagihan",
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
+                                    vmState.selectedFee?.dueDate?.takeIf { it.isNotBlank() }?.let { dueDate ->
+                                        Spacer(modifier = Modifier.height(Spacing.xs))
+                                        Text(
+                                            text = "Jatuh tempo: ${formatTanggal(dueDate)}",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(Spacing.sm))
+                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f))
+                                    Spacer(modifier = Modifier.height(Spacing.sm))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "TOTAL BAYAR",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Black,
+                                            color = colorScheme.primary.copy(alpha = 0.5f)
+                                        )
+                                        Text(
+                                            text = vmState.selectedFee?.let { formatCurrency(it.amount) } ?: "Rp0",
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.primary
+                                        )
+                                    }
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(32.dp))
-                        SectionHeader(title = "Metode Pembayaran", modifier = Modifier.padding(bottom = 12.dp))
+                        item {
+                            Spacer(modifier = Modifier.height(Spacing.md))
+                            SectionHeader(title = "Metode Pembayaran", modifier = Modifier.padding(bottom = Spacing.xs))
+                        }
 
-                        Box(modifier = Modifier.weight(1f)) {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(bottom = 100.dp)
+                        items(vmState.paymentMethods) { method ->
+                            val isSelected = selectedMethod == method.id
+                            Sdm3Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedMethod = method.id },
+                                padding = Spacing.md
                             ) {
-                                items(vmState.paymentMethods) { method ->
-                                    val isSelected = selectedMethod == method.id
-                                    Sdm3Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { selectedMethod = method.id },
-                                        padding = 16.dp
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Surface(
+                                        modifier = Modifier.size(48.dp),
+                                        shape = RoundedCornerShape(Spacing.sm),
+                                        color = if (isSelected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.05f)
                                     ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Surface(
-                                                modifier = Modifier.size(48.dp),
-                                                shape = RoundedCornerShape(12.dp),
-                                                color = if (isSelected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.05f)
-                                            ) {
-                                                Box(contentAlignment = Alignment.Center) {
-                                                    Icon(
-                                                        Icons.Outlined.Payments,
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(24.dp),
-                                                        tint = if (isSelected) colorScheme.onPrimary else colorScheme.primary
-                                                    )
-                                                }
-                                            }
-                                            Spacer(modifier = Modifier.width(16.dp))
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Text(
-                                                    method.name,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = colorScheme.primary
-                                                )
-                                                if (method.description != null) {
-                                                    Text(
-                                                        method.description,
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                                                    )
-                                                }
-                                            }
-                                            RadioButton(
-                                                selected = isSelected,
-                                                onClick = { selectedMethod = method.id },
-                                                colors = RadioButtonDefaults.colors(selectedColor = colorScheme.secondary)
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                Icons.Outlined.Payments,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(Spacing.xl),
+                                                tint = if (isSelected) colorScheme.onPrimary else colorScheme.primary
                                             )
                                         }
                                     }
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 24.dp)
-                                    .fillMaxWidth(),
-                                shape = RoundedCornerShape(20.dp),
-                                color = glassSurface,
-                                border = BorderStroke(1.dp, glassBorder),
-                                shadowElevation = 8.dp
-                            ) {
-                                Box(modifier = Modifier.padding(8.dp)) {
-                                        Sdm3Button(
-                                            text = "Lanjutkan Pembayaran",
-                                            onClick = {
-                                                selectedMethod?.let { method ->
-                                                    viewModel.requestSnapToken(studentFeeId, method)
-                                                }
-                                            },
-                                            modifier = Modifier.fillMaxWidth().height(54.dp),
-                                            enabled = selectedMethod != null && !vmState.isLoading,
-                                            isLoading = vmState.isLoading
+                                    Spacer(modifier = Modifier.width(Spacing.md))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            method.name,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.primary
                                         )
+                                        if (method.description != null) {
+                                            Text(
+                                                method.description,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                            )
+                                        }
+                                    }
+                                    RadioButton(
+                                        selected = isSelected,
+                                        onClick = { selectedMethod = method.id },
+                                        colors = RadioButtonDefaults.colors(selectedColor = colorScheme.secondary)
+                                    )
                                 }
                             }
                         }

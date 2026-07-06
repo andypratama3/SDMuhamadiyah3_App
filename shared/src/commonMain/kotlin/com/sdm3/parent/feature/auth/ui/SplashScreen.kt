@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -176,7 +177,7 @@ private fun SplashContent(
         onAnimationFinished()
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(
@@ -190,6 +191,12 @@ private fun SplashContent(
             .safeDrawingPadding(),
         contentAlignment = Alignment.Center
     ) {
+        val isCompact = maxHeight < 700.dp
+        val titleStyle = if (isCompact) {
+            MaterialTheme.typography.headlineLarge
+        } else {
+            MaterialTheme.typography.displayMedium
+        }
         // Multi-Orb Animated Mesh Background (ProductSchool Style)
         Canvas(modifier = Modifier.fillMaxSize().alpha(if (startAnimation) 1f else 0f)) {
             val canvasWidth = size.width
@@ -269,11 +276,13 @@ private fun SplashContent(
                 Text(
                     text = stringResource(Res.string.app_name),
                     color = heroContent,
-                    style = MaterialTheme.typography.displayMedium.copy(
+                    style = titleStyle.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-1.0).sp
                     ),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
@@ -324,11 +333,15 @@ private fun SplashContent(
                 text = "PORTAL WALI MURID • SD MUHAMMADIYAH 3 SAMARINDA",
                 color = heroContent.copy(alpha = 0.4f),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    letterSpacing = 2.sp,
+                    letterSpacing = if (isCompact) 1.sp else 2.sp,
                     fontWeight = FontWeight.Bold
                 ),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.graphicsLayer { alpha = textAlphaAnim }
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .graphicsLayer { alpha = textAlphaAnim }
+                    .padding(horizontal = Spacing.md),
             )
         }
     }

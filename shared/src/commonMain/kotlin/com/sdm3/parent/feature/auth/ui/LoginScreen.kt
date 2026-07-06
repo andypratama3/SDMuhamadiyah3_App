@@ -87,10 +87,17 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.background)
-            .pointerInput(focusManager) {
-                detectTapGestures(onTap = { focusManager.clearFocus() })
-            }
     ) {
+        // Tap di area kosong saja — jangan bungkus Column form agar TextField
+        // di iOS Simulator bisa menerima fokus + keyboard Mac (hardware keyboard).
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .pointerInput(focusManager) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }
+        )
+
         Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
             drawCircle(
                 brush = Brush.radialGradient(

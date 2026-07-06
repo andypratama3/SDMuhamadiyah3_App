@@ -55,7 +55,7 @@ sealed class HalamanRaporUiState {
 @Composable
 fun HalamanRaporScreen(
     studentId: String,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     onPreviewClick: (String, String) -> Unit,
     onVerifikasiClick: (String) -> Unit,
     viewModel: HalamanRaporViewModel = koinViewModel()
@@ -122,12 +122,14 @@ fun HalamanRaporScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Kembali",
+                                tint = colorScheme.primary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -223,13 +225,15 @@ fun HalamanRaporScreen(
                                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
                             )
                         },
-                        secondaryAction = {
-                            Sdm3OutlinedButton(
-                                text = "Kembali",
-                                onClick = onBack,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-                            )
-                        }
+                        secondaryAction = if (onBack != null) {
+                            {
+                                Sdm3OutlinedButton(
+                                    text = "Kembali",
+                                    onClick = onBack,
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                )
+                            }
+                        } else null,
                     )
                 }
 

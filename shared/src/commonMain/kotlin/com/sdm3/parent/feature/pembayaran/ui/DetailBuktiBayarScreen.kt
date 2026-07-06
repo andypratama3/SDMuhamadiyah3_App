@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -141,6 +142,7 @@ fun DetailBuktiBayarScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
+                        .safeDrawingPadding()
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = Spacing.xl)
                 ) {
@@ -240,6 +242,7 @@ fun DetailBuktiBayarScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
+                        .safeDrawingPadding()
                         .verticalScroll(rememberScrollState())
                         .padding(horizontal = Spacing.xl)
                 ) {
@@ -332,7 +335,7 @@ fun DetailBuktiBayarScreen(
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.sp,
                                     color = statusColor,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xxs)
                                 )
                             }
                             Spacer(modifier = Modifier.height(Spacing.xs))
@@ -383,10 +386,10 @@ fun DetailBuktiBayarScreen(
 
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                                         verticalAlignment = Alignment.Bottom
                                     ) {
-                                        Column {
+                                        Column(modifier = Modifier.weight(1f)) {
                                             Text(
                                                 text = "TOTAL BAYAR",
                                                 style = MaterialTheme.typography.labelSmall,
@@ -401,13 +404,27 @@ fun DetailBuktiBayarScreen(
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
-                                        Text(
-                                            text = com.sdm3.parent.core.util.formatRupiah(payment.grossAmount ?: 0.0),
-                                            style = MaterialTheme.typography.headlineMedium,
-                                            fontWeight = FontWeight.Black,
-                                            color = colorScheme.primary,
-                                            letterSpacing = (-1).sp
-                                        )
+                                        BoxWithConstraints(
+                                            modifier = Modifier.weight(1f),
+                                            contentAlignment = Alignment.BottomEnd
+                                        ) {
+                                            val amountStyle = when {
+                                                maxWidth < 100.dp -> MaterialTheme.typography.titleLarge
+                                                maxWidth < 140.dp -> MaterialTheme.typography.headlineSmall
+                                                else -> MaterialTheme.typography.headlineMedium
+                                            }
+                                            Text(
+                                                text = com.sdm3.parent.core.util.formatRupiah(payment.grossAmount ?: 0.0),
+                                                style = amountStyle,
+                                                fontWeight = FontWeight.Black,
+                                                color = colorScheme.primary,
+                                                letterSpacing = (-1).sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                textAlign = TextAlign.End,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -467,52 +484,58 @@ fun DetailBuktiBayarScreen(
 
                         Spacer(modifier = Modifier.height(Spacing.xxxl))
 
-                        Sdm3Button(
-                            text = if (vmState.isGeneratingReceipt) "Menyiapkan Kwitansi..." else "Download Kwitansi PDF",
-                            onClick = { viewModel.generateReceipt(payment.id) },
-                            icon = Icons.Outlined.FileDownload,
-                            enabled = isPaid && !vmState.isGeneratingReceipt,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        if (!isPaid) {
-                            Spacer(modifier = Modifier.height(Spacing.xs))
-                            Text(
-                                text = "Kwitansi PDF tersedia setelah pembayaran lunas.",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .navigationBarsPadding()
+                        ) {
+                            Sdm3Button(
+                                text = if (vmState.isGeneratingReceipt) "Menyiapkan Kwitansi..." else "Download Kwitansi PDF",
+                                onClick = { viewModel.generateReceipt(payment.id) },
+                                icon = Icons.Outlined.FileDownload,
+                                enabled = isPaid && !vmState.isGeneratingReceipt,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                        }
 
-                        Spacer(modifier = Modifier.height(Spacing.md))
+                            if (!isPaid) {
+                                Spacer(modifier = Modifier.height(Spacing.xs))
+                                Text(
+                                    text = "Kwitansi PDF tersedia setelah pembayaran lunas.",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
 
-                        Sdm3OutlinedButton(
-                            text = "Bagikan Bukti",
-                            onClick = {
-                                val shareText = buildString {
-                                    appendLine("Bukti Pembayaran SD Muhammadiyah 3 Samarinda")
-                                    appendLine("Ref: ${payment.orderId.ifBlank { payment.id }.uppercase()}")
-                                    appendLine("Total: ${com.sdm3.parent.core.util.formatRupiah(payment.grossAmount ?: 0.0)}")
-                                    appendLine("Metode: ${com.sdm3.parent.core.util.formatPaymentMethod(payment.paymentType)}")
-                                    (payment.paidAt ?: payment.createdAt)?.let {
-                                        appendLine("Waktu: ${com.sdm3.parent.core.util.formatTanggalWaktu(it)}")
+                            Spacer(modifier = Modifier.height(Spacing.md))
+
+                            Sdm3OutlinedButton(
+                                text = "Bagikan Bukti",
+                                onClick = {
+                                    val shareText = buildString {
+                                        appendLine("Bukti Pembayaran SD Muhammadiyah 3 Samarinda")
+                                        appendLine("Ref: ${payment.orderId.ifBlank { payment.id }.uppercase()}")
+                                        appendLine("Total: ${com.sdm3.parent.core.util.formatRupiah(payment.grossAmount ?: 0.0)}")
+                                        appendLine("Metode: ${com.sdm3.parent.core.util.formatPaymentMethod(payment.paymentType)}")
+                                        (payment.paidAt ?: payment.createdAt)?.let {
+                                            appendLine("Waktu: ${com.sdm3.parent.core.util.formatTanggalWaktu(it)}")
+                                        }
                                     }
-                                }
-                                PlatformActions.shareText(shareText.trim(), "Bukti Pembayaran")
-                            },
-                            icon = Icons.Outlined.Share,
-                            contentColor = colorScheme.primary,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                                    PlatformActions.shareText(shareText.trim(), "Bukti Pembayaran")
+                                },
+                                icon = Icons.Outlined.Share,
+                                contentColor = colorScheme.primary,
+                                modifier = Modifier.fillMaxWidth()
+                            )
 
-                        Spacer(modifier = Modifier.height(Spacing.xxxl))
+                            Spacer(modifier = Modifier.height(Spacing.xxxl))
+                        }
                     }
                 }
             }
         }
-    }
+        }
     }
 }
 
@@ -532,7 +555,7 @@ private fun ReceiptRow(label: String, value: String) {
             color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             fontWeight = FontWeight.Black,
             letterSpacing = 1.sp,
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier.weight(0.38f, fill = false)
         )
         Text(
             text = value,
@@ -540,7 +563,8 @@ private fun ReceiptRow(label: String, value: String) {
             fontWeight = FontWeight.Bold,
             color = colorScheme.primary,
             textAlign = TextAlign.End,
-            modifier = Modifier.weight(1f)
+            softWrap = true,
+            modifier = Modifier.weight(0.62f)
         )
     }
 }

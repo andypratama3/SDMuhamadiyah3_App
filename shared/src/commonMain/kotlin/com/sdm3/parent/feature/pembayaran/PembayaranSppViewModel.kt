@@ -15,7 +15,11 @@ data class PembayaranSppUiState(
     val studentId: String = "",
     val fees: List<StudentFeeDto> = emptyList(),
     val payments: List<PaymentDto> = emptyList(),
-    val studentName: String = ""
+    val studentName: String = "",
+    val feeYearGroups: List<PaymentYearGroup<StudentFeeDto>> = emptyList(),
+    val paymentYearGroups: List<PaymentYearGroup<PaymentDto>> = emptyList(),
+    val activeFee: StudentFeeDto? = null,
+    val progress: PaymentProgressInfo = PaymentProgressInfo(),
 ) : ScreenState
 
 class PembayaranSppViewModel(
@@ -46,8 +50,12 @@ class PembayaranSppViewModel(
                     studentName = studentName,
                     fees = fees,
                     payments = payments,
+                    feeYearGroups = groupFeesByYearMonth(fees),
+                    paymentYearGroups = groupPaymentsByYearMonth(payments),
+                    activeFee = findActiveFee(fees),
+                    progress = computePaymentProgress(fees),
                     isEmpty = fees.isEmpty() && payments.isEmpty(),
-                    errorMessage = error
+                    errorMessage = error,
                 )
             }
         }

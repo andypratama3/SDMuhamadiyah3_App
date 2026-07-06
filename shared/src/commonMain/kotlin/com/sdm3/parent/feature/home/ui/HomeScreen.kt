@@ -623,14 +623,14 @@ private fun ShortcutFavoritSection(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 20.dp)
+            modifier = Modifier.padding(horizontal = Spacing.lg)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(horizontal = Spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             item {
                 ShortcutCard(
@@ -678,13 +678,13 @@ private fun ShortcutCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(12.dp),
+                modifier = Modifier.fillMaxSize().padding(Spacing.sm),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Surface(
                     modifier = Modifier.size(48.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(Spacing.sm),
                     color = iconColor.copy(alpha = if (comingSoon) 0.05f else 0.08f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -692,11 +692,11 @@ private fun ShortcutCard(
                             icon,
                             contentDescription = null,
                             tint = if (comingSoon) iconColor.copy(alpha = 0.4f) else iconColor,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(Spacing.xl)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
@@ -708,7 +708,7 @@ private fun ShortcutCard(
             }
             if (comingSoon) {
                 Surface(
-                    shape = RoundedCornerShape(bottomStart = 12.dp),
+                    shape = RoundedCornerShape(bottomStart = Spacing.sm),
                     color = colorScheme.secondary,
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
@@ -718,7 +718,7 @@ private fun ShortcutCard(
                         fontWeight = FontWeight.Black,
                         color = colorScheme.primary,
                         letterSpacing = 0.5.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xxs)
                     )
                 }
             }
@@ -900,10 +900,10 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
     val statusSuccess = statusSuccessColor()
     val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
 
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(Spacing.xxl),
             colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -917,30 +917,29 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
                     )
                 }
 
-                Column(modifier = Modifier.padding(24.dp)) {
+                Column(modifier = Modifier.padding(Spacing.xl)) {
                     Text(
                         text = if (hasBills) "Total Tagihan Aktif" else "Tagihan Sekolah",
                         style = MaterialTheme.typography.titleMedium,
                         color = heroContent.copy(alpha = 0.6f),
                         fontWeight = FontWeight.Medium
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xxs))
                     Text(
                         text = if (hasBills) amount else "Lunas",
                         style = MaterialTheme.typography.displayMedium,
                         color = heroContent,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(Spacing.lg))
 
-                    Button(
+                    Sdm3Button(
+                        text = if (hasBills) "Bayar" else "Riwayat",
                         onClick = onBayarClick,
-                        modifier = Modifier.fillMaxWidth(0.4f).height(46.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = statusSuccess)
-                    ) {
-                        Text(if (hasBills) "Bayar" else "Riwayat", fontWeight = FontWeight.Bold, color = colorScheme.onPrimary)
-                    }
+                        containerColor = statusSuccess,
+                        contentColor = colorScheme.onPrimary,
+                        modifier = Modifier.fillMaxWidth(0.4f)
+                    )
                 }
             }
         }

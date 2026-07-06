@@ -40,12 +40,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     private func requestPushAuthorization(_ application: UIApplication) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             if let error = error {
-                debugLog("Push authorization error: \(error.localizedDescription)")
+                self.debugLog("Push authorization error: \(error.localizedDescription)")
                 return
             }
 
             if !granted {
-                debugLog("Push authorization denied by user")
+                self.debugLog("Push authorization denied by user")
                 return
             }
 
@@ -104,7 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     private func fetchAndBridgeFcmToken() {
         Messaging.messaging().token { [weak self] token, error in
             if let error = error {
-                debugLog("SDM3_FCM_TOKEN_FETCH_FAILED => \(error.localizedDescription)")
+                self?.debugLog("SDM3_FCM_TOKEN_FETCH_FAILED => \(error.localizedDescription)")
                 return
             }
             guard let token = token, !token.isEmpty else { return }

@@ -147,11 +147,12 @@ fun ProsesPembayaranScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(horizontal = 24.dp)
+                            .safeDrawingPadding()
+                            .paymentHorizontalPadding()
                             .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(Spacing.sm))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -187,7 +188,7 @@ fun ProsesPembayaranScreen(
                                 .clip(RoundedCornerShape(16.dp))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(100.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xxxxxl))
                     }
                 }
 
@@ -196,7 +197,9 @@ fun ProsesPembayaranScreen(
                         title = "Tidak Ada Instruksi",
                         message = "Instruksi pembayaran tidak tersedia.",
                         style = EmptyStateStyle.Neutral,
-                        modifier = Modifier.padding(padding)
+                        modifier = Modifier
+                            .padding(padding)
+                            .safeDrawingPadding()
                     )
                 }
 
@@ -205,7 +208,9 @@ fun ProsesPembayaranScreen(
                         title = "Gagal Memuat Instruksi",
                         message = state.message,
                         style = ErrorStateStyle.Generic,
-                        modifier = Modifier.padding(padding),
+                        modifier = Modifier
+                            .padding(padding)
+                            .safeDrawingPadding(),
                         primaryAction = {
                             Sdm3Button(
                                 text = "Coba Lagi",
@@ -221,28 +226,29 @@ fun ProsesPembayaranScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(horizontal = 24.dp)
+                            .safeDrawingPadding()
+                            .paymentHorizontalPadding()
                             .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(Spacing.sm))
 
-                        Sdm3Card(padding = 24.dp) {
+                        Sdm3Card(padding = Spacing.xl) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Surface(
                                     modifier = Modifier.size(56.dp),
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = RoundedCornerShape(Spacing.md),
                                     color = colorScheme.primary.copy(alpha = 0.05f)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Outlined.AccountBalance, contentDescription = null, modifier = Modifier.size(32.dp), tint = colorScheme.primary)
+                                        Icon(Icons.Outlined.AccountBalance, contentDescription = null, modifier = Modifier.size(Spacing.xxl), tint = colorScheme.primary)
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(20.dp))
+                                Spacer(modifier = Modifier.height(Spacing.lg))
 
                                 val hasVa = vmState.vaNumber.isNotBlank()
                                 val redirect = vmState.redirectUrl
@@ -257,21 +263,28 @@ fun ProsesPembayaranScreen(
                                     letterSpacing = 1.sp,
                                     color = colorScheme.primary.copy(alpha = 0.4f)
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(Spacing.xs))
+                                val vaStyle = when {
+                                    vmState.vaNumber.length > 16 -> MaterialTheme.typography.titleMedium
+                                    vmState.vaNumber.length > 12 -> MaterialTheme.typography.titleLarge
+                                    else -> MaterialTheme.typography.headlineSmall
+                                }
                                 Text(
                                     text = when {
                                         hasVa -> vmState.vaNumber
                                         !redirect.isNullOrBlank() -> "Selesaikan pembayaran pada halaman yang disediakan"
                                         else -> "Menyiapkan instruksi pembayaran…"
                                     },
-                                    style = if (hasVa) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyMedium,
+                                    style = if (hasVa) vaStyle else MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.primary,
                                     textAlign = TextAlign.Center,
-                                    letterSpacing = if (hasVa) 1.sp else 0.sp
+                                    letterSpacing = if (hasVa) 0.5.sp else 0.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    lineHeight = if (hasVa) 28.sp else 22.sp
                                 )
 
-                                Spacer(modifier = Modifier.height(20.dp))
+                                Spacer(modifier = Modifier.height(Spacing.lg))
 
                                 if (hasVa) {
                                     Sdm3Button(
@@ -294,13 +307,13 @@ fun ProsesPembayaranScreen(
                             }
                         }
 
-                        Sdm3Card(padding = 20.dp) {
+                        Sdm3Card(padding = Spacing.lg) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "TOTAL PEMBAYARAN",
                                         style = MaterialTheme.typography.labelSmall,
@@ -334,13 +347,13 @@ fun ProsesPembayaranScreen(
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
                                         color = statusColor,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xxs)
                                     )
                                 }
                             }
                         }
 
-                        SectionHeader(title = "Langkah Pembayaran", modifier = Modifier.padding(top = 8.dp))
+                        SectionHeader(title = "Langkah Pembayaran", modifier = Modifier.padding(top = Spacing.xs))
 
                         // Instruksi menyesuaikan metode: Virtual Account (transfer m-banking)
                         // vs halaman pembayaran (e-wallet/kartu/gerai via Midtrans).
@@ -363,39 +376,43 @@ fun ProsesPembayaranScreen(
                             )
                         }
 
-                        Sdm3Card(padding = 20.dp) {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Sdm3Card(padding = Spacing.lg) {
+                            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                                 steps.forEachIndexed { index, step ->
-                                    Row(verticalAlignment = Alignment.Top) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.Top
+                                    ) {
                                         Text(
                                             text = "${index + 1}.",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold,
                                             color = colorScheme.primary,
-                                            modifier = Modifier.width(24.dp)
+                                            modifier = Modifier.width(Spacing.xl)
                                         )
                                         Text(
                                             text = step,
                                             style = MaterialTheme.typography.bodyLarge,
                                             color = colorScheme.primary.copy(alpha = 0.7f),
-                                            lineHeight = 24.sp
+                                            lineHeight = 24.sp,
+                                            modifier = Modifier.weight(1f)
                                         )
                                     }
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(Spacing.md))
 
                         if (vmState.status == com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED) {
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 color = colorScheme.error.copy(alpha = 0.1f),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(Spacing.sm)
                             ) {
-                                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Outlined.ErrorOutline, contentDescription = null, modifier = Modifier.size(20.dp), tint = colorScheme.error)
-                                    Spacer(modifier = Modifier.width(12.dp))
+                                Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Outlined.ErrorOutline, contentDescription = null, modifier = Modifier.size(Spacing.lg), tint = colorScheme.error)
+                                    Spacer(modifier = Modifier.width(Spacing.sm))
                                     Text(
                                         text = "Pembayaran gagal atau kedaluwarsa. Silakan ulangi transaksi.",
                                         style = MaterialTheme.typography.bodySmall,
@@ -404,7 +421,7 @@ fun ProsesPembayaranScreen(
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             Sdm3Button(
                                 text = "Kembali",
                                 onClick = onBack,
@@ -423,7 +440,9 @@ fun ProsesPembayaranScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(100.dp))
+                        Spacer(
+                            modifier = Modifier.paymentBottomSafePadding()
+                        )
                     }
                 }
             }

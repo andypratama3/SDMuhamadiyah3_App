@@ -280,7 +280,7 @@ fun SDM3NavHost(
                 NilaiRaporScreen(
                     studentId = route.studentId,
                     semester = route.semester,
-                    onBack = { navController.popBackStack() },
+                    onBack = null,
                     onDetailMapel = { subjectId ->
                         navController.navigate(SDM3Route.DetailNilaiMapel(route.studentId, subjectId, route.semester))
                     }
@@ -301,7 +301,7 @@ fun SDM3NavHost(
                 val route = backStackEntry.toRoute<SDM3Route.PembayaranSpp>()
                 PembayaranSppScreen(
                     studentId = route.studentId,
-                    onBack = { navController.popBackStack() },
+                    onBack = null,
                     onBayarSekarang = { feeId ->
                         navController.navigate(SDM3Route.PilihMetodeBayar(feeId))
                     },
@@ -370,7 +370,7 @@ fun SDM3NavHost(
                 val route = backStackEntry.toRoute<SDM3Route.HalamanRapor>()
                 HalamanRaporScreen(
                     studentId = route.studentId,
-                    onBack = { navController.popBackStack() },
+                    onBack = null,
                     onPreviewClick = { raporId, url ->
                         navController.navigate(SDM3Route.PreviewRaporPdf(raporId, url))
                     },

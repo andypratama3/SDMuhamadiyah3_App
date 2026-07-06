@@ -5,6 +5,8 @@ import platform.UIKit.UIApplication
 import platform.UIKit.UIStatusBarStyle
 import platform.UIKit.UIStatusBarStyleDarkContent
 import platform.UIKit.UIStatusBarStyleLightContent
+import platform.UIKit.UIViewAutoresizingFlexibleHeight
+import platform.UIKit.UIViewAutoresizingFlexibleWidth
 import platform.UIKit.UIViewController
 import platform.UIKit.UIWindowScene
 import platform.UIKit.addChildViewController
@@ -50,10 +52,18 @@ internal class StatusBarHostViewController(
     override fun loadView() {
         super.loadView()
         content.willMoveToParentViewController(this)
-        content.view.setFrame(view.frame)
+        content.view.setAutoresizingMask(
+            UIViewAutoresizingFlexibleWidth or UIViewAutoresizingFlexibleHeight
+        )
+        content.view.setFrame(view.bounds)
         view.addSubview(content.view)
         addChildViewController(content)
         content.didMoveToParentViewController(this)
+    }
+
+    override fun viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        content.view.setFrame(view.bounds)
     }
 
     override fun preferredStatusBarStyle(): UIStatusBarStyle =
