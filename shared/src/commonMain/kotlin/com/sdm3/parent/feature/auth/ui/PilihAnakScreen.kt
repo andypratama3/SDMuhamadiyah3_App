@@ -88,14 +88,14 @@ fun PilihAnakScreen(
                     .padding(horizontal = Spacing.xl, vertical = Spacing.lg)
                     .navigationBarsPadding()
             ) {
-                // ProductSchool Island Button Architecture (Glassmorphic)
+                // Modern Island Button Architecture
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(20.dp),
                     color = glassSurfaceColor(),
-                    shadowElevation = 8.dp,
-                    tonalElevation = 2.dp,
-                    border = BorderStroke(1.dp, glassBorderColor())
+                    shadowElevation = 12.dp,
+                    tonalElevation = 4.dp,
+                    border = BorderStroke(1.5.dp, glassBorderColor())
                 ) {
                     Box(modifier = Modifier.padding(Spacing.xs)) {
                         Sdm3Button(
@@ -106,22 +106,29 @@ fun PilihAnakScreen(
                             enabled = uiState.selectedStudentId != null && uiState.isLoading == false,
                             modifier = Modifier.fillMaxWidth(),
                             containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.primary // Navy text on Gold button
+                            contentColor = MaterialTheme.colorScheme.onSecondary
                         )
                     }
                 }
             }
         }
     ) { padding ->
-        // Background Glow (ProductSchool Style)
-        val glowColor = MaterialTheme.colorScheme.primaryContainer
+        // Modern Background Glow
+        val colorScheme = MaterialTheme.colorScheme
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.3f)) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(glowColor, Color.Transparent),
-                        center = Offset(size.width, 0f),
-                        radius = size.width * 1.2f
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
@@ -170,14 +177,14 @@ fun PilihAnakScreen(
                                         .padding(bottom = Spacing.lg)
                                 ) {
                                     Surface(
-                                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
-                                        shape = RoundedCornerShape(999.dp), // ChipShape
+                                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+                                        shape = RoundedCornerShape(999.dp),
                                         modifier = Modifier.padding(bottom = Spacing.sm)
                                     ) {
                                         Text(
                                             text = "AKADEMIK • SDM3",
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                            style = MaterialTheme.typography.labelSmall,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                                            style = MaterialTheme.typography.labelMedium,
                                             fontWeight = FontWeight.Bold,
                                             letterSpacing = 1.5.sp,
                                             color = MaterialTheme.colorScheme.secondary
@@ -237,31 +244,32 @@ private fun StudentItem(
         label = "borderColor"
     )
 
-    // ProductSchool Glass Card Architecture
+    // Modern Glass Card Architecture
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(20.dp))
             .clickable {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
             .background(
-                if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.05f)
-                else glassSurface.copy(alpha = 0.4f)
+                if (isSelected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.15f)
+                else glassSurface.copy(alpha = 0.5f)
             )
             .border(
-                width = 1.dp,
+                width = if (isSelected) 2.dp else 1.5.dp,
                 color = borderColor,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(20.dp)
             )
-            .padding(1.dp) // Hairline effect
+            .padding(1.dp)
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(15.dp),
-            color = if (isSelected) glassSurface.copy(alpha = 0.9f) else glassSurface,
-            tonalElevation = if (isSelected) 2.dp else 0.dp
+            shape = RoundedCornerShape(19.dp),
+            color = if (isSelected) glassSurface.copy(alpha = 0.95f) else glassSurface,
+            tonalElevation = if (isSelected) 4.dp else 0.dp,
+            shadowElevation = if (isSelected) 4.dp else 0.dp
         ) {
             Row(
                 modifier = Modifier
@@ -269,13 +277,13 @@ private fun StudentItem(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Photo Container with ProductSchool Navy Border
+                // Photo Container with Modern Border
                 Box(
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(64.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape),
+                        .border(2.dp, if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     if (student.photo != null) {
@@ -289,7 +297,7 @@ private fun StudentItem(
                         Text(
                             text = student.name.firstOrNull()?.uppercase() ?: "",
                             style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.ExtraBold
                         )
                     }
@@ -302,9 +310,9 @@ private fun StudentItem(
                         text = student.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "NISN: ${student.nisn ?: "-"}",
                         style = MaterialTheme.typography.bodySmall,
@@ -312,17 +320,17 @@ private fun StudentItem(
                         letterSpacing = 0.2.sp
                     )
                     student.className?.let {
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                         Surface(
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(4.dp)
+                            color = if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
                                 text = " $it ",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.secondary,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
                     }
@@ -333,12 +341,21 @@ private fun StudentItem(
                     enter = fadeIn() + scaleIn(initialScale = 0.8f),
                     exit = fadeOut() + scaleOut()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Terpilih",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    Surface(
+                        modifier = Modifier.size(32.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.secondary,
+                        shadowElevation = 4.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Terpilih",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
             }
         }

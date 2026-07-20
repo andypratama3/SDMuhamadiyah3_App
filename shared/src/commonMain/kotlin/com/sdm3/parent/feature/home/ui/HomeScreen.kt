@@ -47,6 +47,7 @@ import com.sdm3.parent.core.navigation.SDM3BottomTab
 import com.sdm3.parent.feature.home.HomeEffect
 import com.sdm3.parent.feature.home.HomeIntent
 import com.sdm3.parent.feature.home.HomeViewModel
+import com.sdm3.parent.feature.home.HomeUiState
 import com.sdm3.parent.feature.auth.ui.PilihAnakBottomSheet
 import com.sdm3.parent.core.security.SecureTokenManager
 import org.koin.compose.viewmodel.koinViewModel
@@ -64,11 +65,15 @@ sealed class HomeScreenUiState {
 fun HomeScreen(
     studentId: String,
     navController: NavHostController,
-    viewModel: HomeViewModel = koinViewModel(),
+    viewModel: HomeViewModel? = if (LocalInspectionMode.current) null else koinViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val colorScheme = MaterialTheme.colorScheme
     val isPreview = LocalInspectionMode.current
+    val state by if (viewModel != null) {
+        viewModel.uiState.collectAsState()
+    } else {
+        remember { mutableStateOf(HomeUiState()) }
+    }
+    val colorScheme = MaterialTheme.colorScheme
 
     val errorMessage = state.errorMessage
 
@@ -84,12 +89,12 @@ fun HomeScreen(
 
     LaunchedEffect(studentId) {
         if (!isPreview) {
-            viewModel.onIntent(HomeIntent.LoadDashboard(studentId))
+            viewModel?.onIntent(HomeIntent.LoadDashboard(studentId))
         }
     }
 
     LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
+        viewModel?.effect?.collect { effect ->
             when (effect) {
                 is HomeEffect.NavigateToLogin -> {
                     navController.navigate(SDM3Route.Login) {
@@ -133,16 +138,13 @@ fun HomeScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
-            // Atmospheric Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                        center = Offset(size.width, 0f),
-                        radius = size.width * 1.2f
-                    )
-                )
-            }
+            // High-performance Atmospheric Glow
+            AtmosphericGlow(
+                modifier = Modifier.fillMaxSize(),
+                alignment = Alignment.TopEnd,
+                color = colorScheme.primaryContainer,
+                alpha = 0.15f
+            )
 
             when (screenState) {
                 is HomeScreenUiState.Loading -> {
@@ -166,7 +168,7 @@ fun HomeScreen(
                         primaryAction = {
                             Sdm3Button(
                                 text = "Coba Lagi",
-                                onClick = { viewModel.onIntent(HomeIntent.Refresh(studentId)) }
+                                onClick = { viewModel?.onIntent(HomeIntent.Refresh(studentId)) }
                             )
                         }
                     )
@@ -589,6 +591,7 @@ private fun TabunganSekolahShimmer() {
 
 @Composable
 private fun GreetingSection(name: String, info: String, onClick: () -> Unit) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp)
@@ -598,16 +601,22 @@ private fun GreetingSection(name: String, info: String, onClick: () -> Unit) {
             text = "Halo, $name!",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            letterSpacing = (-1).sp
+            color = colorScheme.primary,
+            letterSpacing = (-0.5).sp
         )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = info,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            fontWeight = FontWeight.SemiBold
-        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Surface(
+            color = colorScheme.secondaryContainer.copy(alpha = 0.3f),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = info,
+                style = MaterialTheme.typography.bodySmall,
+                color = colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            )
+        }
     }
 }
 
@@ -673,43 +682,44 @@ private fun ShortcutCard(
     val colorScheme = MaterialTheme.colorScheme
     Sdm3Card(
         modifier = Modifier
-            .size(130.dp, 150.dp)
+            .size(140.dp, 160.dp)
             .clickable(onClick = onClick),
         padding = 0.dp
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(Spacing.sm),
+                modifier = Modifier.fillMaxSize().padding(Spacing.md),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Surface(
-                    modifier = Modifier.size(48.dp),
-                    shape = RoundedCornerShape(Spacing.sm),
-                    color = iconColor.copy(alpha = if (comingSoon) 0.05f else 0.08f)
+                    modifier = Modifier.size(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = iconColor.copy(alpha = if (comingSoon) 0.08f else 0.12f),
+                    shadowElevation = if (comingSoon) 0.dp else 4.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             icon,
                             contentDescription = null,
                             tint = if (comingSoon) iconColor.copy(alpha = 0.4f) else iconColor,
-                            modifier = Modifier.size(Spacing.xl)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(Spacing.sm))
+                Spacer(modifier = Modifier.height(Spacing.md))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    color = if (comingSoon) colorScheme.primary.copy(alpha = 0.6f) else colorScheme.primary,
-                    lineHeight = 18.sp
+                    color = if (comingSoon) colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else colorScheme.primary,
+                    lineHeight = 20.sp
                 )
             }
             if (comingSoon) {
                 Surface(
-                    shape = RoundedCornerShape(bottomStart = Spacing.sm),
+                    shape = RoundedCornerShape(bottomStart = 8.dp),
                     color = colorScheme.secondary,
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
@@ -719,7 +729,7 @@ private fun ShortcutCard(
                         fontWeight = FontWeight.Black,
                         color = colorScheme.primary,
                         letterSpacing = 0.5.sp,
-                        modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xxs)
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
                     )
                 }
             }
@@ -792,21 +802,22 @@ private fun ServiceItem(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(70.dp)
+            .width(72.dp)
             .clickable(onClick = onClick)
     ) {
         Box {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(14.dp),
-                color = colorScheme.primaryContainer.copy(alpha = if (comingSoon) 0.15f else 0.3f)
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = colorScheme.primaryContainer.copy(alpha = if (comingSoon) 0.2f else 0.4f),
+                shadowElevation = if (comingSoon) 0.dp else 2.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         icon,
                         contentDescription = null,
                         tint = if (comingSoon) colorScheme.primary.copy(alpha = 0.4f) else colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }
@@ -827,7 +838,7 @@ private fun ServiceItem(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
@@ -845,7 +856,8 @@ private fun PengumumanSection(
     time: String,
     onClick: () -> Unit
 ) {
-    val successColor = statusSuccessColor()
+    val colorScheme = MaterialTheme.colorScheme
+    val infoColor = statusInfoColor()
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Sdm3Card(
             modifier = Modifier
@@ -853,41 +865,54 @@ private fun PengumumanSection(
                 .clickable(onClick = onClick),
             padding = 20.dp
         ) {
-            Column {
+            Row {
                 Surface(
-                    color = successColor.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(999.dp)
+                    modifier = Modifier.size(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = infoColor.copy(alpha = 0.15f)
                 ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Outlined.Campaign,
+                            contentDescription = null,
+                            tint = infoColor,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "PENGUMUMAN",
                         style = MaterialTheme.typography.labelSmall,
-                        color = successColor,
+                        color = infoColor,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         letterSpacing = 0.5.sp
                     )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Outlined.AccessTime,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = time,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary,
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Outlined.AccessTime,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = time,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -899,47 +924,64 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
     val colorScheme = MaterialTheme.colorScheme
     val heroContent = heroContentColor()
     val statusSuccess = statusSuccessColor()
-    val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
+    val glowColor = colorScheme.secondary.copy(alpha = 0.3f)
 
     Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(Spacing.xxl),
-            colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
-                Canvas(modifier = Modifier.fillMaxWidth().height(160.dp).alpha(0.15f)) {
+                Canvas(modifier = Modifier.fillMaxWidth().height(180.dp).alpha(0.4f)) {
                     drawCircle(
                         brush = Brush.radialGradient(
-                            colors = listOf(glowColor, Color.Transparent),
-                            center = Offset(size.width * 0.9f, size.height * 0.2f),
-                            radius = size.width
+                            colors = listOf(glowColor.copy(alpha = 0.15f), Color.Transparent),
+                            center = Offset(size.width * 0.85f, size.height * 0.15f),
+                            radius = size.width * 1.2f
                         )
                     )
                 }
 
-                Column(modifier = Modifier.padding(Spacing.xl)) {
-                    Text(
-                        text = if (hasBills) "Total Tagihan Aktif" else "Tagihan Sekolah",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = heroContent.copy(alpha = 0.6f),
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.xxs))
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (hasBills) "Total Tagihan Aktif" else "Tagihan Sekolah",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = heroContent.copy(alpha = 0.7f),
+                            fontWeight = FontWeight.Medium
+                        )
+                        Surface(
+                            color = heroContent.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Outlined.AccountBalanceWallet,
+                                contentDescription = null,
+                                tint = heroContent,
+                                modifier = Modifier.padding(8.dp).size(20.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = if (hasBills) amount else "Lunas",
-                        style = MaterialTheme.typography.displayMedium,
+                        style = MaterialTheme.typography.displaySmall,
                         color = heroContent,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(Spacing.lg))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     Sdm3Button(
-                        text = if (hasBills) "Bayar" else "Riwayat",
+                        text = if (hasBills) "Bayar Sekarang" else "Lihat Riwayat",
                         onClick = onBayarClick,
                         containerColor = statusSuccess,
                         contentColor = colorScheme.onPrimary,
-                        modifier = Modifier.fillMaxWidth(0.4f)
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -951,6 +993,10 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
 @Composable
 private fun HomeScreenPreview() {
     SDM3Theme {
-        HomeScreen(studentId = "", navController = rememberNavController())
+        HomeScreen(
+            studentId = "",
+            navController = rememberNavController(),
+            viewModel = null
+        )
     }
 }

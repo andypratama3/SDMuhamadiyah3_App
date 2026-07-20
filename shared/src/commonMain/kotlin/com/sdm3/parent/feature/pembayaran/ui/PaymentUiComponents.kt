@@ -109,13 +109,20 @@ fun PaymentScreenScaffold(
 @Composable
 fun PaymentScreenBackground(modifier: Modifier = Modifier) {
     val colorScheme = MaterialTheme.colorScheme
-    Canvas(modifier = modifier.fillMaxSize().alpha(0.2f)) {
+    Canvas(modifier = modifier.fillMaxSize().alpha(0.4f)) {
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(colorScheme.secondary.copy(alpha = 0.4f), Color.Transparent),
-                center = Offset(size.width, size.height * 0.3f),
-                radius = size.width,
-            ),
+                colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                center = Offset(size.width * 0.85f, size.height * 0.1f),
+                radius = size.width * 1.5f
+            )
+        )
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                center = Offset(size.width * 0.15f, size.height * 0.9f),
+                radius = size.width * 1.0f
+            )
         )
     }
 }
@@ -183,6 +190,7 @@ fun PaymentHeroCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column {
             Box(
@@ -277,7 +285,7 @@ fun PaymentHeroCard(
                     enabled = hasActive,
                     icon = Icons.Outlined.CreditCard,
                     containerColor = colorScheme.secondary,
-                    contentColor = colorScheme.primary,
+                    contentColor = colorScheme.onSecondary,
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                 )
             }
@@ -436,16 +444,17 @@ fun FeeItemCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = colorScheme.primary.copy(alpha = 0.03f),
-                border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.05f)),
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                shadowElevation = 4.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.Receipt,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(24.dp),
                         tint = if (isPaid) statusSuccess else colorScheme.primary,
                     )
                 }
@@ -472,9 +481,9 @@ fun FeeItemCard(
                 )
             }
             Surface(
-                color = statusColor.copy(alpha = 0.08f),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, statusColor.copy(alpha = 0.12f)),
+                color = statusColor.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.5.dp, statusColor.copy(alpha = 0.2f))
             ) {
                 Text(
                     text = formatRupiah(fee.amount),
@@ -483,7 +492,7 @@ fun FeeItemCard(
                     color = statusColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
             if (onClick != null) {
@@ -531,16 +540,17 @@ fun PaymentHistoryCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = colorScheme.primary.copy(alpha = 0.03f),
-                border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.05f)),
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                shadowElevation = 4.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.History,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(24.dp),
                         tint = if (isPaid) statusSuccess else colorScheme.primary,
                     )
                 }
@@ -567,9 +577,9 @@ fun PaymentHistoryCard(
                 )
             }
             Surface(
-                color = statusColor.copy(alpha = 0.08f),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, statusColor.copy(alpha = 0.12f)),
+                color = statusColor.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.5.dp, statusColor.copy(alpha = 0.2f))
             ) {
                 Text(
                     text = formatRupiah(payment.grossAmount ?: 0.0),
@@ -578,7 +588,7 @@ fun PaymentHistoryCard(
                     color = statusColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))

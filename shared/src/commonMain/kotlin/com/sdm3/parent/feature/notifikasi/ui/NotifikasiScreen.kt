@@ -173,13 +173,20 @@ fun NotifikasiScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Atmospheric Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+            // Modern Atmospheric Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                        center = Offset(size.width, 0f),
-                        radius = size.width
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
@@ -308,15 +315,17 @@ fun NotifikasiScreen(
                                                     verticalAlignment = Alignment.Top
                                                 ) {
                                                     Surface(
-                                                        modifier = Modifier.size(44.dp),
-                                                        shape = RoundedCornerShape(12.dp),
-                                                        color = colorScheme.primary.copy(alpha = 0.05f)
+                                                        modifier = Modifier.size(48.dp),
+                                                        shape = RoundedCornerShape(14.dp),
+                                                        color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                                        border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                                                        shadowElevation = 4.dp
                                                     ) {
                                                         Box(contentAlignment = Alignment.Center) {
                                                             Icon(
                                                                 iconForType(notif.type),
                                                                 contentDescription = null,
-                                                                modifier = Modifier.size(26.dp),
+                                                                modifier = Modifier.size(28.dp),
                                                                 tint = colorScheme.primary
                                                             )
                                                         }

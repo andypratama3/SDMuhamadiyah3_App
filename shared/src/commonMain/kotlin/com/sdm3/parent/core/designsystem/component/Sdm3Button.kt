@@ -36,9 +36,8 @@ fun Sdm3Button(
     contentColor: Color = Color.Unspecified,
     content: @Composable (RowScope.() -> Unit)? = null
 ) {
-    // ProductSchool Primary Action: Gold Container with Navy Text
-    val finalContainerColor = if (containerColor != Color.Unspecified) containerColor else MaterialTheme.colorScheme.secondary
-    val finalContentColor = if (contentColor != Color.Unspecified) contentColor else MaterialTheme.colorScheme.primary
+    val finalContainerColor = if (containerColor != Color.Unspecified) containerColor else MaterialTheme.colorScheme.primary
+    val finalContentColor = if (contentColor != Color.Unspecified) contentColor else MaterialTheme.colorScheme.onPrimary
 
     val isPreview = LocalInspectionMode.current
     val haptic = LocalHapticFeedback.current

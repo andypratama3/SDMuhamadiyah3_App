@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.CardShape
 import com.sdm3.parent.core.designsystem.theme.GlassOutline
 import com.sdm3.parent.core.designsystem.theme.GlassSurface
-import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
@@ -131,7 +130,7 @@ private fun Sdm3GlassCardPreview() {
                         "+ Tambah Data Baru",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Primary.copy(alpha = 0.6f),
+                        color = ProductSchoolTheme.colors.primary.copy(alpha = 0.6f),
                     )
                 }
             }

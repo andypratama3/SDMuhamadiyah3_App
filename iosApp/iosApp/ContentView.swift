@@ -17,4 +17,21 @@ struct ContentView: View {
     }
 }
 
+#Preview("SDM3 Parent - iPhone") {
+    ContentView()
+}
 
+#Preview("SDM3 Parent - Light") {
+    ContentView()
+        .preferredColorScheme(.light)
+}
+
+#Preview("SDM3 Parent - Dark") {
+    ContentView()
+        .preferredColorScheme(.dark)
+}
+
+#Preview("SDM3 Parent - iPad") {
+    ContentView()
+        .previewDevice("iPad Pro (11-inch) (4th generation)")
+}

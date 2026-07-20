@@ -143,13 +143,20 @@ fun ProfilAkunScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Atmospheric Background Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+            // Modern Atmospheric Background Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                        center = Offset(size.width, size.height * 0.5f),
-                        radius = size.width
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
@@ -552,9 +559,10 @@ private fun ProfileHeader(
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    shape = RoundedCornerShape(20.dp),
-                    color = colorScheme.primary.copy(alpha = 0.05f),
-                    border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+                    shape = RoundedCornerShape(24.dp),
+                    color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                    border = BorderStroke(2.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                    shadowElevation = 8.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         if (!avatarUrl.isNullOrBlank()) {
@@ -568,7 +576,7 @@ private fun ProfileHeader(
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = null,
-                                modifier = Modifier.size(40.dp),
+                                modifier = Modifier.size(42.dp),
                                 tint = colorScheme.primary
                             )
                         }
@@ -615,28 +623,31 @@ private fun ProfileHeader(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Surface(
-                    color = statusSuccess.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(4.dp)
+                    color = statusSuccess.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(6.dp),
+                    border = BorderStroke(1.dp, statusSuccess.copy(alpha = 0.3f))
                 ) {
                     Text(
                         text = " TERVERIFIKASI ",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
                         color = statusSuccess,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
             }
             Surface(
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(40.dp),
                 shape = CircleShape,
-                color = colorScheme.primary.copy(alpha = 0.05f)
+                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                shadowElevation = 4.dp
             ) {
                 IconButton(onClick = onEditClick) {
                     Icon(
                         Icons.Outlined.Edit,
                         contentDescription = "Edit",
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(18.dp),
                         tint = colorScheme.primary
                     )
                 }
@@ -664,10 +675,11 @@ private fun StudentMiniCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    modifier = Modifier.size(56.dp),
+                    modifier = Modifier.size(60.dp),
                     shape = CircleShape,
-                    color = colorScheme.primaryContainer,
-                    border = BorderStroke(2.dp, colorScheme.surface)
+                    color = colorScheme.primaryContainer.copy(alpha = 0.4f),
+                    border = BorderStroke(2.5.dp, colorScheme.primary.copy(alpha = 0.3f)),
+                    shadowElevation = 4.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(

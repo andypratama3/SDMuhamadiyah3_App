@@ -85,6 +85,22 @@ fun PembayaranBerhasilScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
+                    )
+                )
+            }
             when (val state = uiState) {
                 is PembayaranBerhasilUiState.Loading -> {
                     Column(
@@ -192,18 +208,7 @@ fun PembayaranBerhasilScreen(
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val useCompactTitle = maxHeight < 700.dp
 
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
-                                drawCircle(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(statusSuccess, Color.Transparent),
-                                        center = Offset(size.width * 0.5f, size.height * 0.4f),
-                                        radius = size.width
-                                    )
-                                )
-                            }
-
-                            Column(
+                        Column(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(padding)
@@ -215,16 +220,17 @@ fun PembayaranBerhasilScreen(
                                 Spacer(modifier = Modifier.height(Spacing.xxl))
 
                                 Surface(
-                                    modifier = Modifier.size(110.dp),
-                                    shape = RoundedCornerShape(Spacing.xxxl),
-                                    color = glassSurface,
-                                    border = BorderStroke(2.dp, glassBorder)
+                                    modifier = Modifier.size(120.dp),
+                                    shape = RoundedCornerShape(32.dp),
+                                    color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                    border = BorderStroke(2.5.dp, colorScheme.primary.copy(alpha = 0.3f)),
+                                    shadowElevation = 12.dp
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             imageVector = Icons.Outlined.CheckCircle,
                                             contentDescription = null,
-                                            modifier = Modifier.size(56.dp),
+                                            modifier = Modifier.size(64.dp),
                                             tint = statusSuccess
                                         )
                                     }
@@ -258,9 +264,9 @@ fun PembayaranBerhasilScreen(
 
                                 Spacer(modifier = Modifier.height(Spacing.xxxxl))
 
-                                Sdm3Card(padding = Spacing.xl) {
-                                    Column {
-                                        if (vmState.paymentTitle.isNotBlank()) {
+                                 Sdm3GlassCard(padding = Spacing.xl) {
+                                     Column {
+                                         if (vmState.paymentTitle.isNotBlank()) {
                                             SuccessRow("Item Akademik", vmState.paymentTitle.uppercase())
                                             HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = Spacing.sm))
                                         }
@@ -292,7 +298,7 @@ fun PembayaranBerhasilScreen(
                                     onClick = onLihatBukti,
                                     icon = Icons.AutoMirrored.Outlined.ReceiptLong,
                                     containerColor = colorScheme.secondary,
-                                    contentColor = colorScheme.primary,
+                                    contentColor = colorScheme.onSecondary,
                                     modifier = Modifier.fillMaxWidth().height(56.dp)
                                 )
 
@@ -312,7 +318,6 @@ fun PembayaranBerhasilScreen(
             }
         }
     }
-}
 
 @Composable
 private fun SuccessRow(label: String, value: String) {

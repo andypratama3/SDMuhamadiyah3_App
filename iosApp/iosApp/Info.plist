@@ -36,5 +36,47 @@
 	<string>Lokasi digunakan untuk absensi pegawai (check-in/out) di area sekolah. Koordinat GPS dikirim saat Anda menekan tombol absensi.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Lokasi digunakan untuk absensi pegawai (check-in/out) di area sekolah.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>sdmuhammadiyah3smd.cloud</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<true/>
+			</dict>
+		</dict>
+		<!--
+		SSL CERTIFICATE PINNING (Identity Pinning)
+		To enable certificate pinning for enhanced security:
+		1. Get the server certificate: openssl s_client -showcerts -connect sdmuhammadiyah3smd.cloud:443
+		2. Extract the CA certificate from the chain
+		3. Calculate SPKI-SHA256-BASE64 hash: openssl x509 -in ca.pem -pubkey -noout | openssl rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
+		4. Add the hash below in NSPinnedCAIdentities array
+		5. Uncomment NSPinnedDomains section
+		
+		<key>NSPinnedDomains</key>
+		<dict>
+			<key>sdmuhammadiyah3smd.cloud</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSPinnedCAIdentities</key>
+				<array>
+					<dict>
+						<key>SPKI-SHA256-BASE64</key>
+						<string>REPLACE_WITH_ACTUAL_CERTIFICATE_HASH</string>
+					</dict>
+				</array>
+			</dict>
+		</dict>
+		-->
+	</dict>
 </dict>
 </plist>

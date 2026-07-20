@@ -86,12 +86,19 @@ fun AccountDeletionScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.error, Color.Transparent),
-                        center = Offset(size.width, 0f),
-                        radius = size.width
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }

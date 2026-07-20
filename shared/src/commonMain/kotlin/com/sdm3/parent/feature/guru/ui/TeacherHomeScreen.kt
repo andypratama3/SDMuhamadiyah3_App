@@ -1,5 +1,6 @@
 package com.sdm3.parent.feature.guru.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,6 +17,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
@@ -82,6 +87,22 @@ fun TeacherHomeScreen(
                 .padding(padding)
                 .padding(horizontal = Spacing.lg),
         ) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
+                    )
+                )
+            }
             when {
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -145,28 +166,29 @@ private fun TeacherAbsensiSayaCard(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        padding = Spacing.lg,
+        padding = 20.dp,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = colorScheme.secondary.copy(alpha = 0.15f),
-                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                modifier = Modifier.size(56.dp),
+                shadowElevation = 4.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = colorScheme.secondary)
+                    Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = colorScheme.secondary, modifier = Modifier.size(28.dp))
                 }
             }
             Spacer(modifier = Modifier.width(Spacing.md))
             Column(modifier = Modifier.weight(1f)) {
-                Text("Absensi Saya", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("Absensi Saya", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                 Text(
                     "Check-in/out dengan GPS realtime",
                     style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurface.copy(alpha = 0.6f),
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )
             }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary)
+            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -181,28 +203,29 @@ private fun TeacherClassroomCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        padding = Spacing.lg,
+        padding = 20.dp,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = colorScheme.primary.copy(alpha = 0.08f),
-                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                modifier = Modifier.size(56.dp),
+                shadowElevation = 4.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.Groups, contentDescription = null, tint = colorScheme.primary)
+                    Icon(Icons.Outlined.Groups, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(28.dp))
                 }
             }
             Spacer(modifier = Modifier.width(Spacing.md))
             Column(modifier = Modifier.weight(1f)) {
-                Text(classroom.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(classroom.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                 Text(
                     "${classroom.studentCount} siswa",
                     style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurface.copy(alpha = 0.6f),
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )
             }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary)
+            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp))
         }
     }
 }

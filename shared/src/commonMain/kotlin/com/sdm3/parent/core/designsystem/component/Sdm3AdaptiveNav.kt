@@ -33,11 +33,12 @@ data class BottomNavItem(
 
 internal val navItems = listOf(
     BottomNavItem("Home", SDM3BottomTab.Beranda, Icons.Outlined.Home),
-    BottomNavItem("Nilai", SDM3BottomTab.Nilai, Icons.Outlined.CalendarMonth),
-    BottomNavItem("Bayar", SDM3BottomTab.Bayar, Icons.Outlined.QrCodeScanner),
+    BottomNavItem("Nilai", SDM3BottomTab.Nilai, Icons.Outlined.Assignment),
+    BottomNavItem("Bayar", SDM3BottomTab.Bayar, Icons.Outlined.Payments),
     BottomNavItem("Rapor", SDM3BottomTab.Rapor, Icons.Outlined.School),
-    BottomNavItem("Profil", SDM3BottomTab.Profil, Icons.Outlined.Menu)
+    BottomNavItem("Profil", SDM3BottomTab.Profil, Icons.Outlined.Person)
 )
+
 
 @Composable
 fun Sdm3AdaptiveLayout(

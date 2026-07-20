@@ -131,12 +131,19 @@ fun ProsesPembayaranScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.4f), Color.Transparent),
-                        center = Offset(size.width, 0f),
-                        radius = size.width
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
@@ -239,12 +246,14 @@ fun ProsesPembayaranScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Surface(
-                                    modifier = Modifier.size(56.dp),
-                                    shape = RoundedCornerShape(Spacing.md),
-                                    color = colorScheme.primary.copy(alpha = 0.05f)
+                                    modifier = Modifier.size(64.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                    border = BorderStroke(2.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                                    shadowElevation = 8.dp
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Outlined.AccountBalance, contentDescription = null, modifier = Modifier.size(Spacing.xxl), tint = colorScheme.primary)
+                                        Icon(Icons.Outlined.AccountBalance, contentDescription = null, modifier = Modifier.size(32.dp), tint = colorScheme.primary)
                                     }
                                 }
 
@@ -435,7 +444,7 @@ fun ProsesPembayaranScreen(
                                 onClick = { viewModel.pollStatus() },
                                 isLoading = vmState.isLoading,
                                 containerColor = colorScheme.secondary,
-                                contentColor = colorScheme.primary,
+                                contentColor = colorScheme.onSecondary,
                                 modifier = Modifier.fillMaxWidth().height(56.dp)
                             )
                         }

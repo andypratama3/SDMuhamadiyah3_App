@@ -101,19 +101,26 @@ fun LoginScreen(
                 }
         )
 
-        Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
+        Canvas(modifier = Modifier.fillMaxSize().alpha(0.5f)) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                    center = Offset(size.width * 0.8f, size.height * 0.1f),
-                    radius = size.width
+                    colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                    center = Offset(size.width * 0.85f, size.height * 0.15f),
+                    radius = size.width * 1.2f
                 )
             )
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.secondary.copy(alpha = 0.1f), Color.Transparent),
-                    center = Offset(size.width * 0.2f, size.height * 0.9f),
-                    radius = size.width
+                    colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                    center = Offset(size.width * 0.15f, size.height * 0.85f),
+                    radius = size.width * 0.9f
+                )
+            )
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(colorScheme.tertiary.copy(alpha = 0.08f), Color.Transparent),
+                    center = Offset(size.width * 0.5f, size.height * 0.5f),
+                    radius = size.width * 0.6f
                 )
             )
         }
@@ -132,21 +139,22 @@ fun LoginScreen(
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        scaleX = if (startAnimation) 1f else 0.8f
-                        scaleY = if (startAnimation) 1f else 0.8f
+                        scaleX = if (startAnimation) 1f else 0.85f
+                        scaleY = if (startAnimation) 1f else 0.85f
                         alpha = if (startAnimation) 1f else 0f
                     }
-                    .animateContentSize(tween(600, easing = PremiumEasing)),
+                    .animateContentSize(tween(700, easing = PremiumEasing)),
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
-                    modifier = Modifier.size(100.dp).blur(if (startAnimation) 0.dp else 20.dp),
-                    shape = CircleShape,
+                    modifier = Modifier.size(110.dp).blur(if (startAnimation) 0.dp else 16.dp),
+                    shape = RoundedCornerShape(28.dp),
                     color = glassSurfaceColor(),
-                    border = BorderStroke(1.5.dp, glassBorderColor())
+                    border = BorderStroke(2.dp, glassBorderColor()),
+                    shadowElevation = 8.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Sdm3Logo(size = 70.dp, showBackground = false)
+                        Sdm3Logo(size = 72.dp, showBackground = false)
                     }
                 }
             }
@@ -157,7 +165,7 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.graphicsLayer {
                     alpha = if (startAnimation) 1f else 0f
-                    translationY = if (startAnimation) 0f else 20f
+                    translationY = if (startAnimation) 0f else 24f
                 }
             ) {
                 Text(
@@ -165,20 +173,20 @@ fun LoginScreen(
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary,
-                    letterSpacing = (-0.5).sp,
+                    letterSpacing = (-0.3).sp,
                     textAlign = TextAlign.Center,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Surface(
-                    color = colorScheme.secondary.copy(alpha = 0.15f),
+                    color = colorScheme.secondaryContainer.copy(alpha = 0.4f),
                     shape = RoundedCornerShape(999.dp)
                 ) {
                     Text(
                         text = " ORANG TUA & GURU ",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp,
                         color = colorScheme.secondary
                     )
                 }
@@ -186,12 +194,12 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            Sdm3Card(
+            Sdm3GlassCard(
                 modifier = Modifier.graphicsLayer {
                     alpha = if (startAnimation) 1f else 0f
-                    translationY = if (startAnimation) 0f else 40f
+                    translationY = if (startAnimation) 0f else 48f
                 },
-                padding = 20.dp
+                padding = 24.dp
             ) {
                 Column {
                     Sdm3TextField(
@@ -235,17 +243,29 @@ fun LoginScreen(
                     ) {
                         Surface(
                             modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
-                            color = colorScheme.error.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(8.dp)
+                            color = colorScheme.errorContainer,
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.3f))
                         ) {
-                            Text(
-                                text = uiState.errorMessage ?: "",
-                                color = colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(12.dp),
-                                textAlign = TextAlign.Center
-                            )
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Outlined.ErrorOutline,
+                                    contentDescription = null,
+                                    tint = colorScheme.error,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = uiState.errorMessage ?: "",
+                                    color = colorScheme.error,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
 

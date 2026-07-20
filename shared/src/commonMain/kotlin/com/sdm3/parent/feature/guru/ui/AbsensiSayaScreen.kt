@@ -1,5 +1,6 @@
 package com.sdm3.parent.feature.guru.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -116,6 +121,22 @@ fun AbsensiSayaScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
+                    )
+                )
+            }
             when {
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -298,7 +319,7 @@ private fun LocationPermissionCard(
                 liveLocation?.let { loc ->
                     Spacer(modifier = Modifier.height(Spacing.xs))
                     Text(
-                        text = "Lat ${loc.latitude.formatCoord()} • Lng ${loc.longitude.formatCoord()}",
+                        text = "Lat ${formatCoord(loc.latitude)} • Lng ${formatCoord(loc.longitude)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = colorScheme.onSurface.copy(alpha = 0.6f),
                     )
@@ -360,4 +381,13 @@ private fun formatTime(raw: String?): String {
     return raw.take(5)
 }
 
-private fun Double.formatCoord(): String = "%.6f".format(this)
+private fun formatCoord(value: Double): String {
+    val str = value.toString()
+    val parts = str.split(".")
+    if (parts.size == 2) {
+        val integerPart = parts[0]
+        val decimalPart = parts[1].take(6).padEnd(6, '0')
+        return "$integerPart.$decimalPart"
+    }
+    return str
+}

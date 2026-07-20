@@ -84,6 +84,14 @@ fun SDM3BottomNavBar(
                         animationSpec = tween(400)
                     )
 
+                    val scale by animateFloatAsState(
+                        targetValue = if (selected) 1.12f else 1.0f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    )
+
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -99,6 +107,10 @@ fun SDM3BottomNavBar(
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
+                                .graphicsLayer {
+                                    scaleX = scale
+                                    scaleY = scale
+                                }
                                 .clip(CircleShape)
                                 .background(backgroundColor),
                             contentAlignment = Alignment.Center
@@ -110,6 +122,7 @@ fun SDM3BottomNavBar(
                                 tint = contentColor
                             )
                         }
+
                         
                         Spacer(modifier = Modifier.height(2.dp))
                         

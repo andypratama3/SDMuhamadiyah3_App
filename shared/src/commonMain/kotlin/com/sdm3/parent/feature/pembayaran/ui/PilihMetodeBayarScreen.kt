@@ -160,12 +160,19 @@ fun PilihMetodeBayarScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                        center = Offset(0f, size.height),
-                        radius = size.width
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
@@ -319,15 +326,17 @@ fun PilihMetodeBayarScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Surface(
-                                        modifier = Modifier.size(48.dp),
-                                        shape = RoundedCornerShape(Spacing.sm),
-                                        color = if (isSelected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.05f)
+                                        modifier = Modifier.size(52.dp),
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = if (isSelected) colorScheme.primary else colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                        border = BorderStroke(1.5.dp, if (isSelected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.2f)),
+                                        shadowElevation = if (isSelected) 8.dp else 4.dp
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
                                             Icon(
                                                 Icons.Outlined.Payments,
                                                 contentDescription = null,
-                                                modifier = Modifier.size(Spacing.xl),
+                                                modifier = Modifier.size(24.dp),
                                                 tint = if (isSelected) colorScheme.onPrimary else colorScheme.primary
                                             )
                                         }

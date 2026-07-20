@@ -77,13 +77,20 @@ fun OnboardingScreen(
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // ProductSchool Atmospheric Background
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.3f)) {
+            // Modern Atmospheric Background
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                        center = Offset(size.width, 0f),
-                        radius = size.width * 1.2f
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
@@ -132,14 +139,14 @@ fun OnboardingScreen(
 
                         // Category Badge
                         Surface(
-                            color = colorScheme.secondary.copy(alpha = 0.15f),
+                            color = colorScheme.secondaryContainer.copy(alpha = 0.4f),
                             shape = RoundedCornerShape(999.dp)
                         ) {
                             Text(
                                 text = onboardingPages[page].label,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
                                 letterSpacing = 2.sp,
                                 color = colorScheme.secondary
                             )
@@ -149,12 +156,12 @@ fun OnboardingScreen(
 
                         Text(
                             text = onboardingPages[page].title,
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.headlineMedium,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp,
-                            lineHeight = 30.sp,
+                            letterSpacing = (-0.3).sp,
+                            lineHeight = 32.sp,
                             maxLines = 3,
                         )
 
@@ -269,18 +276,18 @@ private fun OnboardingVisual(page: Int) {
         // Decorative Bloom
         Box(
             modifier = Modifier
-                .size(180.dp)
+                .size(200.dp)
                 .background(
                     Brush.radialGradient(
-                        listOf(colorScheme.primary.copy(alpha = 0.1f), Color.Transparent)
+                        listOf(colorScheme.primary.copy(alpha = 0.12f), Color.Transparent)
                     )
                 )
         )
 
         // Floating Glass Card
-        Sdm3Card(
+        Sdm3GlassCard(
             modifier = Modifier
-                .size(160.dp, 190.dp)
+                .size(170.dp, 200.dp)
                 .graphicsLayer { translationY = floatOffset },
             padding = 0.dp
         ) {
@@ -290,10 +297,10 @@ private fun OnboardingVisual(page: Int) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Surface(
-                    modifier = Modifier.size(80.dp),
+                    modifier = Modifier.size(88.dp),
                     shape = RoundedCornerShape(24.dp),
-                    color = colorScheme.primary.copy(alpha = 0.05f),
-                    border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+                    color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                    shadowElevation = 4.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -303,16 +310,16 @@ private fun OnboardingVisual(page: Int) {
                                 else -> Icons.Outlined.Forum
                             },
                             contentDescription = null,
-                            modifier = Modifier.size(40.dp),
+                            modifier = Modifier.size(44.dp),
                             tint = colorScheme.primary
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
                 // Faux Data Lines
-                Box(modifier = Modifier.width(90.dp).height(8.dp).clip(CircleShape).background(colorScheme.primary.copy(alpha = 0.1f)))
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(modifier = Modifier.width(60.dp).height(6.dp).clip(CircleShape).background(colorScheme.primary.copy(alpha = 0.05f)))
+                Box(modifier = Modifier.width(100.dp).height(10.dp).clip(RoundedCornerShape(5.dp)).background(colorScheme.primary.copy(alpha = 0.12f)))
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(modifier = Modifier.width(70.dp).height(8.dp).clip(RoundedCornerShape(4.dp)).background(colorScheme.primary.copy(alpha = 0.08f)))
             }
         }
     }

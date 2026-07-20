@@ -4,9 +4,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Cancel
@@ -125,19 +125,24 @@ fun DetailBuktiBayarScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        val glowColor = colorScheme.primaryContainer
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(glowColor, Color.Transparent),
-                        center = Offset(size.width, 0f),
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
                         radius = size.width * 1.5f
                     )
                 )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
+                    )
+                )
             }
-
-        when (val state = uiState) {
+            when (val state = uiState) {
             is DetailBayarUiState.Loading -> {
                 Column(
                     modifier = Modifier
@@ -444,10 +449,11 @@ fun DetailBuktiBayarScreen(
                                 val studentName = payment.studentName ?: payment.paymentTitle?.name ?: "Santri"
                                 val initials = com.sdm3.parent.core.util.nameInitials(studentName)
                                 Surface(
-                                    modifier = Modifier.size(48.dp),
+                                    modifier = Modifier.size(52.dp),
                                     shape = CircleShape,
-                                    color = colorScheme.primary.copy(alpha = 0.05f),
-                                    border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+                                    color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                    border = BorderStroke(2.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                                    shadowElevation = 4.dp
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Text(

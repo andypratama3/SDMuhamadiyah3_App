@@ -1,5 +1,6 @@
 package com.sdm3.parent.feature.guru.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +11,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
@@ -23,6 +28,32 @@ import com.sdm3.parent.core.designsystem.theme.statusWarningColor
 import com.sdm3.parent.domain.model.AttendanceStatus
 import com.sdm3.parent.feature.guru.GuruAbsensiViewModel
 import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+private fun AttendanceChip(
+    label: String,
+    selected: Boolean,
+    status: AttendanceStatus,
+    onClick: () -> Unit,
+) {
+    val color = when (status) {
+        AttendanceStatus.HADIR -> statusSuccessColor()
+        AttendanceStatus.IZIN -> statusInfoColor()
+        AttendanceStatus.SAKIT -> statusWarningColor()
+        AttendanceStatus.PULANG -> statusInfoColor()
+        AttendanceStatus.ALPA -> statusDangerColor()
+    }
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+        shape = RoundedCornerShape(999.dp),
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = color.copy(alpha = 0.18f),
+            selectedLabelColor = color,
+        ),
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +119,26 @@ fun GuruAbsensiScreen(
             }
         },
     ) { padding ->
-        when {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
+                    )
+                )
+            }
+            when {
             state.isLoading -> {
                 Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -151,29 +201,4 @@ fun GuruAbsensiScreen(
         }
     }
 }
-
-@Composable
-private fun AttendanceChip(
-    label: String,
-    selected: Boolean,
-    status: AttendanceStatus,
-    onClick: () -> Unit,
-) {
-    val color = when (status) {
-        AttendanceStatus.HADIR -> statusSuccessColor()
-        AttendanceStatus.IZIN -> statusInfoColor()
-        AttendanceStatus.SAKIT -> statusWarningColor()
-        AttendanceStatus.PULANG -> statusInfoColor()
-        AttendanceStatus.ALPA -> statusDangerColor()
-    }
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
-        shape = RoundedCornerShape(999.dp),
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = color.copy(alpha = 0.18f),
-            selectedLabelColor = color,
-        ),
-    )
 }

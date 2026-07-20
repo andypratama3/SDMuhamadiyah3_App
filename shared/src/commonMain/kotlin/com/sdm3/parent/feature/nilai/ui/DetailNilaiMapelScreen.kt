@@ -106,13 +106,19 @@ fun DetailNilaiMapelScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Atmospheric Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                        center = Offset(size.width * 0.8f, size.height * 0.1f),
-                        radius = size.width
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
@@ -182,12 +188,12 @@ fun DetailNilaiMapelScreen(
                             ) {
                                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                     val glowColor = colorScheme.surfaceTint.copy(alpha = 0.3f)
-                                    Canvas(modifier = Modifier.fillMaxWidth().height(180.dp).alpha(0.1f)) {
+                                    Canvas(modifier = Modifier.fillMaxWidth().height(180.dp).alpha(0.4f)) {
                                         drawCircle(
                                             brush = Brush.radialGradient(
-                                                colors = listOf(glowColor, Color.Transparent),
+                                                colors = listOf(glowColor.copy(alpha = 0.15f), Color.Transparent),
                                                 center = Offset(size.width * 0.9f, 0f),
-                                                radius = size.width
+                                                radius = size.width * 1.2f
                                             )
                                         )
                                     }

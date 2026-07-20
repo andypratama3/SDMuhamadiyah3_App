@@ -64,13 +64,20 @@ fun VerifikasiOtpScreen(
             .fillMaxSize()
             .background(colorScheme.background)
     ) {
-        // Atmospheric Glow
-        Canvas(modifier = Modifier.fillMaxSize().alpha(0.3f)) {
+        // Modern Atmospheric Glow
+        Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                    center = Offset(size.width, 0f),
+                    colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                    center = Offset(size.width * 0.85f, size.height * 0.1f),
                     radius = size.width * 1.5f
+                )
+            )
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                    center = Offset(size.width * 0.15f, size.height * 0.9f),
+                    radius = size.width * 1.0f
                 )
             )
         }
@@ -88,10 +95,11 @@ fun VerifikasiOtpScreen(
 
             // Step Indicator Icon
             Surface(
-                modifier = Modifier.size(90.dp),
-                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.size(100.dp),
+                shape = RoundedCornerShape(28.dp),
                 color = glassSurfaceColor(),
-                border = BorderStroke(1.5.dp, glassBorderColor())
+                border = BorderStroke(2.dp, glassBorderColor()),
+                shadowElevation = 8.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -101,7 +109,7 @@ fun VerifikasiOtpScreen(
                             OtpStep.RESET_PASSWORD -> Icons.Outlined.CheckCircle
                         },
                         contentDescription = null,
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.size(40.dp),
                         tint = colorScheme.primary
                     )
                 }
@@ -115,10 +123,10 @@ fun VerifikasiOtpScreen(
                     OtpStep.VERIFY_OTP -> "Verifikasi Akun"
                     OtpStep.RESET_PASSWORD -> "Pembaruan Kunci"
                 },
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
-                letterSpacing = (-1).sp
+                letterSpacing = (-0.5).sp
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -140,7 +148,7 @@ fun VerifikasiOtpScreen(
 
             Sdm3Card(
                 modifier = Modifier.fillMaxWidth(),
-                padding = 24.dp
+                padding = 28.dp
             ) {
                 Column {
                     when (state.step) {
@@ -257,16 +265,17 @@ fun VerifikasiOtpScreen(
             AnimatedVisibility(visible = state.errorMessage != null) {
                 Surface(
                     modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
-                    color = colorScheme.error.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(12.dp)
+                    color = colorScheme.errorContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.3f))
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = colorScheme.error, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = colorScheme.error, modifier = Modifier.size(22.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text(state.errorMessage ?: "", color = colorScheme.error, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                        Text(state.errorMessage ?: "", color = colorScheme.error, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -276,16 +285,17 @@ fun VerifikasiOtpScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 24.dp)) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        color = successColor.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(12.dp)
+                        color = successColor.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, successColor.copy(alpha = 0.3f))
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = successColor, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = successColor, modifier = Modifier.size(22.dp))
                             Spacer(Modifier.width(12.dp))
-                            Text(state.resetSuccessMessage ?: "", color = successColor, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text(state.resetSuccessMessage ?: "", color = successColor, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))
@@ -343,16 +353,16 @@ private fun OtpDigitInput(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(60.dp)
-                            .clip(RoundedCornerShape(14.dp))
+                            .height(64.dp)
+                            .clip(RoundedCornerShape(16.dp))
                             .background(
-                                if (isFocused) colorScheme.primary.copy(alpha = 0.05f)
+                                if (isFocused) colorScheme.primaryContainer.copy(alpha = 0.3f)
                                 else glassSurface
                             )
                             .border(
-                                width = if (isFocused) 2.dp else 1.dp,
+                                width = if (isFocused) 2.dp else 1.5.dp,
                                 color = if (isFocused) colorScheme.primary else glassBorder,
-                                shape = RoundedCornerShape(14.dp)
+                                shape = RoundedCornerShape(16.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {

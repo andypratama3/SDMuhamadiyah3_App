@@ -31,7 +31,9 @@ import com.sdm3.parent.core.designsystem.theme.statusWarningColor
 fun StatusChip(
     text: String,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    leadingDot: Boolean = true,
+    uppercase: Boolean = true
 ) {
     Row(
         modifier = modifier
@@ -41,14 +43,16 @@ fun StatusChip(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(color)
-        )
+        if (leadingDot) {
+            Box(
+                modifier = Modifier
+                    .size(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(color)
+            )
+        }
         Text(
-            text = text.uppercase(),
+            text = if (uppercase) text.uppercase() else text,
             style = MaterialTheme.typography.labelSmall,
             color = color,
             fontWeight = FontWeight.Black,

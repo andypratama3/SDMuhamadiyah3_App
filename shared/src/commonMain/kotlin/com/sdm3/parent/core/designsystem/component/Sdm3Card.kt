@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import com.sdm3.parent.core.designsystem.theme.CardShape
-import com.sdm3.parent.core.designsystem.theme.Primary
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
 
@@ -35,20 +34,39 @@ fun Sdm3Card(
     modifier: Modifier = Modifier,
     padding: Dp = 0.dp,
     border: BorderStroke? = null,
+    onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = colorScheme.surface
-        ),
-        border = border,
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(modifier = Modifier.padding(padding)) {
-            content()
+    
+    if (onClick != null) {
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            shape = CardShape,
+            colors = CardDefaults.cardColors(
+                containerColor = colorScheme.surface
+            ),
+            border = border,
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            onClick = onClick
+        ) {
+            Column(modifier = Modifier.padding(padding)) {
+                content()
+            }
+        }
+    } else {
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            shape = CardShape,
+            colors = CardDefaults.cardColors(
+                containerColor = colorScheme.surface
+            ),
+            border = border,
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(modifier = Modifier.padding(padding)) {
+                content()
+            }
         }
     }
 }
@@ -149,11 +167,12 @@ private fun Sdm3CardPreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            val primaryColor = MaterialTheme.colorScheme.primary
             Sdm3Card {
                 Box(
                     modifier = Modifier.fillMaxWidth().height(80.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Primary.copy(alpha = 0.1f)),
+                        .background(primaryColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("Sdm3Card", style = MaterialTheme.typography.bodyLarge)
@@ -163,7 +182,7 @@ private fun Sdm3CardPreview() {
                 Box(
                     modifier = Modifier.fillMaxWidth().height(80.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Primary.copy(alpha = 0.1f)),
+                        .background(primaryColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("Sdm3ElevatedCard", style = MaterialTheme.typography.bodyLarge)
@@ -181,7 +200,7 @@ private fun Sdm3CardPreview() {
                 Box(
                     modifier = Modifier.fillMaxWidth().height(80.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Primary.copy(alpha = 0.1f)),
+                        .background(primaryColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("Sdm3SurfaceCard", style = MaterialTheme.typography.bodyLarge)
@@ -191,7 +210,7 @@ private fun Sdm3CardPreview() {
                 Box(
                     modifier = Modifier.fillMaxWidth().height(80.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Primary.copy(alpha = 0.1f)),
+                        .background(primaryColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("Sdm3SubtleCard", style = MaterialTheme.typography.bodyLarge)

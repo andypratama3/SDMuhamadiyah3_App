@@ -1,6 +1,7 @@
 package com.sdm3.parent.feature.auth.ui
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -206,38 +207,52 @@ private fun SplashContent(
         } else {
             MaterialTheme.typography.displayMedium
         }
-        // Multi-Orb Animated Mesh Background (ProductSchool Style)
+        // Multi-Orb Animated Mesh Background (Modern Style)
         Canvas(modifier = Modifier.fillMaxSize().alpha(if (startAnimation) 1f else 0f)) {
             val canvasWidth = size.width
             val canvasHeight = size.height
-            val maxRadius = canvasWidth * 1.5f
+            val maxRadius = canvasWidth * 1.8f
 
-            // Orb 1: Academic Gold Glow
+            // Orb 1: Primary Blue Glow
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        colorScheme.secondary.copy(alpha = if (isDark) 0.12f else 0.15f),
+                        colorScheme.primary.copy(alpha = if (isDark) 0.25f else 0.2f),
                         Color.Transparent,
                     ),
-                    center = Offset(canvasWidth * phase1, canvasHeight * 0.2f),
+                    center = Offset(canvasWidth * phase1, canvasHeight * 0.15f),
                     radius = maxRadius
                 ),
                 radius = maxRadius,
-                center = Offset(canvasWidth * phase1, canvasHeight * 0.2f)
+                center = Offset(canvasWidth * phase1, canvasHeight * 0.15f)
             )
 
-            // Orb 2: Soft Navy Glow
+            // Orb 2: Secondary Green Glow
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        colorScheme.primary.copy(alpha = if (isDark) 0.18f else 0.1f),
+                        colorScheme.secondary.copy(alpha = if (isDark) 0.2f else 0.15f),
                         Color.Transparent,
                     ),
-                    center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.8f),
-                    radius = maxRadius * 0.7f
+                    center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.85f),
+                    radius = maxRadius * 0.8f
                 ),
-                radius = maxRadius * 0.7f,
-                center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.8f)
+                radius = maxRadius * 0.8f,
+                center = Offset(canvasWidth * (1f - phase2), canvasHeight * 0.85f)
+            )
+
+            // Orb 3: Tertiary Purple Glow
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        colorScheme.tertiary.copy(alpha = if (isDark) 0.15f else 0.12f),
+                        Color.Transparent,
+                    ),
+                    center = Offset(canvasWidth * 0.5f, canvasHeight * 0.5f),
+                    radius = maxRadius * 0.5f
+                ),
+                radius = maxRadius * 0.5f,
+                center = Offset(canvasWidth * 0.5f, canvasHeight * 0.5f)
             )
         }
 
@@ -264,28 +279,38 @@ private fun SplashContent(
                 // Glassmorphic Outer Bloom
                 Box(
                     modifier = Modifier
-                        .size(logoSize * 1.8f)
+                        .size(logoSize * 2.0f)
                         .background(
                             Brush.radialGradient(
-                                listOf(glassSurface.copy(alpha = 0.1f * logoAlphaAnim), Color.Transparent)
+                                listOf(glassSurface.copy(alpha = 0.15f * logoAlphaAnim), Color.Transparent)
                             )
                         )
                 )
 
-                Sdm3Logo(
-                    size = logoSize,
-                    showBackground = false
-                )
+                Surface(
+                    modifier = Modifier.size(logoSize),
+                    shape = RoundedCornerShape(32.dp),
+                    color = glassSurface.copy(alpha = 0.3f),
+                    border = BorderStroke(2.dp, glassBorderColor()),
+                    shadowElevation = 12.dp
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Sdm3Logo(
+                            size = logoSize * 0.65f,
+                            showBackground = false
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(Spacing.xl))
 
-            // Typography Stack with Inter-like Hierarchy
+            // Typography Stack with Modern Hierarchy
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.graphicsLayer {
                     alpha = textAlphaAnim
-                    translationY = (1f - textAlphaAnim) * 20f
+                    translationY = (1f - textAlphaAnim) * 24f
                 }
             ) {
                 Text(
@@ -293,25 +318,31 @@ private fun SplashContent(
                     color = heroContent,
                     style = titleStyle.copy(
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = (-1.0).sp
+                        letterSpacing = (-0.5).sp
                     ),
                     textAlign = TextAlign.Center,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
-                // Academic Gold Subtitle
-                Text(
-                    text = stringResource(Res.string.splash_subtitle).uppercase(),
-                    color = colorScheme.secondary,
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        letterSpacing = 4.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center
-                )
+                // Modern Secondary Subtitle
+                Surface(
+                    color = colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(999.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.splash_subtitle).uppercase(),
+                        color = colorScheme.secondary,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            letterSpacing = 3.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
             }
         }
 
@@ -324,14 +355,14 @@ private fun SplashContent(
         ) {
             Box(
                 modifier = Modifier
-                    .width(160.dp)
-                    .height(3.dp)
+                    .width(180.dp)
+                    .height(4.dp)
                     .clip(RoundedCornerShape(2.dp))
                     .background(
                         if (isDark) {
-                            Color.White.copy(alpha = 0.08f)
+                            Color.White.copy(alpha = 0.1f)
                         } else {
-                            glassSurface.copy(alpha = 0.1f)
+                            glassSurface.copy(alpha = 0.15f)
                         },
                     ),
                 contentAlignment = Alignment.Center

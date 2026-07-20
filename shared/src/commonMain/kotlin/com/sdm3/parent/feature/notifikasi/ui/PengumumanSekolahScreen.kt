@@ -1,6 +1,8 @@
 package com.sdm3.parent.feature.notifikasi.ui
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -17,8 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,7 +56,6 @@ fun PengumumanSekolahScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val colorScheme = MaterialTheme.colorScheme
-    var startAnimation by remember { mutableStateOf(isPreview) }
 
     val uiState by if (isPreview) {
         remember { mutableStateOf(PengumumanSekolahUiState()) }
@@ -75,7 +77,6 @@ fun PengumumanSekolahScreen(
 
     if (!isPreview) {
         LaunchedEffect(Unit) {
-            startAnimation = true
             viewModel.loadArticles()
         }
     }
@@ -110,98 +111,102 @@ fun PengumumanSekolahScreen(
             )
         }
     ) { padding ->
-        // Background Glow
         Box(modifier = Modifier.fillMaxSize()) {
-            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
-                    brush = androidx.compose.ui.graphics.Brush.radialGradient(
-                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                        center = androidx.compose.ui.geometry.Offset(size.width * 0.8f, 0f),
-                        radius = size.width
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            val categoryFilters = listOf("Semua", "Umum", "Akademik", "Kegiatan")
-
-            AnimatedVisibility(visible = isSearchActive) {
-                Sdm3TextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = "CARI PENGUMUMAN",
-                    placeholder = "Ketik judul pengumuman...",
-                    leadingIcon = Icons.Outlined.Search,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
-                )
-            }
-
-            PrimaryScrollableTabRow(
-                selectedTabIndex = selectedCategory,
-                containerColor = Color.Transparent,
-                contentColor = colorScheme.primary,
-                edgePadding = Spacing.lg,
-                divider = {},
-                indicator = {
-                    TabRowDefaults.SecondaryIndicator(
-                        modifier = Modifier.tabIndicatorOffset(selectedTabIndex = selectedCategory),
-                        color = colorScheme.secondary
-                    )
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
             ) {
-                categoryFilters.forEachIndexed { index, label ->
-                    Tab(
-                        selected = selectedCategory == index,
-                        onClick = { selectedCategory = index },
-                        text = {
-                            Text(
-                                label,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = if (selectedCategory == index) FontWeight.Bold else FontWeight.Medium
-                            )
-                        },
-                        selectedContentColor = colorScheme.secondary,
-                        unselectedContentColor = colorScheme.onSurfaceVariant
+                val categoryFilters = listOf("Semua", "Umum", "Akademik", "Kegiatan")
+
+                AnimatedVisibility(visible = isSearchActive) {
+                    Sdm3TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = "CARI PENGUMUMAN",
+                        placeholder = "Ketik judul pengumuman...",
+                        leadingIcon = Icons.Outlined.Search,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
                     )
                 }
-            }
 
-            when (screenState) {
-                is PengumumanUiState.Loading -> {
-                    ShimmerPengumumanList()
-                }
-                is PengumumanUiState.Empty -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Sdm3EmptyState(
-                            title = "Belum Ada Pengumuman",
-                            message = "Belum terdapat pengumuman sekolah saat ini.",
-                            style = EmptyStateStyle.Neutral
+                PrimaryScrollableTabRow(
+                    selectedTabIndex = selectedCategory,
+                    containerColor = Color.Transparent,
+                    contentColor = colorScheme.primary,
+                    edgePadding = Spacing.lg,
+                    divider = {},
+                    indicator = {
+                        TabRowDefaults.SecondaryIndicator(
+                            modifier = Modifier.tabIndicatorOffset(selectedTabIndex = selectedCategory),
+                            color = colorScheme.secondary
                         )
                     }
-                }
-                is PengumumanUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Sdm3ErrorState(
-                            title = "Gagal Memuat",
-                            message = screenState.message,
-                            style = ErrorStateStyle.Generic,
-                            primaryAction = {
-                                Sdm3Button(
-                                    text = "Coba Lagi",
-                                    onClick = { viewModel.refresh() },
-                                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    categoryFilters.forEachIndexed { index, label ->
+                        Tab(
+                            selected = selectedCategory == index,
+                            onClick = { selectedCategory = index },
+                            text = {
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = if (selectedCategory == index) FontWeight.Bold else FontWeight.Medium
                                 )
-                            }
+                            },
+                            selectedContentColor = colorScheme.secondary,
+                            unselectedContentColor = colorScheme.onSurfaceVariant
                         )
                     }
                 }
+
+                when (screenState) {
+                    is PengumumanUiState.Loading -> {
+                        ShimmerPengumumanList()
+                    }
+                    is PengumumanUiState.Empty -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Sdm3EmptyState(
+                                title = "Belum Ada Pengumuman",
+                                message = "Belum terdapat pengumuman sekolah saat ini.",
+                                style = EmptyStateStyle.Neutral
+                            )
+                        }
+                    }
+                    is PengumumanUiState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Sdm3ErrorState(
+                                title = "Gagal Memuat",
+                                message = screenState.message,
+                                style = ErrorStateStyle.Generic,
+                                primaryAction = {
+                                    Sdm3Button(
+                                        text = "Coba Lagi",
+                                        onClick = { viewModel.refresh() },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            )
+                        }
+                    }
                     is PengumumanUiState.Success -> {
                         val categoryLabel = categoryFilters.getOrElse(selectedCategory) { "Semua" }
                         val articles = uiState.articles
@@ -223,79 +228,80 @@ fun PengumumanSekolahScreen(
                                 )
                             }
                         } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                            contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)
-                        ) {
-                            items(articles) { article ->
-                                val (badgeDay, badgeMonth) = dateBadgeParts(article.publishedAt ?: "")
-                                Sdm3Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { onDetailClick(article.id) }
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(Spacing.md),
-                                        verticalAlignment = Alignment.CenterVertically
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                                contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)
+                            ) {
+                                items(articles) { article ->
+                                    val (badgeDay, badgeMonth) = dateBadgeParts(article.publishedAt ?: "")
+                                    Sdm3Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { onDetailClick(article.id) }
                                     ) {
-                                        Surface(
-                                            modifier = Modifier.size(52.dp, 60.dp),
-                                            shape = RoundedCornerShape(12.dp),
-                                            color = colorScheme.primary.copy(alpha = 0.05f),
-                                            border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+                                        Row(
+                                            modifier = Modifier.padding(Spacing.md),
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                verticalArrangement = Arrangement.Center,
-                                                modifier = Modifier.fillMaxSize()
-                                            ) {
-                                                Text(
-                                                    text = badgeDay,
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = colorScheme.primary
-                                                )
-                                                Text(
-                                                    text = badgeMonth,
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = colorScheme.primary
-                                                )
-                                            }
-                                        }
-                                        Spacer(modifier = Modifier.width(Spacing.md))
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = article.title,
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = FontWeight.Bold,
-                                                color = colorScheme.primary,
-                                                maxLines = 2,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            Spacer(modifier = Modifier.height(Spacing.xs))
                                             Surface(
-                                                shape = RoundedCornerShape(4.dp),
-                                                color = colorScheme.secondary.copy(alpha = 0.1f)
+                                                modifier = Modifier.size(52.dp, 60.dp),
+                                                shape = RoundedCornerShape(12.dp),
+                                                color = colorScheme.primary.copy(alpha = 0.05f),
+                                                border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
                                             ) {
+                                                Column(
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.Center,
+                                                    modifier = Modifier.fillMaxSize()
+                                                ) {
+                                                    Text(
+                                                        text = badgeDay,
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = colorScheme.primary
+                                                    )
+                                                    Text(
+                                                        text = badgeMonth,
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = colorScheme.primary
+                                                    )
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.width(Spacing.md))
+                                            Column(modifier = Modifier.weight(1f)) {
                                                 Text(
-                                                    text = article.category?.uppercase() ?: "UMUM",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = colorScheme.secondary,
+                                                    text = article.title,
+                                                    style = MaterialTheme.typography.bodyLarge,
                                                     fontWeight = FontWeight.Bold,
-                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                                    letterSpacing = 0.5.sp
+                                                    color = colorScheme.primary,
+                                                    maxLines = 2,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
+                                                Spacer(modifier = Modifier.height(Spacing.xs))
+                                                Surface(
+                                                    shape = RoundedCornerShape(4.dp),
+                                                    color = colorScheme.secondary.copy(alpha = 0.1f)
+                                                ) {
+                                                    Text(
+                                                        text = article.category?.uppercase() ?: "UMUM",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = colorScheme.secondary,
+                                                        fontWeight = FontWeight.Bold,
+                                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                                        letterSpacing = 0.5.sp
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                        item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
-                    }
+                                item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
+                            }
                         }
+                    }
                 }
             }
         }

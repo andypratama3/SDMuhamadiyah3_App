@@ -138,13 +138,20 @@ fun NilaiRaporScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // ProductSchool Atmospheric Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.2f)) {
+            // Modern Atmospheric Glow
+            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primaryContainer, Color.Transparent),
-                        center = Offset(size.width, 0f),
-                        radius = size.width
+                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
+                        center = Offset(size.width * 0.85f, size.height * 0.1f),
+                        radius = size.width * 1.5f
+                    )
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
+                        center = Offset(size.width * 0.15f, size.height * 0.9f),
+                        radius = size.width * 1.0f
                     )
                 )
             }
@@ -161,20 +168,20 @@ fun NilaiRaporScreen(
                             val selected = opt == activeSemester
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
-                                color = if (selected) colorScheme.primary else glassSurfaceColor(),
+                                color = if (selected) colorScheme.primary else colorScheme.secondaryContainer.copy(alpha = 0.3f),
                                 border = BorderStroke(
-                                    1.dp,
-                                    if (selected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.15f)
+                                    1.5.dp,
+                                    if (selected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.2f)
                                 ),
                                 modifier = Modifier.clickable(enabled = !selected) { viewModel.selectSemester(opt) }
                             ) {
                                 Text(
                                     text = semesterShortLabel(opt),
                                     style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (selected) colorScheme.onPrimary else colorScheme.primary.copy(alpha = 0.7f),
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                                    color = if (selected) colorScheme.onPrimary else colorScheme.primary,
                                     letterSpacing = 0.2.sp,
-                                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 9.dp)
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
                                 )
                             }
                         }
@@ -351,16 +358,16 @@ private fun SumatifTabContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(32.dp),
                 colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    val glowColor = colorScheme.surfaceTint.copy(alpha = 0.3f)
-                    Canvas(modifier = Modifier.fillMaxWidth().height(180.dp).alpha(0.1f)) {
+                    val glowColor = colorScheme.secondary.copy(alpha = 0.3f)
+                    Canvas(modifier = Modifier.fillMaxWidth().height(200.dp).alpha(0.15f)) {
                         drawCircle(
                             brush = Brush.radialGradient(
                                 colors = listOf(glowColor, Color.Transparent),
-                                center = Offset(size.width * 0.9f, 0f),
-                                radius = size.width
+                                center = Offset(size.width * 0.85f, size.height * 0.15f),
+                                radius = size.width * 0.8f
                             )
                         )
                     }
@@ -392,17 +399,17 @@ private fun SumatifTabContent(
                             else -> "PERLU BIMBINGAN" to statusDanger
                         }
                         Surface(
-                            color = heroContent.copy(alpha = 0.1f),
+                            color = heroContent.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(99.dp),
-                            border = BorderStroke(1.dp, predicateColor.copy(alpha = 0.3f))
+                            border = BorderStroke(1.5.dp, predicateColor.copy(alpha = 0.4f))
                         ) {
                             Text(
                                 text = " $predicateLabel ",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Black,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
                                 color = predicateColor,
                                 letterSpacing = 1.sp,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
                         }
                     }
@@ -567,24 +574,25 @@ private fun SubjectCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        padding = 12.dp
+        padding = 16.dp
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = colorScheme.primary.copy(alpha = 0.03f),
-                border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.05f))
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                shadowElevation = 4.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Outlined.AutoStories,
                         contentDescription = null,
                         tint = colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -606,16 +614,16 @@ private fun SubjectCard(
                 )
             }
             Surface(
-                color = scoreColor.copy(alpha = 0.08f),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, scoreColor.copy(alpha = 0.12f))
+                color = scoreColor.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.5.dp, scoreColor.copy(alpha = 0.2f))
             ) {
                 Text(
                     text = "${subject.score}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Black,
                     color = scoreColor,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
