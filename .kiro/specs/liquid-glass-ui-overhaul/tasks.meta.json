@@ -1,0 +1,521 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Add 8 new fields to ProductSchoolColors data class": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550554
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938566422
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938649854
+      }
+    ],
+    "2.1 Add bottomNavSafeArea to Spacing object": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550617
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938657761
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938906697
+      }
+    ],
+    "2.2 Add liquid glass helper functions to ThemeExt.kt": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550670
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938658659
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938907604
+      }
+    ],
+    "3.1 Migrate Sdm3GlassCard to use new liquidGlass tokens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550699
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938659466
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938908485
+      }
+    ],
+    "3.2 Update Sdm3Card to use liquidGlassBorder as default border": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550717
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938660377
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938909577
+      }
+    ],
+    "4.1 Update SDM3BottomNavBar to use Liquid Glass tokens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550732
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938661304
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938910501
+      }
+    ],
+    "4.2 Update Sdm3AdaptiveNav to use Liquid Glass tokens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550748
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938918853
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939117209
+      }
+    ],
+    "5.1 Fix Shimmer animation direction and gradient": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550765
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938919759
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939117765
+      }
+    ],
+    "5.2 Fix AtmosphericGlow with graphicsLayer and dark mode alpha cap": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550790
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938920631
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939118595
+      }
+    ],
+    "6.1 Add Modifier.pressEffect() to Modifiers.kt": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550805
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938921480
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939119454
+      }
+    ],
+    "6.2 Fix Badge to use container tokens and prevent clipping": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550820
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938922332
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939120315
+      }
+    ],
+    "7. Checkpoint - Ensure design system foundation compiles": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550836
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939153127
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939299411
+      }
+    ],
+    "8.1 Apply Liquid Glass to HomeScreen": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550876
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939332121
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939939155
+      }
+    ],
+    "9.1 Apply Liquid Glass to NilaiRaporScreen and sub-screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550892
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939333003
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939939693
+      }
+    ],
+    "10.1 Apply Liquid Glass to PembayaranSppScreen and sub-screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550906
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939333918
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939940597
+      }
+    ],
+    "11.1 Apply Liquid Glass to HalamanRaporScreen and sub-screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550922
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939334779
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939941452
+      }
+    ],
+    "12.1 Apply Liquid Glass to ProfilAkunScreen": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550938
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939335636
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939942420
+      }
+    ],
+    "13.1 Audit and update auth screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550953
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939960544
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942151207
+      }
+    ],
+    "13.2 Audit and update kehadiran screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550969
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939961520
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942151709
+      }
+    ],
+    "13.3 Audit and update infoanak screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938550986
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939962445
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942152552
+      }
+    ],
+    "13.4 Audit and update notifikasi screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938551003
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939963380
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942153330
+      }
+    ],
+    "13.5 Audit and update guru screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938551020
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939964210
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942154193
+      }
+    ],
+    "14. Checkpoint - Ensure all screens compile and use design system": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938551058
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942163585
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942255193
+      }
+    ],
+    "15.1 Remove unused deprecated top-level color vals": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938551073
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942263935
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942633004
+      }
+    ],
+    "16. Final checkpoint - Ensure full compilation and no warnings": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938551089
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942640856
+      },
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784943522980
+      }
+    ],
+    "1. Extend Color Tokens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938649898
+      }
+    ],
+    "2. Extend Spacing & ThemeExt": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938907624
+      }
+    ],
+    "3. Update Sdm3GlassCard & Sdm3Card": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784938909598
+      }
+    ],
+    "4. Update SDM3BottomNavBar & Sdm3AdaptiveNav": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939117238
+      }
+    ],
+    "5. Fix Shimmer & AtmosphericGlow": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939118616
+      }
+    ],
+    "6. Add pressEffect Modifier & Fix Badge": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939120339
+      }
+    ],
+    "8. Update HomeScreen": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939939196
+      }
+    ],
+    "9. Update NilaiRaporScreen": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939939741
+      }
+    ],
+    "10. Update PembayaranSppScreen & sub-screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939940621
+      }
+    ],
+    "11. Update HalamanRaporScreen & sub-screens": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939941477
+      }
+    ],
+    "12. Update ProfilAkunScreen": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784939942465
+      }
+    ],
+    "13. Update remaining screens (auth, kehadiran, infoanak, notifikasi, guru)": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942154226
+      }
+    ],
+    "15. Remove deprecated backward-compat vals from Color.kt": [
+      {
+        "executionId": "888881d4-796a-463f-a717-e42153e9508e",
+        "chatSessionId": "sess_2afb91ee-cb4e-4e58-bb19-2ead930dda30",
+        "timestamp": 1784942633055
+      }
+    ]
+  }
+}

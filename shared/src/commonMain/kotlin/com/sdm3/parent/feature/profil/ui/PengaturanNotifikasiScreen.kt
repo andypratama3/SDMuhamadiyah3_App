@@ -6,15 +6,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,13 +28,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.feature.profil.PengaturanNotifikasiUiState
 import com.sdm3.parent.feature.profil.PengaturanNotifikasiViewModel
 import org.koin.compose.viewmodel.koinViewModel
-
-sealed class PengaturanNotifUiState {
-    data object Loading : PengaturanNotifUiState()
-    data object Empty : PengaturanNotifUiState()
-    data class Error(val message: String) : PengaturanNotifUiState()
-    data object Success : PengaturanNotifUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,13 +65,8 @@ fun PengaturanNotifikasiScreen(
     val errorMessage = vmState.errorMessage
 
     val screenState = remember(vmState.isLoading, vmState.isEmpty, errorMessage, isPreview) {
-        if (isPreview) PengaturanNotifUiState.Success
-        else when {
-            vmState.isLoading && vmState.isEmpty -> PengaturanNotifUiState.Loading
-            errorMessage != null -> PengaturanNotifUiState.Error(errorMessage)
-            !vmState.isLoading && vmState.isEmpty -> PengaturanNotifUiState.Empty
-            else -> PengaturanNotifUiState.Success
-        }
+        if (isPreview) ScreenUiState.Success
+        else resolveScreenState(vmState.isLoading, vmState.isEmpty, errorMessage)
     }
 
     if (!isPreview) {
@@ -89,64 +75,19 @@ fun PengaturanNotifikasiScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Konfigurasi Notifikasi",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "PREFERENSI NOTIFIKASI",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Konfigurasi Notifikasi",
+        subtitle = "PREFERENSI NOTIFIKASI",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground(color = colorScheme.primaryContainer)
 
             when (screenState) {
-                is PengaturanNotifUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     ShimmerPengaturanNotif()
                 }
-                is PengaturanNotifUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Sdm3EmptyState(
                             title = "Tidak Ada Pengaturan",
@@ -155,7 +96,7 @@ fun PengaturanNotifikasiScreen(
                         )
                     }
                 }
-                is PengaturanNotifUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Sdm3ErrorState(
                             title = "Gagal Memuat",
@@ -171,12 +112,12 @@ fun PengaturanNotifikasiScreen(
                         )
                     }
                 }
-                is PengaturanNotifUiState.Success -> {
+                is ScreenUiState.Success -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = Spacing.xl)
                             .verticalScroll(rememberScrollState())
                     ) {
                         Spacer(modifier = Modifier.height(12.dp))
@@ -196,13 +137,13 @@ fun PengaturanNotifikasiScreen(
                         Sdm3Card(padding = 8.dp) {
                             Column {
                                 ToggleRow(label = "Pembaruan Nilai Akademik", enabled = masterToggle, isOn = nilaiToggle, onToggle = { nilaiToggle = it; if (!isPreview) viewModel.toggleNilai() })
-                                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(horizontal = 16.dp))
+                                HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(horizontal = 16.dp))
                                 ToggleRow(label = "Tagihan & Administrasi", enabled = masterToggle, isOn = tagihanToggle, onToggle = { tagihanToggle = it; if (!isPreview) viewModel.toggleTagihan() })
-                                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(horizontal = 16.dp))
+                                HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(horizontal = 16.dp))
                                 ToggleRow(label = "Pengumuman Institusi", enabled = masterToggle, isOn = pengumumanToggle, onToggle = { pengumumanToggle = it; if (!isPreview) viewModel.togglePengumuman() })
-                                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(horizontal = 16.dp))
+                                HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(horizontal = 16.dp))
                                 ToggleRow(label = "Presensi Real-time", enabled = masterToggle, isOn = kehadiranToggle, onToggle = { kehadiranToggle = it; if (!isPreview) viewModel.toggleKehadiran() })
-                                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(horizontal = 16.dp))
+                                HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(horizontal = 16.dp))
                                 ToggleRow(label = "Ketersediaan Rapor", enabled = masterToggle, isOn = raporToggle, onToggle = { raporToggle = it; if (!isPreview) viewModel.toggleRapor() })
                             }
                         }
@@ -223,7 +164,7 @@ fun PengaturanNotifikasiScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(100.dp))
+                        Spacer(modifier = Modifier.height(Spacing.bottomNavSafeArea))
                     }
                 }
             }
@@ -237,7 +178,7 @@ private fun ShimmerPengaturanNotif() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = Spacing.xl)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(12.dp))
@@ -300,7 +241,7 @@ private fun ShimmerPengaturanNotif() {
             modifier = Modifier.fillMaxWidth().height(80.dp).clip(RoundedCornerShape(12.dp)).shimmerEffect()
         )
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(Spacing.bottomNavSafeArea))
     }
 }
 
@@ -334,10 +275,12 @@ private fun ToggleRow(
             colors = SwitchDefaults.colors(
                 checkedThumbColor = colorScheme.onPrimary,
                 checkedTrackColor = colorScheme.secondary,
-                uncheckedThumbColor = colorScheme.primary.copy(alpha = 0.1f),
-                uncheckedTrackColor = colorScheme.primary.copy(alpha = 0.05f),
-                disabledCheckedTrackColor = colorScheme.secondary.copy(alpha = 0.5f),
-                disabledUncheckedTrackColor = colorScheme.primary.copy(alpha = 0.02f)
+                uncheckedThumbColor = colorScheme.outline,
+                uncheckedTrackColor = colorScheme.surfaceContainerHighest,
+                disabledCheckedThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),
+                disabledCheckedTrackColor = colorScheme.onSurface.copy(alpha = 0.12f),
+                disabledUncheckedThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),
+                disabledUncheckedTrackColor = colorScheme.onSurface.copy(alpha = 0.12f)
             )
         )
     }

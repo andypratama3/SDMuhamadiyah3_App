@@ -1,25 +1,22 @@
 package com.sdm3.parent.feature.guru.ui
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.Sdm3Card
 import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
+import com.sdm3.parent.core.designsystem.component.ScreenGlowBackground
+import com.sdm3.parent.core.designsystem.component.ScreenScaffold
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.statusDangerColor
 import com.sdm3.parent.core.designsystem.theme.statusInfoColor
@@ -82,29 +79,11 @@ fun GuruAbsensiScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
+    ScreenScaffold(
+        title = classroomName,
+        subtitle = state.date,
+        onBack = onBack,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(classroomName, fontWeight = FontWeight.Bold)
-                        Text(
-                            state.date,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onSurface.copy(alpha = 0.6f),
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-            )
-        },
         bottomBar = {
             Surface(tonalElevation = 4.dp) {
                 Sdm3Button(
@@ -119,78 +98,67 @@ fun GuruAbsensiScreen(
             }
         },
     ) { padding ->
+        val errorMessage = state.errorMessage
+
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground(color = colorScheme.primaryContainer)
+
             when {
-            state.isLoading -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                state.isLoading -> {
+                    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
                 }
-            }
-            state.errorMessage != null -> {
-                Sdm3EmptyState(
-                    title = "Gagal Memuat",
-                    message = state.errorMessage ?: "",
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    action = {
-                        Sdm3Button(text = "Coba Lagi", onClick = { viewModel.loadRoster() })
-                    },
-                )
-            }
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(horizontal = Spacing.lg),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    contentPadding = PaddingValues(vertical = Spacing.md),
-                ) {
-                    items(state.students, key = { it.studentId }) { student ->
-                        val selected = state.selectedStatuses[student.studentId]
-                            ?: state.originalStatuses[student.studentId]
-                        Sdm3Card(padding = Spacing.md) {
-                            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                                Text(student.name, fontWeight = FontWeight.Bold)
-                                if (!student.nis.isNullOrBlank()) {
-                                    Text(
-                                        "NIS ${student.nis}",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = colorScheme.onSurface.copy(alpha = 0.6f),
-                                    )
-                                }
-                                if (selected == null) {
-                                    Text(
-                                        "Belum diabsen",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = colorScheme.onSurface.copy(alpha = 0.5f),
-                                    )
-                                }
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    AttendanceStatus.teacherSelectable.forEach { option ->
-                                        AttendanceChip(
-                                            label = option.label,
-                                            selected = selected?.equals(option.apiValue, ignoreCase = true) == true,
-                                            status = option,
-                                            onClick = { viewModel.setStatus(student.studentId, option.apiValue) },
+                errorMessage != null -> {
+                    Sdm3EmptyState(
+                        title = "Gagal Memuat",
+                        message = errorMessage,
+                        modifier = Modifier.fillMaxSize().padding(padding),
+                        action = {
+                            Sdm3Button(text = "Coba Lagi", onClick = { viewModel.loadRoster() })
+                        },
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(horizontal = Spacing.lg),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                        contentPadding = PaddingValues(vertical = Spacing.md),
+                    ) {
+                        items(state.students, key = { it.studentId }) { student ->
+                            val selected = state.selectedStatuses[student.studentId]
+                                ?: state.originalStatuses[student.studentId]
+                            Sdm3Card(padding = Spacing.md) {
+                                Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                                    Text(student.name, fontWeight = FontWeight.Bold)
+                                    if (!student.nis.isNullOrBlank()) {
+                                        Text(
+                                            "NIS ${student.nis}",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = colorScheme.onSurface.copy(alpha = 0.6f),
                                         )
+                                    }
+                                    if (selected == null) {
+                                        Text(
+                                            "Belum diabsen",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = colorScheme.onSurface.copy(alpha = 0.5f),
+                                        )
+                                    }
+                                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                                        AttendanceStatus.teacherSelectable.forEach { option ->
+                                            AttendanceChip(
+                                                label = option.label,
+                                                selected = selected?.equals(option.apiValue, ignoreCase = true) == true,
+                                                status = option,
+                                                onClick = { viewModel.setStatus(student.studentId, option.apiValue) },
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -200,5 +168,4 @@ fun GuruAbsensiScreen(
             }
         }
     }
-}
 }

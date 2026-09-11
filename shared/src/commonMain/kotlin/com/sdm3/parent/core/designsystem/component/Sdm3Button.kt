@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -41,28 +42,19 @@ fun Sdm3Button(
 
     val isPreview = LocalInspectionMode.current
     val haptic = LocalHapticFeedback.current
-    var isPressed by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed && !isPreview) 0.96f else 1f,
-        animationSpec = tween(150),
-        label = "buttonScale",
-        finishedListener = { _ -> if (!isPreview) isPressed = false }
-    )
+    val interactionSource = remember { MutableInteractionSource() }
 
     Button(
         onClick = {
             if (!isPreview) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            isPressed = true
             onClick()
         },
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp) // Premium height
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
+            .pressEffect(interactionSource),
         enabled = enabled && !isLoading,
+        interactionSource = interactionSource,
         shape = ButtonShape,
         colors = ButtonDefaults.buttonColors(
             containerColor = finalContainerColor,
@@ -71,10 +63,10 @@ fun Sdm3Button(
             disabledContentColor = finalContentColor.copy(alpha = 0.5f)
         ),
         elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
+            defaultElevation = 2.dp,
+            pressedElevation = 0.dp
         ),
-        contentPadding = PaddingValues(horizontal = if (icon != null) 8.dp else 24.dp)
+        contentPadding = PaddingValues(horizontal = if (icon != null) Spacing.sm else Spacing.lg)
     ) {
         if (isLoading) {
             CircularProgressIndicator(

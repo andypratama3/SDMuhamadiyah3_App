@@ -1,102 +1,34 @@
 package com.sdm3.parent.core.designsystem.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.theme.Border
-import com.sdm3.parent.core.designsystem.theme.SDM3Theme
+import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.graphicsLayer
+import com.sdm3.parent.core.designsystem.theme.Sdm3Motion
 
-fun Modifier.doubleBezel(
-    outerRadius: Dp = 28.dp,
-    innerRadius: Dp = 24.dp,
-    outerPadding: Dp = 6.dp,
-    outerColor: Color = Color.Black.copy(alpha = 0.04f),
-    innerColor: Color,
-): Modifier = this
-    .background(outerColor, RoundedCornerShape(outerRadius))
-    .padding(outerPadding)
-    .clip(RoundedCornerShape(innerRadius))
-    .background(innerColor)
-    .border(
-        width = 1.dp,
-        color = Border.copy(alpha = 0.5f),
-        shape = RoundedCornerShape(innerRadius)
+/**
+ * Adds a press scale animation to interactive elements.
+ * When pressed, scales down to 0.96f for premium tactile feedback.
+ */
+fun Modifier.pressEffect(
+    interactionSource: MutableInteractionSource
+): Modifier = composed {
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = tween(
+            durationMillis = Sdm3Motion.durationFast,
+            easing = Sdm3Motion.easing
+        ),
+        label = "pressScale"
     )
-
-fun Modifier.level1Shadow(
-    borderRadius: Dp = 24.dp
-): Modifier = this.shadow(
-    elevation = 4.dp,
-    shape = RoundedCornerShape(borderRadius),
-    ambientColor = Color.Black.copy(alpha = 0.04f),
-    spotColor = Color.Black.copy(alpha = 0.08f)
-)
-
-fun Modifier.level2Shadow(
-    borderRadius: Dp = 28.dp
-): Modifier = this.shadow(
-    elevation = 8.dp,
-    shape = RoundedCornerShape(borderRadius),
-    ambientColor = Color.Black.copy(alpha = 0.06f),
-    spotColor = Color.Black.copy(alpha = 0.12f)
-)
-
-@Preview
-@Composable
-private fun ModifiersPreview() {
-    SDM3Theme {
-        Column(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .doubleBezel(innerColor = MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("doubleBezel()", style = MaterialTheme.typography.bodyMedium)
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .level1Shadow()
-                    .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("level1Shadow()", style = MaterialTheme.typography.bodyMedium)
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .clip(RoundedCornerShape(28.dp))
-                    .level2Shadow()
-                    .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("level2Shadow()", style = MaterialTheme.typography.bodyMedium)
-            }
-        }
+    graphicsLayer {
+        scaleX = scale
+        scaleY = scale
     }
 }

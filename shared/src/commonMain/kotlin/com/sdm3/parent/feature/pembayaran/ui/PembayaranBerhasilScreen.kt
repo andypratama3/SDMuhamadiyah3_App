@@ -19,10 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,17 +27,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.ScreenUiState
+import com.sdm3.parent.core.designsystem.component.resolveScreenState
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.pembayaran.PembayaranBerhasilViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.platform.LocalInspectionMode
-
-sealed class PembayaranBerhasilUiState {
-    data object Loading : PembayaranBerhasilUiState()
-    data object Empty : PembayaranBerhasilUiState()
-    data class Error(val message: String = "Silakan coba kembali.") : PembayaranBerhasilUiState()
-    data object Success : PembayaranBerhasilUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,22 +44,14 @@ fun PembayaranBerhasilScreen(
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
     val statusSuccess = statusSuccessColor()
-    val glassSurface = glassSurfaceColor()
-    val glassBorder = glassBorderColor()
     val viewModel: PembayaranBerhasilViewModel = koinViewModel()
     val vmState by if (isPreview) {
         remember { mutableStateOf(com.sdm3.parent.feature.pembayaran.PembayaranBerhasilUiState()) }
     } else {
         viewModel.uiState.collectAsState()
     }
-    val uiState: PembayaranBerhasilUiState = remember(vmState) {
-        val s = vmState
-        when {
-            s.isLoading -> PembayaranBerhasilUiState.Loading
-            s.errorMessage != null -> PembayaranBerhasilUiState.Error(s.errorMessage)
-            s.isEmpty -> PembayaranBerhasilUiState.Empty
-            else -> PembayaranBerhasilUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
     if (!isPreview) {
         LaunchedEffect(paymentId) {
@@ -75,34 +59,14 @@ fun PembayaranBerhasilScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = { },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "",
+        onBack = onKembali,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
             when (val state = uiState) {
-                is PembayaranBerhasilUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -161,7 +125,7 @@ fun PembayaranBerhasilScreen(
                     }
                 }
 
-                is PembayaranBerhasilUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Tidak Ada Data",
                         message = "Data pembayaran tidak tersedia.",
@@ -179,7 +143,7 @@ fun PembayaranBerhasilScreen(
                     )
                 }
 
-                is PembayaranBerhasilUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Konfirmasi Gagal",
                         message = state.message,
@@ -204,7 +168,7 @@ fun PembayaranBerhasilScreen(
                     )
                 }
 
-                is PembayaranBerhasilUiState.Success -> {
+                is ScreenUiState.Success -> {
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val useCompactTitle = maxHeight < 700.dp
 
@@ -229,7 +193,7 @@ fun PembayaranBerhasilScreen(
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             imageVector = Icons.Outlined.CheckCircle,
-                                            contentDescription = null,
+                                            contentDescription = "Pembayaran berhasil",
                                             modifier = Modifier.size(64.dp),
                                             tint = statusSuccess
                                         )
@@ -256,7 +220,7 @@ fun PembayaranBerhasilScreen(
                                 Text(
                                     text = "Dana telah terotentikasi oleh sistem sekolah dan masuk ke rekapitulasi pembayaran.",
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                                     textAlign = TextAlign.Center,
                                     lineHeight = 26.sp,
                                     modifier = Modifier.padding(horizontal = Spacing.md)
@@ -268,18 +232,18 @@ fun PembayaranBerhasilScreen(
                                      Column {
                                          if (vmState.paymentTitle.isNotBlank()) {
                                             SuccessRow("Item Akademik", vmState.paymentTitle.uppercase())
-                                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = Spacing.sm))
+                                            HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(vertical = Spacing.sm))
                                         }
-                                        SuccessRow("Total Transaksi", formatCurrency(vmState.amount))
+                                         SuccessRow("Total Transaksi", com.sdm3.parent.core.util.formatRupiah(vmState.amount))
                                         if (vmState.paymentMethod.isNotBlank()) {
-                                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = Spacing.sm))
+                                            HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(vertical = Spacing.sm))
                                             SuccessRow("Metode Bayar", com.sdm3.parent.core.util.formatPaymentMethod(vmState.paymentMethod))
                                         }
                                         if (vmState.paidAt.isNotBlank()) {
-                                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = Spacing.sm))
+                                            HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(vertical = Spacing.sm))
                                             SuccessRow("Waktu Bayar", com.sdm3.parent.core.util.formatTanggalWaktu(vmState.paidAt))
                                         }
-                                        HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = Spacing.sm))
+                                        HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(vertical = Spacing.sm))
                                         val statusLower = vmState.status.lowercase()
                                         val statusLabel = when {
                                             statusLower in listOf("settlement", "success", "capture", "paid", "lunas", "completed") -> "LUNAS & VERIF"
@@ -320,41 +284,8 @@ fun PembayaranBerhasilScreen(
     }
 
 @Composable
-private fun SuccessRow(label: String, value: String) {
-    val colorScheme = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            color = colorScheme.primary.copy(alpha = 0.4f),
-            fontWeight = FontWeight.Black,
-            letterSpacing = 1.sp,
-            modifier = Modifier.weight(0.45f)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary,
-            textAlign = TextAlign.End,
-            modifier = Modifier.weight(0.55f)
-        )
-    }
-}
-
-private fun formatCurrency(amount: Number): String {
-    val s = amount.toLong().toString()
-    val sb = StringBuilder()
-    for (i in s.indices) {
-        if (i > 0 && (s.length - i) % 3 == 0) sb.append('.')
-        sb.append(s[i])
-    }
-    return "Rp$sb"
-}
+private fun SuccessRow(label: String, value: String) =
+    Sdm3InfoRow(label = label, value = value)
 
 @Preview
 @Composable

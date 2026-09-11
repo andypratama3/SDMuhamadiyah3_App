@@ -43,88 +43,112 @@ data class ProductSchoolColors(
     val danger: Color,
     val info: Color,
     val disabled: Color,
+    val liquidGlassSurface: Color = Color.Unspecified,
+    val liquidGlassBorder: Color = Color.Unspecified,
+    val liquidGlassHighlight: Color = Color.Unspecified,
+    val liquidGlassShadow: Color = Color.Unspecified,
+    val successContainer: Color = Color.Unspecified,
+    val warningContainer: Color = Color.Unspecified,
+    val dangerContainer: Color = Color.Unspecified,
+    val infoContainer: Color = Color.Unspecified,
 )
 
 fun productSchoolLightColors() = ProductSchoolColors(
-    primary = Color(0xFF0066CC),
+    primary = Color(0xFF001B3D),
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFE3F2FD),
-    onPrimaryContainer = Color(0xFF004494),
-    secondary = Color(0xFF00C853),
-    onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFE8F5E9),
-    onSecondaryContainer = Color(0xFF006400),
-    tertiary = Color(0xFF7C4DFF),
+    primaryContainer = Color(0xFFD6E3FF),
+    onPrimaryContainer = Color(0xFF001B3D),
+    secondary = Color(0xFFD4AF37),
+    onSecondary = Color(0xFF1A1300),
+    secondaryContainer = Color(0xFFFED65B),
+    onSecondaryContainer = Color(0xFF745C00),
+    tertiary = Color(0xFF2D6CDF),
     onTertiary = Color(0xFFFFFFFF),
-    tertiaryContainer = Color(0xFFEDE7F6),
-    onTertiaryContainer = Color(0xFF4527A0),
-    error = Color(0xFFFF5252),
+    tertiaryContainer = Color(0xFFD6E3FF),
+    onTertiaryContainer = Color(0xFF001B3D),
+    error = Color(0xFFC13A3A),
     onError = Color(0xFFFFFFFF),
-    errorContainer = Color(0xFFFFEBEE),
-    onErrorContainer = Color(0xFFB71C1C),
-    background = Color(0xFFFAFAFA),
-    onBackground = Color(0xFF1A1A1A),
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF93000A),
+    background = Color(0xFFF7F8FA),
+    onBackground = Color(0xFF0F1722),
     surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF1A1A1A),
-    onSurfaceMuted = Color(0xFF6B7280),
-    onSurfaceFaint = Color(0xFF9CA3AF),
-    surfaceVariant = Color(0xFFF3F4F6),
-    onSurfaceVariant = Color(0xFF4B5563),
-    outline = Color(0xFFE5E7EB),
-    outlineSubtle = Color(0xFFF3F4F6),
-    inverseSurface = Color(0xFF1F2937),
-    inverseOnSurface = Color(0xFFF9FAFB),
-    inversePrimary = Color(0xFF60A5FA),
-    scrim = Color(0xFF000000).copy(alpha = 0.4f),
-    surfaceGlass = Color.White.copy(alpha = 0.7f),
-    glassOutline = Color.White.copy(alpha = 0.3f),
-    navigationActive = Color(0xFF00C853),
-    success = Color(0xFF00C853),
-    warning = Color(0xFFFF9800),
-    danger = Color(0xFFFF5252),
-    info = Color(0xFF2196F3),
-    disabled = Color(0xFFD1D5DB),
+    onSurface = Color(0xFF0F1722),
+    onSurfaceMuted = Color(0xFF525B66),
+    onSurfaceFaint = Color(0xFF8B93A0),
+    surfaceVariant = Color(0xFFDBE4ED),
+    onSurfaceVariant = Color(0xFF44474E),
+    outline = Color(0xFFE2E6EB),
+    outlineSubtle = Color(0xFFEFF1F4),
+    inverseSurface = Color(0xFF0F1722),
+    inverseOnSurface = Color(0xFFF7F8FA),
+    inversePrimary = Color(0xFFD6AF37),
+    scrim = Color(0xFF000000).copy(alpha = 0.32f),
+    surfaceGlass = Color(0x8CFFFFFF),
+    glassOutline = Color(0x33FFFFFF),
+    navigationActive = Color(0xFFD4AF37),
+    success = Color(0xFF1E8E5A),
+    warning = Color(0xFFC98A1D),
+    danger = Color(0xFFC13A3A),
+    info = Color(0xFF2D6CDF),
+    disabled = Color(0xFFC4C6CF),
+    liquidGlassSurface = Color(0xD9FFFFFF),      // alpha 0.85
+    liquidGlassBorder = Color(0x4DFFFFFF),       // alpha 0.30
+    liquidGlassHighlight = Color(0x59FFFFFF),    // alpha 0.35
+    liquidGlassShadow = Color(0x14000000),       // alpha 0.08
+    successContainer = Color(0x1A1E8E5A),        // alpha 0.10
+    warningContainer = Color(0x1AC98A1D),        // alpha 0.10
+    dangerContainer = Color(0x1AC13A3A),         // alpha 0.10
+    infoContainer = Color(0x1A2D6CDF),           // alpha 0.10
 )
 
 fun productSchoolDarkColors() = ProductSchoolColors(
-    primary = Color(0xFF4FC3F7),
+    primary = Color(0xFF9CCAFF),
     onPrimary = Color(0xFF001B3D),
-    primaryContainer = Color(0xFF0D47A1),
-    onPrimaryContainer = Color(0xFFE3F2FD),
-    secondary = Color(0xFF69F0AE),
-    onSecondary = Color(0xFF003300),
-    secondaryContainer = Color(0xFF1B5E20),
-    onSecondaryContainer = Color(0xFFE8F5E9),
-    tertiary = Color(0xFFB388FF),
-    onTertiary = Color(0xFF220055),
-    tertiaryContainer = Color(0xFF311B92),
-    onTertiaryContainer = Color(0xFFEDE7F6),
+    primaryContainer = Color(0xFF00315C),
+    onPrimaryContainer = Color(0xFFD6E3FF),
+    secondary = Color(0xFFE5C158),
+    onSecondary = Color(0xFF1A1300),
+    secondaryContainer = Color(0xFF574400),
+    onSecondaryContainer = Color(0xFFFFE082),
+    tertiary = Color(0xFF82B1FF),
+    onTertiary = Color(0xFF002244),
+    tertiaryContainer = Color(0xFF003F80),
+    onTertiaryContainer = Color(0xFFD6E3FF),
     error = Color(0xFFFF8A80),
     onError = Color(0xFF690005),
-    errorContainer = Color(0xFFB71C1C),
-    onErrorContainer = Color(0xFFFFEBEE),
-    background = Color(0xFF0F172A),
-    onBackground = Color(0xFFF8FAFC),
-    surface = Color(0xFF1E293B),
-    onSurface = Color(0xFFF8FAFC),
-    onSurfaceMuted = Color(0xFF94A3B8),
-    onSurfaceFaint = Color(0xFF64748B),
-    surfaceVariant = Color(0xFF334155),
-    onSurfaceVariant = Color(0xFFCBD5E1),
-    outline = Color(0xFF475569),
-    outlineSubtle = Color(0xFF334155),
-    inverseSurface = Color(0xFFF8FAFC),
-    inverseOnSurface = Color(0xFF0F172A),
-    inversePrimary = Color(0xFF0066CC),
-    scrim = Color(0xFF000000).copy(alpha = 0.6f),
-    surfaceGlass = Color(0xFF1E293B).copy(alpha = 0.8f),
-    glassOutline = Color.White.copy(alpha = 0.1f),
-    navigationActive = Color(0xFF00E676),
-    success = Color(0xFF00E676),
-    warning = Color(0xFFFFAB40),
-    danger = Color(0xFFFF5252),
-    info = Color(0xFF40C4FF),
-    disabled = Color(0xFF475569),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
+    background = Color(0xFF000B18),
+    onBackground = Color(0xFFF1F5F9),
+    surface = Color(0xFF001530),
+    onSurface = Color(0xFFF1F5F9),
+    onSurfaceMuted = Color(0xFF94A9C4),
+    onSurfaceFaint = Color(0xFF647B9B),
+    surfaceVariant = Color(0xFF0D2547),
+    onSurfaceVariant = Color(0xFFCBDDF5),
+    outline = Color(0xFF334A6B),
+    outlineSubtle = Color(0xFF1A3152),
+    inverseSurface = Color(0xFFF1F5F9),
+    inverseOnSurface = Color(0xFF000B18),
+    inversePrimary = Color(0xFF001B3D),
+    scrim = Color(0xFF000000).copy(alpha = 0.65f),
+    surfaceGlass = Color(0xCC001530),
+    glassOutline = Color(0x1AFFFFFF),
+    navigationActive = Color(0xFFE5C158),
+    success = Color(0xFF4ADE80),
+    warning = Color(0xFFFBBF24),
+    danger = Color(0xFFF87171),
+    info = Color(0xFF60A5FA),
+    disabled = Color(0xFF334A6B),
+    liquidGlassSurface = Color(0xD9001530),      // alpha 0.85
+    liquidGlassBorder = Color(0x26FFFFFF),       // alpha 0.15
+    liquidGlassHighlight = Color(0x1AFFFFFF),    // alpha 0.10
+    liquidGlassShadow = Color(0x33000000),       // alpha 0.20
+    successContainer = Color(0x264ADE80),        // alpha 0.15
+    warningContainer = Color(0x26FBBF24),        // alpha 0.15
+    dangerContainer = Color(0x26F87171),         // alpha 0.15
+    infoContainer = Color(0x2660A5FA),           // alpha 0.15
 )
 
 fun ProductSchoolColors.toMaterialColorScheme(darkTheme: Boolean) =
@@ -189,42 +213,3 @@ private fun ProductSchoolColors.toDarkMaterialColorScheme() = androidx.compose.m
     inversePrimary = inversePrimary,
     scrim = scrim,
 )
-
-// Backward-compatible color vals (existing code still compiles)
-val Primary = Color(0xFF001B3D)
-val OnPrimary = Color(0xFFFFFFFF)
-val PrimaryContainer = Color(0xFFD6E3FF)
-val OnPrimaryContainer = Color(0xFF001B3D)
-val Secondary = Color(0xFFD4AF37)
-val OnSecondary = Color(0xFFFFFFFF)
-val SecondaryContainer = Color(0xFFFED65B)
-val OnSecondaryContainer = Color(0xFF745C00)
-val Tertiary = Color(0xFF191C1D)
-val OnTertiary = Color(0xFFFFFFFF)
-val TertiaryContainer = Color(0xFFE1E3E4)
-val OnTertiaryContainer = Color(0xFF454748)
-val Error = Color(0xFFBA1A1A)
-val OnError = Color(0xFFFFFFFF)
-val ErrorContainer = Color(0xFFFFDAD6)
-val OnErrorContainer = Color(0xFF93000A)
-val Background = Color(0xFFF6FAFF)
-val OnBackground = Color(0xFF141D23)
-val Surface = Color(0xFFF6FAFF)
-val OnSurface = Color(0xFF141D23)
-val SurfaceVariant = Color(0xFFDBE4ED)
-val OnSurfaceVariant = Color(0xFF44474E)
-val Outline = Color(0xFF74777F)
-val OutlineVariant = Color(0xFFC4C6CF)
-val Divider = Color(0xFFC4C6CF)
-val TextPrimary = OnBackground
-val TextSecondary = OnSurfaceVariant
-val TextTertiary = Color(0xFF74777F)
-val Disabled = Color(0xFFC4C6CF)
-val Border = Outline
-val StatusSuccess = Color(0xFF16A34A)
-val StatusWarning = Color(0xFFF59E0B)
-val StatusDanger = Color(0xFFBA1A1A)
-val StatusInfo = Color(0xFF495F84)
-val Scrim = Color(0xFF000000).copy(alpha = 0.32f)
-val GlassSurface = Color(0xFFFFFFFF).copy(alpha = 0.4f)
-val GlassOutline = Color(0xFFFFFFFF).copy(alpha = 0.2f)

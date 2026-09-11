@@ -6,14 +6,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.CreditCard
@@ -25,12 +23,11 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.Sdm3Card
+import com.sdm3.parent.core.designsystem.component.Sdm3IconBadge
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.util.formatRupiah
 import com.sdm3.parent.core.util.formatTanggal
@@ -54,78 +52,8 @@ enum class PaymentTab {
 fun Modifier.paymentHorizontalPadding(): Modifier = padding(horizontal = Spacing.xl)
 
 @Composable
-fun Modifier.paymentBottomSafePadding(extra: androidx.compose.ui.unit.Dp = Spacing.xxxl): Modifier =
-    navigationBarsPadding().padding(bottom = extra)
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PaymentScreenScaffold(
-    onBack: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
-    content: @Composable (PaddingValues) -> Unit,
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    Scaffold(
-        modifier = modifier,
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Administrasi Keuangan",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp,
-                        )
-                        Text(
-                            text = "STATUS PEMBAYARAN SPP",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp,
-                        )
-                    }
-                },
-                navigationIcon = {
-                    if (onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Kembali",
-                                tint = colorScheme.primary,
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-            )
-        },
-        content = content,
-    )
-}
-
-@Composable
-fun PaymentScreenBackground(modifier: Modifier = Modifier) {
-    val colorScheme = MaterialTheme.colorScheme
-    Canvas(modifier = modifier.fillMaxSize().alpha(0.4f)) {
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                center = Offset(size.width * 0.85f, size.height * 0.1f),
-                radius = size.width * 1.5f
-            )
-        )
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                center = Offset(size.width * 0.15f, size.height * 0.9f),
-                radius = size.width * 1.0f
-            )
-        )
-    }
-}
+fun Modifier.paymentBottomSafePadding(): Modifier =
+    navigationBarsPadding().padding(bottom = Spacing.bottomNavSafeArea)
 
 @Composable
 fun PaymentTabSelector(
@@ -135,7 +63,7 @@ fun PaymentTabSelector(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val tabs = listOf(PaymentTab.Tagihan to "Tagihan", PaymentTab.Riwayat to "Riwayat")
-    PrimaryTabRow(
+    TabRow(
         selectedTabIndex = selectedTab.ordinal,
         modifier = modifier.fillMaxWidth(),
         containerColor = Color.Transparent,
@@ -160,8 +88,8 @@ fun PaymentTabSelector(
                         fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Medium,
                     )
                 },
-                selectedContentColor = colorScheme.secondary,
-                unselectedContentColor = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                selectedContentColor = colorScheme.primary,
+                unselectedContentColor = ProductSchoolTheme.colors.onSurfaceMuted,
             )
         }
     }
@@ -183,7 +111,7 @@ fun PaymentHeroCard(
         !hasActive -> statusSuccess
         activeFee.isPaid() -> statusSuccess
         statusLabel == "TERLAMBAT" -> colorScheme.error
-        else -> colorScheme.error
+        else -> statusWarning
     }
 
     Card(
@@ -219,7 +147,7 @@ fun PaymentHeroCard(
                             letterSpacing = 1.sp,
                             color = heroContent.copy(alpha = 0.5f),
                         )
-                        Spacer(modifier = Modifier.height(Spacing.xxs))
+                        Spacer(modifier = Modifier.height(Spacing.xs))
                         Text(
                             text = activeFee?.paymentTitleName
                                 ?: if (hasActive) "Tagihan Aktif" else "Semua Tagihan Lunas",
@@ -230,7 +158,7 @@ fun PaymentHeroCard(
                             overflow = TextOverflow.Ellipsis,
                         )
                         if (studentName.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(Spacing.xxs))
+                            Spacer(modifier = Modifier.height(Spacing.xs))
                             Text(
                                 text = studentName,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -332,7 +260,7 @@ fun PaymentProgressCard(
             Text(
                 text = "${progress.paid} dari ${progress.total} tagihan telah diselesaikan.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = ProductSchoolTheme.colors.onSurfaceMuted,
             )
         }
     }
@@ -372,7 +300,7 @@ fun PaymentYearHeader(
             Text(
                 text = "$itemCount item",
                 style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                color = ProductSchoolTheme.colors.onSurfaceFaint,
             )
         }
         Icon(
@@ -394,7 +322,7 @@ fun PaymentMonthHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = Spacing.xs, bottom = Spacing.xxs),
+            .padding(top = Spacing.xs, bottom = Spacing.xs),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -403,36 +331,32 @@ fun PaymentMonthHeader(
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Black,
             letterSpacing = 1.sp,
-            color = colorScheme.primary.copy(alpha = 0.5f),
+            color = ProductSchoolTheme.colors.onSurfaceMuted,
         )
         Text(
             text = "$itemCount",
             style = MaterialTheme.typography.labelSmall,
-            color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            color = ProductSchoolTheme.colors.onSurfaceFaint,
         )
     }
 }
 
+/**
+ * Shared payment card layout — eliminates the identical Row(Sm3Card, icon, column, amount, chevron)
+ * pattern duplicated in FeeItemCard and PaymentHistoryCard.
+ */
 @Composable
-fun FeeItemCard(
-    fee: StudentFeeDto,
+private fun PaymentCardLayout(
+    title: String,
+    subtitle: String,
+    amount: String,
+    statusColor: Color,
+    icon: ImageVector,
+    iconTint: Color,
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val statusSuccess = statusSuccessColor()
-    val statusWarning = statusWarningColor()
-    val isPaid = fee.isPaid()
-    val statusLabel = fee.feeStatusLabel()
-    val statusColor = when {
-        isPaid -> statusSuccess
-        statusLabel == "TERLAMBAT" -> colorScheme.error
-        else -> statusWarning
-    }
-    val subtitle = fee.dueDate?.takeIf { it.isNotBlank() }?.let {
-        "Jatuh tempo ${formatTanggal(it)}"
-    } ?: "Status $statusLabel"
-
     Sdm3Card(
         modifier = modifier
             .fillMaxWidth()
@@ -443,26 +367,16 @@ fun FeeItemCard(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
-                shadowElevation = 4.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.Receipt,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = if (isPaid) statusSuccess else colorScheme.primary,
-                    )
-                }
-            }
+            Sdm3IconBadge(
+                icon = icon,
+                size = 52.dp,
+                iconSize = 24.dp,
+                iconTint = iconTint,
+            )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = fee.paymentTitleName,
+                    text = title,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary,
@@ -474,7 +388,7 @@ fun FeeItemCard(
                     text = subtitle,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                     letterSpacing = 0.5.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -486,7 +400,7 @@ fun FeeItemCard(
                 border = BorderStroke(1.5.dp, statusColor.copy(alpha = 0.2f))
             ) {
                 Text(
-                    text = formatRupiah(fee.amount),
+                    text = amount,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Black,
                     color = statusColor,
@@ -509,12 +423,42 @@ fun FeeItemCard(
 }
 
 @Composable
+fun FeeItemCard(
+    fee: StudentFeeDto,
+    onClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    val statusSuccess = statusSuccessColor()
+    val statusWarning = statusWarningColor()
+    val isPaid = fee.isPaid()
+    val statusLabel = fee.feeStatusLabel()
+    val statusColor = when {
+        isPaid -> statusSuccess
+        statusLabel == "TERLAMBAT" -> MaterialTheme.colorScheme.error
+        else -> statusWarning
+    }
+    val subtitle = fee.dueDate?.takeIf { it.isNotBlank() }?.let {
+        "Jatuh tempo ${formatTanggal(it)}"
+    } ?: "Status $statusLabel"
+
+    PaymentCardLayout(
+        title = fee.paymentTitleName,
+        subtitle = subtitle,
+        amount = formatRupiah(fee.amount),
+        statusColor = statusColor,
+        icon = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.Receipt,
+        iconTint = if (isPaid) statusSuccess else MaterialTheme.colorScheme.primary,
+        onClick = onClick,
+        modifier = modifier,
+    )
+}
+
+@Composable
 fun PaymentHistoryCard(
     payment: PaymentDto,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val statusSuccess = statusSuccessColor()
     val statusWarning = statusWarningColor()
     val statusLower = payment.status.lowercase()
@@ -523,83 +467,22 @@ fun PaymentHistoryCard(
     val statusLabel = payment.paymentStatusLabel()
     val statusColor = when {
         isPaid -> statusSuccess
-        isFailed -> colorScheme.error
+        isFailed -> MaterialTheme.colorScheme.error
         else -> statusWarning
     }
     val title = payment.paymentTitle?.name ?: payment.orderId
     val dateRaw = payment.paidAt ?: payment.createdAt
 
-    Sdm3Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        padding = 12.dp,
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
-                shadowElevation = 4.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.History,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = if (isPaid) statusSuccess else colorScheme.primary,
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary,
-                    letterSpacing = (-0.2).sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = "Status $statusLabel · ${formatTanggal(dateRaw)}",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Medium,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    letterSpacing = 0.5.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Surface(
-                color = statusColor.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(1.5.dp, statusColor.copy(alpha = 0.2f))
-            ) {
-                Text(
-                    text = formatRupiah(payment.grossAmount ?: 0.0),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Black,
-                    color = statusColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.Outlined.ChevronRight,
-                contentDescription = null,
-                tint = colorScheme.primary.copy(alpha = 0.15f),
-                modifier = Modifier.size(18.dp),
-            )
-        }
-    }
+    PaymentCardLayout(
+        title = title,
+        subtitle = "Status $statusLabel · ${formatTanggal(dateRaw)}",
+        amount = formatRupiah(payment.grossAmount ?: 0.0),
+        statusColor = statusColor,
+        icon = if (isPaid) Icons.Outlined.Verified else Icons.Outlined.History,
+        iconTint = if (isPaid) statusSuccess else MaterialTheme.colorScheme.primary,
+        onClick = onClick,
+        modifier = modifier,
+    )
 }
 
 @Composable

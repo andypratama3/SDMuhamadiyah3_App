@@ -17,15 +17,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,6 +35,9 @@ import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
 import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
 import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
 import com.sdm3.parent.core.designsystem.component.EmptyStateStyle
+import com.sdm3.parent.core.designsystem.component.ScreenUiState
+import com.sdm3.parent.core.designsystem.component.resolveScreenState
+import com.sdm3.parent.core.designsystem.component.Sdm3IconBadge
 import com.sdm3.parent.core.designsystem.theme.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -53,12 +52,6 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.coroutines.launch
 
-sealed class ProfilUiState {
-    data object Loading : ProfilUiState()
-    data object Empty : ProfilUiState()
-    data class Error(val message: String) : ProfilUiState()
-    data object Success : ProfilUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,13 +88,8 @@ fun ProfilAkunScreen(
     val errorMessage = uiState.errorMessage
 
     val screenState = remember(uiState.isLoading, uiState.isEmpty, errorMessage, isPreview) {
-        if (isPreview) ProfilUiState.Success
-        else when {
-            uiState.isLoading && uiState.isEmpty -> ProfilUiState.Loading
-            errorMessage != null -> ProfilUiState.Error(errorMessage)
-            !uiState.isLoading && uiState.isEmpty -> ProfilUiState.Empty
-            else -> ProfilUiState.Success
-        }
+        if (isPreview) ScreenUiState.Success
+        else resolveScreenState(uiState.isLoading, uiState.isEmpty, errorMessage)
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -124,48 +112,18 @@ fun ProfilAkunScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Konfigurasi Profil",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.primary,
-                        letterSpacing = (-0.5).sp
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Konfigurasi Profil",
+        subtitle = "PENGATURAN PENGGUNA",
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Modern Atmospheric Background Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             when (screenState) {
-                is ProfilUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     ShimmerProfil()
                 }
-                is ProfilUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Sdm3EmptyState(
                             title = "Data Profil Tidak Tersedia",
@@ -174,7 +132,7 @@ fun ProfilAkunScreen(
                         )
                     }
                 }
-                is ProfilUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Sdm3ErrorState(
                             title = "Gagal Memuat",
@@ -190,12 +148,12 @@ fun ProfilAkunScreen(
                         )
                     }
                 }
-                is ProfilUiState.Success -> {
+                is ScreenUiState.Success -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = Spacing.xl)
                             .verticalScroll(rememberScrollState())
                     ) {
                         Spacer(modifier = Modifier.height(12.dp))
@@ -311,7 +269,7 @@ fun ProfilAkunScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(100.dp))
+                        Spacer(modifier = Modifier.height(Spacing.bottomNavSafeArea))
                     }
                 }
             }
@@ -319,19 +277,13 @@ fun ProfilAkunScreen(
     }
 
     if (!isPreview && uiState.isEditing) {
-        AlertDialog(
+        Sdm3Dialog(
             onDismissRequest = { viewModel.cancelEdit() },
-            shape = RoundedCornerShape(24.dp),
-            containerColor = colorScheme.surface,
-            title = {
-                Text(
-                    "Edit Profil",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-            },
-            text = {
+            title = "Edit Profil",
+            confirmLabel = "Simpan",
+            onConfirm = { viewModel.updateProfile() },
+            confirmEnabled = !uiState.isLoading,
+            body = {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Sdm3TextField(
                         value = uiState.editedName,
@@ -347,62 +299,28 @@ fun ProfilAkunScreen(
                     )
                 }
             },
-            confirmButton = {
-                Button(
-                    onClick = { viewModel.updateProfile() },
-                    enabled = !uiState.isLoading,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Simpan", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.cancelEdit() }) {
-                    Text("Batal", fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                }
-            }
         )
     }
 
     if (showLogoutDialog) {
-        AlertDialog(
+        Sdm3Dialog(
             onDismissRequest = { showLogoutDialog = false },
-            shape = RoundedCornerShape(24.dp),
-            containerColor = colorScheme.surface,
-            title = { 
-                Text(
-                    "Konfirmasi Keluar", 
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                ) 
+            title = "Konfirmasi Keluar",
+            confirmLabel = "Keluar",
+            onConfirm = {
+                showLogoutDialog = false
+                if (!isPreview) {
+                    viewModel.logout()
+                }
             },
-            text = { 
+            destructive = true,
+            body = {
                 Text(
-                    "Anda akan mengakhiri sesi aktif pada perangkat ini. Perlu masuk kembali untuk mengakses aplikasi.",
+                    text = "Anda akan mengakhiri sesi aktif pada perangkat ini. Perlu masuk kembali untuk mengakses aplikasi.",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = colorScheme.onSurfaceVariant
-                ) 
+                    color = colorScheme.onSurfaceVariant,
+                )
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showLogoutDialog = false
-                        if (!isPreview) {
-                            viewModel.logout()
-                        }
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
-                ) {
-                    Text("Keluar", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Batal", fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                }
-            }
         )
     }
 
@@ -425,7 +343,7 @@ private fun ShimmerProfil() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = Spacing.xl)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(12.dp))
@@ -529,7 +447,7 @@ private fun ShimmerProfil() {
             modifier = Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(12.dp)).shimmerEffect()
         )
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(Spacing.bottomNavSafeArea))
     }
 }
 
@@ -575,7 +493,7 @@ private fun ProfileHeader(
                         } else {
                             Icon(
                                 Icons.Default.Person,
-                                contentDescription = null,
+                                contentDescription = "Avatar default",
                                 modifier = Modifier.size(42.dp),
                                 tint = colorScheme.primary
                             )
@@ -622,36 +540,14 @@ private fun ProfileHeader(
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
-                Surface(
-                    color = statusSuccess.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(1.dp, statusSuccess.copy(alpha = 0.3f))
-                ) {
-                    Text(
-                        text = " TERVERIFIKASI ",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = statusSuccess,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
+                StatusChip(text = "TERVERIFIKASI", color = statusSuccess)
             }
-            Surface(
-                modifier = Modifier.size(40.dp),
-                shape = CircleShape,
-                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
-                shadowElevation = 4.dp
-            ) {
-                IconButton(onClick = onEditClick) {
-                    Icon(
-                        Icons.Outlined.Edit,
-                        contentDescription = "Edit",
-                        modifier = Modifier.size(18.dp),
-                        tint = colorScheme.primary
-                    )
-                }
-            }
+            Sdm3IconBadge(
+                icon = Icons.Outlined.Edit,
+                size = 40.dp,
+                iconSize = 18.dp,
+                modifier = Modifier.clickable(onClick = onEditClick)
+            )
         }
     }
 }
@@ -729,23 +625,12 @@ private fun StudentMiniCard(
                         )
                     }
                 }
-                Surface(
-                    color = colorScheme.secondary,
-                    shape = RoundedCornerShape(6.dp)
-                ) {
-                    Text(
-                        text = "AKTIF",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Black,
-                        color = colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
+                StatusChip(text = "AKTIF", color = statusSuccessColor())
             }
 
             if (canSwitch) {
                 Spacer(modifier = Modifier.height(12.dp))
-                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.06f))
+                HorizontalDivider(color = colorScheme.outline)
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -791,20 +676,7 @@ private fun BiometricSettingsRow(
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Surface(
-            modifier = Modifier.size(40.dp),
-            shape = RoundedCornerShape(12.dp),
-            color = colorScheme.primary.copy(alpha = 0.05f),
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    Icons.Outlined.Fingerprint,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = colorScheme.primary,
-                )
-            }
-        }
+        Sdm3IconBadge(icon = Icons.Outlined.Fingerprint, size = 40.dp, iconSize = 20.dp)
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -839,20 +711,7 @@ private fun SettingsItemRow(
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
-            modifier = Modifier.size(40.dp),
-            shape = RoundedCornerShape(12.dp),
-            color = item.color.copy(alpha = 0.05f)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    item.icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = item.color
-                )
-            }
-        }
+        Sdm3IconBadge(icon = item.icon, size = 40.dp, iconSize = 20.dp, iconTint = item.color, backgroundColor = item.color.copy(alpha = 0.05f))
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = item.label,
@@ -872,7 +731,7 @@ private fun SettingsItemRow(
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
+            contentDescription = "Buka menu",
             modifier = Modifier.size(18.dp),
             tint = colorScheme.primary.copy(alpha = 0.2f)
         )

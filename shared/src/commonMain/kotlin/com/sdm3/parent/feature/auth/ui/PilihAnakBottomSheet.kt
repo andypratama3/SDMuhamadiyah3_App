@@ -43,8 +43,8 @@ fun PilihAnakBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 48.dp)
+                .padding(horizontal = Spacing.xl)
+                .padding(bottom = Spacing.xxxxl)
         ) {
             Text(
                 text = "Pilih Identitas Siswa",
@@ -59,10 +59,10 @@ fun PilihAnakBottomSheet(
                 color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 items(students) { student ->
                     val isSelected = student.id == selectedStudentId
@@ -76,7 +76,7 @@ fun PilihAnakBottomSheet(
                         Row(
                             modifier = Modifier
                                 .background(if (isSelected) colorScheme.primary.copy(alpha = 0.05f) else Color.Transparent)
-                                .padding(16.dp),
+                                .padding(Spacing.md),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
@@ -87,13 +87,13 @@ fun PilihAnakBottomSheet(
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         Icons.Outlined.Person,
-                                        contentDescription = null,
+                                        contentDescription = "Siswa",
                                         tint = colorScheme.primary,
                                         modifier = Modifier.size(28.dp)
                                     )
                                 }
                             }
-                            Spacer(Modifier.width(16.dp))
+                            Spacer(Modifier.width(Spacing.md))
                             Column(Modifier.weight(1f)) {
                                 Text(
                                     text = student.name,
@@ -117,7 +117,7 @@ fun PilihAnakBottomSheet(
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             Icons.Outlined.Check,
-                                            contentDescription = null,
+                                            contentDescription = "Terpilih",
                                             tint = colorScheme.primary,
                                             modifier = Modifier.size(16.dp)
                                         )

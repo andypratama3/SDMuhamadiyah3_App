@@ -8,17 +8,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,13 +27,6 @@ import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.infoanak.KegiatanProgramViewModel
 import androidx.compose.ui.platform.LocalInspectionMode
 import org.koin.compose.viewmodel.koinViewModel
-
-sealed class KegiatanProgramUiState {
-    data object Loading : KegiatanProgramUiState()
-    data object Empty : KegiatanProgramUiState()
-    data class Error(val message: String) : KegiatanProgramUiState()
-    data object Success : KegiatanProgramUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,67 +48,26 @@ fun KegiatanProgramScreen(
         }
     }
 
-    val uiState: KegiatanProgramUiState = remember(vmState) {
-        val s = vmState
-        when {
-            s.isLoading -> KegiatanProgramUiState.Loading
-            s.errorMessage != null -> KegiatanProgramUiState.Error(s.errorMessage)
-            s.isEmpty -> KegiatanProgramUiState.Empty
-            else -> KegiatanProgramUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
 
     val colorScheme = MaterialTheme.colorScheme
-    val glassSurface = glassSurfaceColor()
-    val glassBorder = glassBorderColor()
+    val liquidSurface = liquidGlassSurfaceColor()
+    val liquidBorder = liquidGlassBorderColor()
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Ekstrakurikuler", "Program Unggulan")
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Aktivitas & Bakat",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "PENGEMBANGAN DIRI",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Aktivitas & Bakat",
+        subtitle = "PENGEMBANGAN DIRI",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.15f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.4f), Color.Transparent),
-                        center = Offset(0f, size.height * 0.5f),
-                        radius = size.width
-                    )
-                )
-            }
+            ScreenGlowBackground(
+                color = colorScheme.secondaryContainer,
+                modifier = Modifier
+            )
 
             Column(
                 modifier = Modifier
@@ -128,11 +77,11 @@ fun KegiatanProgramScreen(
             ) {
                 Surface(
                     modifier = Modifier
-                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
                         .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = glassSurface,
-                    border = BorderStroke(1.dp, glassBorder)
+                    shape = RoundedCornerShape(Spacing.md),
+                    color = liquidSurface,
+                    border = BorderStroke(1.dp, liquidBorder)
                 ) {
                     Row(modifier = Modifier.padding(6.dp)) {
                         tabs.forEachIndexed { index, label ->
@@ -141,7 +90,7 @@ fun KegiatanProgramScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(42.dp)
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .clip(RoundedCornerShape(Spacing.sm))
                                     .background(if (isSelected) colorScheme.primary else Color.Transparent)
                                     .clickable { selectedTab = index },
                                 contentAlignment = Alignment.Center
@@ -158,18 +107,18 @@ fun KegiatanProgramScreen(
                 }
 
                 when (val state = uiState) {
-                    is KegiatanProgramUiState.Loading -> {
+                    is ScreenUiState.Loading -> {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
                         ) {
                             item {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(60.dp)
-                                        .clip(RoundedCornerShape(12.dp))
+                                        .clip(RoundedCornerShape(Spacing.sm))
                                         .shimmerEffect()
                                 )
                             }
@@ -179,7 +128,7 @@ fun KegiatanProgramScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(120.dp)
-                                            .clip(RoundedCornerShape(16.dp))
+                                            .clip(RoundedCornerShape(Spacing.md))
                                             .shimmerEffect()
                                     )
                                 }
@@ -187,7 +136,7 @@ fun KegiatanProgramScreen(
                         }
                     }
 
-                    is KegiatanProgramUiState.Empty -> {
+                    is ScreenUiState.Empty -> {
                         Sdm3EmptyState(
                             title = "Belum Ada Aktivitas",
                             message = "Belum terdapat data kegiatan untuk siswa ini.",
@@ -196,13 +145,13 @@ fun KegiatanProgramScreen(
                                 Sdm3Button(
                                     text = "Muat Ulang",
                                     onClick = { viewModel.loadActivities(studentId) },
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)
                                 )
                             }
                         )
                     }
 
-                    is KegiatanProgramUiState.Error -> {
+                    is ScreenUiState.Error -> {
                         Sdm3ErrorState(
                             title = "Gagal Memuat Data",
                             message = state.message,
@@ -211,24 +160,24 @@ fun KegiatanProgramScreen(
                                 Sdm3Button(
                                     text = "Coba Lagi",
                                     onClick = { viewModel.loadActivities(studentId) },
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)
                                 )
                             },
                             secondaryAction = {
                                 Sdm3OutlinedButton(
                                     text = "Kembali",
                                     onClick = onBack,
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)
                                 )
                             }
                         )
                     }
 
-                    is KegiatanProgramUiState.Success -> {
+                    is ScreenUiState.Success -> {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                            contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
                         ) {
                             item {
                                 Column {
@@ -261,32 +210,24 @@ fun KegiatanProgramScreen(
                                             title = "Belum Ada Ekstrakurikuler",
                                             message = "Siswa belum terdaftar dalam kegiatan ekstrakurikuler.",
                                             style = EmptyStateStyle.Neutral,
-                                            modifier = Modifier.padding(vertical = 24.dp)
+                                            modifier = Modifier.padding(vertical = Spacing.xl)
                                         )
                                     }
                                 } else {
                                     items(ekskulList) { ekskul ->
-                                        Sdm3Card(padding = 16.dp) {
+                                        Sdm3Card(padding = Spacing.md) {
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Surface(
-                                                    modifier = Modifier.size(52.dp),
-                                                    shape = RoundedCornerShape(14.dp),
-                                                    color = colorScheme.primary.copy(alpha = 0.05f),
-                                                    border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
-                                                ) {
-                                                    Box(contentAlignment = Alignment.Center) {
-                                                        Icon(
-                                                            imageVector = Icons.Outlined.AutoStories,
-                                                            contentDescription = null,
-                                                            modifier = Modifier.size(24.dp),
-                                                            tint = colorScheme.primary
-                                                        )
-                                                    }
-                                                }
-                                                Spacer(modifier = Modifier.width(16.dp))
+                                                Sdm3IconBadge(
+                                                    icon = Icons.Outlined.AutoStories,
+                                                    size = 52.dp,
+                                                    iconTint = colorScheme.primary,
+                                                    backgroundColor = colorScheme.primary.copy(alpha = 0.05f),
+                                                    borderColor = colorScheme.primary.copy(alpha = 0.1f),
+                                                )
+                                                Spacer(modifier = Modifier.width(Spacing.md))
                                                 Column(modifier = Modifier.weight(1f)) {
                                                     Row(
                                                         modifier = Modifier.fillMaxWidth(),
@@ -312,7 +253,7 @@ fun KegiatanProgramScreen(
                                                         )
                                                     }
                                                     if (ekskul.description != null) {
-                                                        Spacer(modifier = Modifier.height(8.dp))
+                                                        Spacer(modifier = Modifier.height(Spacing.xs))
                                                         Text(
                                                             text = "\"${ekskul.description}\"",
                                                             style = MaterialTheme.typography.bodyMedium,
@@ -334,32 +275,24 @@ fun KegiatanProgramScreen(
                                             title = "Belum Ada Program Unggulan",
                                             message = "Data program unggulan belum tersedia.",
                                             style = EmptyStateStyle.Neutral,
-                                            modifier = Modifier.padding(vertical = 24.dp)
+                                            modifier = Modifier.padding(vertical = Spacing.xl)
                                         )
                                     }
                                 } else {
                                     items(programList) { program ->
-                                        Sdm3Card(padding = 20.dp) {
+                                        Sdm3Card(padding = Spacing.lg) {
                                             Column {
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
                                                     verticalAlignment = Alignment.CenterVertically,
                                                 ) {
-                                                    Surface(
-                                                        modifier = Modifier.size(48.dp),
-                                                        shape = RoundedCornerShape(12.dp),
-                                                        color = colorScheme.primary.copy(alpha = 0.05f),
-                                                    ) {
-                                                        Box(contentAlignment = Alignment.Center) {
-                                                            Icon(
-                                                                Icons.AutoMirrored.Filled.MenuBook,
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(24.dp),
-                                                                tint = colorScheme.primary,
-                                                            )
-                                                        }
-                                                    }
-                                                    Spacer(modifier = Modifier.width(16.dp))
+                                                    Sdm3IconBadge(
+                                                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                                                        size = 48.dp,
+                                                        iconTint = colorScheme.primary,
+                                                        backgroundColor = colorScheme.primary.copy(alpha = 0.05f),
+                                                    )
+                                                    Spacer(modifier = Modifier.width(Spacing.md))
                                                     Column(modifier = Modifier.weight(1f)) {
                                                         Text(
                                                             text = program.name,
@@ -380,7 +313,7 @@ fun KegiatanProgramScreen(
                                                     }
                                                 }
 
-                                                Spacer(modifier = Modifier.height(16.dp))
+                                                Spacer(modifier = Modifier.height(Spacing.md))
 
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
@@ -395,9 +328,9 @@ fun KegiatanProgramScreen(
                                                         maxLines = 3,
                                                         overflow = TextOverflow.Ellipsis,
                                                     )
-                                                    Spacer(modifier = Modifier.width(12.dp))
+                                                    Spacer(modifier = Modifier.width(Spacing.sm))
                                                     Surface(
-                                                        shape = RoundedCornerShape(8.dp),
+                                                        shape = RoundedCornerShape(Spacing.xs),
                                                         color = colorScheme.primary.copy(alpha = 0.06f),
                                                     ) {
                                                         Text(
@@ -414,7 +347,7 @@ fun KegiatanProgramScreen(
                                                     }
                                                 }
 
-                                                Spacer(modifier = Modifier.height(12.dp))
+                                                Spacer(modifier = Modifier.height(Spacing.sm))
 
                                                 val progressFraction = if (program.target > 0) {
                                                     (program.progress.toFloat() / program.target.toFloat()).coerceIn(0f, 1f)
@@ -429,18 +362,18 @@ fun KegiatanProgramScreen(
                                                     trackColor = colorScheme.secondary.copy(alpha = 0.1f),
                                                 )
 
-                                                Spacer(modifier = Modifier.height(12.dp))
-                                                HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f))
+                                                Spacer(modifier = Modifier.height(Spacing.sm))
+                                                HorizontalDivider(color = colorScheme.outline)
                                                 Spacer(modifier = Modifier.height(10.dp))
 
                                                 Row(verticalAlignment = Alignment.Top) {
                                                     Icon(
                                                         Icons.Outlined.Update,
-                                                        contentDescription = null,
+                                                        contentDescription = "Aktivitas terakhir",
                                                         tint = colorScheme.primary.copy(alpha = 0.3f),
                                                         modifier = Modifier.size(16.dp),
                                                     )
-                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Spacer(modifier = Modifier.width(Spacing.xs))
                                                     Text(
                                                         text = program.lastActivity,
                                                         style = MaterialTheme.typography.labelSmall,
@@ -456,7 +389,7 @@ fun KegiatanProgramScreen(
                                 }
                             }
 
-                            item { Spacer(modifier = Modifier.height(100.dp)) }
+                            item { Spacer(modifier = Modifier.height(Spacing.xxl)) }
                         }
                     }
                 }

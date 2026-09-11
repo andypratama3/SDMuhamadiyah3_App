@@ -23,9 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
-import com.sdm3.parent.core.designsystem.theme.glassBorderColor
-import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
 import com.sdm3.parent.core.navigation.SDM3BottomTab
 
 @Composable
@@ -34,9 +33,10 @@ fun SDM3BottomNavBar(
     onTabSelected: (SDM3BottomTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = ProductSchoolTheme.colors
     val colorScheme = MaterialTheme.colorScheme
-    val glassSurface = glassSurfaceColor()
-    val glassBorder = glassBorderColor()
+    val glassSurface = colors.liquidGlassSurface
+    val glassBorder = colors.liquidGlassBorder
 
     // ProductSchool Floating Glass Navigation
     Box(
@@ -54,8 +54,8 @@ fun SDM3BottomNavBar(
                     shadowElevation = 24f
                     shape = RoundedCornerShape(36.dp)
                     clip = true
-                    ambientShadowColor = colorScheme.primary.copy(alpha = 0.1f)
-                    spotShadowColor = colorScheme.primary.copy(alpha = 0.1f)
+                    ambientShadowColor = colors.liquidGlassShadow
+                    spotShadowColor = colors.liquidGlassShadow
                 },
             color = glassSurface,
             shape = RoundedCornerShape(36.dp),

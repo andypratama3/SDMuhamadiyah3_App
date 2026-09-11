@@ -54,13 +54,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
 import kotlinx.coroutines.launch
 
-sealed class HomeScreenUiState {
-    data object Loading : HomeScreenUiState()
-    data object Empty : HomeScreenUiState()
-    data class Error(val message: String) : HomeScreenUiState()
-    data object Success : HomeScreenUiState()
-}
-
 @Composable
 fun HomeScreen(
     studentId: String,
@@ -78,13 +71,8 @@ fun HomeScreen(
     val errorMessage = state.errorMessage
 
     val screenState = remember(state.isLoading, state.isEmpty, errorMessage, isPreview) {
-        if (isPreview) HomeScreenUiState.Success
-        else when {
-            state.isLoading && state.isEmpty -> HomeScreenUiState.Loading
-            errorMessage != null -> HomeScreenUiState.Error(errorMessage)
-            !state.isLoading && state.isEmpty -> HomeScreenUiState.Empty
-            else -> HomeScreenUiState.Success
-        }
+        if (isPreview) ScreenUiState.Success
+        else resolveScreenState(state.isLoading, state.isEmpty, errorMessage)
     }
 
     LaunchedEffect(studentId) {
@@ -143,14 +131,15 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 alignment = Alignment.TopEnd,
                 color = colorScheme.primaryContainer,
-                alpha = 0.15f
+                alpha = 0.15f,
+                animate = true
             )
 
             when (screenState) {
-                is HomeScreenUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 120.dp),
+                        contentPadding = PaddingValues(bottom = Spacing.bottomNavSafeArea),
                         verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
                         item { GreetingShimmer() }
@@ -160,7 +149,7 @@ fun HomeScreen(
                         item { TabunganSekolahShimmer() }
                     }
                 }
-                is HomeScreenUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Gagal Memuat Data",
                         message = screenState.message,
@@ -173,17 +162,17 @@ fun HomeScreen(
                         }
                     )
                 }
-                is HomeScreenUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Belum Ada Data",
                         message = "Data dashboard belum tersedia.",
                         style = EmptyStateStyle.Neutral
                     )
                 }
-                is HomeScreenUiState.Success -> {
+                is ScreenUiState.Success -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 120.dp),
+                        contentPadding = PaddingValues(bottom = Spacing.bottomNavSafeArea), // floating nav safe area
                         verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
                         item {
@@ -259,7 +248,7 @@ private fun StudentSwitcherBar(
     onClick: () -> Unit,
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Sdm3Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -287,7 +276,7 @@ private fun StudentSwitcherBar(
                         text = "MEMANTAU · $childCount ANAK",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
-                        color = colorScheme.primary.copy(alpha = 0.4f),
+                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                         letterSpacing = 0.5.sp
                     )
                     Text(
@@ -302,7 +291,7 @@ private fun StudentSwitcherBar(
                         Text(
                             text = com.sdm3.parent.core.util.formatClassName(className),
                             style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                             maxLines = 1,
                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
@@ -347,7 +336,7 @@ private fun HomeHeader(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(start = 20.dp, end = 12.dp, top = 24.dp, bottom = 12.dp),
+            .padding(start = Spacing.lg, end = 12.dp, top = 24.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -395,7 +384,7 @@ private fun HomeHeader(
 
 @Composable
 private fun GreetingShimmer() {
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.55f)
@@ -420,7 +409,7 @@ private fun ShortcutFavoritShimmer() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = Spacing.lg),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -441,7 +430,7 @@ private fun ShortcutFavoritShimmer() {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             repeat(3) {
@@ -458,7 +447,7 @@ private fun ShortcutFavoritShimmer() {
 
 @Composable
 private fun LayananSekolahShimmer() {
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.4f)
@@ -471,7 +460,7 @@ private fun LayananSekolahShimmer() {
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, glassBorderColor())
+            border = BorderStroke(1.dp, liquidGlassBorderColor())
         ) {
             Column(modifier = Modifier.padding(vertical = 16.dp)) {
                 repeat(3) {
@@ -509,7 +498,7 @@ private fun LayananSekolahShimmer() {
 
 @Composable
 private fun PengumumanShimmer() {
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Sdm3Card(
             modifier = Modifier.fillMaxWidth(),
             padding = 20.dp
@@ -554,7 +543,7 @@ private fun PengumumanShimmer() {
 
 @Composable
 private fun TabunganSekolahShimmer() {
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(28.dp),
@@ -594,7 +583,7 @@ private fun GreetingSection(name: String, info: String, onClick: () -> Unit) {
     val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = Spacing.lg)
             .clickable(onClick = onClick)
     ) {
         Text(
@@ -605,17 +594,26 @@ private fun GreetingSection(name: String, info: String, onClick: () -> Unit) {
             letterSpacing = (-0.5).sp
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Surface(
-            color = colorScheme.secondaryContainer.copy(alpha = 0.3f),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(
-                text = info,
-                style = MaterialTheme.typography.bodySmall,
-                color = colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-            )
+        Box(contentAlignment = Alignment.CenterStart) {
+            if (!info.isEmpty()) {
+                LocalizedGlow(
+                    modifier = Modifier.size(80.dp, 30.dp),
+                    color = colorScheme.secondary,
+                    alpha = 0.1f
+                )
+            }
+            Surface(
+                color = colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = info,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colorScheme.onSecondaryContainer,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            }
         }
     }
 }
@@ -692,19 +690,28 @@ private fun ShortcutCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Surface(
-                    modifier = Modifier.size(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = iconColor.copy(alpha = if (comingSoon) 0.08f else 0.12f),
-                    shadowElevation = if (comingSoon) 0.dp else 4.dp
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            icon,
-                            contentDescription = null,
-                            tint = if (comingSoon) iconColor.copy(alpha = 0.4f) else iconColor,
-                            modifier = Modifier.size(28.dp)
+                Box(contentAlignment = Alignment.Center) {
+                    if (!comingSoon) {
+                        LocalizedGlow(
+                            modifier = Modifier.size(80.dp),
+                            color = iconColor,
+                            alpha = 0.15f
                         )
+                    }
+                    Surface(
+                        modifier = Modifier.size(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = iconColor.copy(alpha = if (comingSoon) 0.08f else 0.12f),
+                        shadowElevation = if (comingSoon) 0.dp else 2.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                icon,
+                                contentDescription = title,
+                                tint = if (comingSoon) iconColor.copy(alpha = 0.4f) else iconColor,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(Spacing.md))
@@ -713,7 +720,7 @@ private fun ShortcutCard(
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    color = if (comingSoon) colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else colorScheme.primary,
+                    color = if (comingSoon) ProductSchoolTheme.colors.onSurfaceFaint else colorScheme.primary,
                     lineHeight = 20.sp
                 )
             }
@@ -727,7 +734,7 @@ private fun ShortcutCard(
                         text = "SEGERA",
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                         fontWeight = FontWeight.Black,
-                        color = colorScheme.primary,
+                        color = colorScheme.onSecondary,
                         letterSpacing = 0.5.sp,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
                     )
@@ -764,7 +771,7 @@ private fun LayananSekolahSection(
         ServiceEntry("LAINNYA", Icons.Outlined.GridView, true, onComingSoonClick)
     )
 
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Text(
             text = "Layanan Sekolah",
             style = MaterialTheme.typography.titleLarge,
@@ -805,17 +812,24 @@ private fun ServiceItem(
             .width(72.dp)
             .clickable(onClick = onClick)
     ) {
-        Box {
+        Box(contentAlignment = Alignment.Center) {
+            if (!comingSoon) {
+                LocalizedGlow(
+                    modifier = Modifier.size(64.dp),
+                    color = colorScheme.primary,
+                    alpha = 0.12f
+                )
+            }
             Surface(
                 modifier = Modifier.size(52.dp),
                 shape = RoundedCornerShape(16.dp),
                 color = colorScheme.primaryContainer.copy(alpha = if (comingSoon) 0.2f else 0.4f),
-                shadowElevation = if (comingSoon) 0.dp else 2.dp
+                shadowElevation = if (comingSoon) 0.dp else 1.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         icon,
-                        contentDescription = null,
+                        contentDescription = label,
                         tint = if (comingSoon) colorScheme.primary.copy(alpha = 0.4f) else colorScheme.primary,
                         modifier = Modifier.size(26.dp)
                     )
@@ -825,13 +839,13 @@ private fun ServiceItem(
                 Surface(
                     shape = RoundedCornerShape(6.dp),
                     color = colorScheme.secondary,
-                    modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp, y = (-4).dp)
+                    modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 2.dp)
                 ) {
                     Text(
                         text = "SEGERA",
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 7.sp),
                         fontWeight = FontWeight.Black,
-                        color = colorScheme.primary,
+                        color = colorScheme.onSecondary,
                         letterSpacing = 0.3.sp,
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                     )
@@ -844,7 +858,7 @@ private fun ServiceItem(
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = if (comingSoon) colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant,
+            color = if (comingSoon) ProductSchoolTheme.colors.onSurfaceFaint else colorScheme.onSurfaceVariant,
             maxLines = 1
         )
     }
@@ -858,7 +872,7 @@ private fun PengumumanSection(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val infoColor = statusInfoColor()
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Sdm3Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -874,7 +888,7 @@ private fun PengumumanSection(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             Icons.Outlined.Campaign,
-                            contentDescription = null,
+                            contentDescription = "Pengumuman",
                             tint = infoColor,
                             modifier = Modifier.size(24.dp)
                         )
@@ -902,7 +916,7 @@ private fun PengumumanSection(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Outlined.AccessTime,
-                            contentDescription = null,
+                            contentDescription = "Waktu",
                             modifier = Modifier.size(14.dp),
                             tint = colorScheme.onSurfaceVariant
                         )
@@ -961,7 +975,7 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
                         ) {
                             Icon(
                                 Icons.Outlined.AccountBalanceWallet,
-                                contentDescription = null,
+                                contentDescription = "Tagihan",
                                 tint = heroContent,
                                 modifier = Modifier.padding(8.dp).size(20.dp)
                             )

@@ -1,9 +1,9 @@
 package com.sdm3.parent.feature.auth.ui
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -11,32 +11,31 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.foundation.isSystemInDarkTheme
-import com.sdm3.parent.core.AppBranding
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.AppBranding
+import com.sdm3.parent.core.designsystem.component.Sdm3CategoryBadge
 import com.sdm3.parent.core.designsystem.component.Sdm3Logo
 import com.sdm3.parent.core.designsystem.theme.*
-import com.sdm3.parent.core.network.ApiError
-import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.navigation.PostAuthNavigator
 import com.sdm3.parent.core.navigation.SDM3Route
+import com.sdm3.parent.core.network.ApiError
+import com.sdm3.parent.core.network.ApiResult
 import com.sdm3.parent.core.security.SecureTokenManager
 import com.sdm3.parent.domain.model.RoleContext
 import com.sdm3.parent.domain.repository.AuthRepositoryContract
 import kotlinx.coroutines.delay
-import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import sdmuhammadiyah3samarinda.shared.generated.resources.Res
@@ -123,7 +122,7 @@ private fun SplashContent(
     val isDark = isSystemInDarkTheme()
     val colorScheme = MaterialTheme.colorScheme
     val heroContent = heroContentColor()
-    val glassSurface = glassSurfaceColor()
+    val glassSurface = ProductSchoolTheme.colors.liquidGlassSurface
     var startAnimation by remember { mutableStateOf(isPreview) }
 
     // High-End Vanguard Motion Curves
@@ -153,30 +152,18 @@ private fun SplashContent(
         label = "scale"
     )
 
-    val rotationAnim by animateFloatAsState(
-        targetValue = if (startAnimation) 0f else -10f,
-        animationSpec = if (reducedMotion) snap() else tween(1400, easing = easeOutBack),
-        label = "rotation"
-    )
-
     val logoAlphaAnim by animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
         animationSpec = if (reducedMotion) snap() else tween(1000, easing = easeOutQuart),
         label = "logo_alpha"
     )
 
-    // Memberikan sedikit delay untuk teks agar muncul setelah logo mulai membesar
+    // Delayed text animation
     var textStartAnimation by remember { mutableStateOf(isPreview) }
     val textAlphaAnim by animateFloatAsState(
         targetValue = if (textStartAnimation) 1f else 0f,
         animationSpec = if (reducedMotion) snap() else tween(1000, easing = easeOutQuart),
         label = "text_alpha"
-    )
-
-    val blurAnim by animateDpAsState(
-        targetValue = if (startAnimation) 0.dp else 24.dp,
-        animationSpec = if (reducedMotion) snap() else tween(1500, easing = easeOutQuart),
-        label = "blur"
     )
 
     val progressAnim by animateFloatAsState(
@@ -188,7 +175,7 @@ private fun SplashContent(
     LaunchedEffect(Unit) {
         delay(300)
         startAnimation = true
-        delay(400) // Delay sebelum teks muncul
+        delay(400)
         textStartAnimation = true
         delay(2500)
         onAnimationFinished()
@@ -207,7 +194,8 @@ private fun SplashContent(
         } else {
             MaterialTheme.typography.displayMedium
         }
-        // Multi-Orb Animated Mesh Background (Modern Style)
+        
+        // Multi-Orb Animated Mesh Background
         Canvas(modifier = Modifier.fillMaxSize().alpha(if (startAnimation) 1f else 0f)) {
             val canvasWidth = size.width
             val canvasHeight = size.height
@@ -256,61 +244,39 @@ private fun SplashContent(
             )
         }
 
+        // Central Branding Stack
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .align(Alignment.Center)
-                .offset(y = (-36).dp)
-                .padding(horizontal = Spacing.xxl)
+                .offset(y = (-Spacing.xxl)) // Consistent vertical lift
+                .padding(horizontal = Spacing.xl)
         ) {
-            // Logo with Glassmorphic Glow
+            // Logo Container
             Box(
                 modifier = Modifier
                     .graphicsLayer {
                         scaleX = scaleAnim
                         scaleY = scaleAnim
-                        rotationZ = rotationAnim
                         alpha = logoAlphaAnim
-                    }
-                    .blur(blurAnim),
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                // Glassmorphic Outer Bloom
-                Box(
-                    modifier = Modifier
-                        .size(logoSize * 2.0f)
-                        .background(
-                            Brush.radialGradient(
-                                listOf(glassSurface.copy(alpha = 0.15f * logoAlphaAnim), Color.Transparent)
-                            )
-                        )
+                Sdm3Logo(
+                    size = logoSize * 0.65f,
+                    showBackground = false
                 )
-
-                Surface(
-                    modifier = Modifier.size(logoSize),
-                    shape = RoundedCornerShape(32.dp),
-                    color = glassSurface.copy(alpha = 0.3f),
-                    border = BorderStroke(2.dp, glassBorderColor()),
-                    shadowElevation = 12.dp
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Sdm3Logo(
-                            size = logoSize * 0.65f,
-                            showBackground = false
-                        )
-                    }
-                }
             }
 
             Spacer(modifier = Modifier.height(Spacing.xl))
 
-            // Typography Stack with Modern Hierarchy
+            // Typography Stack
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.graphicsLayer {
                     alpha = textAlphaAnim
-                    translationY = (1f - textAlphaAnim) * 24f
+                    translationY = (1f - textAlphaAnim) * 32f
                 }
             ) {
                 Text(
@@ -327,45 +293,31 @@ private fun SplashContent(
 
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                // Modern Secondary Subtitle
-                Surface(
-                    color = colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(999.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.splash_subtitle).uppercase(),
-                        color = colorScheme.secondary,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            letterSpacing = 3.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                    )
-                }
+                Sdm3CategoryBadge(
+                    text = stringResource(Res.string.splash_subtitle).uppercase()
+                )
             }
         }
 
+        // Bottom Footer
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(bottom = 20.dp),
+                .padding(bottom = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Modern Slim Progress Bar
             Box(
                 modifier = Modifier
-                    .width(180.dp)
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
+                    .width(160.dp)
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(999.dp))
                     .background(
-                        if (isDark) {
-                            Color.White.copy(alpha = 0.1f)
-                        } else {
-                            glassSurface.copy(alpha = 0.15f)
-                        },
+                        if (isDark) Color.White.copy(alpha = 0.08f)
+                        else glassSurface.copy(alpha = 0.12f)
                     ),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.CenterStart
             ) {
                 Box(
                     modifier = Modifier
@@ -373,20 +325,24 @@ private fun SplashContent(
                         .fillMaxWidth(progressAnim)
                         .background(
                             Brush.horizontalGradient(
-                                colors = listOf(Color.Transparent, colorScheme.secondary, Color.Transparent)
+                                colors = listOf(
+                                    colorScheme.secondary.copy(alpha = 0.5f),
+                                    colorScheme.secondary,
+                                    colorScheme.secondary.copy(alpha = 0.5f)
+                                )
                             )
                         )
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             Text(
                 text = AppBranding.SCHOOL_NAME.uppercase(),
-                color = heroContent.copy(alpha = if (isDark) 0.55f else 0.4f),
+                color = heroContent.copy(alpha = if (isDark) 0.5f else 0.35f),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    letterSpacing = if (isCompact) 1.sp else 2.sp,
-                    fontWeight = FontWeight.Bold
+                    letterSpacing = if (isCompact) 1.sp else 2.5.sp,
+                    fontWeight = FontWeight.Black
                 ),
                 textAlign = TextAlign.Center,
                 maxLines = 2,

@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Warning
@@ -14,9 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
@@ -50,65 +47,20 @@ fun AccountDeletionScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Penghapusan Akun",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "KONFIGURASI PRIVASI",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Penghapusan Akun",
+        subtitle = "KONFIGURASI PRIVASI",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
                 item {
                     Sdm3Card(padding = 24.dp) {
@@ -124,14 +76,14 @@ fun AccountDeletionScreen(
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Outlined.Warning,
-                                        contentDescription = null,
+                                        contentDescription = "Peringatan",
                                         tint = colorScheme.error,
                                         modifier = Modifier.size(28.dp)
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.width(20.dp))
+                            Spacer(modifier = Modifier.width(Spacing.lg))
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
@@ -140,7 +92,7 @@ fun AccountDeletionScreen(
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.error
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(Spacing.xs))
                                 Text(
                                     text = "Permintaan ini bersifat permanen untuk akses digital. Data akademik resmi tetap tersimpan pada database institusi sesuai regulasi kependidikan.",
                                     style = MaterialTheme.typography.bodyMedium,
@@ -164,8 +116,8 @@ fun AccountDeletionScreen(
                 }
 
                 item {
-                    SectionHeader(title = "Alasan Terminasi", modifier = Modifier.padding(top = 8.dp))
-                    Spacer(modifier = Modifier.height(12.dp))
+                    SectionHeader(title = "Alasan Terminasi", modifier = Modifier.padding(top = Spacing.xs))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
                     Sdm3Card(padding = 20.dp) {
                         Sdm3TextField(
                             value = uiState.reasonText,
@@ -183,24 +135,12 @@ fun AccountDeletionScreen(
 
                 if (uiState.errorMessage != null) {
                     item {
-                        Surface(
-                            color = colorScheme.error.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = uiState.errorMessage!!,
-                                color = colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(12.dp)
-                            )
-                        }
+                        Sdm3ErrorBanner(message = uiState.errorMessage ?: "")
                     }
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
                     Sdm3Button(
                         text = "Ajukan Terminasi Akun",
                         onClick = {
@@ -208,57 +148,35 @@ fun AccountDeletionScreen(
                         },
                         isLoading = uiState.isLoading,
                         containerColor = colorScheme.error,
-                        contentColor = colorScheme.onPrimary,
+                        contentColor = colorScheme.onError,
                         icon = Icons.Outlined.DeleteForever,
                         modifier = Modifier.fillMaxWidth().height(56.dp)
                     )
                 }
 
-                item { Spacer(modifier = Modifier.height(100.dp)) }
+                item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
             }
         }
     }
 
     if (uiState.isConfirmDialogShown) {
-        AlertDialog(
+        Sdm3Dialog(
             onDismissRequest = {
                 if (!isPreview) viewModel.dismissConfirmDialog()
             },
-            shape = RoundedCornerShape(24.dp),
-            containerColor = colorScheme.surface,
-            title = {
-                Text(
-                    text = "Konfirmasi Mutlak",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
+            title = "Konfirmasi Mutlak",
+            confirmLabel = "Ya, Hapus Akun",
+            onConfirm = {
+                if (!isPreview) viewModel.submitDeletionRequest()
             },
-            text = {
+            destructive = true,
+            body = {
                 Text(
                     text = "Tindakan ini akan mengakhiri seluruh hak akses digital Anda pada aplikasi ini. Apakah Anda yakin?",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant,
                 )
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (!isPreview) viewModel.submitDeletionRequest()
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error)
-                ) {
-                    Text("Ya, Hapus Akun", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    if (!isPreview) viewModel.dismissConfirmDialog()
-                }) {
-                    Text("Batal", color = colorScheme.primary, fontWeight = FontWeight.Bold)
-                }
-            }
         )
     }
 }

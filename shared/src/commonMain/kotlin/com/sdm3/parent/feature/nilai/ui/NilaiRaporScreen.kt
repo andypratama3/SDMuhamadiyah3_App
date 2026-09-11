@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.automirrored.outlined.TrendingDown
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.*
@@ -27,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.AtmosphericGlow
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.data.remote.dto.GradeDto
 import com.sdm3.parent.feature.nilai.FormatifGradeItem
 import com.sdm3.parent.feature.nilai.NilaiRaporUiState
@@ -35,13 +37,6 @@ import com.sdm3.parent.feature.nilai.NilaiRaporViewModel
 import com.sdm3.parent.feature.nilai.ProjekGradeItem
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.tooling.preview.Preview
-
-sealed class NilaiRaporScreenUiState {
-    data object Loading : NilaiRaporScreenUiState()
-    data object Empty : NilaiRaporScreenUiState()
-    data class Error(val message: String) : NilaiRaporScreenUiState()
-    data object Success : NilaiRaporScreenUiState()
-}
 
 internal fun semesterLabelOf(semester: String): String = when (semester.lowercase()) {
     "ganjil" -> "Semester Ganjil"
@@ -81,14 +76,8 @@ fun NilaiRaporScreen(
     }
     val activeSemester = vmState.semester.ifBlank { semester }
 
-    val uiState: NilaiRaporScreenUiState = remember(vmState) {
-        val s = vmState
-        when {
-            s.isLoading -> NilaiRaporScreenUiState.Loading
-            s.errorMessage != null -> NilaiRaporScreenUiState.Error(s.errorMessage)
-            s.isEmpty -> NilaiRaporScreenUiState.Empty
-            else -> NilaiRaporScreenUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
 
     if (!isPreview) {
@@ -97,64 +86,13 @@ fun NilaiRaporScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Text(
-                            text = "Analitik Akademik",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = semesterLabelOf(activeSemester).uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    if (onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Kembali",
-                                tint = colorScheme.primary
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Analitik Akademik",
+        subtitle = semesterLabelOf(activeSemester).uppercase(),
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Modern Atmospheric Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             Column(modifier = Modifier.fillMaxSize().padding(padding)) {
                 val semesters = vmState.availableSemesters
@@ -171,7 +109,7 @@ fun NilaiRaporScreen(
                                 color = if (selected) colorScheme.primary else colorScheme.secondaryContainer.copy(alpha = 0.3f),
                                 border = BorderStroke(
                                     1.5.dp,
-                                    if (selected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.2f)
+                                    if (selected) colorScheme.secondary else colorScheme.primary.copy(alpha = 0.2f)
                                 ),
                                 modifier = Modifier.clickable(enabled = !selected) { viewModel.selectSemester(opt) }
                             ) {
@@ -197,10 +135,10 @@ fun NilaiRaporScreen(
                     val selectedTab = vmState.selectedTab.coerceIn(0, (tabs.size - 1).coerceAtLeast(0))
 
                     when (uiState) {
-                        NilaiRaporScreenUiState.Loading -> {
+                        ScreenUiState.Loading -> {
                             SumatifTabShimmer()
                         }
-                        NilaiRaporScreenUiState.Empty -> {
+                        ScreenUiState.Empty -> {
                             Sdm3EmptyState(
                                 title = "Belum Ada Data Nilai",
                                 message = "Data nilai untuk semester ini belum tersedia.",
@@ -213,7 +151,7 @@ fun NilaiRaporScreen(
                                 }
                             )
                         }
-                        is NilaiRaporScreenUiState.Error -> {
+                        is ScreenUiState.Error -> {
                             Sdm3ErrorState(
                                 title = "Gagal Memuat Data",
                                 message = uiState.message,
@@ -226,7 +164,7 @@ fun NilaiRaporScreen(
                                 }
                             )
                         }
-                        NilaiRaporScreenUiState.Success -> {
+                        ScreenUiState.Success -> {
                             Column(modifier = Modifier.fillMaxSize()) {
                                 if (tabs.size > 1) {
                                     PrimaryScrollableTabRow(
@@ -322,7 +260,7 @@ private fun SumatifTabShimmer() {
                     .shimmerEffect()
             )
         }
-        item { Spacer(Modifier.height(100.dp)) }
+        item { Spacer(Modifier.height(Spacing.bottomNavSafeArea)) }
     }
 }
 
@@ -334,7 +272,6 @@ private fun SumatifTabContent(
     val colorScheme = MaterialTheme.colorScheme
     val statusSuccess = statusSuccessColor()
     val statusWarning = statusWarningColor()
-    val statusDanger = statusDangerColor()
     val heroContent = heroContentColor()
     val subjects = grades.map { grade ->
         SubjectGrade(
@@ -392,12 +329,7 @@ private fun SumatifTabContent(
                             letterSpacing = (-2).sp
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-                        val (predicateLabel, predicateColor) = when {
-                            avgScore >= 90 -> "SANGAT BAIK" to statusSuccess
-                            avgScore >= 80 -> "BAIK" to colorScheme.secondary
-                            avgScore >= 70 -> "CUKUP" to statusWarning
-                            else -> "PERLU BIMBINGAN" to statusDanger
-                        }
+                        val (predicateLabel, predicateColor) = com.sdm3.parent.core.util.predicateForScore(avgScore)
                         Surface(
                             color = heroContent.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(99.dp),
@@ -455,7 +387,7 @@ private fun SumatifTabContent(
             )
         }
 
-        item { Spacer(Modifier.height(100.dp)) }
+        item { Spacer(Modifier.height(Spacing.bottomNavSafeArea)) }
     }
 }
 
@@ -487,7 +419,7 @@ private fun FormatifTabContent(items: List<FormatifGradeItem>) {
                             Text(
                                 text = item.description,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                color = ProductSchoolTheme.colors.onSurfaceMuted
                             )
                         }
                     }
@@ -495,19 +427,18 @@ private fun FormatifTabContent(items: List<FormatifGradeItem>) {
                         text = "${item.score}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black,
-                        color = colorScheme.secondary
+                        color = com.sdm3.parent.core.util.scoreColor(item.score)
                     )
                 }
             }
         }
-        item { Spacer(Modifier.height(100.dp)) }
+        item { Spacer(Modifier.height(Spacing.bottomNavSafeArea)) }
     }
 }
 
 @Composable
 private fun ProjekTabContent(items: List<ProjekGradeItem>) {
     val colorScheme = MaterialTheme.colorScheme
-    val statusSuccess = statusSuccessColor()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -530,7 +461,7 @@ private fun ProjekTabContent(items: List<ProjekGradeItem>) {
                         Text(
                             text = item.deskripsi,
                             style = MaterialTheme.typography.bodySmall,
-                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            color = ProductSchoolTheme.colors.onSurfaceMuted
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -539,19 +470,19 @@ private fun ProjekTabContent(items: List<ProjekGradeItem>) {
                             text = "${item.nilai}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Black,
-                            color = statusSuccess
+                            color = com.sdm3.parent.core.util.scoreColor(item.nilai)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Predikat ${item.predikat}",
                             style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            color = ProductSchoolTheme.colors.onSurfaceFaint
                         )
                     }
                 }
             }
         }
-        item { Spacer(Modifier.height(100.dp)) }
+        item { Spacer(Modifier.height(Spacing.bottomNavSafeArea)) }
     }
 }
 
@@ -561,14 +492,7 @@ private fun SubjectCard(
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val statusSuccess = statusSuccessColor()
-    val statusWarning = statusWarningColor()
-    val statusDanger = statusDangerColor()
-    val scoreColor = when {
-        subject.score >= 90 -> statusSuccess
-        subject.score >= 75 -> statusWarning
-        else -> statusDanger
-    }
+    val scoreColor = com.sdm3.parent.core.util.scoreColor(subject.score)
 
     Sdm3Card(
         modifier = Modifier
@@ -590,7 +514,7 @@ private fun SubjectCard(
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Outlined.AutoStories,
-                        contentDescription = null,
+                        contentDescription = "Mata pelajaran",
                         tint = colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
@@ -609,7 +533,7 @@ private fun SubjectCard(
                     text = "Predikat ${subject.predicate}",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                     letterSpacing = 0.5.sp
                 )
             }
@@ -629,7 +553,7 @@ private fun SubjectCard(
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 Icons.Outlined.ChevronRight,
-                contentDescription = null,
+                contentDescription = "Lihat detail",
                 tint = colorScheme.primary.copy(alpha = 0.15f),
                 modifier = Modifier.size(18.dp)
             )
@@ -659,7 +583,7 @@ private fun StatMiniCard(
                 color = color.copy(alpha = 0.08f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+                    Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(20.dp))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -676,7 +600,7 @@ private fun StatMiniCard(
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp,
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                color = ProductSchoolTheme.colors.onSurfaceFaint
             )
         }
     }

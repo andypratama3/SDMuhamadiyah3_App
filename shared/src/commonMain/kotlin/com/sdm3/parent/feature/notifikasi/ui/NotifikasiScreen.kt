@@ -8,18 +8,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -34,7 +30,11 @@ import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
 import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
 import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
 import com.sdm3.parent.core.designsystem.component.EmptyStateStyle
+import com.sdm3.parent.core.designsystem.component.ScreenUiState
+import com.sdm3.parent.core.designsystem.component.resolveScreenState
+import com.sdm3.parent.core.designsystem.component.Sdm3IconBadge
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.util.bulanSingkat
 import com.sdm3.parent.feature.notifikasi.NotifikasiUiState
 import com.sdm3.parent.feature.notifikasi.NotifikasiViewModel
 import kotlinx.datetime.TimeZone
@@ -56,13 +56,6 @@ private fun notifMatchesCategory(type: String, category: String): Boolean {
         "Pengumuman" -> t in setOf("announcement", "pengumuman", "general", "info", "broadcast", "umum")
         else -> true
     }
-}
-
-sealed class NotifUiState {
-    data object Loading : NotifUiState()
-    data object Empty : NotifUiState()
-    data class Error(val message: String) : NotifUiState()
-    data object Success : NotifUiState()
 }
 
 data class NotifItem(
@@ -91,7 +84,7 @@ private fun iconForType(type: String): ImageVector = when (type) {
 fun NotifikasiScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit = {},
-    uiState: NotifUiState = NotifUiState.Success,
+    uiState: ScreenUiState = ScreenUiState.Success,
     viewModel: NotifikasiViewModel = koinViewModel()
 ) {
     val isPreview = LocalInspectionMode.current
@@ -106,15 +99,7 @@ fun NotifikasiScreen(
 
     val screenState = remember(vmState, isPreview) {
         if (isPreview) uiState
-        else {
-            val s = vmState
-            when {
-                s.isLoading -> NotifUiState.Loading
-                s.errorMessage != null -> NotifUiState.Error(s.errorMessage)
-                s.isEmpty -> NotifUiState.Empty
-                else -> NotifUiState.Success
-            }
-        }
+        else resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
 
     if (!isPreview) {
@@ -123,73 +108,31 @@ fun NotifikasiScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "Notifikasi",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "PUSAT INFORMASI TERPADU",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
+    ScreenScaffold(
+        title = "Notifikasi",
+        subtitle = "PUSAT INFORMASI TERPADU",
+        onBack = onBack,
+        actions = {
+            IconButton(onClick = { viewModel.markAllAsRead() }) {
+                Surface(
+                    modifier = Modifier.size(36.dp),
+                    shape = CircleShape,
+                    color = colorScheme.primary.copy(alpha = 0.05f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Outlined.DoneAll,
+                            contentDescription = "Baca Semua",
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.primary)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.markAllAsRead() }) {
-                        Surface(
-                            modifier = Modifier.size(36.dp),
-                            shape = CircleShape,
-                            color = colorScheme.primary.copy(alpha = 0.05f)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Outlined.DoneAll,
-                                    contentDescription = "Baca Semua",
-                                    tint = colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
+                }
+            }
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Modern Atmospheric Glow
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             Column(
                 modifier = Modifier
@@ -200,7 +143,7 @@ fun NotifikasiScreen(
                     selectedTabIndex = selectedFilter,
                     containerColor = Color.Transparent,
                     contentColor = colorScheme.primary,
-                    edgePadding = 24.dp,
+                    edgePadding = Spacing.lg,
                     divider = {},
                     indicator = {
                         TabRowDefaults.SecondaryIndicator(
@@ -227,13 +170,13 @@ fun NotifikasiScreen(
                 }
 
                 when (screenState) {
-                    is NotifUiState.Loading -> {
+                    is ScreenUiState.Loading -> {
                         ShimmerNotifikasiList()
                     }
-                    is NotifUiState.Empty -> {
+                    is ScreenUiState.Empty -> {
                         EmptyNotifikasiState()
                     }
-                    is NotifUiState.Error -> {
+                    is ScreenUiState.Error -> {
                         Box(modifier = Modifier.fillMaxSize()) {
                             Sdm3ErrorState(
                                 title = "Gagal Memuat",
@@ -249,7 +192,7 @@ fun NotifikasiScreen(
                             )
                         }
                     }
-                    is NotifUiState.Success -> {
+                    is ScreenUiState.Success -> {
                         val notifItems = vmState.notifications.map { n ->
                             NotifItem(
                                 id = n.id,
@@ -280,8 +223,8 @@ fun NotifikasiScreen(
 
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
+                                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                             ) {
                                 items(lazyItems) { lazyItem ->
                                     when (lazyItem) {
@@ -291,8 +234,8 @@ fun NotifikasiScreen(
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Black,
                                                 letterSpacing = 1.5.sp,
-                                                color = colorScheme.primary.copy(alpha = 0.3f),
-                                                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                                                color = ProductSchoolTheme.colors.onSurfaceMuted,
+                                                modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.xs)
                                             )
                                         }
                                         is LazyNotifItem.Notif -> {
@@ -311,26 +254,11 @@ fun NotifikasiScreen(
                                                             if (!notif.isRead) colorScheme.primary.copy(alpha = 0.03f)
                                                             else Color.Transparent
                                                         )
-                                                        .padding(16.dp),
+                                                        .padding(Spacing.md),
                                                     verticalAlignment = Alignment.Top
                                                 ) {
-                                                    Surface(
-                                                        modifier = Modifier.size(48.dp),
-                                                        shape = RoundedCornerShape(14.dp),
-                                                        color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                                        border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
-                                                        shadowElevation = 4.dp
-                                                    ) {
-                                                        Box(contentAlignment = Alignment.Center) {
-                                                            Icon(
-                                                                iconForType(notif.type),
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(28.dp),
-                                                                tint = colorScheme.primary
-                                                            )
-                                                        }
-                                                    }
-                                                    Spacer(modifier = Modifier.width(16.dp))
+                                                    Sdm3IconBadge(icon = iconForType(notif.type), size = 48.dp, iconSize = 28.dp)
+                                                    Spacer(modifier = Modifier.width(Spacing.md))
                                                     Column(modifier = Modifier.weight(1f)) {
                                                         Row(
                                                             modifier = Modifier.fillMaxWidth(),
@@ -349,22 +277,22 @@ fun NotifikasiScreen(
                                                             Text(
                                                                 text = notifGroupAndLabel(notif.timestamp).second,
                                                                 style = MaterialTheme.typography.labelSmall,
-                                                                color = colorScheme.primary.copy(alpha = 0.3f),
+                                                                color = ProductSchoolTheme.colors.onSurfaceFaint,
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
-                                                        Spacer(modifier = Modifier.height(4.dp))
+                                                        Spacer(modifier = Modifier.height(Spacing.xs))
                                                         Text(
                                                             text = notif.body,
                                                             style = MaterialTheme.typography.bodyMedium,
-                                                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                                                             maxLines = 2,
                                                             overflow = TextOverflow.Ellipsis,
                                                             lineHeight = 20.sp
                                                         )
                                                     }
                                                     if (!notif.isRead) {
-                                                        Spacer(modifier = Modifier.width(12.dp))
+                                                        Spacer(modifier = Modifier.width(Spacing.sm))
                                                         Box(
                                                             modifier = Modifier
                                                                 .size(8.dp)
@@ -378,7 +306,7 @@ fun NotifikasiScreen(
                                         }
                                     }
                                 }
-                                item { Spacer(modifier = Modifier.height(100.dp)) }
+                                item { Spacer(modifier = Modifier.height(Spacing.xxxl)) }
                             }
                         }
                     }
@@ -390,10 +318,9 @@ fun NotifikasiScreen(
 
 @Composable
 private fun ShimmerNotifikasiList() {
-    val colorScheme = MaterialTheme.colorScheme
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         repeat(5) {
             Sdm3Card(
@@ -401,7 +328,7 @@ private fun ShimmerNotifikasiList() {
                 padding = 0.dp
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(Spacing.md),
                     verticalAlignment = Alignment.Top
                 ) {
                     Box(
@@ -410,7 +337,7 @@ private fun ShimmerNotifikasiList() {
                             .clip(RoundedCornerShape(12.dp))
                             .shimmerEffect()
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(Spacing.md))
                     Column(modifier = Modifier.weight(1f)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -432,7 +359,7 @@ private fun ShimmerNotifikasiList() {
                                     .shimmerEffect()
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xs))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -440,7 +367,7 @@ private fun ShimmerNotifikasiList() {
                                 .clip(RoundedCornerShape(4.dp))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xs))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.7f)
@@ -459,7 +386,7 @@ private fun ShimmerNotifikasiList() {
 private fun EmptyNotifikasiState() {
     val colorScheme = MaterialTheme.colorScheme
     Column(
-        modifier = Modifier.fillMaxSize().padding(bottom = 60.dp),
+        modifier = Modifier.fillMaxSize().padding(bottom = Spacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -472,34 +399,30 @@ private fun EmptyNotifikasiState() {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     Icons.Outlined.NotificationsNone,
-                    contentDescription = null,
+                    contentDescription = "Tidak ada notifikasi",
                     modifier = Modifier.size(48.dp),
                     tint = colorScheme.primary.copy(alpha = 0.2f)
                 )
             }
         }
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
         Text(
             text = "Hening Di Sini",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = colorScheme.primary
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
         Text(
             text = "Seluruh aktivitas akademik dan administrasi Anda akan muncul di pusat notifikasi ini.",
             style = MaterialTheme.typography.bodyLarge,
             color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 48.dp),
+            modifier = Modifier.padding(horizontal = Spacing.xxxxl),
             lineHeight = 26.sp
         )
     }
 }
-
-private val bulanSingkatNotif = listOf(
-    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
-)
 
 private fun parseInstantOrNull(iso: String): Instant? {
     if (iso.isBlank()) return null
@@ -530,7 +453,7 @@ private fun notifGroupAndLabel(iso: String): Pair<String, String> {
         diff.inWholeMinutes < 60 -> "${diff.inWholeMinutes} mnt lalu"
         daysDiff <= 0 -> "${diff.inWholeHours} jam lalu"
         daysDiff == 1 -> "Kemarin"
-        else -> "${notifDate.dayOfMonth} ${bulanSingkatNotif[notifDate.monthNumber - 1]}"
+        else -> "${notifDate.dayOfMonth} ${bulanSingkat[notifDate.monthNumber - 1]}"
     }
     val group = when {
         daysDiff <= 0 -> "BARU INI"

@@ -1,7 +1,6 @@
 package com.sdm3.parent.core.designsystem.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -17,21 +15,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.theme.CardShape
-import com.sdm3.parent.core.designsystem.theme.GlassOutline
-import com.sdm3.parent.core.designsystem.theme.GlassSurface
 import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
@@ -40,63 +35,34 @@ import com.sdm3.parent.core.designsystem.theme.Spacing
 fun Sdm3GlassCard(
     modifier: Modifier = Modifier,
     padding: Dp = 0.dp,
-    blurRadius: Dp = 12.dp,
-    tint: Color = ProductSchoolTheme.colors.surfaceGlass,
-    innerHighlightAlpha: Float = 0.35f,
+    tint: Color = ProductSchoolTheme.colors.liquidGlassSurface,
     content: @Composable () -> Unit,
 ) {
+    val colors = ProductSchoolTheme.colors
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                shadowElevation = 4f
+                shape = CardShape
+                clip = true
+                ambientShadowColor = colors.liquidGlassShadow
+                spotShadowColor = colors.liquidGlassShadow
+            },
         shape = CardShape,
         colors = CardDefaults.cardColors(
             containerColor = tint,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         border = BorderStroke(
             width = 1.dp,
             brush = Brush.verticalGradient(
                 colors = listOf(
-                    ProductSchoolTheme.colors.glassOutline,
+                    colors.liquidGlassBorder,
                     Color.Transparent,
                 ),
             ),
         ),
-    ) {
-        Column(modifier = Modifier.padding(padding)) {
-            content()
-        }
-    }
-}
-
-@Composable
-fun Sdm3DashedGlassCard(
-    modifier: Modifier = Modifier,
-    padding: Dp = Spacing.md,
-    content: @Composable () -> Unit,
-) {
-    val primaryColor = MaterialTheme.colorScheme.primary
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .drawWithContent {
-                drawContent()
-                drawRoundRect(
-                    color = primaryColor.copy(alpha = 0.2f),
-                    cornerRadius = CornerRadius(16.dp.toPx()),
-                    style = Stroke(
-                        width = 1.5.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(
-                            floatArrayOf(8.dp.toPx(), 4.dp.toPx()),
-                            0f,
-                        ),
-                    ),
-                )
-            },
-        shape = CardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = ProductSchoolTheme.colors.surfaceGlass,
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(modifier = Modifier.padding(padding)) {
             content()
@@ -120,19 +86,6 @@ private fun Sdm3GlassCardPreview() {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            }
-            Sdm3DashedGlassCard {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(60.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "+ Tambah Data Baru",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = ProductSchoolTheme.colors.primary.copy(alpha = 0.6f),
-                    )
-                }
             }
         }
     }

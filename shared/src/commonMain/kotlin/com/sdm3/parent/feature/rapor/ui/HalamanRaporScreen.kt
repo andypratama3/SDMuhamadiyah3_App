@@ -11,18 +11,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,13 +37,6 @@ private fun raporStatusLabel(status: String?): String = when (status?.lowercase(
     "draft", "pending", "processing", "queued", "generating" -> "DIPROSES"
     null, "" -> "-"
     else -> status.uppercase()
-}
-
-sealed class HalamanRaporUiState {
-    data object Loading : HalamanRaporUiState()
-    data object Empty : HalamanRaporUiState()
-    data class Error(val message: String) : HalamanRaporUiState()
-    data object Success : HalamanRaporUiState()
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -73,14 +61,8 @@ fun HalamanRaporScreen(
         }
     }
 
-    val uiState: HalamanRaporUiState = remember(vmState) {
-        val s = vmState
-        when {
-            s.isLoading -> HalamanRaporUiState.Loading
-            s.errorMessage != null -> HalamanRaporUiState.Error(s.errorMessage)
-            s.isEmpty -> HalamanRaporUiState.Empty
-            else -> HalamanRaporUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
 
     val allSemesters = remember(vmState.rapors) {
@@ -99,63 +81,16 @@ fun HalamanRaporScreen(
     val heroContent = heroContentColor()
     val statusSuccess = statusSuccessColor()
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Arsip Rapor Digital",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "DOKUMEN RESMI NEGARA",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    if (onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Kembali",
-                                tint = colorScheme.primary
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Arsip Rapor Digital",
+        subtitle = "DOKUMEN RESMI NEGARA",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             when (val state = uiState) {
-                is HalamanRaporUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -205,7 +140,7 @@ fun HalamanRaporScreen(
                     }
                 }
 
-                is HalamanRaporUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Belum Ada Rapor",
                         message = "Belum terdapat arsip rapor digital untuk siswa ini.",
@@ -214,13 +149,13 @@ fun HalamanRaporScreen(
                             Sdm3Button(
                                 text = "Muat Ulang",
                                 onClick = { viewModel.loadRapors(studentId) },
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xl)
                             )
                         }
                     )
                 }
 
-                is HalamanRaporUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Gagal Memuat Rapor",
                         message = state.message,
@@ -229,7 +164,7 @@ fun HalamanRaporScreen(
                             Sdm3Button(
                                 text = "Coba Lagi",
                                 onClick = { viewModel.loadRapors(studentId) },
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xl)
                             )
                         },
                         secondaryAction = if (onBack != null) {
@@ -237,14 +172,14 @@ fun HalamanRaporScreen(
                                 Sdm3OutlinedButton(
                                     text = "Kembali",
                                     onClick = onBack,
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xl)
                                 )
                             }
                         } else null,
                     )
                 }
 
-                is HalamanRaporUiState.Success -> {
+                is ScreenUiState.Success -> {
                     val latestRapor = filteredRapors.firstOrNull()
                     LazyColumn(
                         modifier = Modifier
@@ -256,7 +191,7 @@ fun HalamanRaporScreen(
                         item {
                             Column {
                                 Surface(
-                                    color = colorScheme.secondary.copy(alpha = 0.15f),
+                                    color = colorScheme.secondaryContainer,
                                     shape = RoundedCornerShape(999.dp)
                                 ) {
                                     Text(
@@ -265,7 +200,7 @@ fun HalamanRaporScreen(
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
                                         letterSpacing = 1.sp,
-                                        color = colorScheme.secondary
+                                        color = colorScheme.onSecondaryContainer
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -317,11 +252,6 @@ fun HalamanRaporScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .background(
-                                                brush = Brush.horizontalGradient(
-                                                    listOf(colorScheme.primary, colorScheme.inversePrimary.copy(alpha = 0.8f))
-                                                )
-                                            )
                                             .padding(24.dp)
                                     ) {
                                         Row(
@@ -336,7 +266,7 @@ fun HalamanRaporScreen(
                                                     color = heroContent.copy(alpha = 0.15f)
                                                 ) {
                                                     Box(contentAlignment = Alignment.Center) {
-                                                        Icon(Icons.Outlined.AutoStories, contentDescription = null, tint = heroContent, modifier = Modifier.size(24.dp))
+                                                        Icon(Icons.Outlined.AutoStories, contentDescription = "Rapor Semester", tint = heroContent, modifier = Modifier.size(24.dp))
                                                     }
                                                 }
                                                 Spacer(modifier = Modifier.width(16.dp))
@@ -351,12 +281,12 @@ fun HalamanRaporScreen(
                                             val statusPublished = isRaporPublished(latestRapor?.status)
                                             Surface(
                                                 shape = RoundedCornerShape(999.dp),
-                                                color = if (statusPublished) colorScheme.secondary else heroContent.copy(alpha = 0.2f)
+                                                color = if (statusPublished) colorScheme.secondary else colorScheme.primaryContainer
                                             ) {
                                                 Text(
                                                     text = " ${raporStatusLabel(latestRapor?.status)} ",
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = if (statusPublished) colorScheme.primary else heroContent,
+                                                    color = if (statusPublished) colorScheme.primary else colorScheme.onPrimaryContainer,
                                                     fontWeight = FontWeight.Black,
                                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                                 )
@@ -425,7 +355,7 @@ fun HalamanRaporScreen(
                                             ) {
                                                 Icon(
                                                     Icons.Outlined.Verified,
-                                                    contentDescription = null,
+                                                    contentDescription = "Terverifikasi",
                                                     modifier = Modifier.size(18.dp),
                                                     tint = statusSuccess
                                                 )
@@ -462,7 +392,7 @@ fun HalamanRaporScreen(
                                         color = colorScheme.primary.copy(alpha = 0.05f)
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
-                                            Icon(Icons.Outlined.History, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(22.dp))
+                                            Icon(Icons.Outlined.History, contentDescription = "Riwayat rapor", tint = colorScheme.primary, modifier = Modifier.size(22.dp))
                                         }
                                     }
                                     Spacer(modifier = Modifier.width(16.dp))
@@ -492,7 +422,7 @@ fun HalamanRaporScreen(
                             }
                         }
 
-                        item { Spacer(modifier = Modifier.height(100.dp)) }
+                        item { Spacer(modifier = Modifier.height(Spacing.bottomNavSafeArea)) }
                     }
                 }
             }

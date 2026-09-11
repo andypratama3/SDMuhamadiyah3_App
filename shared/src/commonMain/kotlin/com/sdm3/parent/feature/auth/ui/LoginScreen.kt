@@ -20,8 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -101,29 +99,10 @@ fun LoginScreen(
                 }
         )
 
-        Canvas(modifier = Modifier.fillMaxSize().alpha(0.5f)) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                    center = Offset(size.width * 0.85f, size.height * 0.15f),
-                    radius = size.width * 1.2f
-                )
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                    center = Offset(size.width * 0.15f, size.height * 0.85f),
-                    radius = size.width * 0.9f
-                )
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.tertiary.copy(alpha = 0.08f), Color.Transparent),
-                    center = Offset(size.width * 0.5f, size.height * 0.5f),
-                    radius = size.width * 0.6f
-                )
-            )
-        }
+        AtmosphericGlow(
+            alignment = Alignment.TopEnd,
+            color = colorScheme.primary
+        )
 
         Column(
             modifier = Modifier
@@ -131,10 +110,10 @@ fun LoginScreen(
                 .verticalScroll(rememberScrollState())
                 .safeDrawingPadding()
                 .imePadding()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             Box(
                 modifier = Modifier
@@ -146,20 +125,15 @@ fun LoginScreen(
                     .animateContentSize(tween(700, easing = PremiumEasing)),
                 contentAlignment = Alignment.Center
             ) {
-                Surface(
-                    modifier = Modifier.size(110.dp).blur(if (startAnimation) 0.dp else 16.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    color = glassSurfaceColor(),
-                    border = BorderStroke(2.dp, glassBorderColor()),
-                    shadowElevation = 8.dp
+                Sdm3GlassIconContainer(
+                    size = 110.dp,
+                    modifier = Modifier.blur(if (startAnimation) 0.dp else 16.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Sdm3Logo(size = 72.dp, showBackground = false)
-                    }
+                    Sdm3Logo(size = 72.dp, showBackground = false)
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -176,23 +150,11 @@ fun LoginScreen(
                     letterSpacing = (-0.3).sp,
                     textAlign = TextAlign.Center,
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Surface(
-                    color = colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                    shape = RoundedCornerShape(999.dp)
-                ) {
-                    Text(
-                        text = " ORANG TUA & GURU ",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.2.sp,
-                        color = colorScheme.secondary
-                    )
-                }
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                Sdm3CategoryBadge(text = "ORANG TUA & GURU")
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxxl))
 
             Sdm3GlassCard(
                 modifier = Modifier.graphicsLayer {
@@ -214,7 +176,7 @@ fun LoginScreen(
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(Spacing.lg))
 
                     Sdm3TextField(
                         value = uiState.password,
@@ -241,35 +203,10 @@ fun LoginScreen(
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
-                        Surface(
-                            modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
-                            color = colorScheme.errorContainer,
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.3f))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    Icons.Outlined.ErrorOutline,
-                                    contentDescription = null,
-                                    tint = colorScheme.error,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = uiState.errorMessage ?: "",
-                                    color = colorScheme.error,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
+                        Sdm3ErrorBanner(message = uiState.errorMessage ?: "")
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
 
                     TextButton(
                         onClick = { onForgotPassword(uiState.email) },
@@ -285,7 +222,7 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             Column(
                 modifier = Modifier.graphicsLayer {
@@ -301,7 +238,7 @@ fun LoginScreen(
                 )
 
                 if (uiState.biometricAvailable) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
                     Sdm3OutlinedButton(
                         text = "Gunakan Biometrik",
@@ -312,7 +249,7 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             Text(
                 text = "${stringResource(Res.string.school_name)} v${com.sdm3.parent.APP_VERSION_NAME}",
@@ -322,7 +259,7 @@ fun LoginScreen(
                 letterSpacing = 1.sp
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
         }
     }
 }

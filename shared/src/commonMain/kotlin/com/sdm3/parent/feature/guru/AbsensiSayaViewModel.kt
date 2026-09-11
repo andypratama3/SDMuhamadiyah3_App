@@ -29,9 +29,11 @@ data class AbsensiSayaUiState(
     override val isEmpty: Boolean = false,
 ) : ScreenState {
     val isLocationReady: Boolean
-        get() = locationPermission == LocationPermissionState.GRANTED &&
-            liveLocation != null &&
-            (liveLocation?.accuracyMeters ?: Double.MAX_VALUE) <= 100.0
+        get() {
+            val loc = liveLocation ?: return false
+            return locationPermission == LocationPermissionState.GRANTED &&
+                loc.accuracyMeters <= 100.0
+        }
 
     val showLocationSettingsShortcut: Boolean
         get() = locationPermission == LocationPermissionState.DENIED_PERMANENTLY ||

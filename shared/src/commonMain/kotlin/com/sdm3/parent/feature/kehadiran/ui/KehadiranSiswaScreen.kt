@@ -1,7 +1,5 @@
 package com.sdm3.parent.feature.kehadiran.ui
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,17 +7,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -39,8 +34,6 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import org.koin.compose.viewmodel.koinViewModel
 
-private val PremiumEasing = androidx.compose.animation.core.CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
-
 private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
 private fun pad2(n: Int): String = if (n < 10) "0$n" else "$n"
@@ -50,13 +43,6 @@ private fun daysInMonth(month: Int, year: Int): Int = when (month) {
     4, 6, 9, 11 -> 30
     2 -> if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) 29 else 28
     else -> 30
-}
-
-sealed class KehadiranScreenUiState {
-    data object Loading : KehadiranScreenUiState()
-    data object Empty : KehadiranScreenUiState()
-    data class Error(val message: String) : KehadiranScreenUiState()
-    data object Success : KehadiranScreenUiState()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,13 +65,8 @@ fun KehadiranSiswaScreen(
     val errorMessage = uiState.errorMessage
 
     val screenState = remember(uiState.isLoading, uiState.isEmpty, errorMessage, isPreview) {
-        if (isPreview) KehadiranScreenUiState.Success
-        else when {
-            uiState.isLoading && uiState.isEmpty -> KehadiranScreenUiState.Loading
-            errorMessage != null -> KehadiranScreenUiState.Error(errorMessage)
-            !uiState.isLoading && uiState.isEmpty -> KehadiranScreenUiState.Empty
-            else -> KehadiranScreenUiState.Success
-        }
+        if (isPreview) ScreenUiState.Success
+        else resolveScreenState(uiState.isLoading, uiState.isEmpty, errorMessage)
     }
 
     if (!isPreview) {
@@ -95,79 +76,34 @@ fun KehadiranSiswaScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "Presensi Siswa",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "MONITORING REAL-TIME",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Presensi Siswa",
+        subtitle = "MONITORING REAL-TIME",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             when (screenState) {
-                is KehadiranScreenUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
                         item { TodayShimmer() }
                         item { SummaryShimmer() }
                         item { CalendarShimmer() }
-                        item { Spacer(Modifier.height(8.dp)) }
+                        item { Spacer(Modifier.height(Spacing.xs)) }
                         item { LogRowShimmer() }
                         item { LogRowShimmer() }
                         item { LogRowShimmer() }
-                        item { Spacer(Modifier.height(100.dp)) }
+                        item { Spacer(Modifier.height(Spacing.xxxl)) }
                     }
                 }
-                is KehadiranScreenUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Gagal Memuat Data",
                         message = screenState.message,
@@ -180,14 +116,14 @@ fun KehadiranSiswaScreen(
                         }
                     )
                 }
-                is KehadiranScreenUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Belum Ada Data Presensi",
                         message = "Data kehadiran siswa belum tersedia.",
                         style = EmptyStateStyle.Neutral
                     )
                 }
-                is KehadiranScreenUiState.Success -> {
+                is ScreenUiState.Success -> {
                     val attendances = uiState.attendances
                     val summary = uiState.summary
                     val month = uiState.selectedMonth
@@ -227,8 +163,8 @@ fun KehadiranSiswaScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
                         item {
                             TodayAttendanceCard(
@@ -240,7 +176,7 @@ fun KehadiranSiswaScreen(
                         item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                             ) {
                                 SummaryCard(
                                     modifier = Modifier.weight(1f),
@@ -262,7 +198,7 @@ fun KehadiranSiswaScreen(
                         item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                             ) {
                                 SummaryCard(
                                     modifier = Modifier.weight(1f),
@@ -284,12 +220,12 @@ fun KehadiranSiswaScreen(
                         item {
                             SectionHeader(
                                 title = "Kalender Presensi",
-                                modifier = Modifier.padding(top = 8.dp)
+                                modifier = Modifier.padding(top = Spacing.xs)
                             )
                         }
 
                         item {
-                            Sdm3Card(padding = 20.dp) {
+                            Sdm3Card(padding = Spacing.lg) {
                                 Column {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
@@ -302,7 +238,7 @@ fun KehadiranSiswaScreen(
                                             fontWeight = FontWeight.Bold,
                                             color = colorScheme.primary
                                         )
-                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                                             Surface(
                                                 modifier = Modifier
                                                     .size(32.dp)
@@ -334,7 +270,7 @@ fun KehadiranSiswaScreen(
                                         }
                                     }
 
-                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Spacer(modifier = Modifier.height(Spacing.xl))
 
                                     Row(modifier = Modifier.fillMaxWidth()) {
                                         listOf("MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB").forEach {
@@ -350,7 +286,7 @@ fun KehadiranSiswaScreen(
                                         }
                                     }
 
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(Spacing.md))
 
                                     weeks.forEach { week ->
                                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -371,11 +307,12 @@ fun KehadiranSiswaScreen(
                                                     contentAlignment = Alignment.Center
                                                 ) {
                                                     if (isToday) {
+                                                        val heroContent = heroContentColor()
                                                         Surface(
                                                             modifier = Modifier.fillMaxSize(0.85f),
                                                             shape = RoundedCornerShape(12.dp),
                                                             color = colorScheme.primary,
-                                                            border = BorderStroke(1.dp, colorScheme.primary)
+                                                            border = BorderStroke(1.dp, heroContent.copy(alpha = 0.35f))
                                                         ) {
                                                             DayContent(day, isToday = true, colorScheme, onPrimary = true, status = status, isSunday = isSunday)
                                                         }
@@ -390,13 +327,13 @@ fun KehadiranSiswaScreen(
                                         }
                                     }
 
-                                    Spacer(modifier = Modifier.height(20.dp))
+                                    Spacer(modifier = Modifier.height(Spacing.lg))
 
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                                     ) {
-                                        listOf("Hadir" to statusSuccess, "Sakit" to statusWarning, "Alpa" to colorScheme.error).forEach { (label, color) ->
+                                        listOf("Hadir" to statusSuccess, "Sakit" to statusWarning, "Alpa" to statusDangerColor()).forEach { (label, color) ->
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(color))
                                                 Spacer(Modifier.width(6.dp))
@@ -404,7 +341,7 @@ fun KehadiranSiswaScreen(
                                                     text = label,
                                                     style = MaterialTheme.typography.labelSmall,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = colorScheme.primary.copy(alpha = 0.5f)
+                                                    color = ProductSchoolTheme.colors.onSurfaceMuted
                                                 )
                                             }
                                         }
@@ -417,7 +354,7 @@ fun KehadiranSiswaScreen(
                             item {
                                 SectionHeader(
                                     title = "Log Aktivitas",
-                                    modifier = Modifier.padding(top = 8.dp)
+                                    modifier = Modifier.padding(top = Spacing.xs)
                                 )
                             }
 
@@ -429,8 +366,8 @@ fun KehadiranSiswaScreen(
                                     AttendanceStatus.SAKIT -> statusWarning to Icons.Outlined.MedicalServices
                                     AttendanceStatus.IZIN -> colorScheme.primary to Icons.Outlined.EventAvailable
                                     AttendanceStatus.ALPA -> colorScheme.error to Icons.Outlined.Cancel
-                                    AttendanceStatus.PULANG -> colorScheme.secondary to Icons.Outlined.Logout
-                                    null -> colorScheme.onSurfaceVariant.copy(alpha = 0.3f) to Icons.Outlined.Info
+                                    AttendanceStatus.PULANG -> colorScheme.secondary to Icons.AutoMirrored.Outlined.Logout
+                                    null -> ProductSchoolTheme.colors.onSurfaceFaint to Icons.Outlined.Info
                                 }
                                 val logNote = att.notes ?: when (parsedStatus) {
                                     AttendanceStatus.HADIR -> "Hadir sesuai jadwal."
@@ -445,7 +382,7 @@ fun KehadiranSiswaScreen(
                             }
                         }
 
-                        item { Spacer(Modifier.height(100.dp)) }
+                        item { Spacer(Modifier.height(Spacing.bottomNavSafeArea)) }
                     }
                 }
             }
@@ -464,7 +401,7 @@ private fun TodayShimmer() {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp)
+                .padding(Spacing.xl)
         ) {
             Box(
                 modifier = Modifier
@@ -472,7 +409,7 @@ private fun TodayShimmer() {
                     .clip(RoundedCornerShape(16.dp))
                     .shimmerEffect()
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.3f)
@@ -480,7 +417,7 @@ private fun TodayShimmer() {
                     .clip(RoundedCornerShape(6.dp))
                     .shimmerEffect()
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
@@ -488,7 +425,7 @@ private fun TodayShimmer() {
                     .clip(RoundedCornerShape(8.dp))
                     .shimmerEffect()
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
@@ -502,14 +439,14 @@ private fun TodayShimmer() {
 
 @Composable
 private fun SummaryShimmer() {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
             repeat(2) {
                 Sdm3Card(modifier = Modifier.weight(1f)) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(Spacing.md)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -529,7 +466,7 @@ private fun SummaryShimmer() {
                                     .shimmerEffect()
                             )
                         }
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(Spacing.sm))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.3f)
@@ -543,11 +480,11 @@ private fun SummaryShimmer() {
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
             repeat(2) {
                 Sdm3Card(modifier = Modifier.weight(1f)) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(Spacing.md)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -567,7 +504,7 @@ private fun SummaryShimmer() {
                                     .shimmerEffect()
                             )
                         }
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(Spacing.sm))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.3f)
@@ -584,7 +521,7 @@ private fun SummaryShimmer() {
 
 @Composable
 private fun CalendarShimmer() {
-    Sdm3Card(padding = 20.dp) {
+    Sdm3Card(padding = Spacing.lg) {
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -598,7 +535,7 @@ private fun CalendarShimmer() {
                         .clip(RoundedCornerShape(8.dp))
                         .shimmerEffect()
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                     Box(
                         modifier = Modifier
                             .size(32.dp)
@@ -613,20 +550,20 @@ private fun CalendarShimmer() {
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
             Row(modifier = Modifier.fillMaxWidth()) {
                 repeat(7) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(12.dp)
-                            .padding(horizontal = 4.dp)
+                            .padding(horizontal = Spacing.xs)
                             .clip(RoundedCornerShape(4.dp))
                             .shimmerEffect()
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
             repeat(5) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     repeat(7) {
@@ -634,13 +571,13 @@ private fun CalendarShimmer() {
                             modifier = Modifier
                                 .weight(1f)
                                 .aspectRatio(1f)
-                                .padding(4.dp)
+                                .padding(Spacing.xs)
                                 .clip(RoundedCornerShape(8.dp))
                                 .shimmerEffect()
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
             }
         }
     }
@@ -650,7 +587,7 @@ private fun CalendarShimmer() {
 private fun LogRowShimmer() {
     Sdm3Card {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -659,7 +596,7 @@ private fun LogRowShimmer() {
                     .clip(RoundedCornerShape(12.dp))
                     .shimmerEffect()
             )
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(Spacing.md))
             Column(modifier = Modifier.weight(1f)) {
                 Box(
                     modifier = Modifier
@@ -696,7 +633,7 @@ private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onP
     val dotColor = when (AttendanceStatus.fromApi(status)) {
         AttendanceStatus.HADIR -> if (onPrimary) heroContent else statusSuccess
         AttendanceStatus.SAKIT -> statusWarning
-        AttendanceStatus.IZIN -> colorScheme.primary
+        AttendanceStatus.IZIN -> if (onPrimary) heroContent else colorScheme.primary
         AttendanceStatus.ALPA -> colorScheme.error
         AttendanceStatus.PULANG -> colorScheme.secondary
         null -> null
@@ -749,22 +686,18 @@ private fun TodayAttendanceCard(
         colors = CardDefaults.cardColors(containerColor = colorScheme.primary)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            val glowColor = colorScheme.surfaceTint.copy(alpha = 0.4f)
-            Canvas(modifier = Modifier.fillMaxWidth().height(140.dp).alpha(0.15f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(glowColor, Color.Transparent),
-                        center = Offset(size.width * 0.9f, 0f),
-                        radius = size.width
-                    )
-                )
-            }
+            AtmosphericGlow(
+                modifier = Modifier.height(140.dp),
+                alignment = Alignment.TopEnd,
+                color = colorScheme.primaryContainer,
+                alpha = 0.15f
+            )
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp)
+                    .padding(Spacing.xl)
             ) {
                 Surface(
                     modifier = Modifier.size(56.dp),
@@ -774,13 +707,13 @@ private fun TodayAttendanceCard(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             Icons.Outlined.Fingerprint,
-                            contentDescription = null,
+                            contentDescription = "Status kehadiran",
                             tint = heroContent,
                             modifier = Modifier.size(32.dp)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
                 Text(
                     text = "STATUS HARI INI",
                     style = MaterialTheme.typography.labelSmall,
@@ -794,7 +727,7 @@ private fun TodayAttendanceCard(
                     fontWeight = FontWeight.Bold,
                     color = heroContent
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
                 Text(
                     text = timeLocation,
                     style = MaterialTheme.typography.bodyMedium,
@@ -809,7 +742,7 @@ private fun TodayAttendanceCard(
 private fun SummaryCard(modifier: Modifier = Modifier, label: String, count: String, color: Color, icon: ImageVector) {
     val colorScheme = MaterialTheme.colorScheme
     Sdm3Card(modifier = modifier) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -822,7 +755,7 @@ private fun SummaryCard(modifier: Modifier = Modifier, label: String, count: Str
                     border = BorderStroke(1.dp, color.copy(alpha = 0.1f))
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
+                        Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(18.dp))
                     }
                 }
                 Text(
@@ -832,12 +765,12 @@ private fun SummaryCard(modifier: Modifier = Modifier, label: String, count: Str
                     color = colorScheme.primary
                 )
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(Spacing.sm))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Black,
-                color = colorScheme.primary.copy(alpha = 0.4f),
+                color = ProductSchoolTheme.colors.onSurfaceMuted,
                 letterSpacing = 1.sp
             )
         }
@@ -849,7 +782,7 @@ private fun AttendanceLogRow(date: String, status: String, note: String, time: S
     val colorScheme = MaterialTheme.colorScheme
     Sdm3Card {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
@@ -859,14 +792,14 @@ private fun AttendanceLogRow(date: String, status: String, note: String, time: S
                 border = BorderStroke(1.dp, color.copy(alpha = 0.1f))
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+                    Icon(icon, contentDescription = status, tint = color, modifier = Modifier.size(22.dp))
                 }
             }
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(Spacing.md))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(date, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(Spacing.xs))
                     Surface(
                         shape = RoundedCornerShape(4.dp),
                         color = color.copy(alpha = 0.1f)
@@ -880,9 +813,9 @@ private fun AttendanceLogRow(date: String, status: String, note: String, time: S
                         )
                     }
                 }
-                Text(note, style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                Text(note, style = MaterialTheme.typography.bodyMedium, color = ProductSchoolTheme.colors.onSurfaceMuted)
             }
-            Text(time, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = colorScheme.primary.copy(alpha = 0.3f))
+            Text(time, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = ProductSchoolTheme.colors.onSurfaceFaint)
         }
     }
 }

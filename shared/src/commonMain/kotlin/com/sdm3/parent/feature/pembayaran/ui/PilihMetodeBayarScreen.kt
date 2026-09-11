@@ -8,36 +8,28 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.ScreenUiState
+import com.sdm3.parent.core.designsystem.component.resolveScreenState
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.util.formatRupiah
 import com.sdm3.parent.core.util.formatTanggal
 import com.sdm3.parent.platform.PlatformActions
 import com.sdm3.parent.feature.pembayaran.PilihMetodeBayarViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.platform.LocalInspectionMode
-
-sealed class PilihMetodeBayarUiState {
-    data object Loading : PilihMetodeBayarUiState()
-    data object Empty : PilihMetodeBayarUiState()
-    data class Error(val message: String = "Silakan coba kembali.") : PilihMetodeBayarUiState()
-    data object Success : PilihMetodeBayarUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,8 +40,8 @@ fun PilihMetodeBayarScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
-    val glassSurface = glassSurfaceColor()
-    val glassBorder = glassBorderColor()
+    val liquidGlassSurface = ProductSchoolTheme.colors.liquidGlassSurface
+    val liquidGlassBorder = ProductSchoolTheme.colors.liquidGlassBorder
     var selectedMethod by remember { mutableStateOf<String?>(null) }
     val viewModel: PilihMetodeBayarViewModel = koinViewModel()
     val vmState by if (isPreview) {
@@ -57,14 +49,8 @@ fun PilihMetodeBayarScreen(
     } else {
         viewModel.uiState.collectAsState()
     }
-    val uiState: PilihMetodeBayarUiState = remember(vmState) {
-        val s = vmState
-        when {
-            s.isLoading -> PilihMetodeBayarUiState.Loading
-            s.errorMessage != null -> PilihMetodeBayarUiState.Error(s.errorMessage)
-            s.isEmpty -> PilihMetodeBayarUiState.Empty
-            else -> PilihMetodeBayarUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
 
     if (!isPreview) {
@@ -96,89 +82,16 @@ fun PilihMetodeBayarScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Pilih Cara Bayar",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "TRANSAKSI AMAN & TERVERIFIKASI",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.primary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        },
-        bottomBar = {
-            if (uiState is PilihMetodeBayarUiState.Success) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.xl, vertical = Spacing.md)
-                        .navigationBarsPadding()
-                ) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        color = glassSurface,
-                        border = BorderStroke(1.dp, glassBorder),
-                        shadowElevation = 8.dp
-                    ) {
-                        Box(modifier = Modifier.padding(Spacing.xs)) {
-                            Sdm3Button(
-                                text = "Lanjutkan Pembayaran",
-                                onClick = {
-                                    selectedMethod?.let { method ->
-                                        viewModel.requestSnapToken(studentFeeId, method)
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth().height(54.dp),
-                                enabled = selectedMethod != null && !vmState.isLoading,
-                                isLoading = vmState.isLoading
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    ScreenScaffold(
+        title = "Pilih Cara Bayar",
+        subtitle = "TRANSAKSI AMAN & TERVERIFIKASI",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             when (val state = uiState) {
-                is PilihMetodeBayarUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -204,7 +117,7 @@ fun PilihMetodeBayarScreen(
                         )
                         Spacer(modifier = Modifier.height(Spacing.sm))
                         repeat(4) {
-                            Spacer(modifier = Modifier.height(Spacing.xxs))
+                            Spacer(modifier = Modifier.height(Spacing.xs))
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -217,7 +130,7 @@ fun PilihMetodeBayarScreen(
                     }
                 }
 
-                is PilihMetodeBayarUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Tidak Ada Metode Pembayaran",
                         message = "Belum tersedia metode pembayaran saat ini.",
@@ -228,7 +141,7 @@ fun PilihMetodeBayarScreen(
                     )
                 }
 
-                is PilihMetodeBayarUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Gagal Memuat Metode",
                         message = state.message,
@@ -246,7 +159,7 @@ fun PilihMetodeBayarScreen(
                     )
                 }
 
-                is PilihMetodeBayarUiState.Success -> {
+                is ScreenUiState.Success -> {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -266,7 +179,7 @@ fun PilihMetodeBayarScreen(
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
                                         letterSpacing = 1.5.sp,
-                                        color = colorScheme.primary.copy(alpha = 0.4f)
+                                        color = ProductSchoolTheme.colors.onSurfaceMuted
                                     )
                                     Spacer(modifier = Modifier.height(Spacing.md))
                                     Text(
@@ -280,11 +193,11 @@ fun PilihMetodeBayarScreen(
                                         Text(
                                             text = "Jatuh tempo: ${formatTanggal(dueDate)}",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                            color = ProductSchoolTheme.colors.onSurfaceMuted
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(Spacing.sm))
-                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f))
+                                    HorizontalDivider(color = colorScheme.outline)
                                     Spacer(modifier = Modifier.height(Spacing.sm))
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
@@ -295,10 +208,10 @@ fun PilihMetodeBayarScreen(
                                             text = "TOTAL BAYAR",
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Black,
-                                            color = colorScheme.primary.copy(alpha = 0.5f)
+                                            color = ProductSchoolTheme.colors.onSurfaceMuted
                                         )
                                         Text(
-                                            text = vmState.selectedFee?.let { formatCurrency(it.amount) } ?: "Rp0",
+                                            text = vmState.selectedFee?.let { formatRupiah(it.amount) } ?: "Rp0",
                                             style = MaterialTheme.typography.headlineSmall,
                                             fontWeight = FontWeight.Bold,
                                             color = colorScheme.primary
@@ -335,7 +248,7 @@ fun PilihMetodeBayarScreen(
                                         Box(contentAlignment = Alignment.Center) {
                                             Icon(
                                                 Icons.Outlined.Payments,
-                                                contentDescription = null,
+                                                contentDescription = "Metode pembayaran",
                                                 modifier = Modifier.size(24.dp),
                                                 tint = if (isSelected) colorScheme.onPrimary else colorScheme.primary
                                             )
@@ -354,7 +267,7 @@ fun PilihMetodeBayarScreen(
                                                 method.description,
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Bold,
-                                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                                color = ProductSchoolTheme.colors.onSurfaceFaint
                                             )
                                         }
                                     }
@@ -372,8 +285,6 @@ fun PilihMetodeBayarScreen(
         }
     }
 }
-
-private fun formatCurrency(amount: Number): String = com.sdm3.parent.core.util.formatRupiah(amount)
 
 @Preview
 @Composable

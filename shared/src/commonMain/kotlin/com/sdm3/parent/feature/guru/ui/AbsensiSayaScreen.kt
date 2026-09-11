@@ -1,6 +1,5 @@
 package com.sdm3.parent.feature.guru.ui
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,23 +12,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+
+import androidx.compose.material.icons.automirrored.outlined.Login
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Login
-import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -38,10 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -51,13 +41,14 @@ import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.Sdm3Card
 import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
 import com.sdm3.parent.core.designsystem.component.Sdm3OutlinedButton
+import com.sdm3.parent.core.designsystem.component.ScreenGlowBackground
+import com.sdm3.parent.core.designsystem.component.ScreenScaffold
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.feature.guru.AbsensiSayaViewModel
 import com.sdm3.parent.platform.DeviceLocation
 import com.sdm3.parent.platform.LocationPermissionState
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AbsensiSayaScreen(
     onBack: () -> Unit,
@@ -92,51 +83,21 @@ fun AbsensiSayaScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
+    ScreenScaffold(
+        title = "Absensi Saya",
+        subtitle = "ABSENSI MANDIRI",
+        onBack = onBack,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("Absensi Saya", fontWeight = FontWeight.Bold)
-                        Text(
-                            text = "Check-in/out dengan GPS realtime",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onSurface.copy(alpha = 0.6f),
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Kembali")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-            )
-        },
     ) { padding ->
+        val errorMessage = state.errorMessage
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground(color = colorScheme.primary)
+
             when {
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -144,14 +105,14 @@ fun AbsensiSayaScreen(
                 state.isEmployeeProfileMissing -> {
                     Sdm3EmptyState(
                         title = "Profil Pegawai Belum Tersedia",
-                        message = state.errorMessage.orEmpty(),
+                        message = errorMessage.orEmpty(),
                         modifier = Modifier.align(Alignment.Center),
                     )
                 }
-                state.errorMessage != null && state.employeeName.isBlank() -> {
+                errorMessage != null && state.employeeName.isBlank() -> {
                     Sdm3EmptyState(
                         title = "Gagal Memuat",
-                        message = state.errorMessage.orEmpty(),
+                        message = errorMessage,
                         modifier = Modifier.align(Alignment.Center),
                         action = {
                             Sdm3Button(text = "Coba Lagi", onClick = { viewModel.load() })
@@ -217,7 +178,7 @@ fun AbsensiSayaScreen(
                             )
                         }
 
-                        state.errorMessage?.takeIf { state.employeeName.isNotBlank() }?.let { message ->
+                        errorMessage?.takeIf { state.employeeName.isNotBlank() }?.let { message ->
                             Text(
                                 text = message,
                                 color = colorScheme.error,
@@ -246,7 +207,7 @@ fun AbsensiSayaScreen(
                             enabled = state.canCheckIn &&
                                 !state.isSubmitting &&
                                 state.isLocationReady,
-                            icon = Icons.Outlined.Login,
+                            icon = Icons.AutoMirrored.Outlined.Login,
                             modifier = Modifier.fillMaxWidth(),
                             isLoading = state.isSubmitting && state.canCheckIn,
                         )
@@ -261,7 +222,7 @@ fun AbsensiSayaScreen(
                             enabled = state.canCheckOut &&
                                 !state.isSubmitting &&
                                 state.isLocationReady,
-                            icon = Icons.Outlined.Logout,
+                            icon = Icons.AutoMirrored.Outlined.Logout,
                             modifier = Modifier.fillMaxWidth(),
                             isLoading = state.isSubmitting && state.canCheckOut,
                         )
@@ -284,7 +245,7 @@ private fun CheckInStatusBadge(status: String) {
     Surface(color = container, shape = MaterialTheme.shapes.small) {
         Text(
             text = label,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
             style = MaterialTheme.typography.labelSmall,
             color = content,
             fontWeight = FontWeight.SemiBold,
@@ -306,7 +267,7 @@ private fun LocationPermissionCard(
     val colorScheme = MaterialTheme.colorScheme
     Sdm3Card(padding = Spacing.lg) {
         Row(verticalAlignment = Alignment.Top) {
-            Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = colorScheme.primary)
+            Icon(Icons.Outlined.LocationOn, contentDescription = "Status lokasi", tint = colorScheme.primary)
             Spacer(modifier = Modifier.padding(Spacing.xs))
             Column(modifier = Modifier.weight(1f)) {
                 Text("Izin Lokasi & GPS", fontWeight = FontWeight.SemiBold)
@@ -340,7 +301,7 @@ private fun LocationPermissionCard(
                 )
             }
             if (showSettingsShortcut) {
-                Spacer(modifier = Modifier.height(Spacing.sm))
+                Spacer(modifier = Modifier.height(Spacing.xs))
                 Sdm3OutlinedButton(
                     text = if (permission == LocationPermissionState.LOCATION_SERVICES_OFF) {
                         "Aktifkan GPS"

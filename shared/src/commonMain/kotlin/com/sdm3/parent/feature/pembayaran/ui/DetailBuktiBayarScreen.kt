@@ -8,7 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.FileDownload
@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -39,18 +38,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.AppBranding
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.ScreenUiState
+import com.sdm3.parent.core.designsystem.component.StatusChip
+import com.sdm3.parent.core.designsystem.component.resolveScreenState
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarUiState
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarViewModel
 import com.sdm3.parent.platform.PlatformActions
 import org.koin.compose.viewmodel.koinViewModel
-
-sealed class DetailBayarUiState {
-    data object Loading : DetailBayarUiState()
-    data object Empty : DetailBayarUiState()
-    data class Error(val message: String = "Silakan coba kembali.") : DetailBayarUiState()
-    data object Success : DetailBayarUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,62 +83,18 @@ fun DetailBuktiBayarScreen(
         }
     }
 
-    val uiState: DetailBayarUiState = remember(vmState) {
-        val s = vmState
-        when {
-            s.isLoading -> DetailBayarUiState.Loading
-            s.errorMessage != null -> DetailBayarUiState.Error(s.errorMessage)
-            s.isEmpty || s.payment == null -> DetailBayarUiState.Empty
-            else -> DetailBayarUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty || vmState.payment == null, vmState.errorMessage)
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Kwitansi Digital",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp,
-                        color = colorScheme.primary
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ScreenScaffold(
+        title = "Kwitansi Digital",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
             when (val state = uiState) {
-            is DetailBayarUiState.Loading -> {
+            is ScreenUiState.Loading -> {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -204,7 +155,7 @@ fun DetailBuktiBayarScreen(
                 }
             }
 
-            is DetailBayarUiState.Empty -> {
+            is ScreenUiState.Empty -> {
                 Sdm3EmptyState(
                     title = "Tidak Ada Bukti",
                     message = "Data pembayaran tidak ditemukan.",
@@ -220,7 +171,7 @@ fun DetailBuktiBayarScreen(
                 )
             }
 
-            is DetailBayarUiState.Error -> {
+            is ScreenUiState.Error -> {
                 Sdm3ErrorState(
                     title = "Gagal Memuat Bukti",
                     message = state.message,
@@ -243,7 +194,7 @@ fun DetailBuktiBayarScreen(
                 )
             }
 
-            is DetailBayarUiState.Success -> {
+            is ScreenUiState.Success -> {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -302,7 +253,7 @@ fun DetailBuktiBayarScreen(
                                 text = "PENERIMAAN PEMBAYARAN PENDIDIKAN",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary.copy(alpha = 0.5f),
+                                color = ProductSchoolTheme.colors.onSurfaceMuted,
                                 letterSpacing = 1.sp,
                                 textAlign = TextAlign.Center
                             )
@@ -323,27 +274,19 @@ fun DetailBuktiBayarScreen(
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         statusIcon,
-                                        contentDescription = null,
+                                        contentDescription = statusHeadline,
                                         modifier = Modifier.size(32.dp),
                                         tint = statusColor
                                     )
                                 }
                             }
                             Spacer(modifier = Modifier.height(Spacing.md))
-                            Surface(
-                                color = statusColor.copy(alpha = 0.1f),
-                                shape = RoundedCornerShape(99.dp),
-                                border = BorderStroke(1.dp, statusColor.copy(alpha = 0.2f))
-                            ) {
-                                Text(
-                                    text = statusBadge,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.sp,
-                                    color = statusColor,
-                                    modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xxs)
-                                )
-                            }
+                            StatusChip(
+                                text = statusBadge,
+                                color = statusColor,
+                                leadingDot = false,
+                                modifier = Modifier.padding(vertical = Spacing.xs),
+                            )
                             Spacer(modifier = Modifier.height(Spacing.xs))
                             Text(
                                 text = statusHeadline,
@@ -376,7 +319,7 @@ fun DetailBuktiBayarScreen(
                                         text = "RINCIAN TRANSAKSI",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
-                                        color = colorScheme.primary.copy(alpha = 0.4f),
+                                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                                         letterSpacing = 2.sp
                                     )
                                     Spacer(modifier = Modifier.height(Spacing.md))
@@ -384,10 +327,10 @@ fun DetailBuktiBayarScreen(
                                     ReceiptRow("Nomor Referensi", payment.orderId.ifBlank { payment.id }.uppercase())
                                     ReceiptRow("Waktu Bayar", com.sdm3.parent.core.util.formatTanggalWaktu(payment.paidAt ?: payment.createdAt))
                                     ReceiptRow("Metode Pembayaran", com.sdm3.parent.core.util.formatPaymentMethod(payment.paymentType))
-                                    ReceiptRow("Status Audit", statusHeadline)
+                                    ReceiptRow("Status Audit", statusHeadline, valueColor = statusColor)
 
                                     Spacer(modifier = Modifier.height(Spacing.lg))
-                                    DashedDivider(color = colorScheme.outlineVariant)
+                                    DashedDivider(color = colorScheme.outline)
                                     Spacer(modifier = Modifier.height(Spacing.lg))
 
                                     Row(
@@ -400,14 +343,15 @@ fun DetailBuktiBayarScreen(
                                                 text = "TOTAL BAYAR",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Black,
-                                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                                color = ProductSchoolTheme.colors.onSurfaceFaint,
                                                 letterSpacing = 1.sp
                                             )
                                             Text(
-                                                text = "Lunas & Terverifikasi",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = statusSuccess,
-                                                fontWeight = FontWeight.Bold
+                                                text = statusHeadline.uppercase(),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = statusColor,
+                                                fontWeight = FontWeight.Black,
+                                                letterSpacing = 0.5.sp,
                                             )
                                         }
                                         BoxWithConstraints(
@@ -547,39 +491,16 @@ fun DetailBuktiBayarScreen(
 }
 
 @Composable
-private fun ReceiptRow(label: String, value: String) {
-    val colorScheme = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = Spacing.md),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-        verticalAlignment = Alignment.Top
-    ) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            fontWeight = FontWeight.Black,
-            letterSpacing = 1.sp,
-            modifier = Modifier.weight(0.38f, fill = false)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary,
-            textAlign = TextAlign.End,
-            softWrap = true,
-            modifier = Modifier.weight(0.62f)
-        )
-    }
-}
+private fun ReceiptRow(
+    label: String,
+    value: String,
+    valueColor: Color = MaterialTheme.colorScheme.primary,
+) = Sdm3InfoRow(label = label, value = value, valueColor = valueColor)
 
 @Composable
 fun DashedDivider(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.outlineVariant,
+    color: Color = MaterialTheme.colorScheme.outline,
     thickness: Dp = 1.dp,
 ) {
     Canvas(

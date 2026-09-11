@@ -44,7 +44,7 @@ fun Sdm3Logo(
 
     Box(
         modifier = modifier.size(size),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         if (showBackground) {
             Box(

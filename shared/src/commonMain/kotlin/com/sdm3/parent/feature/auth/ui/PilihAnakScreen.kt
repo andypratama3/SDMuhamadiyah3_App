@@ -3,13 +3,11 @@ package com.sdm3.parent.feature.auth.ui
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,10 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -38,11 +33,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.sdm3.parent.core.designsystem.component.Sdm3Button
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
-import com.sdm3.parent.core.designsystem.theme.glassBorderColor
-import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
 import com.sdm3.parent.data.remote.dto.StudentDto
 import com.sdm3.parent.feature.auth.PilihAnakViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -62,83 +56,13 @@ fun PilihAnakScreen(
         viewModel.uiState.collectAsState()
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Pilih Data Anak",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                )
-            )
-        },
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.xl, vertical = Spacing.lg)
-                    .navigationBarsPadding()
-            ) {
-                // Modern Island Button Architecture
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    color = glassSurfaceColor(),
-                    shadowElevation = 12.dp,
-                    tonalElevation = 4.dp,
-                    border = BorderStroke(1.5.dp, glassBorderColor())
-                ) {
-                    Box(modifier = Modifier.padding(Spacing.xs)) {
-                        Sdm3Button(
-                            text = "Lanjutkan Ke Dashboard",
-                            onClick = {
-                                uiState.selectedStudentId?.let { onChildSelected(it) }
-                            },
-                            enabled = uiState.selectedStudentId != null && uiState.isLoading == false,
-                            modifier = Modifier.fillMaxWidth(),
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        )
-                    }
-                }
-            }
-        }
+    ScreenScaffold(
+        title = "Pilih Data Anak",
+        subtitle = "AKADEMIK · SDM3",
     ) { padding ->
-        // Modern Background Glow
-        val colorScheme = MaterialTheme.colorScheme
-        Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
-        }
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            ScreenGlowBackground()
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
             when {
                 uiState.isLoading == true -> {
                     CircularProgressIndicator(
@@ -149,9 +73,18 @@ fun PilihAnakScreen(
                 }
 
                 uiState.errorMessage != null -> {
-                    ErrorState(
-                        message = uiState.errorMessage!!,
-                        onRetry = { viewModel.loadStudents() }
+                    val errorMsg = uiState.errorMessage ?: ""
+                    Sdm3ErrorState(
+                        message = errorMsg,
+                        primaryAction = {
+                            Sdm3Button(
+                                text = "Coba Lagi",
+                                onClick = { viewModel.loadStudents() },
+                                modifier = Modifier.widthIn(min = 200.dp),
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            )
+                        }
                     )
                 }
 
@@ -159,7 +92,11 @@ fun PilihAnakScreen(
                     val students = uiState.students
 
                     if (students.isEmpty()) {
-                        EmptyStudentState()
+                        Sdm3EmptyState(
+                            title = "Belum Ada Data Anak",
+                            message = "Data anak tidak ditemukan atau belum ditambahkan ke akun Anda. Silakan hubungi admin sekolah.",
+                            icon = Icons.Outlined.Face
+                        )
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -167,7 +104,7 @@ fun PilihAnakScreen(
                                 start = Spacing.xl,
                                 end = Spacing.xl,
                                 top = Spacing.md,
-                                bottom = 120.dp
+                                bottom = Spacing.xxxl
                             ),
                             verticalArrangement = Arrangement.spacedBy(Spacing.md)
                         ) {
@@ -176,20 +113,6 @@ fun PilihAnakScreen(
                                     modifier = Modifier
                                         .padding(bottom = Spacing.lg)
                                 ) {
-                                    Surface(
-                                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                                        shape = RoundedCornerShape(999.dp),
-                                        modifier = Modifier.padding(bottom = Spacing.sm)
-                                    ) {
-                                        Text(
-                                            text = "AKADEMIK • SDM3",
-                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            letterSpacing = 1.5.sp,
-                                            color = MaterialTheme.colorScheme.secondary
-                                        )
-                                    }
                                     Text(
                                         text = "Silakan pilih data anak untuk melanjutkan.",
                                         style = MaterialTheme.typography.bodyLarge,
@@ -224,6 +147,37 @@ fun PilihAnakScreen(
                     }
                 }
             }
+
+            // Modern Island Button Architecture
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.xl, vertical = Spacing.lg)
+                    .navigationBarsPadding()
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    color = ProductSchoolTheme.colors.liquidGlassSurface,
+                    shadowElevation = 12.dp,
+                    tonalElevation = 4.dp,
+                    border = BorderStroke(1.5.dp, ProductSchoolTheme.colors.liquidGlassBorder)
+                ) {
+                    Box(modifier = Modifier.padding(Spacing.xs)) {
+                        Sdm3Button(
+                            text = "Lanjutkan Ke Dashboard",
+                            onClick = {
+                                uiState.selectedStudentId?.let { onChildSelected(it) }
+                            },
+                            enabled = uiState.selectedStudentId != null && uiState.isLoading == false,
+                            modifier = Modifier.fillMaxWidth(),
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -235,8 +189,8 @@ private fun StudentItem(
     onClick: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-    val glassSurface = glassSurfaceColor()
-    val glassBorder = glassBorderColor()
+    val glassSurface = ProductSchoolTheme.colors.liquidGlassSurface
+    val glassBorder = ProductSchoolTheme.colors.liquidGlassBorder
 
     val borderColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.secondary else glassBorder,
@@ -321,18 +275,7 @@ private fun StudentItem(
                     )
                     student.className?.let {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Surface(
-                            color = if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                text = " $it ",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                            )
-                        }
+                        Sdm3CategoryBadge(text = it)
                     }
                 }
 
@@ -362,108 +305,7 @@ private fun StudentItem(
     }
 }
 
-@Composable
-private fun EmptyStudentState() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Spacing.xl),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // High-end Empty State with Soft Structuralism
-        Box(
-            modifier = Modifier
-                .size(160.dp)
-                .graphicsLayer {
-                    alpha = 0.6f
-                    translationY = -20f
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Surface(
-                modifier = Modifier.size(120.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-            ) {}
-            Icon(
-                imageVector = Icons.Outlined.Face,
-                contentDescription = null,
-                modifier = Modifier.size(80.dp).alpha(0.4f),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(Spacing.md))
-        
-        Text(
-            text = "Belum Ada Data Anak",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(Spacing.sm))
-        Text(
-            text = "Data anak tidak ditemukan atau belum ditambahkan ke akun Anda. Silakan hubungi admin sekolah.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = Spacing.md),
-            lineHeight = 26.sp
-        )
-    }
-}
 
-@Composable
-private fun ErrorState(message: String, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Spacing.xl),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Surface(
-            modifier = Modifier.size(100.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Warning,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(Spacing.lg))
-        Text(
-            text = "Terjadi Kesalahan",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(Spacing.xs))
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            lineHeight = 24.sp
-        )
-        Spacer(modifier = Modifier.height(Spacing.xl))
-        Sdm3Button(
-            text = "Coba Lagi",
-            onClick = onRetry,
-            modifier = Modifier.widthIn(min = 200.dp),
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError
-        )
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

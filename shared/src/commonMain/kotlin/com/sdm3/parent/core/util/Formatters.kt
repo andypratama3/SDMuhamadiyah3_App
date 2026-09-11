@@ -17,20 +17,6 @@ fun formatRupiah(amount: Number): String {
 }
 
 /**
- * Format angka besar menjadi format singkat (1K, 1M, dll).
- * Contoh: 1500 -> "1.5K", 1000000 -> "1M"
- */
-fun formatCompactNumber(amount: Number): String {
-    val value = amount.toLong()
-    return when {
-        value >= 1_000_000_000 -> "${(value / 100_000_000) / 10.0}B"
-        value >= 1_000_000 -> "${(value / 100_000) / 10.0}M"
-        value >= 1_000 -> "${(value / 100) / 10.0}K"
-        else -> value.toString()
-    }
-}
-
-/**
  * Inisial nama untuk avatar (maks. 2 huruf), aman untuk nama kosong / berspasi.
  * Contoh: "Ahmad Fauzi" -> "AF", "Ahmad " -> "A", "" -> "?".
  */
@@ -43,31 +29,8 @@ fun nameInitials(name: String?): String {
     }
 }
 
-/**
- * Inisial nama dengan maksimal N huruf.
- */
-fun nameInitials(name: String?, maxChars: Int): String {
-    val parts = name?.trim()?.split(" ")?.filter { it.isNotBlank() } ?: emptyList()
-    return when {
-        parts.isEmpty() -> "?"
-        maxChars <= 0 -> ""
-        else -> parts.take(maxChars).map { it.take(1).uppercase() }.joinToString("")
-    }
-}
-
-private val bulanSingkat = listOf(
+val bulanSingkat = listOf(
     "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
-)
-
-private val bulanLengkap = listOf(
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-)
-
-private val hariSingkat = listOf("Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab")
-
-private val hariLengkap = listOf(
-    "Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"
 )
 
 /**
@@ -88,45 +51,6 @@ fun formatTanggal(raw: String?): String {
 }
 
 /**
- * Format tanggal lengkap dengan nama bulan: "13 Januari 2026"
- */
-fun formatTanggalLengkap(raw: String?): String {
-    val s = raw?.trim().orEmpty()
-    if (s.isEmpty()) return "-"
-    val datePart = s.substringBefore('T').substringBefore(' ')
-    val parts = datePart.split('-')
-    if (parts.size < 3) return s
-    val year = parts[0].toIntOrNull() ?: return s
-    val month = parts[1].toIntOrNull() ?: return s
-    val day = parts[2].take(2).toIntOrNull() ?: return s
-    if (month !in 1..12) return s
-    return "$day ${bulanLengkap[month - 1]} $year"
-}
-
-/**
- * Format dengan hari: "Senin, 13 Januari 2026"
- */
-fun formatTanggalDenganHari(raw: String?): String {
-    val s = raw?.trim().orEmpty()
-    if (s.isEmpty()) return "-"
-    val datePart = s.substringBefore('T').substringBefore(' ')
-    val parts = datePart.split('-')
-    if (parts.size < 3) return s
-    val year = parts[0].toIntOrNull() ?: return s
-    val month = parts[1].toIntOrNull() ?: return s
-    val day = parts[2].take(2).toIntOrNull() ?: return s
-    if (month !in 1..12) return s
-    
-    val dayOfWeek = try {
-        kotlinx.datetime.LocalDate(year, month, day).dayOfWeek.ordinal
-    } catch (e: Exception) {
-        return s
-    }
-    
-    return "${hariLengkap[dayOfWeek]}, $day ${bulanLengkap[month - 1]} $year"
-}
-
-/**
  * Seperti [formatTanggal] tapi menambahkan jam:menit bila tersedia,
  * mis. "2026-06-13 18:52:23" -> "13 Jun 2026, 18:52".
  */
@@ -144,23 +68,6 @@ fun formatTanggalWaktu(raw: String?): String {
     val validHm = hm.length == 5 && hm[2] == ':' &&
         hm.substring(0, 2).toIntOrNull() != null && hm.substring(3, 5).toIntOrNull() != null
     return if (validHm) "$tanggal, $hm" else tanggal
-}
-
-/**
- * Format waktu saja: "18:52" dari "2026-06-13 18:52:23"
- */
-fun formatWaktu(raw: String?): String {
-    val s = raw?.trim().orEmpty()
-    if (s.isEmpty()) return "-"
-    val timePart = when {
-        s.contains('T') -> s.substringAfter('T')
-        s.contains(' ') -> s.substringAfter(' ')
-        else -> return "-"
-    }
-    val hm = timePart.take(5)
-    val validHm = hm.length == 5 && hm[2] == ':' &&
-        hm.substring(0, 2).toIntOrNull() != null && hm.substring(3, 5).toIntOrNull() != null
-    return if (validHm) hm else "-"
 }
 
 /**
@@ -199,77 +106,5 @@ fun formatPaymentMethod(type: String?): String {
         else -> t.split('_', ' ').filter { it.isNotBlank() }.joinToString(" ") { w ->
             w.replaceFirstChar { ch -> ch.uppercaseChar() }
         }
-    }
-}
-
-/**
- * Masking nomor telepon: "08123456789" -> "0812****6789"
- */
-fun maskPhoneNumber(phone: String?): String {
-    val p = phone?.trim().orEmpty()
-    if (p.length < 8) return p
-    return "${p.take(4)}****${p.takeLast(4)}"
-}
-
-/**
- * Masking email: "john.doe@example.com" -> "j***@example.com"
- */
-fun maskEmail(email: String?): String {
-    val e = email?.trim().orEmpty()
-    if (e.isEmpty() || !e.contains("@")) return e
-    val parts = e.split("@")
-    val local = parts[0]
-    val domain = parts[1]
-    val maskedLocal = if (local.length <= 2) {
-        "${local.firstOrNull() ?: '*'}*"
-    } else {
-        "${local.first()}***${local.last()}"
-    }
-    return "$maskedLocal@$domain"
-}
-
-/**
- * Relative time: "2 jam lalu", "Kemarin", "3 hari lalu"
- */
-fun formatRelativeTime(raw: String?): String {
-    val s = raw?.trim().orEmpty()
-    if (s.isEmpty()) return "-"
-    
-    // Parse the date - this is a simplified version
-    // In production, you'd use proper date parsing
-    return try {
-        val datePart = s.substringBefore('T').substringBefore(' ')
-        val parts = datePart.split('-')
-        if (parts.size < 3) return s
-        
-        val year = parts[0].toInt()
-        val month = parts[1].toInt()
-        val day = parts[2].take(2).toInt()
-        
-        // Simplified relative calculation
-        // For accurate calculation, use Clock.System.now() and calculate difference
-        "Baru saja" // Placeholder
-    } catch (e: Exception) {
-        s
-    }
-}
-
-/**
- * Truncate text with ellipsis if longer than maxLength.
- */
-fun truncateText(text: String?, maxLength: Int = 100): String {
-    val t = text?.trim().orEmpty()
-    if (t.length <= maxLength) return t
-    return "${t.take(maxLength - 3)}..."
-}
-
-/**
- * Capitalize first letter of each word.
- */
-fun capitalizeWords(text: String?): String {
-    val t = text?.trim().orEmpty()
-    if (t.isEmpty()) return ""
-    return t.split(" ").filter { it.isNotBlank() }.joinToString(" ") { word ->
-        word.replaceFirstChar { it.uppercaseChar() }
     }
 }

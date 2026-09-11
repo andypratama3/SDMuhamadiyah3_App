@@ -26,8 +26,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -49,6 +47,7 @@ import com.sdm3.parent.feature.auth.VerifikasiOtpViewModel
 @Composable
 fun VerifikasiOtpScreen(
     viewModel: VerifikasiOtpViewModel,
+    onBack: () -> Unit,
     onSuccess: () -> Unit
 ) {
     val isPreview = LocalInspectionMode.current
@@ -59,63 +58,46 @@ fun VerifikasiOtpScreen(
     }
     val colorScheme = MaterialTheme.colorScheme
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorScheme.background)
-    ) {
-        // Modern Atmospheric Glow
-        Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                    center = Offset(size.width * 0.85f, size.height * 0.1f),
-                    radius = size.width * 1.5f
-                )
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                    center = Offset(size.width * 0.15f, size.height * 0.9f),
-                    radius = size.width * 1.0f
-                )
-            )
-        }
-
+    ScreenScaffold(
+        title = when(state.step) {
+            OtpStep.REQUEST_OTP -> "Akses Pemulihan"
+            OtpStep.VERIFY_OTP -> "Verifikasi Akun"
+            OtpStep.RESET_PASSWORD -> "Pembaruan Kunci"
+        },
+        subtitle = "KEAMANAN DIGITAL",
+        onBack = onBack
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .safeDrawingPadding()
                 .imePadding()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(60.dp))
+            ScreenGlowBackground()
 
-            // Step Indicator Icon
-            Surface(
-                modifier = Modifier.size(100.dp),
-                shape = RoundedCornerShape(28.dp),
-                color = glassSurfaceColor(),
-                border = BorderStroke(2.dp, glassBorderColor()),
-                shadowElevation = 8.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = when(state.step) {
-                            OtpStep.REQUEST_OTP -> Icons.Outlined.Email
-                            OtpStep.VERIFY_OTP -> Icons.Outlined.Lock
-                            OtpStep.RESET_PASSWORD -> Icons.Outlined.CheckCircle
-                        },
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp),
-                        tint = colorScheme.primary
-                    )
-                }
+            Spacer(modifier = Modifier.height(Spacing.xxl))
+
+            Sdm3GlassIconContainer(size = 100.dp) {
+                Icon(
+                    imageVector = when(state.step) {
+                        OtpStep.REQUEST_OTP -> Icons.Outlined.Email
+                        OtpStep.VERIFY_OTP -> Icons.Outlined.Lock
+                        OtpStep.RESET_PASSWORD -> Icons.Outlined.CheckCircle
+                    },
+                    contentDescription = when(state.step) {
+                        OtpStep.REQUEST_OTP -> "Email"
+                        OtpStep.VERIFY_OTP -> "Verifikasi"
+                        OtpStep.RESET_PASSWORD -> "Selesai"
+                    },
+                    modifier = Modifier.size(40.dp),
+                    tint = colorScheme.primary
+                )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             Text(
                 text = when(state.step) {
@@ -129,7 +111,7 @@ fun VerifikasiOtpScreen(
                 letterSpacing = (-0.5).sp
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             Text(
                 text = when (state.step) {
@@ -141,10 +123,10 @@ fun VerifikasiOtpScreen(
                 color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
                 lineHeight = 24.sp,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = Spacing.md)
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             Sdm3Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -161,7 +143,7 @@ fun VerifikasiOtpScreen(
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                             )
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.xl))
 
                             Sdm3Button(
                                 text = "Kirim Instruksi",
@@ -178,7 +160,7 @@ fun VerifikasiOtpScreen(
                                 colorScheme = colorScheme
                             )
 
-                            Spacer(modifier = Modifier.height(32.dp))
+                            Spacer(modifier = Modifier.height(Spacing.xxl))
 
                             if (state.countdownSeconds > 0) {
                                 Row(
@@ -186,8 +168,8 @@ fun VerifikasiOtpScreen(
                                     horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(Icons.Outlined.Timer, contentDescription = null, modifier = Modifier.size(16.dp), tint = colorScheme.primary.copy(alpha = 0.4f))
-                                    Spacer(Modifier.width(8.dp))
+                                    Icon(Icons.Outlined.Timer, contentDescription = "Timer", modifier = Modifier.size(16.dp), tint = colorScheme.primary.copy(alpha = 0.4f))
+                                    Spacer(Modifier.width(Spacing.xs))
                                     Text(
                                         text = "Kirim ulang dalam ${state.countdownSeconds}d",
                                         style = MaterialTheme.typography.labelLarge,
@@ -205,13 +187,13 @@ fun VerifikasiOtpScreen(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable { viewModel.resendOtp() }
-                                            .padding(12.dp),
+                                            .padding(Spacing.sm),
                                         letterSpacing = 1.sp
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.xl))
 
                             Sdm3Button(
                                 text = "Verifikasi Kunci",
@@ -235,7 +217,7 @@ fun VerifikasiOtpScreen(
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                             )
 
-                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(Spacing.lg))
 
                             Sdm3TextField(
                                 value = state.newPasswordConfirmation,
@@ -249,7 +231,7 @@ fun VerifikasiOtpScreen(
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                             )
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.xl))
 
                             Sdm3Button(
                                 text = "Simpan Perubahan",
@@ -263,21 +245,7 @@ fun VerifikasiOtpScreen(
             }
 
             AnimatedVisibility(visible = state.errorMessage != null) {
-                Surface(
-                    modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
-                    color = colorScheme.errorContainer,
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.3f))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = colorScheme.error, modifier = Modifier.size(22.dp))
-                        Spacer(Modifier.width(12.dp))
-                        Text(state.errorMessage ?: "", color = colorScheme.error, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                    }
-                }
+                Sdm3ErrorBanner(message = state.errorMessage ?: "")
             }
 
             AnimatedVisibility(visible = state.resetSuccessMessage != null) {
@@ -293,12 +261,12 @@ fun VerifikasiOtpScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = successColor, modifier = Modifier.size(22.dp))
-                            Spacer(Modifier.width(12.dp))
+                            Icon(Icons.Outlined.CheckCircle, contentDescription = "Berhasil", tint = successColor, modifier = Modifier.size(22.dp))
+                            Spacer(Modifier.width(Spacing.sm))
                             Text(state.resetSuccessMessage ?: "", color = successColor, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xl))
                     Sdm3Button(
                         text = "Kembali ke Login",
                         onClick = onSuccess,
@@ -307,7 +275,7 @@ fun VerifikasiOtpScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
         }
     }
 }
@@ -320,8 +288,8 @@ private fun OtpDigitInput(
 ) {
     val focusRequester = remember { FocusRequester() }
     val isPreview = LocalInspectionMode.current
-    val glassSurface = glassSurfaceColor()
-    val glassBorder = glassBorderColor()
+    val glassSurface = ProductSchoolTheme.colors.liquidGlassSurface
+    val glassBorder = ProductSchoolTheme.colors.liquidGlassBorder
 
     LaunchedEffect(Unit) {
         if (!isPreview) {
@@ -357,7 +325,7 @@ private fun OtpDigitInput(
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (isFocused) colorScheme.primaryContainer.copy(alpha = 0.3f)
-                                else glassSurface
+                                else Color.Transparent
                             )
                             .border(
                                 width = if (isFocused) 2.dp else 1.5.dp,
@@ -408,6 +376,7 @@ private fun VerifikasiOtpScreenPreview() {
     SDM3Theme {
         VerifikasiOtpScreen(
             viewModel = VerifikasiOtpViewModel(mockAuthRepo),
+            onBack = {},
             onSuccess = {}
         )
     }

@@ -22,10 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import com.sdm3.parent.core.designsystem.theme.CardShape
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
 
@@ -37,16 +36,29 @@ fun Sdm3Card(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = MaterialTheme.colorScheme
-    
+    val colors = ProductSchoolTheme.colors
+    val cardBorder = border ?: BorderStroke(
+        width = 0.5.dp, // Hairline per standards
+        color = colors.liquidGlassBorder,
+    )
+    val cardModifier = modifier
+        .fillMaxWidth()
+        .graphicsLayer {
+            shadowElevation = 2f
+            shape = CardShape
+            clip = true
+            ambientShadowColor = colors.liquidGlassShadow
+            spotShadowColor = colors.liquidGlassShadow
+        }
+
     if (onClick != null) {
         Card(
-            modifier = modifier.fillMaxWidth(),
+            modifier = cardModifier,
             shape = CardShape,
             colors = CardDefaults.cardColors(
-                containerColor = colorScheme.surface
+                containerColor = colors.liquidGlassSurface
             ),
-            border = border,
+            border = cardBorder,
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             onClick = onClick
         ) {
@@ -56,105 +68,17 @@ fun Sdm3Card(
         }
     } else {
         Card(
-            modifier = modifier.fillMaxWidth(),
+            modifier = cardModifier,
             shape = CardShape,
             colors = CardDefaults.cardColors(
-                containerColor = colorScheme.surface
+                containerColor = colors.liquidGlassSurface
             ),
-            border = border,
+            border = cardBorder,
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column(modifier = Modifier.padding(padding)) {
                 content()
             }
-        }
-    }
-}
-
-@Composable
-fun Sdm3ElevatedCard(
-    modifier: Modifier = Modifier,
-    padding: Dp = 0.dp,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 4.dp
-        )
-    ) {
-        Column(modifier = Modifier.padding(padding)) {
-            content()
-        }
-    }
-}
-
-@Composable
-fun Sdm3HeroCard(
-    modifier: Modifier = Modifier,
-    padding: Dp = 0.dp,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 3.dp
-        )
-    ) {
-        Column(modifier = Modifier.padding(padding)) {
-            content()
-        }
-    }
-}
-
-@Composable
-fun Sdm3SurfaceCard(
-    modifier: Modifier = Modifier,
-    padding: Dp = 0.dp,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(padding)) {
-            content()
-        }
-    }
-}
-
-@Composable
-fun Sdm3SubtleCard(
-    modifier: Modifier = Modifier,
-    padding: Dp = 0.dp,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(padding)) {
-            content()
         }
     }
 }
@@ -176,44 +100,6 @@ private fun Sdm3CardPreview() {
                     contentAlignment = Alignment.Center
                 ) {
                     Text("Sdm3Card", style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-            Sdm3ElevatedCard {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(80.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(primaryColor.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Sdm3ElevatedCard", style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-            Sdm3HeroCard {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(80.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Sdm3HeroCard", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onPrimary)
-                }
-            }
-            Sdm3SurfaceCard {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(80.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(primaryColor.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Sdm3SurfaceCard", style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-            Sdm3SubtleCard {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(80.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(primaryColor.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Sdm3SubtleCard", style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }

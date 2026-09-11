@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,9 +22,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
@@ -38,28 +35,27 @@ fun Modifier.shimmerEffect(): Modifier = composed {
         return@composed background(color = baseColor)
     }
 
-    val density = LocalDensity.current
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateAnim by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 200f,
+        initialValue = -200f,
+        targetValue = 1000f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
+            repeatMode = RepeatMode.Restart
         ),
         label = "shimmerTranslate"
     )
 
     val colorScheme = MaterialTheme.colorScheme
-    val baseColor = colorScheme.surfaceVariant.copy(alpha = 0.6f)
-    val highlightColor = colorScheme.onSurface.copy(alpha = 0.1f)
+    val baseColor = colorScheme.surfaceVariant.copy(alpha = 0.4f)
+    val highlightColor = colorScheme.surface.copy(alpha = 0.8f)
     val shimmerColors = listOf(baseColor, highlightColor, baseColor)
 
     background(
         brush = Brush.linearGradient(
             colors = shimmerColors,
-            start = Offset.Zero,
-            end = Offset(x = translateAnim, y = translateAnim)
+            start = Offset(x = translateAnim, y = 0f),
+            end = Offset(x = translateAnim + 300f, y = 0f)
         )
     )
 }

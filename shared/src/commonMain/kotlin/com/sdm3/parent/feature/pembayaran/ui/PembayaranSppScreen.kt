@@ -11,19 +11,14 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.ScreenUiState
+import com.sdm3.parent.core.designsystem.component.resolveScreenState
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.feature.pembayaran.PembayaranSppViewModel
 import com.sdm3.parent.feature.pembayaran.currentYear
 import com.sdm3.parent.feature.pembayaran.isPaid
 import org.koin.compose.viewmodel.koinViewModel
-
-sealed class PembayaranSppUiState {
-    data object Loading : PembayaranSppUiState()
-    data object Empty : PembayaranSppUiState()
-    data class Error(val message: String = "Silakan coba kembali.") : PembayaranSppUiState()
-    data object Success : PembayaranSppUiState()
-}
 
 @Composable
 fun PembayaranSppScreen(
@@ -39,13 +34,8 @@ fun PembayaranSppScreen(
     } else {
         viewModel.uiState.collectAsState()
     }
-    val uiState: PembayaranSppUiState = remember(vmState.isLoading, vmState.errorMessage, vmState.isEmpty) {
-        when {
-            vmState.isLoading -> PembayaranSppUiState.Loading
-            vmState.errorMessage != null -> PembayaranSppUiState.Error(vmState.errorMessage!!)
-            vmState.isEmpty -> PembayaranSppUiState.Empty
-            else -> PembayaranSppUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState.isLoading, vmState.errorMessage, vmState.isEmpty) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
 
     if (!isPreview) {
@@ -58,16 +48,20 @@ fun PembayaranSppScreen(
     val currentYear = remember { currentYear() }
     val yearExpansion = remember { mutableStateMapOf<Int, Boolean>() }
 
-    PaymentScreenScaffold(onBack = onBack) { padding ->
+    ScreenScaffold(
+        title = "Administrasi Keuangan",
+        subtitle = "STATUS PEMBAYARAN SPP",
+        onBack = onBack,
+    ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            PaymentScreenBackground()
+            ScreenGlowBackground()
 
             when (val state = uiState) {
-                is PembayaranSppUiState.Loading -> PaymentLoadingContent(
+                is ScreenUiState.Loading -> PaymentLoadingContent(
                     modifier = Modifier.padding(padding),
                 )
 
-                is PembayaranSppUiState.Empty -> Sdm3EmptyState(
+                is ScreenUiState.Empty -> Sdm3EmptyState(
                     title = "Belum Ada Data",
                     message = "Belum ada tagihan atau riwayat pembayaran SPP yang tercatat.",
                     style = EmptyStateStyle.Neutral,
@@ -81,7 +75,7 @@ fun PembayaranSppScreen(
                     },
                 )
 
-                is PembayaranSppUiState.Error -> Sdm3ErrorState(
+                is ScreenUiState.Error -> Sdm3ErrorState(
                     title = "Gagal Memuat Data",
                     message = state.message,
                     style = ErrorStateStyle.Generic,
@@ -95,7 +89,7 @@ fun PembayaranSppScreen(
                     },
                 )
 
-                is PembayaranSppUiState.Success -> {
+                is ScreenUiState.Success -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()

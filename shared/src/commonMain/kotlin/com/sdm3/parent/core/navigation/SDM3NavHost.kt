@@ -235,6 +235,7 @@ fun SDM3NavHost(
                 viewModel.setEmail(route.email)
                 VerifikasiOtpScreen(
                     viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
                     onSuccess = {
                         navController.navigate(SDM3Route.Login) {
                             popUpTo<SDM3Route.VerifikasiOtp> { inclusive = true }

@@ -6,7 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -18,10 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
@@ -34,13 +31,6 @@ import com.sdm3.parent.feature.rapor.PreviewRaporPdfUiState
 import com.sdm3.parent.feature.rapor.PreviewRaporPdfViewModel
 import com.sdm3.parent.platform.PlatformActions
 import org.koin.compose.viewmodel.koinViewModel
-
-sealed class PreviewPdfUiState {
-    data object Loading : PreviewPdfUiState()
-    data object Empty : PreviewPdfUiState()
-    data class Error(val message: String) : PreviewPdfUiState()
-    data class Success(val isDownloaded: Boolean, val fileName: String, val fileSize: String) : PreviewPdfUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,79 +56,27 @@ fun PreviewRaporPdfScreen(
         }
     }
 
-    val uiState: PreviewPdfUiState = with(state) {
-        when {
-            isLoading -> PreviewPdfUiState.Loading
-            errorMessage != null -> PreviewPdfUiState.Error(errorMessage)
-            isEmpty -> PreviewPdfUiState.Empty
-            else -> PreviewPdfUiState.Success(
-                isDownloaded = isDownloaded,
-                fileName = fileName,
-                fileSize = fileSize
-            )
-        }
-    }
+    val uiState: ScreenUiState = resolveScreenState(
+        isLoading = state.isLoading,
+        isEmpty = state.isEmpty,
+        errorMessage = state.errorMessage
+    )
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Pratinjau Dokumen",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "DOKUMEN PORTABEL PDF",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Pratinjau Dokumen",
+        subtitle = "DOKUMEN PORTABEL PDF",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             when (val currentState = uiState) {
-                is PreviewPdfUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = Spacing.xl)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
@@ -168,7 +106,7 @@ fun PreviewRaporPdfScreen(
                     }
                 }
 
-                is PreviewPdfUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Dokumen Tidak Tersedia",
                         message = "Dokumen PDF tidak ditemukan atau telah dihapus.",
@@ -177,13 +115,13 @@ fun PreviewRaporPdfScreen(
                             Sdm3Button(
                                 text = "Kembali",
                                 onClick = onBack,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xl)
                             )
                         }
                     )
                 }
 
-                is PreviewPdfUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Gagal Memuat Dokumen",
                         message = currentState.message,
@@ -192,25 +130,25 @@ fun PreviewRaporPdfScreen(
                             Sdm3Button(
                                 text = "Coba Lagi",
                                 onClick = { viewModel.retry() },
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xl)
                             )
                         },
                         secondaryAction = {
                             Sdm3OutlinedButton(
                                 text = "Kembali",
                                 onClick = onBack,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xl)
                             )
                         }
                     )
                 }
 
-                is PreviewPdfUiState.Success -> {
+                is ScreenUiState.Success -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = Spacing.xl)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
@@ -224,22 +162,22 @@ fun PreviewRaporPdfScreen(
                                     color = colorScheme.primary.copy(alpha = 0.05f)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(32.dp), tint = colorScheme.primary)
+                                        Icon(Icons.Outlined.Description, contentDescription = "Dokumen PDF", modifier = Modifier.size(32.dp), tint = colorScheme.primary)
                                     }
                                 }
                                 Spacer(modifier = Modifier.width(20.dp))
                                 Column {
                                     Text(
-                                        text = currentState.fileName.ifEmpty { "Dokumen Rapor.pdf" },
+                                        text = state.fileName.ifEmpty { "Dokumen Rapor.pdf" },
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
                                     Text(
-                                        text = if (currentState.fileSize.isNotEmpty()) "Ukuran: ${currentState.fileSize}" else "Format: PDF",
+                                        text = if (state.fileSize.isNotEmpty()) "Ukuran: ${state.fileSize}" else "Format: PDF",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = colorScheme.primary.copy(alpha = 0.4f)
+                                        color = ProductSchoolTheme.colors.onSurfaceFaint
                                     )
                                 }
                             }
@@ -250,16 +188,16 @@ fun PreviewRaporPdfScreen(
                         Sdm3Card(padding = 20.dp) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = if (currentState.isDownloaded) Icons.Outlined.TaskAlt else Icons.Outlined.Sync,
-                                    contentDescription = null,
+                                    imageVector = if (state.isDownloaded) Icons.Outlined.TaskAlt else Icons.Outlined.Sync,
+                                    contentDescription = if (state.isDownloaded) "Unduhan selesai" else "Menyinkronkan",
                                     modifier = Modifier.size(24.dp),
-                                    tint = if (currentState.isDownloaded) statusSuccess else colorScheme.primary.copy(alpha = 0.3f)
+                                    tint = if (state.isDownloaded) statusSuccess else ProductSchoolTheme.colors.onSurfaceMuted
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Text(
-                                    text = if (currentState.isDownloaded) "Dokumen telah siap dibuka melalui PDF Viewer eksternal." else "Sedang menyinkronkan data dengan server institusi...",
+                                    text = if (state.isDownloaded) "Dokumen telah siap dibuka melalui PDF Viewer eksternal." else "Sedang menyinkronkan data dengan server institusi...",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = colorScheme.primary.copy(alpha = 0.7f),
+                                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                                     lineHeight = 22.sp
                                 )
                             }
@@ -274,11 +212,11 @@ fun PreviewRaporPdfScreen(
                                 if (url.isNotBlank()) PlatformActions.openUrl(url)
                             },
                             icon = Icons.AutoMirrored.Outlined.OpenInNew,
-                            enabled = currentState.isDownloaded && state.downloadUrl.isNotBlank(),
+                            enabled = state.isDownloaded && state.downloadUrl.isNotBlank(),
                             modifier = Modifier.fillMaxWidth().height(56.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(100.dp))
+                        Spacer(modifier = Modifier.height(Spacing.bottomNavSafeArea))
                     }
                 }
             }

@@ -1,6 +1,5 @@
 package com.sdm3.parent.feature.guru.ui
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,16 +16,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.sdm3.parent.core.designsystem.component.Sdm3Button
-import com.sdm3.parent.core.designsystem.component.Sdm3Card
-import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
+import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.Spacing
+import androidx.compose.ui.unit.dp
 import com.sdm3.parent.data.remote.dto.TeacherClassroomDto
 import com.sdm3.parent.feature.guru.TeacherHomeViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -49,68 +44,38 @@ fun TeacherHomeScreen(
 
     LaunchedEffect(Unit) { viewModel.load() }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = stringResource(Res.string.school_name),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = stringResource(Res.string.teacher_panel_title),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onSurface.copy(alpha = 0.6f),
-                        )
-                    }
-                },
-                actions = {
-                    if (onBackToParent != null) {
-                        IconButton(onClick = onBackToParent) {
-                            Icon(Icons.Outlined.Home, contentDescription = "Kembali ke beranda")
-                        }
-                    }
-                    IconButton(onClick = onLogout) {
-                        Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = "Keluar")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
-            )
-        },
+    ScreenScaffold(
+        title = stringResource(Res.string.school_name),
+        subtitle = stringResource(Res.string.teacher_panel_title),
+        actions = {
+            if (onBackToParent != null) {
+                IconButton(onClick = onBackToParent) {
+                    Icon(Icons.Outlined.Home, contentDescription = "Kembali ke beranda")
+                }
+            }
+            IconButton(onClick = onLogout) {
+                Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = "Keluar")
+            }
+        }
     ) { padding ->
+        val errorMessage = state.errorMessage
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = Spacing.lg),
         ) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
+
             when {
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                state.errorMessage != null -> {
+                errorMessage != null -> {
                     Sdm3EmptyState(
                         title = "Gagal Memuat",
-                        message = state.errorMessage ?: "",
+                        message = errorMessage,
                         modifier = Modifier.align(Alignment.Center),
                         action = {
                             Sdm3Button(text = "Coba Lagi", onClick = { viewModel.load() })
@@ -166,19 +131,17 @@ private fun TeacherAbsensiSayaCard(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        padding = 20.dp,
+        padding = Spacing.lg,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                modifier = Modifier.size(56.dp),
-                shadowElevation = 4.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = colorScheme.secondary, modifier = Modifier.size(28.dp))
-                }
-            }
+            Sdm3IconBadge(
+                icon = Icons.Outlined.LocationOn,
+                size = 56.dp,
+                iconSize = 28.dp,
+                iconTint = colorScheme.secondary,
+                backgroundColor = colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                borderColor = Color.Unspecified,
+            )
             Spacer(modifier = Modifier.width(Spacing.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text("Absensi Saya", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary)
@@ -188,7 +151,12 @@ private fun TeacherAbsensiSayaCard(onClick: () -> Unit) {
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )
             }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp))
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = "Buka absensi saya",
+                tint = colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }
@@ -203,19 +171,17 @@ private fun TeacherClassroomCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        padding = 20.dp,
+        padding = Spacing.lg,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                modifier = Modifier.size(56.dp),
-                shadowElevation = 4.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.Groups, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(28.dp))
-                }
-            }
+            Sdm3IconBadge(
+                icon = Icons.Outlined.Groups,
+                size = 56.dp,
+                iconSize = 28.dp,
+                iconTint = colorScheme.primary,
+                backgroundColor = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                borderColor = Color.Unspecified,
+            )
             Spacer(modifier = Modifier.width(Spacing.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text(classroom.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary)
@@ -225,7 +191,12 @@ private fun TeacherClassroomCard(
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )
             }
-            Icon(Icons.Outlined.ChevronRight, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp))
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = "Buka kelas ${classroom.name}",
+                tint = colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }

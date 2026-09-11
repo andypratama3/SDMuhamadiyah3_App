@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,18 +26,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.AtmosphericGlow
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.core.designsystem.theme.Spacing
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.feature.nilai.DetailNilaiMapelUiState
 import com.sdm3.parent.feature.nilai.DetailNilaiMapelViewModel
 import org.koin.compose.viewmodel.koinViewModel
-
-sealed class DetailNilaiMapelScreenUiState {
-    data object Loading : DetailNilaiMapelScreenUiState()
-    data object Empty : DetailNilaiMapelScreenUiState()
-    data class Error(val message: String) : DetailNilaiMapelScreenUiState()
-    data object Success : DetailNilaiMapelScreenUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,13 +54,8 @@ fun DetailNilaiMapelScreen(
     val errorMessage = uiState.errorMessage
 
     val screenState = remember(uiState.isLoading, uiState.isEmpty, errorMessage, isPreview) {
-        if (isPreview) DetailNilaiMapelScreenUiState.Success
-        else when {
-            uiState.isLoading && uiState.isEmpty -> DetailNilaiMapelScreenUiState.Loading
-            errorMessage != null -> DetailNilaiMapelScreenUiState.Error(errorMessage)
-            !uiState.isLoading && uiState.isEmpty -> DetailNilaiMapelScreenUiState.Empty
-            else -> DetailNilaiMapelScreenUiState.Success
-        }
+        if (isPreview) ScreenUiState.Success
+        else resolveScreenState(uiState.isLoading, uiState.isEmpty, errorMessage)
     }
 
     if (!isPreview) {
@@ -74,60 +64,19 @@ fun DetailNilaiMapelScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = uiState.subjectName.ifEmpty { "Mata Pelajaran" },
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "ANALISIS KOMPETENSI",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.primary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = uiState.subjectName.ifEmpty { "Mata Pelajaran" },
+        subtitle = "ANALISIS KOMPETENSI",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             when (screenState) {
-                DetailNilaiMapelScreenUiState.Loading -> {
+                ScreenUiState.Loading -> {
                     DetailNilaiMapelShimmer(modifier = Modifier.fillMaxSize().padding(padding))
                 }
-                DetailNilaiMapelScreenUiState.Empty -> {
+                ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Tidak Ada Data Penilaian",
                         message = "Data penilaian untuk mata pelajaran ini belum tersedia.",
@@ -135,7 +84,7 @@ fun DetailNilaiMapelScreen(
                         modifier = Modifier.fillMaxSize().padding(padding)
                     )
                 }
-                is DetailNilaiMapelScreenUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Gagal Memuat Data Penilaian",
                         message = screenState.message,
@@ -151,7 +100,7 @@ fun DetailNilaiMapelScreen(
                         } else null
                     )
                 }
-                DetailNilaiMapelScreenUiState.Success -> {
+                ScreenUiState.Success -> {
                     val components = uiState.components
                     val subjectName = uiState.subjectName.ifEmpty { "Mata Pelajaran" }
 
@@ -170,8 +119,6 @@ fun DetailNilaiMapelScreen(
                     val tpList = components.filter { it.tpName != null }
                     val heroContent = heroContentColor()
                     val statusSuccess = statusSuccessColor()
-                    val statusWarning = statusWarningColor()
-                    val statusDanger = statusDangerColor()
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize().padding(padding),
@@ -187,7 +134,7 @@ fun DetailNilaiMapelScreen(
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                             ) {
                                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                    val glowColor = colorScheme.surfaceTint.copy(alpha = 0.3f)
+                                    val glowColor = heroContent.copy(alpha = 0.3f)
                                     Canvas(modifier = Modifier.fillMaxWidth().height(180.dp).alpha(0.4f)) {
                                         drawCircle(
                                             brush = Brush.radialGradient(
@@ -218,12 +165,7 @@ fun DetailNilaiMapelScreen(
                                             letterSpacing = (-2).sp
                                         )
                                         Spacer(modifier = Modifier.height(12.dp))
-                                        val (predicateLabel, predicateColor) = when {
-                                            finalScore >= 90 -> "SANGAT BAIK" to statusSuccess
-                                            finalScore >= 80 -> "BAIK" to colorScheme.secondary
-                                            finalScore >= 70 -> "CUKUP" to statusWarning
-                                            else -> "PERLU BIMBINGAN" to statusDanger
-                                        }
+                                        val (predicateLabel, predicateColor) = com.sdm3.parent.core.util.predicateForScore(finalScore)
                                         Surface(
                                             color = heroContent.copy(alpha = 0.1f),
                                             shape = RoundedCornerShape(99.dp),
@@ -271,11 +213,7 @@ fun DetailNilaiMapelScreen(
                             items(tpList) { tp ->
                                 var expanded by remember { mutableStateOf(false) }
                                 val tpScore = tp.score?.toInt() ?: 0
-                                val tpColor = when {
-                                    tpScore >= 90 -> statusSuccess
-                                    tpScore >= 75 -> statusWarning
-                                    else -> colorScheme.error
-                                }
+                                val tpColor = com.sdm3.parent.core.util.scoreColor(tpScore)
 
                                 Sdm3Card(
                                     modifier = Modifier
@@ -324,17 +262,18 @@ fun DetailNilaiMapelScreen(
                                         }
                                         if (expanded) {
                                             Spacer(modifier = Modifier.height(16.dp))
-                                            HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f))
+                                            HorizontalDivider(color = colorScheme.outline)
                                             Spacer(modifier = Modifier.height(12.dp))
                                             val tpNote = when {
                                                 tpScore >= 90 -> "Ananda telah menguasai TP ini dengan sangat baik. Pertahankan prestasi ini."
-                                                tpScore >= 75 -> "Ananda telah mencapai standar minimal pada TP ini. Terus tingkatkan pemahaman."
+                                                tpScore >= 80 -> "Ananda telah menguasai TP ini dengan baik. Pertahankan pemahamannya."
+                                                tpScore >= 70 -> "Ananda telah mencapai standar minimal pada TP ini. Terus tingkatkan pemahaman."
                                                 else -> "Ananda perlu bimbingan tambahan pada TP ini. Disarankan untuk belajar lebih giat."
                                             }
                                             Text(
                                                 text = tpNote,
                                                 style = MaterialTheme.typography.bodyMedium,
-                                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                color = ProductSchoolTheme.colors.onSurfaceMuted,
                                                 lineHeight = 22.sp
                                             )
                                         }
@@ -355,7 +294,7 @@ fun DetailNilaiMapelScreen(
                                         Column {
                                             Icon(
                                                 Icons.Outlined.FormatQuote,
-                                                contentDescription = null,
+                                                contentDescription = "Catatan guru",
                                                 tint = colorScheme.secondary,
                                                 modifier = Modifier.size(24.dp)
                                             )
@@ -372,7 +311,7 @@ fun DetailNilaiMapelScreen(
                                 }
                             }
 
-                        item { Spacer(modifier = Modifier.height(100.dp)) }
+                        item { Spacer(modifier = Modifier.height(Spacing.bottomNavSafeArea)) }
                     }
                 }
             }
@@ -450,7 +389,7 @@ private fun DetailNilaiMapelShimmer(modifier: Modifier = Modifier) {
                     .shimmerEffect()
             )
         }
-        item { Spacer(Modifier.height(100.dp)) }
+        item { Spacer(Modifier.height(Spacing.bottomNavSafeArea)) }
     }
 }
 

@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -78,22 +77,10 @@ fun OnboardingScreen(
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             // Modern Atmospheric Background
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            AtmosphericGlow(
+                alignment = Alignment.TopEnd,
+                color = colorScheme.primary
+            )
 
             Column(
                 modifier = Modifier
@@ -105,7 +92,7 @@ fun OnboardingScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .padding(horizontal = Spacing.xl, vertical = Spacing.md),
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     TextButton(
@@ -129,30 +116,18 @@ fun OnboardingScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 32.dp, vertical = 16.dp),
+                            .padding(horizontal = Spacing.xxl, vertical = Spacing.md),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         OnboardingVisual(page = page)
 
-                        Spacer(modifier = Modifier.height(48.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xxxxl))
 
                         // Category Badge
-                        Surface(
-                            color = colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(999.dp)
-                        ) {
-                            Text(
-                                text = onboardingPages[page].label,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 2.sp,
-                                color = colorScheme.secondary
-                            )
-                        }
+                        Sdm3CategoryBadge(text = onboardingPages[page].label)
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xl))
 
                         Text(
                             text = onboardingPages[page].title,
@@ -165,7 +140,7 @@ fun OnboardingScreen(
                             maxLines = 3,
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(Spacing.md))
 
                         Text(
                             text = onboardingPages[page].subtitle,
@@ -182,14 +157,14 @@ fun OnboardingScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 24.dp),
+                        .padding(horizontal = Spacing.xl)
+                        .padding(bottom = Spacing.xl),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Modern Pager Indicators
                     Row(
                         modifier = Modifier.height(48.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         repeat(onboardingPages.size) { index ->
@@ -212,7 +187,7 @@ fun OnboardingScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xl))
 
                     val isLastPage = pagerState.currentPage == onboardingPages.size - 1
 
@@ -233,7 +208,7 @@ fun OnboardingScreen(
                         modifier = Modifier.fillMaxWidth().height(58.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
                     AnimatedVisibility(
                         visible = !isLastPage,
@@ -309,13 +284,17 @@ private fun OnboardingVisual(page: Int) {
                                 1 -> Icons.Outlined.Payments
                                 else -> Icons.Outlined.Forum
                             },
-                            contentDescription = null,
+                            contentDescription = when (page) {
+                                0 -> "Akademik"
+                                1 -> "Pembayaran"
+                                else -> "Komunikasi"
+                            },
                             modifier = Modifier.size(44.dp),
                             tint = colorScheme.primary
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(Spacing.xl))
                 // Faux Data Lines
                 Box(modifier = Modifier.width(100.dp).height(10.dp).clip(RoundedCornerShape(5.dp)).background(colorScheme.primary.copy(alpha = 0.12f)))
                 Spacer(modifier = Modifier.height(10.dp))

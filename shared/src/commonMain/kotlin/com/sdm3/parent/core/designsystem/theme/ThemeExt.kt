@@ -36,6 +36,14 @@ fun glassSurfaceColor(): Color = ProductSchoolTheme.colors.surfaceGlass
 @Composable
 fun glassBorderColor(): Color = ProductSchoolTheme.colors.glassOutline
 
+/** Liquid Glass surface fill — preferred over glassSurfaceColor(). */
+@Composable
+fun liquidGlassSurfaceColor(): Color = ProductSchoolTheme.colors.liquidGlassSurface
+
+/** Liquid Glass border color — preferred over glassBorderColor(). */
+@Composable
+fun liquidGlassBorderColor(): Color = ProductSchoolTheme.colors.liquidGlassBorder
+
 @Composable
 fun statusSuccessColor(): Color = ProductSchoolTheme.colors.success
 

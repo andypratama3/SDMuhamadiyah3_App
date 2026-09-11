@@ -25,7 +25,7 @@ data class GuruAbsensiUiState(
 
 private fun todayIso(): String {
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    return "${today.year}-${today.monthNumber.toString().padStart(2, '0')}-${today.dayOfMonth.toString().padStart(2, '0')}"
+    return today.toString()
 }
 
 class GuruAbsensiViewModel(

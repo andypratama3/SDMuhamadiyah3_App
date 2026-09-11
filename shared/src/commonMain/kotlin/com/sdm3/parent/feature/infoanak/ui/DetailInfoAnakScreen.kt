@@ -6,17 +6,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -29,13 +25,6 @@ import com.sdm3.parent.core.navigation.SDM3Route
 import com.sdm3.parent.feature.infoanak.DetailInfoAnakViewModel
 import androidx.compose.ui.platform.LocalInspectionMode
 import org.koin.compose.viewmodel.koinViewModel
-
-sealed class DetailInfoAnakUiState {
-    data object Loading : DetailInfoAnakUiState()
-    data object Empty : DetailInfoAnakUiState()
-    data class Error(val message: String) : DetailInfoAnakUiState()
-    data object Success : DetailInfoAnakUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,84 +47,33 @@ fun DetailInfoAnakScreen(
         }
     }
 
-    val uiState: DetailInfoAnakUiState = remember(vmState) {
-        val s = vmState
-        when {
-            s.isLoading -> DetailInfoAnakUiState.Loading
-            s.errorMessage != null -> DetailInfoAnakUiState.Error(s.errorMessage)
-            s.isEmpty -> DetailInfoAnakUiState.Empty
-            else -> DetailInfoAnakUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
 
     val colorScheme = MaterialTheme.colorScheme
     val statusSuccess = statusSuccessColor()
     val statusWarning = statusWarningColor()
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Profil Siswa",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = "IDENTITAS RESMI",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Profil Siswa",
+        subtitle = "IDENTITAS RESMI",
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             when (val state = uiState) {
-                is DetailInfoAnakUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
                     ) {
                         item {
-                            Sdm3Card(padding = 24.dp) {
+                            Sdm3Card(padding = Spacing.xl) {
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier.fillMaxWidth()
@@ -146,24 +84,24 @@ fun DetailInfoAnakScreen(
                                             .clip(RoundedCornerShape(32.dp))
                                             .shimmerEffect()
                                     )
-                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Spacer(modifier = Modifier.height(Spacing.xl))
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth(0.6f)
                                             .height(28.dp)
-                                            .clip(RoundedCornerShape(8.dp))
+                                            .clip(RoundedCornerShape(Spacing.xs))
                                             .shimmerEffect()
                                     )
-                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Spacer(modifier = Modifier.height(Spacing.sm))
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth(0.4f)
                                             .height(22.dp)
-                                            .clip(RoundedCornerShape(8.dp))
+                                            .clip(RoundedCornerShape(Spacing.xs))
                                             .shimmerEffect()
                                     )
-                                    Spacer(modifier = Modifier.height(20.dp))
-                                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    Spacer(modifier = Modifier.height(Spacing.lg))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                                         Box(
                                             modifier = Modifier
                                                 .width(120.dp)
@@ -187,15 +125,15 @@ fun DetailInfoAnakScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(24.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(Spacing.xs))
                                     .shimmerEffect()
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(160.dp)
-                                    .clip(RoundedCornerShape(16.dp))
+                                    .clip(RoundedCornerShape(Spacing.md))
                                     .shimmerEffect()
                             )
                         }
@@ -204,26 +142,26 @@ fun DetailInfoAnakScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(24.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(Spacing.xs))
                                     .shimmerEffect()
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(120.dp)
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .clip(RoundedCornerShape(Spacing.md))
                                         .shimmerEffect()
                                 )
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(120.dp)
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .clip(RoundedCornerShape(Spacing.md))
                                         .shimmerEffect()
                                 )
                             }
@@ -231,7 +169,7 @@ fun DetailInfoAnakScreen(
                     }
                 }
 
-                is DetailInfoAnakUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Data Siswa Tidak Ditemukan",
                         message = "Informasi profil siswa belum tersedia.",
@@ -240,13 +178,13 @@ fun DetailInfoAnakScreen(
                             Sdm3Button(
                                 text = "Muat Ulang",
                                 onClick = { viewModel.loadStudentDetail(studentId) },
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)
                             )
                         }
                     )
                 }
 
-                is DetailInfoAnakUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Gagal Memuat Profil",
                         message = state.message,
@@ -255,29 +193,29 @@ fun DetailInfoAnakScreen(
                             Sdm3Button(
                                 text = "Coba Lagi",
                                 onClick = { viewModel.loadStudentDetail(studentId) },
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)
                             )
                         },
                         secondaryAction = {
                             Sdm3OutlinedButton(
                                 text = "Kembali",
                                 onClick = onBack,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)
                             )
                         }
                     )
                 }
 
-                is DetailInfoAnakUiState.Success -> {
+                is ScreenUiState.Success -> {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
                     ) {
                         item {
-                            Sdm3Card(padding = 24.dp) {
+                            Sdm3Card(padding = Spacing.xl) {
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier.fillMaxWidth()
@@ -302,7 +240,7 @@ fun DetailInfoAnakScreen(
                                         }
                                     }
 
-                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Spacer(modifier = Modifier.height(Spacing.xl))
 
                                     Text(
                                         text = student?.name ?: "",
@@ -310,24 +248,14 @@ fun DetailInfoAnakScreen(
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Surface(
-                                        color = colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                                        shape = RoundedCornerShape(999.dp)
-                                    ) {
-                                        Text(
-                                            text = student?.className?.let { " $it " } ?: "",
-                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            letterSpacing = 0.5.sp,
-                                            color = colorScheme.secondary
-                                        )
+                                    Spacer(modifier = Modifier.height(Spacing.xs))
+                                    student?.className?.let { className ->
+                                        Sdm3CategoryBadge(text = className)
                                     }
 
-                                    Spacer(modifier = Modifier.height(20.dp))
+                                    Spacer(modifier = Modifier.height(Spacing.lg))
 
-                                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                                         StatusChip(text = "NISN: ${student?.nisn ?: ""}", color = colorScheme.primary)
                                         val statusRaw = student?.status?.takeIf { it.isNotBlank() }
                                         val statusIsActive = statusRaw == null ||
@@ -345,19 +273,19 @@ fun DetailInfoAnakScreen(
                         item {
                             SectionHeader(
                                 title = "Biodata Institusi",
-                                modifier = Modifier.padding(top = 8.dp)
+                                modifier = Modifier.padding(top = Spacing.xs)
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Sdm3Card(padding = 16.dp) {
+                            Spacer(modifier = Modifier.height(Spacing.sm))
+                            Sdm3Card(padding = Spacing.md) {
                                 Column {
                                     val biodata = vmState.student
-                                    InfoRow("Tempat Lahir", biodata?.birthPlace ?: "")
-                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                                    InfoRow("Tanggal Lahir", biodata?.birthDate ?: "")
-                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                                    InfoRow("Wali Kelas", biodata?.waliKelas ?: "-")
-                                    HorizontalDivider(color = colorScheme.primary.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                                    InfoRow("ID Akun Siswa", biodata?.portalId ?: "-")
+                                    Sdm3InfoRow("Tempat Lahir", biodata?.birthPlace ?: "")
+                                    HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(vertical = Spacing.sm))
+                                    Sdm3InfoRow("Tanggal Lahir", biodata?.birthDate ?: "")
+                                    HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(vertical = Spacing.sm))
+                                    Sdm3InfoRow("Wali Kelas", biodata?.waliKelas ?: "-")
+                                    HorizontalDivider(color = colorScheme.outline, modifier = Modifier.padding(vertical = Spacing.sm))
+                                    Sdm3InfoRow("ID Akun Siswa", biodata?.portalId ?: "-")
                                 }
                             }
                         }
@@ -365,12 +293,12 @@ fun DetailInfoAnakScreen(
                         item {
                             SectionHeader(
                                 title = "Eksplorasi Akademik",
-                                modifier = Modifier.padding(top = 8.dp)
+                                modifier = Modifier.padding(top = Spacing.xs)
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                             ) {
                                 QuickNavItem(
                                     modifier = Modifier.weight(1f),
@@ -387,10 +315,10 @@ fun DetailInfoAnakScreen(
                                     onClick = { onQuickNavClick(SDM3Route.HalamanRapor(studentId)) }
                                 )
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                             ) {
                                 QuickNavItem(
                                     modifier = Modifier.weight(1f),
@@ -409,34 +337,11 @@ fun DetailInfoAnakScreen(
                             }
                         }
 
-                        item { Spacer(modifier = Modifier.height(100.dp)) }
+                        item { Spacer(modifier = Modifier.height(Spacing.xxl)) }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun InfoRow(label: String, value: String) {
-    val colorScheme = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = colorScheme.primary.copy(alpha = 0.5f),
-            fontWeight = FontWeight.Medium
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary
-        )
     }
 }
 
@@ -451,24 +356,21 @@ private fun QuickNavItem(
     val colorScheme = MaterialTheme.colorScheme
     Sdm3Card(
         modifier = modifier.clickable(onClick = onClick),
-        padding = 20.dp
+        padding = Spacing.lg
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = color.copy(alpha = 0.12f),
-                border = BorderStroke(1.5.dp, color.copy(alpha = 0.2f)),
-                shadowElevation = 4.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(26.dp))
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
+            Sdm3IconBadge(
+                icon = icon,
+                size = 52.dp,
+                iconSize = 26.dp,
+                iconTint = color,
+                backgroundColor = color.copy(alpha = 0.12f),
+                borderColor = color.copy(alpha = 0.2f),
+            )
+            Spacer(modifier = Modifier.height(Spacing.sm))
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,7 +21,7 @@ import sdmuhammadiyah3samarinda.shared.generated.resources.Res
 import sdmuhammadiyah3samarinda.shared.generated.resources.school_name
 import sdmuhammadiyah3samarinda.shared.generated.resources.school_name_short
 import androidx.compose.ui.unit.sp
-import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.navigation.SDM3BottomTab
 
 enum class WindowWidthSizeClass { Compact, Medium, Expanded }
@@ -33,7 +34,7 @@ data class BottomNavItem(
 
 internal val navItems = listOf(
     BottomNavItem("Home", SDM3BottomTab.Beranda, Icons.Outlined.Home),
-    BottomNavItem("Nilai", SDM3BottomTab.Nilai, Icons.Outlined.Assignment),
+    BottomNavItem("Nilai", SDM3BottomTab.Nilai, Icons.AutoMirrored.Outlined.Assignment),
     BottomNavItem("Bayar", SDM3BottomTab.Bayar, Icons.Outlined.Payments),
     BottomNavItem("Rapor", SDM3BottomTab.Rapor, Icons.Outlined.School),
     BottomNavItem("Profil", SDM3BottomTab.Profil, Icons.Outlined.Person)
@@ -113,7 +114,7 @@ private fun Sdm3NavRail(
     onTabSelected: (SDM3BottomTab) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val glassSurface = glassSurfaceColor()
+    val glassSurface = ProductSchoolTheme.colors.liquidGlassSurface
 
     Surface(
         modifier = Modifier
@@ -188,7 +189,7 @@ private fun Sdm3NavRail(
         modifier = Modifier
             .width(1.dp)
             .fillMaxHeight()
-            .background(colorScheme.outlineVariant.copy(alpha = 0.3f))
+            .background(ProductSchoolTheme.colors.liquidGlassBorder)
     )
 }
 

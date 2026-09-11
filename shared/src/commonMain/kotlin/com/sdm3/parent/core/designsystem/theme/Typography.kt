@@ -92,15 +92,3 @@ fun ProductSchoolTypography.toMaterialTypography() = Typography(
     labelMedium = labelLarge,
     labelSmall = labelSmall,
 )
-
-val SDM3Typography = Typography(
-    displayLarge = baseTypography.displayLarge,
-    displayMedium = baseTypography.displayMedium,
-    titleLarge = baseTypography.titleLarge,
-    titleMedium = baseTypography.titleMedium,
-    bodyLarge = baseTypography.bodyLarge,
-    bodyMedium = baseTypography.bodyMedium,
-    bodySmall = baseTypography.bodySmall,
-    labelLarge = baseTypography.labelLarge,
-    labelSmall = baseTypography.labelSmall,
-)

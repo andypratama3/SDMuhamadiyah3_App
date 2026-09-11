@@ -10,7 +10,6 @@ val LocalProductSchoolColors = staticCompositionLocalOf { productSchoolLightColo
 val LocalProductSchoolTypography = staticCompositionLocalOf { baseTypography }
 val LocalProductSchoolSpacing = staticCompositionLocalOf { ProductSchoolSpacing() }
 val LocalProductSchoolShapes = staticCompositionLocalOf { ProductSchoolShapes() }
-val LocalProductSchoolElevation = staticCompositionLocalOf { ProductSchoolElevation() }
 
 object ProductSchoolTheme {
     val colors: ProductSchoolColors
@@ -21,8 +20,6 @@ object ProductSchoolTheme {
         @Composable get() = LocalProductSchoolSpacing.current
     val shapes: ProductSchoolShapes
         @Composable get() = LocalProductSchoolShapes.current
-    val elevation: ProductSchoolElevation
-        @Composable get() = LocalProductSchoolElevation.current
 }
 
 @Composable
@@ -38,7 +35,6 @@ fun ProductSchoolTheme(
         LocalProductSchoolTypography provides typography,
         LocalProductSchoolSpacing provides ProductSchoolSpacing(),
         LocalProductSchoolShapes provides ProductSchoolShapes(),
-        LocalProductSchoolElevation provides ProductSchoolElevation(),
     ) {
         MaterialTheme(
             colorScheme = colors.toMaterialColorScheme(darkTheme),

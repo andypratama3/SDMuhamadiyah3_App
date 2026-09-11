@@ -2,24 +2,20 @@ package com.sdm3.parent.feature.notifikasi.ui
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
@@ -32,17 +28,13 @@ import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
 import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
 import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
 import com.sdm3.parent.core.designsystem.component.EmptyStateStyle
+import com.sdm3.parent.core.designsystem.component.ScreenUiState
+import com.sdm3.parent.core.designsystem.component.resolveScreenState
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.notifikasi.PengumumanSekolahUiState
 import com.sdm3.parent.feature.notifikasi.PengumumanSekolahViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
-sealed class PengumumanUiState {
-    data object Loading : PengumumanUiState()
-    data object Empty : PengumumanUiState()
-    data class Error(val message: String) : PengumumanUiState()
-    data object Success : PengumumanUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,13 +58,8 @@ fun PengumumanSekolahScreen(
     val errorMessage = uiState.errorMessage
 
     val screenState = remember(uiState.isLoading, uiState.isEmpty, errorMessage, isPreview) {
-        if (isPreview) PengumumanUiState.Success
-        else when {
-            uiState.isLoading && uiState.isEmpty -> PengumumanUiState.Loading
-            errorMessage != null -> PengumumanUiState.Error(errorMessage)
-            !uiState.isLoading && uiState.isEmpty -> PengumumanUiState.Empty
-            else -> PengumumanUiState.Success
-        }
+        if (isPreview) ScreenUiState.Success
+        else resolveScreenState(uiState.isLoading, uiState.isEmpty, errorMessage)
     }
 
     if (!isPreview) {
@@ -81,53 +68,17 @@ fun PengumumanSekolahScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Informasi Sekolah",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.primary
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colorScheme.primary
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { isSearchActive = !isSearchActive }) {
-                        Icon(Icons.Outlined.Search, contentDescription = "Cari", tint = colorScheme.primary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Informasi Sekolah",
+        onBack = onBack,
+        actions = {
+            IconButton(onClick = { isSearchActive = !isSearchActive }) {
+                Icon(Icons.Outlined.Search, contentDescription = "Cari", tint = colorScheme.primary)
+            }
+        },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground(color = colorScheme.primaryContainer)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -179,10 +130,10 @@ fun PengumumanSekolahScreen(
                 }
 
                 when (screenState) {
-                    is PengumumanUiState.Loading -> {
+                    is ScreenUiState.Loading -> {
                         ShimmerPengumumanList()
                     }
-                    is PengumumanUiState.Empty -> {
+                    is ScreenUiState.Empty -> {
                         Box(modifier = Modifier.fillMaxSize()) {
                             Sdm3EmptyState(
                                 title = "Belum Ada Pengumuman",
@@ -191,7 +142,7 @@ fun PengumumanSekolahScreen(
                             )
                         }
                     }
-                    is PengumumanUiState.Error -> {
+                    is ScreenUiState.Error -> {
                         Box(modifier = Modifier.fillMaxSize()) {
                             Sdm3ErrorState(
                                 title = "Gagal Memuat",
@@ -207,7 +158,7 @@ fun PengumumanSekolahScreen(
                             )
                         }
                     }
-                    is PengumumanUiState.Success -> {
+                    is ScreenUiState.Success -> {
                         val categoryLabel = categoryFilters.getOrElse(selectedCategory) { "Semua" }
                         val articles = uiState.articles
                             .filter { article ->
@@ -282,14 +233,14 @@ fun PengumumanSekolahScreen(
                                                 Spacer(modifier = Modifier.height(Spacing.xs))
                                                 Surface(
                                                     shape = RoundedCornerShape(4.dp),
-                                                    color = colorScheme.secondary.copy(alpha = 0.1f)
+                                                    color = colorScheme.secondaryContainer
                                                 ) {
                                                     Text(
                                                         text = article.category?.uppercase() ?: "UMUM",
                                                         style = MaterialTheme.typography.labelSmall,
-                                                        color = colorScheme.secondary,
+                                                        color = colorScheme.onSecondaryContainer,
                                                         fontWeight = FontWeight.Bold,
-                                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                                        modifier = Modifier.padding(horizontal = Spacing.xs, vertical = 2.dp),
                                                         letterSpacing = 0.5.sp
                                                     )
                                                 }

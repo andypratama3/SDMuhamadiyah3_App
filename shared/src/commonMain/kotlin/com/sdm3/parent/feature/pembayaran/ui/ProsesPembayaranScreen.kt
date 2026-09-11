@@ -6,7 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.outlined.*
@@ -20,10 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,19 +28,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.ScreenUiState
+import com.sdm3.parent.core.designsystem.component.resolveScreenState
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.platform.PlatformActions
 import com.sdm3.parent.feature.pembayaran.ProsesPembayaranViewModel
 import kotlinx.coroutines.delay
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.platform.LocalInspectionMode
-
-sealed class ProsesPembayaranUiState {
-    data object Loading : ProsesPembayaranUiState()
-    data object Empty : ProsesPembayaranUiState()
-    data class Error(val message: String = "Silakan coba kembali.") : ProsesPembayaranUiState()
-    data object Success : ProsesPembayaranUiState()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,14 +54,8 @@ fun ProsesPembayaranScreen(
     } else {
         viewModel.uiState.collectAsState()
     }
-    val uiState: ProsesPembayaranUiState = remember(vmState) {
-        val s = vmState
-        when {
-            s.isLoading -> ProsesPembayaranUiState.Loading
-            s.errorMessage != null -> ProsesPembayaranUiState.Error(s.errorMessage)
-            s.isEmpty -> ProsesPembayaranUiState.Empty
-            else -> ProsesPembayaranUiState.Success
-        }
+    val uiState: ScreenUiState = remember(vmState) {
+        resolveScreenState(vmState.isLoading, vmState.isEmpty, vmState.errorMessage)
     }
 
     if (!isPreview) {
@@ -94,62 +80,21 @@ fun ProsesPembayaranScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colorScheme.background,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Instruksi Bayar",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary,
-                            letterSpacing = (-0.5).sp
-                        )
-                        Text(
-                            text = when (vmState.status) {
-                                com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> "PEMBAYARAN BERHASIL"
-                                com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED -> "PEMBAYARAN GAGAL"
-                                com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.PROCESSING -> "MEMPROSES"
-                                else -> "MENUNGGU PEMBAYARAN"
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = colorScheme.primary.copy(alpha = 0.4f),
-                            letterSpacing = 1.sp
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = colorScheme.primary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
+    ScreenScaffold(
+        title = "Instruksi Bayar",
+        subtitle = when (vmState.status) {
+            com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> "PEMBAYARAN BERHASIL"
+            com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED -> "PEMBAYARAN GAGAL"
+            com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.PROCESSING -> "MEMPROSES"
+            else -> "MENUNGGU PEMBAYARAN"
+        },
+        onBack = onBack,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.fillMaxSize().alpha(0.4f)) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.primary.copy(alpha = 0.15f), Color.Transparent),
-                        center = Offset(size.width * 0.85f, size.height * 0.1f),
-                        radius = size.width * 1.5f
-                    )
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(colorScheme.secondary.copy(alpha = 0.12f), Color.Transparent),
-                        center = Offset(size.width * 0.15f, size.height * 0.9f),
-                        radius = size.width * 1.0f
-                    )
-                )
-            }
+            ScreenGlowBackground()
 
             when (val state = uiState) {
-                is ProsesPembayaranUiState.Loading -> {
+                is ScreenUiState.Loading -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -199,7 +144,7 @@ fun ProsesPembayaranScreen(
                     }
                 }
 
-                is ProsesPembayaranUiState.Empty -> {
+                is ScreenUiState.Empty -> {
                     Sdm3EmptyState(
                         title = "Tidak Ada Instruksi",
                         message = "Instruksi pembayaran tidak tersedia.",
@@ -210,7 +155,7 @@ fun ProsesPembayaranScreen(
                     )
                 }
 
-                is ProsesPembayaranUiState.Error -> {
+                is ScreenUiState.Error -> {
                     Sdm3ErrorState(
                         title = "Gagal Memuat Instruksi",
                         message = state.message,
@@ -228,7 +173,7 @@ fun ProsesPembayaranScreen(
                     )
                 }
 
-                is ProsesPembayaranUiState.Success -> {
+                is ScreenUiState.Success -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -253,7 +198,7 @@ fun ProsesPembayaranScreen(
                                     shadowElevation = 8.dp
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Outlined.AccountBalance, contentDescription = null, modifier = Modifier.size(32.dp), tint = colorScheme.primary)
+                                        Icon(Icons.Outlined.AccountBalance, contentDescription = "Bank", modifier = Modifier.size(32.dp), tint = colorScheme.primary)
                                     }
                                 }
 
@@ -356,7 +301,7 @@ fun ProsesPembayaranScreen(
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
                                         color = statusColor,
-                                        modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xxs)
+                                        modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xs)
                                     )
                                 }
                             }
@@ -420,7 +365,7 @@ fun ProsesPembayaranScreen(
                                 shape = RoundedCornerShape(Spacing.sm)
                             ) {
                                 Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Outlined.ErrorOutline, contentDescription = null, modifier = Modifier.size(Spacing.lg), tint = colorScheme.error)
+                                    Icon(Icons.Outlined.ErrorOutline, contentDescription = "Error", modifier = Modifier.size(Spacing.lg), tint = colorScheme.error)
                                     Spacer(modifier = Modifier.width(Spacing.sm))
                                     Text(
                                         text = "Pembayaran gagal atau kedaluwarsa. Silakan ulangi transaksi.",
