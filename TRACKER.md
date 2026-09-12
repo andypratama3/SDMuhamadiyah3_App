@@ -22,6 +22,18 @@ Legend: ✅ bersih · 🔧 fixed · ⏳ pending · ❌ bug belum fix
 - Cleanup MD (`Prompt/`, `docs/`, 8 root docs) → README.md saja.
 - Verifikasi akhir statis (tabel §4).
 
+### Sesi 3 — Deep re-audit "cek lagi" (paralel 3 agen: alpha-hack, kontras/duplikasi, compile-sanity)
+- Compile breaker ditemukan & difix: `PaymentUiComponents.kt` `else -> statusWarning` di scope `PaymentHeroCard` (var lokal tidak ada) → tambah `statusDanger` & `statusWarning` lokal; `TERLAMBAT` `colorScheme.error` → `statusDangerColor()`. `ProsesPembayaranScreen` butuh `statusDanger` lokal (grep bukti) → dibenahi.
+- Double-fill `PaymentHeroCard`: gradient `[primary, inversePrimary@0.5]` di atas `Card primary` → `[Color.Transparent, inversePrimary@0.35]` (killer-bug warna).
+- Pill emas-on-emas: HalamanRapor pill TERBIT (`onSecondary`), DetailPengumuman "INFORMASI", predikat NilaiRapor/DetailNilaiMapel → solid `predicateColor` + `onPrimary`.
+- `colorScheme.error` vs `statusDangerColor()` diseragamkan: KehadiranSiswa (SummaryCard ALPA, log ALPA, DayContent dot ALPA, Minggu), PaymentUi (TERLAMBAT), ProsesPembayaran (FAILED), DetailBuktiBayar (FAILED). Sisa `colorScheme.error` = pesan error boks (sah).
+- Tab gold-teks: Notifikasi + PengumumanSekolah `selectedContentColor` → `primary`.
+- Design-system: AppSection/ScreenScaffold/Sdm3TextField/Sdm3CommonPatterns/nav-rail/bottom-nav → token (`onSurfaceMuted`/`onSurfaceFaint`).
+- Guru: GuruAbsensi FilterChip solid-fill (`selectedContainerColor=color` + `selectedLabelColor=onPrimary`); teacher-home/Absensi kept.
+- PilihAnak selected name/gold → `primary`; ceklist ikon → `onSecondary`; RadioButton metode bayar → `primary`.
+- Sisa 168 `copy(alpha)` di-sweep: semua terklasifikasi **dekoratif/hero-on-navy/badge** (detail §4), bukan teks melanggar kontras.
+- Var/import mati dibersihkan: `heroContent` (NilaiRapor), reindent pill HalamanRapor.
+
 ---
 
 ## 2. Temuan Audit (LENGKAP, sebelum fix)
@@ -183,6 +195,66 @@ Legend: ✅ bersih · 🔧 fixed · ⏳ pending · ❌ bug belum fix
 ### 3.8 Auth
 - `AccountDeletionScreen.kt`: tombol hapus `contentColor = onPrimary` → `onError`.
 
+### 3.9 Sesi 3 — deep re-audit (per file: before → after)
+**`PaymentUiComponents.kt`**
+- (compile) `else -> statusWarning` di `PaymentHeroCard` tanpa var → tambah `val statusDanger`/`val statusWarning` lokal.
+- `TERLAMBAT` `colorScheme.error` → `statusDangerColor()` (hero + FeeItemCard + PaymentHistoryCard).
+- Double-fill gradient hero `[primary, inversePrimary@0.5]` → `[Color.Transparent, inversePrimary@0.35]` (Card tetap `primary`).
+- Chevron year-header `primary@0.5` → `onSurfaceMuted`; chevron card `primary@0.15` → `onSurfaceMuted`.
+
+**`ProsesPembayaranScreen.kt`**
+- FAILED `colorScheme.error` → `statusDangerColor()` (lokal `statusDanger` ditambahkan).
+- 218/275/350 teks alpha-hack → `onSurfaceMuted`.
+
+**`DetailBuktiBayarScreen.kt`**
+- FAILED `colorScheme.error` → `statusDangerColor()`; rincian badge fill tetap `statusColor@0.1` (diterima).
+
+**`KehadiranSiswaScreen.kt`**
+- ALPA `colorScheme.error` → `statusDangerColor()` (SummaryCard, log, DayContent dot, angka Minggu).
+- PULANG `colorScheme.secondary` → `statusInfoColor()` (log + dot) — bukan lagi gold-on-gold.
+- Label card-absen `primary@0.3` → `onSurfaceMuted`.
+
+**`HalamanRaporScreen.kt`**
+- Pill TERBIT: teks `onSecondary` (kontras di fill gold, light+dark); fill tetap `secondary`.
+- "Status: …" `onSurfaceVariant@0.6` → `onSurfaceMuted`; reindent pill.
+
+**`DetailPengumumanScreen.kt`**
+- Pill "INFORMASI": teks `primary` → `onSecondary` (fill gold).
+
+**`NilaiRaporScreen.kt` + `DetailNilaiMapelScreen.kt`**
+- Pill predikat: `heroContent@0.15/0.1` fill + teks `predicateColor` → solid `predicateColor` + teks `onPrimary` (hapus BorderStroke; `heroContent` var mati di NilaiRapor dihapus).
+
+**`NotifikasiScreen.kt` / `PengumumanSekolahScreen.kt`**
+- Tab: `selectedContentColor secondary` → `primary`; unselected → `onSurfaceMuted` (keduanya).
+
+**`PilihAnakScreen.kt`**
+- Nama/inisial terpilih `secondary` (gold) → `primary`; ikon ceklis `secondary` → `onSecondary`.
+**`PilihAnakBottomSheet.kt`**
+- Ikon ceklis tint → `onSecondary`; baris 59/107 alpha-hack → `onSurfaceMuted`.
+
+**`AccountDeletionScreen.kt`**
+- StatusChip "Proses 7 Hari": teks `secondary` → `statusWarningColor`; "Final & Absolut" → `statusDangerColor`.
+
+**`GuruAbsensiScreen.kt`**
+- FilterChip: `selectedContainerColor = secondary@0.2` + teks `secondary` → solid `color` + `selectedLabelColor = onPrimary`; 2× label `primary@0.3` → `onSurfaceMuted`.
+
+**`TeacherHomeScreen.kt` / `AbsensiSayaScreen.kt` / `KegiatanProgramScreen.kt` / `PengaturanNotifikasiScreen.kt` / `ProfilAkunScreen.kt`**
+- Batch mekanis: `primary@0.3..0.5`/`onSurfaceVariant@0.7` → `onSurfaceMuted`; `@0.1..0.2` → `onSurfaceFaint`; chevrons → `onSurfaceMuted` (ProfilAkun 530/537/643/607/615/623, dsb).
+
+**Design-system components (semua → token)**
+- `AppSection.kt`: subtitle `secondary@0.6` → `onSurfaceMuted`; aksi "Lihat Semua" `secondary@0.9` → `primary`.
+- `ScreenScaffold.kt`: subtitle `secondary@0.6/0.7` → `onSurfaceMuted`.
+- `Sdm3TextField.kt`: label → `onSurfaceMuted`, placeholder → `onSurfaceFaint`, leading icon → `onSurfaceMuted`.
+- `Sdm3CommonPatterns.kt`: default labelColor `secondary@0.6` → `onSurfaceMuted`; divider `primary@0.05` → `outline`; bg main/dialog glow `primary@0.03` (dekoratif) dipertahankan.
+- `Sdm3AdaptiveNav.kt` + `SDM3BottomNavBar.kt`: unselect `primary@0.4` → `onSurfaceMuted`.
+
+**`OnboardingScreen.kt` / `LoginScreen.kt` / `VerifikasiOtpScreen.kt`**
+- "LEWATI", subtitle, "Sudah punya akun?", lupa-kunci, versi, deskripsi OTP, timer → `onSurfaceMuted`/`onSurfaceFaint`.
+- "KIRIM ULANG KODE" auto-callout `secondary` → `primary` (Onboarding + VerifikasiOtp).
+
+**`PilihMetodeBayarScreen.kt`**
+- RadioButton `selectedColor` `secondary` → `primary`.
+
 ---
 
 ## 4. Verifikasi Akhir (statis, sesi 2)
@@ -196,6 +268,19 @@ Legend: ✅ bersih · 🔧 fixed · ⏳ pending · ❌ bug belum fix
 | Import mati (`Brush`, `Color`) | **0** |
 | Baca ulang manual semua file fix (sesi 2) | OK — tidak ada referensi menggantung, param mogok, atau duplikasi warna tersisa |
 
+### Sesi 3 (ulang penuh, semua scope)
+| Pemeriksaan | Hasil |
+|---|---|
+| Tek `primary@0.3..0.9`/`onSurfaceVariant@0.5..0.7`/`onSurface@0.x` pada permukaan terang (alpha-hack) | **0** → semua token (`onSurfaceMuted`/`onSurfaceFaint`/`outline`) |
+| `colorScheme.error` utk status (ALPA/TERLAMBAT/FAILED/Minggu/PULANG) | **0** → semua `statusDangerColor()`/`statusInfoColor()`; sisa `error` = boks pesan error improvi (sah) |
+| Pill/capsul fill `secondary@0.1..0.2`/`heroContent@0.1..0.2` + teks sama | **0** → `secondaryContainer`/`onSecondaryContainer` atau solid `predicateColor`/`onPrimary` |
+| Tab/Radio `selectedContentColor`/`selectedColor` berwarna gold | **0** → `primary` |
+| Double-fill satu elemen (Card + Box background opaque) | **0** — `PaymentHeroCard` gradient `[Transparent, inversePrimary@0.35]` |
+| Compile-sanity agen (referensi var status di scope) | OK — `statusWarning`/`statusDanger` lokal ditambahkan di PaymentHeroCard & ProsesPembayaran |
+| `heroContent` var mati di NilaiRapor | **0** (dihapus) |
+| Import `ProductSchoolTheme` di semua file yang memakainya | OK (wildcard `theme.*` atau eksplisit) |
+| Sweep sisa `copy(alpha)` (ruang awal 168) | Semua **dekoratif** — bg ikon-badge 5%, sheen hero, glow navy, badge `statusColor@0.12` (diterima §6), drag-handle, switch disabled. Tidak ada teks melanggar kontras. |
+
 ---
 
 ## 5. Cleanup MD
@@ -205,10 +290,16 @@ Dipertahankan: `README.md`. **Jangan dibuat ulang** (kontrak di `AGENTS.md`).
 ---
 
 ## 6. Deferred / Dibiar sama sekali
-- ⏳ Layar guru (`feature/guru/ui/{GuruAbsensiScreen, AbsensiSayaScreen, TeacherHomeScreen}.kt`) — ada perubahan dari sesi lama (refactor), **belum diaudit ulang** untuk warna.
+- ⏳ Layar guru: **sebagian besar sudah diaudit sesi 3** (`GuruAbsensiScreen`, `AbsensiSayaScreen`, `TeacherHomeScreen` difix); sisa layar guru yang belum dicek mendalam = dashboard/kelola-absensi lainnya jika ada.
 - ⏳ Verifikasi QR skenario positif (yg negatif sudah fixed).
 - ⏳ Template/wizard baru apa pun.
-- Konsiderasi disengaja: ±59 sisa `color.copy(alpha=0.05..0.4f)` adalah **fill dekoratif** (bg ikon-badge 5%, sheen hero, glow gold) — bukan bug kontras, dibiarkan.
+- Diterima sesi 3:
+  - Badge jumlah tagihan/`statusColor.copy(alpha=0.1..0.12f)` fill + teks status penuh (tidak ada token on-status-container di `Color.kt`; kontras ok karena teks solid).
+  - `LocalizedGlow`/tab-indicator/garis progress gold `secondary` (`Material3` overflow-glow; bukan kontras teks).
+  - Label/ikon `heroContent.copy(alpha)` di atas navy (kontras ok).
+  - Switch off/disabled (`PengaturanNotifikasi` disable color `onSurface@0.38/0.12`), drag-handle `primary@0.1`, cursor OTP `primary@0.4` (dekoratif non-teks).
+  - Ikon empty-state `primary@0.2` (icon, bukan teks).
+- Konsiderasi disengaja: sisa `color.copy(alpha=0.05..0.4f)` adalah **fill dekoratif** — bukan bug kontras, dibiarkan.
 
 ---
 

@@ -214,7 +214,7 @@ fun LoginScreen(
                     ) {
                         Text(
                             text = "Lupa Kunci Akses?",
-                            color = colorScheme.primary.copy(alpha = 0.6f),
+                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -254,7 +254,7 @@ fun LoginScreen(
             Text(
                 text = "${stringResource(Res.string.school_name)} v${com.sdm3.parent.APP_VERSION_NAME}",
                 style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.primary.copy(alpha = 0.3f),
+                color = ProductSchoolTheme.colors.onSurfaceFaint,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )

@@ -104,7 +104,7 @@ fun OnboardingScreen(
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.5.sp,
-                            color = colorScheme.primary.copy(alpha = 0.5f)
+                            color = ProductSchoolTheme.colors.onSurfaceMuted
                         )
                     }
                 }
@@ -146,7 +146,7 @@ fun OnboardingScreen(
                             text = onboardingPages[page].subtitle,
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
-                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                             lineHeight = 26.sp
                         )
                     }
@@ -219,7 +219,7 @@ fun OnboardingScreen(
                             Text(
                                 text = "Sudah punya akun? Masuk Saja",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = colorScheme.primary.copy(alpha = 0.6f),
+                                color = ProductSchoolTheme.colors.onSurfaceMuted,
                                 fontWeight = FontWeight.Bold
                             )
                         }

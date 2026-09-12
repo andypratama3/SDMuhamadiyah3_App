@@ -163,8 +163,8 @@ fun NotifikasiScreen(
                                     fontWeight = if (selectedFilter == index) FontWeight.Bold else FontWeight.Medium
                                 )
                             },
-                            selectedContentColor = colorScheme.secondary,
-                            unselectedContentColor = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            selectedContentColor = colorScheme.primary,
+                            unselectedContentColor = ProductSchoolTheme.colors.onSurfaceMuted
                         )
                     }
                 }
@@ -416,7 +416,7 @@ private fun EmptyNotifikasiState() {
         Text(
             text = "Seluruh aktivitas akademik dan administrasi Anda akan muncul di pusat notifikasi ini.",
             style = MaterialTheme.typography.bodyLarge,
-            color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            color = ProductSchoolTheme.colors.onSurfaceMuted,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = Spacing.xxxxl),
             lineHeight = 26.sp

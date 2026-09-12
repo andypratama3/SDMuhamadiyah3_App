@@ -105,12 +105,14 @@ fun PaymentHeroCard(
     val colorScheme = MaterialTheme.colorScheme
     val heroContent = heroContentColor()
     val statusSuccess = statusSuccessColor()
+    val statusDanger = statusDangerColor()
+    val statusWarning = statusWarningColor()
     val hasActive = activeFee != null
     val statusLabel = activeFee?.feeStatusLabel() ?: "LUNAS"
     val statusColor = when {
         !hasActive -> statusSuccess
         activeFee.isPaid() -> statusSuccess
-        statusLabel == "TERLAMBAT" -> colorScheme.error
+        statusLabel == "TERLAMBAT" -> statusDanger
         else -> statusWarning
     }
 
@@ -127,8 +129,8 @@ fun PaymentHeroCard(
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
-                                colorScheme.primary,
-                                colorScheme.inversePrimary.copy(alpha = 0.5f),
+                                Color.Transparent,
+                                colorScheme.inversePrimary.copy(alpha = 0.35f),
                             ),
                         ),
                     )
@@ -306,7 +308,7 @@ fun PaymentYearHeader(
         Icon(
             imageVector = Icons.Default.KeyboardArrowDown,
             contentDescription = if (expanded) "Tutup" else "Buka",
-            tint = colorScheme.primary.copy(alpha = 0.5f),
+            tint = ProductSchoolTheme.colors.onSurfaceMuted,
             modifier = Modifier.rotate(rotation),
         )
     }
@@ -414,7 +416,7 @@ private fun PaymentCardLayout(
                 Icon(
                     imageVector = Icons.Outlined.ChevronRight,
                     contentDescription = null,
-                    tint = colorScheme.primary.copy(alpha = 0.15f),
+                    tint = ProductSchoolTheme.colors.onSurfaceMuted,
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -430,11 +432,12 @@ fun FeeItemCard(
 ) {
     val statusSuccess = statusSuccessColor()
     val statusWarning = statusWarningColor()
+    val statusDanger = statusDangerColor()
     val isPaid = fee.isPaid()
     val statusLabel = fee.feeStatusLabel()
     val statusColor = when {
         isPaid -> statusSuccess
-        statusLabel == "TERLAMBAT" -> MaterialTheme.colorScheme.error
+        statusLabel == "TERLAMBAT" -> statusDanger
         else -> statusWarning
     }
     val subtitle = fee.dueDate?.takeIf { it.isNotBlank() }?.let {
@@ -461,13 +464,14 @@ fun PaymentHistoryCard(
 ) {
     val statusSuccess = statusSuccessColor()
     val statusWarning = statusWarningColor()
+    val statusDanger = statusDangerColor()
     val statusLower = payment.status.lowercase()
     val isPaid = statusLower in PAID_PAYMENT_STATUSES
     val isFailed = statusLower in FAILED_PAYMENT_STATUSES
     val statusLabel = payment.paymentStatusLabel()
     val statusColor = when {
         isPaid -> statusSuccess
-        isFailed -> MaterialTheme.colorScheme.error
+        isFailed -> statusDanger
         else -> statusWarning
     }
     val title = payment.paymentTitle?.name ?: payment.orderId

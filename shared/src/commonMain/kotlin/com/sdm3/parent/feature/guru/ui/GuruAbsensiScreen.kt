@@ -17,6 +17,7 @@ import com.sdm3.parent.core.designsystem.component.Sdm3Card
 import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
 import com.sdm3.parent.core.designsystem.component.ScreenGlowBackground
 import com.sdm3.parent.core.designsystem.component.ScreenScaffold
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.core.designsystem.theme.statusDangerColor
 import com.sdm3.parent.core.designsystem.theme.statusInfoColor
@@ -46,8 +47,8 @@ private fun AttendanceChip(
         label = { Text(label, style = MaterialTheme.typography.labelSmall) },
         shape = RoundedCornerShape(999.dp),
         colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = color.copy(alpha = 0.18f),
-            selectedLabelColor = color,
+            selectedContainerColor = color,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
         ),
     )
 }
@@ -140,14 +141,14 @@ fun GuruAbsensiScreen(
                                         Text(
                                             "NIS ${student.nis}",
                                             style = MaterialTheme.typography.labelMedium,
-                                            color = colorScheme.onSurface.copy(alpha = 0.6f),
+                                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                                         )
                                     }
                                     if (selected == null) {
                                         Text(
                                             "Belum diabsen",
                                             style = MaterialTheme.typography.labelMedium,
-                                            color = colorScheme.onSurface.copy(alpha = 0.5f),
+                                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                                         )
                                     }
                                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {

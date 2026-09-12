@@ -274,7 +274,7 @@ fun PilihMetodeBayarScreen(
                                     RadioButton(
                                         selected = isSelected,
                                         onClick = { selectedMethod = method.id },
-                                        colors = RadioButtonDefaults.colors(selectedColor = colorScheme.secondary)
+                                        colors = RadioButtonDefaults.colors(selectedColor = colorScheme.primary)
                                     )
                                 }
                             }

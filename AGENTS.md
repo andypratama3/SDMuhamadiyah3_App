@@ -31,9 +31,9 @@ Tracker detail per-layar ada di `TRACKER.md`.
 - Jangan menulis `when` skala ulang di layar lain — pakai helper ini.
 
 ## Status audit per-klaster
-- Bersih (audited, tanpa bug): theme/design-system components, auth (kecuali AccountDeletion sdh fixed), SPP/proses pembayaran.
+- Bersih (audited, tanpa bug): theme/design-system components, auth (kecuali AccountDeletion sdh fixed), SPP/proses pembayaran, guru (`GuruAbsensiScreen`, `AbsensiSayaScreen`, `TeacherHomeScreen`).
 - Fixed: detail lihat `TRACKER.md`.
-- Belum diaudit: layar guru (`feature/guru/ui/*`), verifikasi QR positif, wizard baru apa pun.
+- Belum diaudit: layar guru lain jika ada, verifikasi QR positif, wizard baru apa pun.
 
 ## MD
 - Jangan buat ulang `Prompt/` atau doc lama. `README.md` saja yang dipertahankan.

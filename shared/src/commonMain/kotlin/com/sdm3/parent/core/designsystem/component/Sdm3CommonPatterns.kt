@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 
 /**
  * Inline error banner shown inside forms (login, OTP, etc.).
@@ -159,7 +160,7 @@ fun Sdm3InfoRow(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
-    labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+    labelColor: Color = ProductSchoolTheme.colors.onSurfaceMuted,
     valueColor: Color = MaterialTheme.colorScheme.primary,
 ) {
     Row(

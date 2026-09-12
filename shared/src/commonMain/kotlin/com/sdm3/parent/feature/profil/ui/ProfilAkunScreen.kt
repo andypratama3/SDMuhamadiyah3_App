@@ -259,13 +259,13 @@ fun ProfilAkunScreen(
                                 text = "${AppBranding.SCHOOL_NAME.uppercase()} v${com.sdm3.parent.APP_VERSION_NAME}",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
-                                color = colorScheme.primary.copy(alpha = 0.3f),
+                                color = ProductSchoolTheme.colors.onSurfaceFaint,
                                 letterSpacing = 1.sp
                             )
                             Text(
                                 text = AppBranding.SCHOOL_NAME,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.primary.copy(alpha = 0.2f)
+                                color = ProductSchoolTheme.colors.onSurfaceFaint
                             )
                         }
 
@@ -527,14 +527,14 @@ private fun ProfileHeader(
                     Text(
                         text = phone,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        color = ProductSchoolTheme.colors.onSurfaceMuted
                     )
                 }
                 if (email.isNotBlank()) {
                     Text(
                         text = email,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -604,7 +604,7 @@ private fun StudentMiniCard(
                         Text(
                             text = "NISN: ${student.nisn}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.primary.copy(alpha = 0.6f),
+                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -612,7 +612,7 @@ private fun StudentMiniCard(
                         Text(
                             text = "ID Akun: ${student.portalId}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.primary.copy(alpha = 0.6f),
+                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -620,7 +620,7 @@ private fun StudentMiniCard(
                         Text(
                             text = "Wali Kelas: ${student.waliKelas}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.primary.copy(alpha = 0.6f),
+                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -640,7 +640,7 @@ private fun StudentMiniCard(
                     Text(
                         text = "$childCount anak terdaftar",
                         style = MaterialTheme.typography.labelMedium,
-                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                         fontWeight = FontWeight.Medium
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -688,7 +688,7 @@ private fun BiometricSettingsRow(
             Text(
                 text = "Masuk cepat dengan sidik jari atau Face ID",
                 style = MaterialTheme.typography.labelSmall,
-                color = colorScheme.primary.copy(alpha = 0.5f),
+                color = ProductSchoolTheme.colors.onSurfaceMuted,
             )
         }
         Switch(
@@ -725,7 +725,7 @@ private fun SettingsItemRow(
                 text = trailing,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
-                color = colorScheme.primary.copy(alpha = 0.4f)
+                color = ProductSchoolTheme.colors.onSurfaceMuted
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
@@ -733,7 +733,7 @@ private fun SettingsItemRow(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = "Buka menu",
             modifier = Modifier.size(18.dp),
-            tint = colorScheme.primary.copy(alpha = 0.2f)
+            tint = ProductSchoolTheme.colors.onSurfaceMuted
         )
     }
 }

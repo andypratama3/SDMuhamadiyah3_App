@@ -211,7 +211,7 @@ fun KehadiranSiswaScreen(
                                     modifier = Modifier.weight(1f),
                                     label = "ALPA",
                                     count = "$alpaCount",
-                                    color = colorScheme.error,
+                                    color = statusDangerColor(),
                                     icon = Icons.Outlined.Cancel
                                 )
                             }
@@ -280,7 +280,7 @@ fun KehadiranSiswaScreen(
                                                 textAlign = TextAlign.Center,
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Black,
-                                                color = colorScheme.primary.copy(alpha = 0.3f),
+                                                color = ProductSchoolTheme.colors.onSurfaceMuted,
                                                 letterSpacing = 0.5.sp
                                             )
                                         }
@@ -365,8 +365,8 @@ fun KehadiranSiswaScreen(
                                     AttendanceStatus.HADIR -> statusSuccess to Icons.Outlined.CheckCircle
                                     AttendanceStatus.SAKIT -> statusWarning to Icons.Outlined.MedicalServices
                                     AttendanceStatus.IZIN -> colorScheme.primary to Icons.Outlined.EventAvailable
-                                    AttendanceStatus.ALPA -> colorScheme.error to Icons.Outlined.Cancel
-                                    AttendanceStatus.PULANG -> colorScheme.secondary to Icons.AutoMirrored.Outlined.Logout
+                                    AttendanceStatus.ALPA -> statusDangerColor() to Icons.Outlined.Cancel
+                                    AttendanceStatus.PULANG -> statusInfoColor() to Icons.AutoMirrored.Outlined.Logout
                                     null -> ProductSchoolTheme.colors.onSurfaceFaint to Icons.Outlined.Info
                                 }
                                 val logNote = att.notes ?: when (parsedStatus) {
@@ -634,8 +634,8 @@ private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onP
         AttendanceStatus.HADIR -> if (onPrimary) heroContent else statusSuccess
         AttendanceStatus.SAKIT -> statusWarning
         AttendanceStatus.IZIN -> if (onPrimary) heroContent else colorScheme.primary
-        AttendanceStatus.ALPA -> colorScheme.error
-        AttendanceStatus.PULANG -> colorScheme.secondary
+        AttendanceStatus.ALPA -> statusDangerColor()
+        AttendanceStatus.PULANG -> statusInfoColor()
         null -> null
     }
     Column(
@@ -647,7 +647,7 @@ private fun DayContent(day: Int, isToday: Boolean, colorScheme: ColorScheme, onP
             text = "$day",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = if (isToday) FontWeight.Black else FontWeight.Bold,
-            color = if (onPrimary) heroContent else if (isSunday) colorScheme.error else colorScheme.primary
+            color = if (onPrimary) heroContent else if (isSunday) statusDangerColor() else colorScheme.primary
         )
         if (dotColor != null) {
             Spacer(modifier = Modifier.height(2.dp))

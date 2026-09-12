@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 
 @Composable
@@ -46,7 +47,7 @@ fun SectionHeader(
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp,
-                    color = colorScheme.primary.copy(alpha = 0.4f)
+                    color = ProductSchoolTheme.colors.onSurfaceMuted
                 )
             }
         }
@@ -61,13 +62,13 @@ fun SectionHeader(
                 Text(
                     text = actionLabel,
                     style = MaterialTheme.typography.labelLarge,
-                    color = colorScheme.secondary,
+                    color = colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = colorScheme.secondary,
+                    tint = colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )
             }

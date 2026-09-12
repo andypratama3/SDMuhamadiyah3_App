@@ -272,7 +272,6 @@ private fun SumatifTabContent(
     val colorScheme = MaterialTheme.colorScheme
     val statusSuccess = statusSuccessColor()
     val statusWarning = statusWarningColor()
-    val heroContent = heroContentColor()
     val subjects = grades.map { grade ->
         SubjectGrade(
             name = grade.subjectName,
@@ -331,15 +330,14 @@ private fun SumatifTabContent(
                         Spacer(modifier = Modifier.height(12.dp))
                         val (predicateLabel, predicateColor) = com.sdm3.parent.core.util.predicateForScore(avgScore)
                         Surface(
-                            color = heroContent.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(99.dp),
-                            border = BorderStroke(1.5.dp, predicateColor.copy(alpha = 0.4f))
+                            color = predicateColor,
+                            shape = RoundedCornerShape(99.dp)
                         ) {
                             Text(
                                 text = " $predicateLabel ",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = predicateColor,
+                                color = colorScheme.onPrimary,
                                 letterSpacing = 1.sp,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )

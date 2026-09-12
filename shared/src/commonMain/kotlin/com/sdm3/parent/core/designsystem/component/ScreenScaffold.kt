@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -56,7 +57,7 @@ fun ScreenScaffold(
                                 text = subtitle.uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
-                                color = colorScheme.primary.copy(alpha = 0.4f),
+                                color = ProductSchoolTheme.colors.onSurfaceMuted,
                                 letterSpacing = 1.sp,
                             )
                         }

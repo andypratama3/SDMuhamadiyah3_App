@@ -167,15 +167,14 @@ fun DetailNilaiMapelScreen(
                                         Spacer(modifier = Modifier.height(12.dp))
                                         val (predicateLabel, predicateColor) = com.sdm3.parent.core.util.predicateForScore(finalScore)
                                         Surface(
-                                            color = heroContent.copy(alpha = 0.1f),
-                                            shape = RoundedCornerShape(99.dp),
-                                            border = BorderStroke(1.dp, predicateColor.copy(alpha = 0.3f))
+                                            color = predicateColor,
+                                            shape = RoundedCornerShape(99.dp)
                                         ) {
                                             Text(
                                                 text = " $predicateLabel ",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Black,
-                                                color = predicateColor,
+                                                color = colorScheme.onPrimary,
                                                 letterSpacing = 1.sp,
                                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                                             )

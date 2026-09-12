@@ -159,7 +159,7 @@ fun DetailPengumumanScreen(
                                     Text(
                                         " INFORMASI ",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = colorScheme.primary,
+                                        color = colorScheme.onSecondary,
                                         fontWeight = FontWeight.Black,
                                         modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xs)
                                     )

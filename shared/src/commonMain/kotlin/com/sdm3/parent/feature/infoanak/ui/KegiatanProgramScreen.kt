@@ -99,7 +99,7 @@ fun KegiatanProgramScreen(
                                     text = label,
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isSelected) colorScheme.onPrimary else colorScheme.primary.copy(alpha = 0.6f)
+                                    color = if (isSelected) colorScheme.onPrimary else ProductSchoolTheme.colors.onSurfaceMuted
                                 )
                             }
                         }
@@ -195,7 +195,7 @@ fun KegiatanProgramScreen(
                                             "Rekapitulasi progres program unggulan institusi."
                                         },
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                                         lineHeight = 22.sp,
                                     )
                                 }
@@ -249,7 +249,7 @@ fun KegiatanProgramScreen(
                                                             text = ekskul.teacherName,
                                                             style = MaterialTheme.typography.labelSmall,
                                                             fontWeight = FontWeight.Bold,
-                                                            color = colorScheme.primary.copy(alpha = 0.4f)
+                                                            color = ProductSchoolTheme.colors.onSurfaceMuted
                                                         )
                                                     }
                                                     if (ekskul.description != null) {
@@ -257,7 +257,7 @@ fun KegiatanProgramScreen(
                                                         Text(
                                                             text = "\"${ekskul.description}\"",
                                                             style = MaterialTheme.typography.bodyMedium,
-                                                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                                                             lineHeight = 20.sp
                                                         )
                                                     }
@@ -306,7 +306,7 @@ fun KegiatanProgramScreen(
                                                             text = program.coach,
                                                             style = MaterialTheme.typography.labelSmall,
                                                             fontWeight = FontWeight.Bold,
-                                                            color = colorScheme.primary.copy(alpha = 0.4f),
+                                                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                                                             maxLines = 1,
                                                             overflow = TextOverflow.Ellipsis,
                                                         )
@@ -323,7 +323,7 @@ fun KegiatanProgramScreen(
                                                         text = program.subtitle,
                                                         style = MaterialTheme.typography.labelSmall,
                                                         fontWeight = FontWeight.Medium,
-                                                        color = colorScheme.primary.copy(alpha = 0.6f),
+                                                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                                                         modifier = Modifier.weight(1f),
                                                         maxLines = 3,
                                                         overflow = TextOverflow.Ellipsis,
@@ -378,7 +378,7 @@ fun KegiatanProgramScreen(
                                                         text = program.lastActivity,
                                                         style = MaterialTheme.typography.labelSmall,
                                                         fontWeight = FontWeight.Medium,
-                                                        color = colorScheme.primary.copy(alpha = 0.5f),
+                                                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                                                         maxLines = 3,
                                                         overflow = TextOverflow.Ellipsis,
                                                     )

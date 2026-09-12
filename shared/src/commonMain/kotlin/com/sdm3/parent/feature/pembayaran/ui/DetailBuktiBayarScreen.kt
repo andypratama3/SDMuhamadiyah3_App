@@ -219,7 +219,7 @@ fun DetailBuktiBayarScreen(
                         }
                         val statusColor = when {
                             isPaid -> statusSuccess
-                            isFailed -> colorScheme.error
+                            isFailed -> statusDangerColor()
                             else -> statusWarning
                         }
                         val statusIcon = when {

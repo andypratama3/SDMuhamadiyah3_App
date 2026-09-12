@@ -48,6 +48,7 @@ fun ProsesPembayaranScreen(
     val colorScheme = MaterialTheme.colorScheme
     val statusSuccess = statusSuccessColor()
     val statusWarning = statusWarningColor()
+    val statusDanger = statusDangerColor()
     val viewModel: ProsesPembayaranViewModel = koinViewModel()
     val vmState by if (isPreview) {
         remember { mutableStateOf(com.sdm3.parent.feature.pembayaran.ProsesPembayaranUiState()) }
@@ -215,7 +216,7 @@ fun ProsesPembayaranScreen(
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.sp,
-                                    color = colorScheme.primary.copy(alpha = 0.4f)
+                                    color = ProductSchoolTheme.colors.onSurfaceMuted
                                 )
                                 Spacer(modifier = Modifier.height(Spacing.xs))
                                 val vaStyle = when {
@@ -272,7 +273,7 @@ fun ProsesPembayaranScreen(
                                         text = "TOTAL PEMBAYARAN",
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Black,
-                                        color = colorScheme.primary.copy(alpha = 0.4f)
+                                        color = ProductSchoolTheme.colors.onSurfaceMuted
                                     )
                                     Text(
                                         text = com.sdm3.parent.core.util.formatRupiah(vmState.grossAmount),
@@ -283,7 +284,7 @@ fun ProsesPembayaranScreen(
                                 }
                                 val statusColor = when (vmState.status) {
                                     com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.SUCCESS -> statusSuccess
-                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED -> colorScheme.error
+                                    com.sdm3.parent.feature.pembayaran.PaymentProcessStatus.FAILED -> statusDanger
                                     else -> statusWarning
                                 }
                                 val statusLabel = when (vmState.status) {
@@ -347,7 +348,7 @@ fun ProsesPembayaranScreen(
                                         Text(
                                             text = step,
                                             style = MaterialTheme.typography.bodyLarge,
-                                            color = colorScheme.primary.copy(alpha = 0.7f),
+                                            color = ProductSchoolTheme.colors.onSurfaceMuted,
                                             lineHeight = 24.sp,
                                             modifier = Modifier.weight(1f)
                                         )

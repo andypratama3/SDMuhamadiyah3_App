@@ -286,7 +286,7 @@ fun HalamanRaporScreen(
                                                 Text(
                                                     text = " ${raporStatusLabel(latestRapor?.status)} ",
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    color = if (statusPublished) colorScheme.primary else colorScheme.onPrimaryContainer,
+                                                    color = if (statusPublished) colorScheme.onSecondary else colorScheme.onPrimaryContainer,
                                                     fontWeight = FontWeight.Black,
                                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                                 )
@@ -406,7 +406,7 @@ fun HalamanRaporScreen(
                                         Text(
                                             text = "Status: ${raporStatusLabel(rapor.status)}",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                            color = ProductSchoolTheme.colors.onSurfaceMuted
                                         )
                                     }
                                     Surface(

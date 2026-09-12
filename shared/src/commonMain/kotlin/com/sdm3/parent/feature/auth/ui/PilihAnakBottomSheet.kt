@@ -56,7 +56,7 @@ fun PilihAnakBottomSheet(
             Text(
                 text = "Pilih profil untuk memantau aktivitas akademik spesifik.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                color = ProductSchoolTheme.colors.onSurfaceMuted
             )
 
             Spacer(modifier = Modifier.height(Spacing.xxl))
@@ -104,7 +104,7 @@ fun PilihAnakBottomSheet(
                                 Text(
                                     text = com.sdm3.parent.core.util.formatClassName(student.className),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -118,7 +118,7 @@ fun PilihAnakBottomSheet(
                                         Icon(
                                             Icons.Outlined.Check,
                                             contentDescription = "Terpilih",
-                                            tint = colorScheme.primary,
+                                            tint = MaterialTheme.colorScheme.onSecondary,
                                             modifier = Modifier.size(16.dp)
                                         )
                                     }

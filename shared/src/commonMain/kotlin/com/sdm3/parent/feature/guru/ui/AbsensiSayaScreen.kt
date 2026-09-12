@@ -43,7 +43,7 @@ import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
 import com.sdm3.parent.core.designsystem.component.Sdm3OutlinedButton
 import com.sdm3.parent.core.designsystem.component.ScreenGlowBackground
 import com.sdm3.parent.core.designsystem.component.ScreenScaffold
-import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.guru.AbsensiSayaViewModel
 import com.sdm3.parent.platform.DeviceLocation
 import com.sdm3.parent.platform.LocationPermissionState
@@ -142,7 +142,7 @@ fun AbsensiSayaScreen(
                                     Text(
                                         text = listOfNotNull(state.employeeNip, state.date).joinToString(" • "),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = colorScheme.onSurface.copy(alpha = 0.65f),
+                                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                                     )
                                 }
                                 state.attendance?.checkInStatus?.let { status ->
@@ -190,14 +190,14 @@ fun AbsensiSayaScreen(
                             Text(
                                 text = "Area: $locationName",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onSurface.copy(alpha = 0.6f),
+                                color = ProductSchoolTheme.colors.onSurfaceFaint,
                             )
                         }
                         state.attendance?.checkInDistance?.let { distance ->
                             Text(
                                 text = "Jarak check-in: ${distance.toInt()} m dari pusat area",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onSurface.copy(alpha = 0.6f),
+                                color = ProductSchoolTheme.colors.onSurfaceFaint,
                             )
                         }
 
@@ -275,14 +275,14 @@ private fun LocationPermissionCard(
                 Text(
                     statusMessage,
                     style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurface.copy(alpha = 0.75f),
+                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                 )
                 liveLocation?.let { loc ->
                     Spacer(modifier = Modifier.height(Spacing.xs))
                     Text(
                         text = "Lat ${formatCoord(loc.latitude)} • Lng ${formatCoord(loc.longitude)}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.onSurface.copy(alpha = 0.6f),
+                        color = ProductSchoolTheme.colors.onSurfaceFaint,
                     )
                 }
             }
@@ -331,7 +331,7 @@ private fun AttendanceTimeCard(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     Sdm3Card(modifier = modifier, padding = Spacing.md) {
-        Text(title, style = MaterialTheme.typography.labelMedium, color = colorScheme.onSurface.copy(alpha = 0.65f))
+        Text(title, style = MaterialTheme.typography.labelMedium, color = ProductSchoolTheme.colors.onSurfaceMuted)
         Spacer(modifier = Modifier.height(Spacing.xs))
         Text(time, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
     }

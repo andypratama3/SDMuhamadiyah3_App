@@ -19,8 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.sdm3.parent.core.designsystem.component.*
-import com.sdm3.parent.core.designsystem.theme.SDM3Theme
-import com.sdm3.parent.core.designsystem.theme.Spacing
+import com.sdm3.parent.core.designsystem.theme.*
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.data.remote.dto.TeacherClassroomDto
 import com.sdm3.parent.feature.guru.TeacherHomeViewModel
@@ -104,7 +103,7 @@ fun TeacherHomeScreen(
                             Text(
                                 text = "Pilih kelas untuk mencatat absensi hari ini.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = colorScheme.onSurface.copy(alpha = 0.7f),
+                                color = ProductSchoolTheme.colors.onSurfaceMuted,
                             )
                             Spacer(modifier = Modifier.height(Spacing.sm))
                         }
@@ -148,7 +147,7 @@ private fun TeacherAbsensiSayaCard(onClick: () -> Unit) {
                 Text(
                     "Check-in/out dengan GPS realtime",
                     style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                 )
             }
             Icon(
@@ -188,7 +187,7 @@ private fun TeacherClassroomCard(
                 Text(
                     "${classroom.studentCount} siswa",
                     style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                 )
             }
             Icon(

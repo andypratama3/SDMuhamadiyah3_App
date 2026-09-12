@@ -123,8 +123,8 @@ fun PengumumanSekolahScreen(
                                     fontWeight = if (selectedCategory == index) FontWeight.Bold else FontWeight.Medium
                                 )
                             },
-                            selectedContentColor = colorScheme.secondary,
-                            unselectedContentColor = colorScheme.onSurfaceVariant
+                            selectedContentColor = colorScheme.primary,
+                            unselectedContentColor = ProductSchoolTheme.colors.onSurfaceMuted
                         )
                     }
                 }

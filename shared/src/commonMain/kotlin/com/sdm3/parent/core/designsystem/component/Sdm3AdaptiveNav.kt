@@ -136,7 +136,7 @@ private fun Sdm3NavRail(
             navItems.forEach { item ->
                 val selected = selectedTab == item.tab
                 val contentColor by animateColorAsState(
-                    targetValue = if (selected) colorScheme.onPrimary else colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    targetValue = if (selected) colorScheme.onPrimary else ProductSchoolTheme.colors.onSurfaceMuted,
                     animationSpec = tween(400)
                 )
                 val backgroundColor by animateColorAsState(
@@ -170,14 +170,14 @@ private fun Sdm3NavRail(
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                                 letterSpacing = 0.sp
                             ),
-                            color = if (selected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            color = if (selected) colorScheme.primary else ProductSchoolTheme.colors.onSurfaceMuted
                         )
                     },
                     colors = NavigationRailItemDefaults.colors(
                         selectedIconColor = colorScheme.primary,
                         selectedTextColor = colorScheme.primary,
-                        unselectedIconColor = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        unselectedTextColor = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        unselectedIconColor = ProductSchoolTheme.colors.onSurfaceMuted,
+                        unselectedTextColor = ProductSchoolTheme.colors.onSurfaceMuted,
                         indicatorColor = Color.Transparent
                     )
                 )

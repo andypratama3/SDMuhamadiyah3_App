@@ -120,7 +120,7 @@ fun VerifikasiOtpScreen(
                     OtpStep.RESET_PASSWORD -> "Silakan buat kunci akses baru yang kuat untuk keamanan akun Anda."
                 },
                 style = MaterialTheme.typography.bodyLarge,
-                color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = ProductSchoolTheme.colors.onSurfaceMuted,
                 textAlign = TextAlign.Center,
                 lineHeight = 24.sp,
                 modifier = Modifier.padding(horizontal = Spacing.md)
@@ -168,12 +168,12 @@ fun VerifikasiOtpScreen(
                                     horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(Icons.Outlined.Timer, contentDescription = "Timer", modifier = Modifier.size(16.dp), tint = colorScheme.primary.copy(alpha = 0.4f))
+                                    Icon(Icons.Outlined.Timer, contentDescription = "Timer", modifier = Modifier.size(16.dp), tint = ProductSchoolTheme.colors.onSurfaceMuted)
                                     Spacer(Modifier.width(Spacing.xs))
                                     Text(
                                         text = "Kirim ulang dalam ${state.countdownSeconds}d",
                                         style = MaterialTheme.typography.labelLarge,
-                                        color = colorScheme.primary.copy(alpha = 0.4f),
+                                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -181,7 +181,7 @@ fun VerifikasiOtpScreen(
                                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                     Text(
                                         text = "KIRIM ULANG KODE",
-                                        color = colorScheme.secondary,
+                                        color = colorScheme.primary,
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Black,
                                         modifier = Modifier

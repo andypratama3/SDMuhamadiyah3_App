@@ -158,7 +158,7 @@ fun PengaturanNotifikasiScreen(
                                 text = "Preferensi ini akan diterapkan pada seluruh perangkat yang terhubung dengan akun Anda. Pastikan koneksi internet stabil untuk menerima notifikasi tepat waktu.",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary.copy(alpha = 0.6f),
+                                color = ProductSchoolTheme.colors.onSurfaceMuted,
                                 modifier = Modifier.padding(16.dp),
                                 lineHeight = 18.sp
                             )

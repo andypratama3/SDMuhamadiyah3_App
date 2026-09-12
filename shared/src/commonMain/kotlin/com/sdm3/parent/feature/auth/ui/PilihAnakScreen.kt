@@ -251,7 +251,7 @@ private fun StudentItem(
                         Text(
                             text = student.name.firstOrNull()?.uppercase() ?: "",
                             style = MaterialTheme.typography.headlineSmall,
-                            color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.ExtraBold
                         )
                     }
@@ -264,13 +264,13 @@ private fun StudentItem(
                         text = student.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "NISN: ${student.nisn ?: "-"}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        color = ProductSchoolTheme.colors.onSurfaceMuted,
                         letterSpacing = 0.2.sp
                     )
                     student.className?.let {
@@ -294,7 +294,7 @@ private fun StudentItem(
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 contentDescription = "Terpilih",
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = MaterialTheme.colorScheme.onSecondary,
                                 modifier = Modifier.size(20.dp)
                             )
                         }

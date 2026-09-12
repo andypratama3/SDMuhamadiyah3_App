@@ -96,7 +96,7 @@ fun AccountDeletionScreen(
                                 Text(
                                     text = "Permintaan ini bersifat permanen untuk akses digital. Data akademik resmi tetap tersimpan pada database institusi sesuai regulasi kependidikan.",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = colorScheme.primary.copy(alpha = 0.7f),
+                                    color = ProductSchoolTheme.colors.onSurfaceMuted,
                                     lineHeight = 22.sp
                                 )
                             }
@@ -110,8 +110,8 @@ fun AccountDeletionScreen(
                         contentPadding = PaddingValues(bottom = 8.dp)
                     ) {
                         item { StatusChip(text = "Arsip Terjamin", color = colorScheme.primary) }
-                        item { StatusChip(text = "Proses 7 Hari", color = colorScheme.secondary) }
-                        item { StatusChip(text = "Final & Absolut", color = colorScheme.error) }
+                        item { StatusChip(text = "Proses 7 Hari", color = statusWarningColor()) }
+                        item { StatusChip(text = "Final & Absolut", color = statusDangerColor()) }
                     }
                 }
 

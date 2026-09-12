@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.glassBorderColor
 import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
@@ -63,7 +64,7 @@ fun Sdm3TextField(
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.5.sp,
-            color = if (isError) colorScheme.error else colorScheme.primary.copy(alpha = 0.6f),
+            color = if (isError) colorScheme.error else ProductSchoolTheme.colors.onSurfaceMuted,
             modifier = Modifier.padding(start = 2.dp, bottom = 8.dp)
         )
 
@@ -81,7 +82,7 @@ fun Sdm3TextField(
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        color = ProductSchoolTheme.colors.onSurfaceFaint
                     )
                 }
             },
@@ -91,7 +92,7 @@ fun Sdm3TextField(
                         imageVector = it,
                         contentDescription = null,
                         modifier = Modifier.size(22.dp),
-                        tint = if (isError) colorScheme.error else colorScheme.primary.copy(alpha = 0.6f)
+                        tint = if (isError) colorScheme.error else ProductSchoolTheme.colors.onSurfaceMuted
                     )
                 }
             },
