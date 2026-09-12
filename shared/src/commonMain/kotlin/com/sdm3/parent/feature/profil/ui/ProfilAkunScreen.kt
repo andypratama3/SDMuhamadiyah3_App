@@ -155,7 +155,7 @@ fun ProfilAkunScreen(
                             .padding(horizontal = Spacing.xl)
                             .verticalScroll(rememberScrollState())
                     ) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         ProfileHeader(
                             name = uiState.name,
@@ -171,13 +171,13 @@ fun ProfilAkunScreen(
                             }
                         )
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(28.dp))
 
                         val activeStudent = uiState.students.firstOrNull { it.id == selectedStudentId }
                             ?: uiState.students.firstOrNull()
                         val canSwitch = uiState.students.size > 1
                         SectionHeader(title = "IDENTITAS AKADEMIK")
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                         StudentMiniCard(
                             student = activeStudent,
                             childCount = uiState.students.size,
@@ -185,12 +185,12 @@ fun ProfilAkunScreen(
                             onSwitchClick = { if (canSwitch) showStudentSheet = true }
                         )
 
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(36.dp))
 
                         SectionHeader(title = "PENGATURAN SISTEM")
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        Sdm3Card(padding = 8.dp) {
+                        Sdm3Card(padding = 10.dp) {
                             Column {
                                 BiometricSettingsRow(
                                     enabled = uiState.biometricEnabled,

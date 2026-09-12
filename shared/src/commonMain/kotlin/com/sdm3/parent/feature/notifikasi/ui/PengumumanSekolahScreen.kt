@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -104,13 +103,7 @@ fun PengumumanSekolahScreen(
                     containerColor = Color.Transparent,
                     contentColor = colorScheme.primary,
                     edgePadding = Spacing.lg,
-                    divider = {},
-                    indicator = {
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(selectedTabIndex = selectedCategory),
-                            color = colorScheme.secondary
-                        )
-                    }
+                    divider = {}
                 ) {
                     categoryFilters.forEachIndexed { index, label ->
                         Tab(

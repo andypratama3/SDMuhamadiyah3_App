@@ -124,10 +124,10 @@ fun AbsensiSayaScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
-                            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                            .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
                     ) {
-                        Sdm3Card(padding = Spacing.lg) {
+                        Sdm3Card(padding = Spacing.xl) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -138,11 +138,13 @@ fun AbsensiSayaScreen(
                                         state.employeeName,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
+                                        letterSpacing = (-0.2).sp
                                     )
                                     Text(
                                         text = listOfNotNull(state.employeeNip, state.date).joinToString(" • "),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = ProductSchoolTheme.colors.onSurfaceMuted,
+                                        fontWeight = FontWeight.Medium
                                     )
                                 }
                                 state.attendance?.checkInStatus?.let { status ->

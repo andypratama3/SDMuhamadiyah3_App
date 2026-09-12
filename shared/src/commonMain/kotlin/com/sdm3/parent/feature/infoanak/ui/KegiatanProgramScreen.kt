@@ -77,19 +77,19 @@ fun KegiatanProgramScreen(
             ) {
                 Surface(
                     modifier = Modifier
-                        .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.md)
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(Spacing.md),
                     color = liquidSurface,
                     border = BorderStroke(1.dp, liquidBorder)
                 ) {
-                    Row(modifier = Modifier.padding(6.dp)) {
+                    Row(modifier = Modifier.padding(8.dp)) {
                         tabs.forEachIndexed { index, label ->
                             val isSelected = selectedTab == index
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(42.dp)
+                                    .height(46.dp)
                                     .clip(RoundedCornerShape(Spacing.sm))
                                     .background(if (isSelected) colorScheme.primary else Color.Transparent)
                                     .clickable { selectedTab = index },

@@ -99,21 +99,22 @@ fun PilihAnakScreen(
                             contentPadding = PaddingValues(
                                 start = Spacing.xl,
                                 end = Spacing.xl,
-                                top = Spacing.md,
+                                top = Spacing.lg,
                                 bottom = 140.dp
                             ),
-                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                         ) {
                             item {
                                 Column(
                                     modifier = Modifier
-                                        .padding(bottom = Spacing.lg)
+                                        .padding(bottom = Spacing.xl)
                                 ) {
                                     Text(
                                         text = "Silakan pilih data anak untuk melanjutkan.",
                                         style = MaterialTheme.typography.bodyLarge,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        lineHeight = 24.sp
+                                        lineHeight = 26.sp,
+                                        fontWeight = FontWeight.Medium
                                     )
                                 }
                             }
@@ -198,42 +199,42 @@ private fun StudentItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(22.dp))
             .clickable {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
             .background(
-                if (isSelected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.15f)
-                else glassSurface.copy(alpha = 0.5f)
+                if (isSelected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.18f)
+                else glassSurface.copy(alpha = 0.55f)
             )
             .border(
-                width = if (isSelected) 2.dp else 1.5.dp,
+                width = if (isSelected) 2.5.dp else 1.5.dp,
                 color = borderColor,
-                shape = RoundedCornerShape(20.dp)
+                shape = RoundedCornerShape(22.dp)
             )
             .padding(1.dp)
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(19.dp),
-            color = if (isSelected) glassSurface.copy(alpha = 0.95f) else glassSurface,
-            tonalElevation = if (isSelected) 4.dp else 0.dp,
-            shadowElevation = if (isSelected) 4.dp else 0.dp
+            shape = RoundedCornerShape(21.dp),
+            color = if (isSelected) glassSurface.copy(alpha = 0.98f) else glassSurface,
+            tonalElevation = if (isSelected) 5.dp else 0.dp,
+            shadowElevation = if (isSelected) 5.dp else 0.dp
         ) {
             Row(
                 modifier = Modifier
-                    .padding(Spacing.md)
+                    .padding(Spacing.lg)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Photo Container with Modern Border
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(68.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(2.dp, if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
+                        .border(2.5.dp, if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     if (student.photo != null) {
@@ -248,29 +249,32 @@ private fun StudentItem(
                             text = student.name.firstOrNull()?.uppercase() ?: "",
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = (-0.5).sp
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(Spacing.md))
+                Spacer(modifier = Modifier.width(Spacing.lg))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = student.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = (-0.2).sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = "NISN: ${student.nisn ?: "-"}",
                         style = MaterialTheme.typography.bodySmall,
                         color = ProductSchoolTheme.colors.onSurfaceMuted,
-                        letterSpacing = 0.2.sp
+                        letterSpacing = 0.3.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     student.className?.let {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Sdm3CategoryBadge(text = it)
                     }
                 }
@@ -281,17 +285,17 @@ private fun StudentItem(
                     exit = fadeOut() + scaleOut()
                 ) {
                     Surface(
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(36.dp),
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.secondary,
-                        shadowElevation = 4.dp
+                        shadowElevation = 5.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 contentDescription = "Terpilih",
                                 tint = MaterialTheme.colorScheme.onSecondary,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                     }

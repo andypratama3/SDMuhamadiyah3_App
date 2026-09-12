@@ -4,6 +4,7 @@ package com.sdm3.parent.platform
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
+import platform.CoreLocation.CLAuthorizationStatus
 import platform.CoreLocation.CLLocation
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.CLLocationManagerDelegateProtocol
@@ -18,6 +19,7 @@ import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
 import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UIKit.UIDevice
+import platform.darwin.NSObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -25,25 +27,123 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 private const val LOCATION_TIMEOUT_MS = 20_000L
 
-// Temporarily simplified for iOS build compatibility
-private class IosLocationCoordinator {
-    fun permissionState(): LocationPermissionState = LocationPermissionState.NEED_PERMISSION
-    fun requestPermission(onResult: (Boolean) -> Unit) = onResult(false)
-    fun getCurrentLocation(onResult: (Result<DeviceLocation>) -> Unit) = 
-        onResult(Result.failure(IllegalStateException("Location not available on iOS simulator")))
-    fun watch(onUpdate: (DeviceLocation) -> Unit): () -> Unit = {}
+private fun CLLocation.toDeviceLocation(): DeviceLocation = coordinate.useContents {
+    DeviceLocation(
+        latitude = latitude,
+        longitude = longitude,
+        accuracyMeters = this@toDeviceLocation.horizontalAccuracy.coerceAtLeast(0.0),
+    )
+}
+
+private class IosLocationCoordinator : NSObject(), CLLocationManagerDelegateProtocol {
+
+    private val manager = CLLocationManager()
+
+    private var currentCallback: ((Result<DeviceLocation>) -> Unit)? = null
+    private var currentPermissionCallback: ((Boolean) -> Unit)? = null
+    private var watchCallback: ((DeviceLocation) -> Unit)? = null
+
+    init {
+        manager.delegate = this
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+    }
+
+    fun permissionState(): LocationPermissionState {
+        if (!CLLocationManager.locationServicesEnabled()) return LocationPermissionState.LOCATION_SERVICES_OFF
+        return when (CLLocationManager.authorizationStatus()) {
+            kCLAuthorizationStatusAuthorizedWhenInUse,
+            kCLAuthorizationStatusAuthorizedAlways -> LocationPermissionState.GRANTED
+            kCLAuthorizationStatusNotDetermined -> LocationPermissionState.NEED_PERMISSION
+            kCLAuthorizationStatusDenied,
+            kCLAuthorizationStatusRestricted -> LocationPermissionState.DENIED_PERMANENTLY
+            else -> LocationPermissionState.NEED_PERMISSION
+        }
+    }
+
+    fun requestPermission(onResult: (Boolean) -> Unit) {
+        val status = CLLocationManager.authorizationStatus()
+        if (status == kCLAuthorizationStatusNotDetermined) {
+            currentPermissionCallback = onResult
+            manager.requestWhenInUseAuthorization()
+            return
+        }
+        onResult(isGranted(status))
+    }
+
+    fun getCurrentLocation(onResult: (Result<DeviceLocation>) -> Unit) {
+        if (currentCallback != null) {
+            onResult(Result.failure(IllegalStateException("Pencarian lokasi sedang berjalan")))
+            return
+        }
+        if (permissionState() != LocationPermissionState.GRANTED) {
+            onResult(Result.failure(IllegalStateException("Izin lokasi belum diberikan")))
+            return
+        }
+        currentCallback = onResult
+        manager.startUpdatingLocation()
+    }
+
+    fun watch(onUpdate: (DeviceLocation) -> Unit): () -> Unit {
+        watchCallback = onUpdate
+        if (permissionState() == LocationPermissionState.GRANTED) {
+            manager.startUpdatingLocation()
+        }
+        return {
+            watchCallback = null
+            manager.stopUpdatingLocation()
+        }
+    }
+
+    fun cancelPendingLocation() {
+        currentCallback = null
+        manager.stopUpdatingLocation()
+    }
+
+    private fun isGranted(status: CLAuthorizationStatus): Boolean =
+        status == kCLAuthorizationStatusAuthorizedWhenInUse || status == kCLAuthorizationStatusAuthorizedAlways
+
+    private fun onAuthorizationChanged(status: CLAuthorizationStatus) {
+        val callback = currentPermissionCallback ?: return
+        currentPermissionCallback = null
+        val granted = CLLocationManager.locationServicesEnabled() && isGranted(status)
+        callback(granted)
+    }
+
+    override fun locationManagerDidChangeAuthorization(manager: CLLocationManager) {
+        onAuthorizationChanged(CLLocationManager.authorizationStatus())
+    }
+
+    @Suppress("DEPRECATION")
+    override fun locationManager(manager: CLLocationManager, didChangeAuthorizationStatus: CLAuthorizationStatus) {
+        onAuthorizationChanged(didChangeAuthorizationStatus)
+    }
+
+    override fun locationManager(manager: CLLocationManager, didUpdateLocations: List<*>) {
+        val location = didUpdateLocations.lastOrNull() as? CLLocation ?: return
+        val deviceLocation = location.toDeviceLocation()
+        val pending = currentCallback
+        if (pending != null) {
+            currentCallback = null
+            manager.stopUpdatingLocation()
+            pending(Result.success(deviceLocation))
+        }
+        watchCallback?.invoke(deviceLocation)
+    }
+
+    override fun locationManager(manager: CLLocationManager, didFailWithError: NSError) {
+        val failure = Result.failure<DeviceLocation>(
+            IllegalStateException(didFailWithError.localizedDescription),
+        )
+        val pending = currentCallback
+        if (pending != null) {
+            currentCallback = null
+            manager.stopUpdatingLocation()
+            pending(failure)
+        }
+    }
 }
 
 private val iosLocationCoordinator = IosLocationCoordinator()
-
-// Temporarily disabled for iOS build compatibility
-// private fun CLLocation.toDeviceLocation(): DeviceLocation = useContents {
-//     DeviceLocation(
-//         latitude = coordinate.latitude,
-//         longitude = coordinate.longitude,
-//         accuracyMeters = horizontalAccuracy.coerceAtLeast(0.0),
-//     )
-// }
 
 actual object DeviceLocationService {
     actual suspend fun permissionState(): LocationPermissionState =
@@ -67,6 +167,9 @@ actual object DeviceLocationService {
     actual suspend fun getCurrentLocation(): DeviceLocation {
         val result = withTimeoutOrNull(LOCATION_TIMEOUT_MS) {
             suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    iosLocationCoordinator.cancelPendingLocation()
+                }
                 iosLocationCoordinator.getCurrentLocation { locationResult ->
                     if (!continuation.isActive) return@getCurrentLocation
                     locationResult.fold(

@@ -78,48 +78,48 @@ fun PembayaranBerhasilScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(110.dp)
-                                .clip(RoundedCornerShape(36.dp))
+                                .size(120.dp)
+                                .clip(RoundedCornerShape(40.dp))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(40.dp))
+                        Spacer(modifier = Modifier.height(48.dp))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.6f)
-                                .height(32.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(10.dp))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
-                                .height(48.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .height(52.dp)
+                                .clip(RoundedCornerShape(10.dp))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(48.dp))
+                        Spacer(modifier = Modifier.height(56.dp))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp)
-                                .clip(RoundedCornerShape(20.dp))
+                                .height(130.dp)
+                                .clip(RoundedCornerShape(22.dp))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(48.dp))
+                        Spacer(modifier = Modifier.height(56.dp))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp)
-                                .clip(RoundedCornerShape(16.dp))
+                                .height(60.dp)
+                                .clip(RoundedCornerShape(18.dp))
                                 .shimmerEffect()
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.5f)
-                                .height(24.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .height(26.dp)
+                                .clip(RoundedCornerShape(10.dp))
                                 .shimmerEffect()
                         )
                     }
@@ -184,17 +184,17 @@ fun PembayaranBerhasilScreen(
                                 Spacer(modifier = Modifier.height(Spacing.xxl))
 
                                 Surface(
-                                    modifier = Modifier.size(120.dp),
-                                    shape = RoundedCornerShape(32.dp),
-                                    color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                    border = BorderStroke(2.5.dp, colorScheme.primary.copy(alpha = 0.3f)),
-                                    shadowElevation = 12.dp
+                                    modifier = Modifier.size(130.dp),
+                                    shape = RoundedCornerShape(36.dp),
+                                    color = colorScheme.primaryContainer.copy(alpha = 0.35f),
+                                    border = BorderStroke(3.dp, colorScheme.primary.copy(alpha = 0.35f)),
+                                    shadowElevation = 14.dp
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             imageVector = Icons.Outlined.CheckCircle,
                                             contentDescription = "Pembayaran berhasil",
-                                            modifier = Modifier.size(64.dp),
+                                            modifier = Modifier.size(70.dp),
                                             tint = statusSuccess
                                         )
                                     }

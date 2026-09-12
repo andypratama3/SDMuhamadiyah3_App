@@ -244,35 +244,35 @@ fun NilaiRaporScreen(
 private fun SumatifTabShimmer() {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)
     ) {
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(28.dp))
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(32.dp))
                     .shimmerEffect()
             )
         }
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(120.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .height(130.dp)
+                        .clip(RoundedCornerShape(18.dp))
                         .shimmerEffect()
                 )
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(120.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .height(130.dp)
+                        .clip(RoundedCornerShape(18.dp))
                         .shimmerEffect()
                 )
             }
@@ -280,9 +280,9 @@ private fun SumatifTabShimmer() {
         item {
             Box(
                 modifier = Modifier
-                    .width(180.dp)
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .width(200.dp)
+                    .height(22.dp)
+                    .clip(RoundedCornerShape(6.dp))
                     .shimmerEffect()
             )
         }
@@ -290,8 +290,8 @@ private fun SumatifTabShimmer() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(72.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .height(78.dp)
+                    .clip(RoundedCornerShape(18.dp))
                     .shimmerEffect()
             )
         }
@@ -344,25 +344,25 @@ private fun SumatifTabContent(
                     }
 
                     Column(
-                        modifier = Modifier.padding(vertical = 32.dp, horizontal = 24.dp),
+                        modifier = Modifier.padding(vertical = 36.dp, horizontal = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = "RATA-RATA KOMPETENSI",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp,
-                            color = colorScheme.onPrimary.copy(alpha = 0.4f)
+                            letterSpacing = 2.2.sp,
+                            color = colorScheme.onPrimary.copy(alpha = 0.45f)
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
                         Text(
                             text = "$avgScore",
-                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 56.sp),
+                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 60.sp),
                             fontWeight = FontWeight.Black,
                             color = colorScheme.onPrimary,
-                            letterSpacing = (-2).sp
+                            letterSpacing = (-2.5).sp
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
                         val (predicateLabel, predicateColor) = com.sdm3.parent.core.util.predicateForScore(avgScore)
                         Surface(
                             color = predicateColor,
@@ -373,8 +373,8 @@ private fun SumatifTabContent(
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = colorScheme.onPrimary,
-                                letterSpacing = 1.sp,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                letterSpacing = 1.2.sp,
+                                modifier = Modifier.padding(horizontal = 18.dp, vertical = 9.dp)
                             )
                         }
                     }

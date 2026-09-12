@@ -257,14 +257,14 @@ fun PembayaranSppScreen(
 private fun PaymentLoadingContent(modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.sm),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp)
+                    .height(240.dp)
                     .clip(RoundedCornerShape(28.dp))
                     .shimmerEffect(),
             )
@@ -273,8 +273,8 @@ private fun PaymentLoadingContent(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .height(52.dp)
+                    .clip(RoundedCornerShape(10.dp))
                     .shimmerEffect(),
             )
         }
@@ -282,8 +282,8 @@ private fun PaymentLoadingContent(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .height(110.dp)
+                    .clip(RoundedCornerShape(18.dp))
                     .shimmerEffect(),
             )
         }
@@ -291,8 +291,8 @@ private fun PaymentLoadingContent(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(72.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .height(78.dp)
+                    .clip(RoundedCornerShape(18.dp))
                     .shimmerEffect(),
             )
         }

@@ -90,13 +90,13 @@ fun KehadiranSiswaScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding),
-                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
                         item { TodayShimmer() }
                         item { SummaryShimmer() }
                         item { CalendarShimmer() }
-                        item { Spacer(Modifier.height(Spacing.xs)) }
+                        item { Spacer(Modifier.height(Spacing.sm)) }
                         item { LogRowShimmer() }
                         item { LogRowShimmer() }
                         item { LogRowShimmer() }

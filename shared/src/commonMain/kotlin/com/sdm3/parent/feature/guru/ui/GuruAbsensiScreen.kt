@@ -45,7 +45,7 @@ private fun AttendanceChip(
     FilterChip(
         selected = selected,
         onClick = onClick,
-        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+        label = { Text(label, style = MaterialTheme.typography.labelSmall, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium) },
         shape = RoundedCornerShape(999.dp),
         colors = FilterChipDefaults.filterChipColors(
             selectedContainerColor = color,
@@ -87,7 +87,7 @@ fun GuruAbsensiScreen(
         onBack = onBack,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            Surface(tonalElevation = 4.dp) {
+            Surface(tonalElevation = 5.dp) {
                 Sdm3Button(
                     text = if (state.isSaving) "Menyimpan..." else "Simpan Absensi",
                     onClick = { viewModel.save() },
@@ -95,7 +95,8 @@ fun GuruAbsensiScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .padding(Spacing.lg),
+                        .padding(Spacing.lg)
+                        .height(56.dp),
                 )
             }
         },

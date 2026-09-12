@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -144,13 +143,7 @@ fun NotifikasiScreen(
                     containerColor = Color.Transparent,
                     contentColor = colorScheme.primary,
                     edgePadding = Spacing.lg,
-                    divider = {},
-                    indicator = {
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(selectedTabIndex = selectedFilter),
-                            color = colorScheme.secondary
-                        )
-                    }
+                    divider = {}
                 ) {
                     filterOptions.forEachIndexed { index, label ->
                         Tab(

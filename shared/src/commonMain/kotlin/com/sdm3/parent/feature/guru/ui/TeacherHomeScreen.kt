@@ -90,22 +90,24 @@ fun TeacherHomeScreen(
                 }
                 else -> {
                     LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                        contentPadding = PaddingValues(vertical = Spacing.md),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+                        contentPadding = PaddingValues(vertical = Spacing.lg),
                     ) {
                         item {
                             Text(
                                 text = "Halo, ${state.teacherName}",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
+                                letterSpacing = (-0.3).sp
                             )
-                            Spacer(modifier = Modifier.height(Spacing.xs))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             Text(
                                 text = "Pilih kelas untuk mencatat absensi hari ini.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = ProductSchoolTheme.colors.onSurfaceMuted,
+                                fontWeight = FontWeight.Medium
                             )
-                            Spacer(modifier = Modifier.height(Spacing.sm))
+                            Spacer(modifier = Modifier.height(Spacing.md))
                         }
                         item {
                             TeacherAbsensiSayaCard(onClick = onOpenAbsensiSaya)
@@ -130,31 +132,32 @@ private fun TeacherAbsensiSayaCard(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        padding = Spacing.lg,
+        padding = Spacing.xl,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Sdm3IconBadge(
                 icon = Icons.Outlined.LocationOn,
-                size = 56.dp,
-                iconSize = 28.dp,
+                size = 60.dp,
+                iconSize = 30.dp,
                 iconTint = colorScheme.secondary,
-                backgroundColor = colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                backgroundColor = colorScheme.secondaryContainer.copy(alpha = 0.35f),
                 borderColor = Color.Unspecified,
             )
-            Spacer(modifier = Modifier.width(Spacing.md))
+            Spacer(modifier = Modifier.width(Spacing.lg))
             Column(modifier = Modifier.weight(1f)) {
-                Text("Absensi Saya", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+                Text("Absensi Saya", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary, letterSpacing = (-0.2).sp)
                 Text(
                     "Check-in/out dengan GPS realtime",
                     style = MaterialTheme.typography.bodySmall,
                     color = ProductSchoolTheme.colors.onSurfaceMuted,
+                    fontWeight = FontWeight.Medium
                 )
             }
             Icon(
                 Icons.Outlined.ChevronRight,
                 contentDescription = "Buka absensi saya",
                 tint = colorScheme.primary,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(22.dp),
             )
         }
     }
@@ -170,31 +173,32 @@ private fun TeacherClassroomCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        padding = Spacing.lg,
+        padding = Spacing.xl,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Sdm3IconBadge(
                 icon = Icons.Outlined.Groups,
-                size = 56.dp,
-                iconSize = 28.dp,
+                size = 60.dp,
+                iconSize = 30.dp,
                 iconTint = colorScheme.primary,
-                backgroundColor = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                backgroundColor = colorScheme.primaryContainer.copy(alpha = 0.35f),
                 borderColor = Color.Unspecified,
             )
-            Spacer(modifier = Modifier.width(Spacing.md))
+            Spacer(modifier = Modifier.width(Spacing.lg))
             Column(modifier = Modifier.weight(1f)) {
-                Text(classroom.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+                Text(classroom.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colorScheme.primary, letterSpacing = (-0.2).sp)
                 Text(
                     "${classroom.studentCount} siswa",
                     style = MaterialTheme.typography.bodySmall,
                     color = ProductSchoolTheme.colors.onSurfaceMuted,
+                    fontWeight = FontWeight.Medium
                 )
             }
             Icon(
                 Icons.Outlined.ChevronRight,
                 contentDescription = "Buka kelas ${classroom.name}",
                 tint = colorScheme.primary,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(22.dp),
             )
         }
     }

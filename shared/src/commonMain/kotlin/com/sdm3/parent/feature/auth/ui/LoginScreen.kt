@@ -185,7 +185,7 @@ fun LoginScreen(
                     alpha = revealForm
                     translationY = (1f - revealForm) * 48f
                 },
-                padding = 24.dp
+                padding = 28.dp
             ) {
                 Column {
                     Sdm3TextField(
@@ -200,7 +200,7 @@ fun LoginScreen(
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(Spacing.lg))
+                    Spacer(modifier = Modifier.height(Spacing.xl))
 
                     Sdm3TextField(
                         value = uiState.password,
@@ -230,7 +230,7 @@ fun LoginScreen(
                         Sdm3ErrorBanner(message = uiState.errorMessage ?: "")
                     }
 
-                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
                     TextButton(
                         onClick = { onForgotPassword(uiState.email) },
@@ -240,7 +240,8 @@ fun LoginScreen(
                             text = "Lupa Kunci Akses?",
                             color = ProductSchoolTheme.colors.onSurfaceMuted,
                             style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.1).sp
                         )
                     }
                 }
@@ -258,17 +259,18 @@ fun LoginScreen(
                     text = "Masuk",
                     onClick = handleLogin,
                     isLoading = uiState.isLoading,
-                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                    modifier = Modifier.fillMaxWidth().height(58.dp)
                 )
 
                 if (uiState.biometricAvailable) {
-                    Spacer(modifier = Modifier.height(Spacing.md))
+                    Spacer(modifier = Modifier.height(Spacing.lg))
 
                     Sdm3OutlinedButton(
                         text = "Gunakan Biometrik",
                         onClick = { viewModel?.onIntent(LoginIntent.BiometricLogin) },
                         icon = Icons.Outlined.Fingerprint,
-                        contentColor = colorScheme.primary
+                        contentColor = colorScheme.primary,
+                        modifier = Modifier.fillMaxWidth().height(54.dp)
                     )
                 }
             }

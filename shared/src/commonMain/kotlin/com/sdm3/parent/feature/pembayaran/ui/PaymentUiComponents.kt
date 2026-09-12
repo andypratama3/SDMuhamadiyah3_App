@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,19 +62,11 @@ fun PaymentTabSelector(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val tabs = listOf(PaymentTab.Tagihan to "Tagihan", PaymentTab.Riwayat to "Riwayat")
-    TabRow(
+    SecondaryTabRow(
         selectedTabIndex = selectedTab.ordinal,
         modifier = modifier.fillMaxWidth(),
         containerColor = Color.Transparent,
-        contentColor = colorScheme.primary,
         divider = {},
-        indicator = {
-            TabRowDefaults.SecondaryIndicator(
-                modifier = Modifier.tabIndicatorOffset(selectedTabIndex = selectedTab.ordinal),
-                color = colorScheme.secondary,
-                height = 3.dp,
-            )
-        },
     ) {
         tabs.forEach { (tab, label) ->
             Tab(
@@ -120,7 +111,7 @@ fun PaymentHeroCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column {
             Box(
@@ -130,7 +121,7 @@ fun PaymentHeroCard(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                colorScheme.inversePrimary.copy(alpha = 0.35f),
+                                colorScheme.inversePrimary.copy(alpha = 0.4f),
                             ),
                         ),
                     )
@@ -146,10 +137,10 @@ fun PaymentHeroCard(
                             text = "TAGIHAN AKTIF",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 1.sp,
-                            color = heroContent.copy(alpha = 0.5f),
+                            letterSpacing = 1.2.sp,
+                            color = heroContent.copy(alpha = 0.55f),
                         )
-                        Spacer(modifier = Modifier.height(Spacing.xs))
+                        Spacer(modifier = Modifier.height(Spacing.sm))
                         Text(
                             text = activeFee?.paymentTitleName
                                 ?: if (hasActive) "Tagihan Aktif" else "Semua Tagihan Lunas",
@@ -158,19 +149,21 @@ fun PaymentHeroCard(
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
+                            lineHeight = 28.sp
                         )
                         if (studentName.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(Spacing.xs))
+                            Spacer(modifier = Modifier.height(Spacing.sm))
                             Text(
                                 text = studentName,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = heroContent.copy(alpha = 0.7f),
+                                color = heroContent.copy(alpha = 0.75f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    Spacer(modifier = Modifier.width(Spacing.md))
                     Surface(
                         shape = RoundedCornerShape(999.dp),
                         color = statusColor,
@@ -180,7 +173,8 @@ fun PaymentHeroCard(
                             style = MaterialTheme.typography.labelSmall,
                             color = colorScheme.onPrimary,
                             fontWeight = FontWeight.Black,
-                            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = 6.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.md, vertical = 7.dp),
+                            letterSpacing = 0.3.sp
                         )
                     }
                 }
@@ -195,6 +189,7 @@ fun PaymentHeroCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.fillMaxWidth(),
+                    letterSpacing = (-0.5).sp
                 )
                 val dueLabel = activeFee?.dueDate?.takeIf { it.isNotBlank() }?.let {
                     "Jatuh tempo: ${formatTanggal(it)}"
@@ -203,7 +198,8 @@ fun PaymentHeroCard(
                     Text(
                         text = dueLabel,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = heroContent.copy(alpha = 0.6f),
+                        color = heroContent.copy(alpha = 0.65f),
+                        fontWeight = FontWeight.Medium
                     )
                 }
 
@@ -216,7 +212,7 @@ fun PaymentHeroCard(
                     icon = Icons.Outlined.CreditCard,
                     containerColor = colorScheme.secondary,
                     contentColor = colorScheme.onSecondary,
-                    modifier = Modifier.fillMaxWidth().height(54.dp),
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
                 )
             }
         }
@@ -231,7 +227,7 @@ fun PaymentProgressCard(
     val colorScheme = MaterialTheme.colorScheme
     val statusSuccess = statusSuccessColor()
 
-    Sdm3Card(modifier = modifier, padding = Spacing.lg) {
+    Sdm3Card(modifier = modifier, padding = Spacing.xl) {
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -243,26 +239,29 @@ fun PaymentProgressCard(
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary,
                     modifier = Modifier.weight(1f),
+                    letterSpacing = (-0.2).sp
                 )
                 Text(
                     text = "${progress.percent}%",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = statusSuccess,
+                    letterSpacing = (-0.3).sp
                 )
             }
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.md))
             LinearProgressIndicator(
                 progress = { progress.ratio },
-                modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                modifier = Modifier.fillMaxWidth().height(10.dp).clip(CircleShape),
                 color = statusSuccess,
-                trackColor = statusSuccess.copy(alpha = 0.1f),
+                trackColor = statusSuccess.copy(alpha = 0.12f),
             )
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.md))
             Text(
                 text = "${progress.paid} dari ${progress.total} tagihan telah diselesaikan.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = ProductSchoolTheme.colors.onSurfaceMuted,
+                fontWeight = FontWeight.Medium
             )
         }
     }

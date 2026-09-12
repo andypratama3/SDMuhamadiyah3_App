@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -688,50 +690,51 @@ private fun ShortcutCard(
                 Box(contentAlignment = Alignment.Center) {
                     if (!comingSoon) {
                         LocalizedGlow(
-                            modifier = Modifier.size(80.dp),
+                            modifier = Modifier.size(90.dp),
                             color = iconColor,
-                            alpha = 0.15f
+                            alpha = 0.2f
                         )
                     }
                     Surface(
-                        modifier = Modifier.size(56.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        color = iconColor.copy(alpha = if (comingSoon) 0.08f else 0.12f),
-                        shadowElevation = if (comingSoon) 0.dp else 2.dp
+                        modifier = Modifier.size(64.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        color = if (comingSoon) colorScheme.surfaceVariant else iconColor.copy(alpha = 0.15f),
+                        shadowElevation = if (comingSoon) 0.dp else 3.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 icon,
                                 contentDescription = title,
-                                tint = if (comingSoon) iconColor.copy(alpha = 0.4f) else iconColor,
-                                modifier = Modifier.size(28.dp)
+                                tint = if (comingSoon) ProductSchoolTheme.colors.onSurfaceFaint else iconColor,
+                                modifier = Modifier.size(32.dp)
                             )
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(Spacing.md))
+                Spacer(modifier = Modifier.height(Spacing.lg))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     color = if (comingSoon) ProductSchoolTheme.colors.onSurfaceFaint else colorScheme.primary,
-                    lineHeight = 20.sp
+                    lineHeight = 22.sp,
+                    letterSpacing = (-0.2).sp
                 )
             }
             if (comingSoon) {
                 Surface(
-                    shape = RoundedCornerShape(bottomStart = 8.dp),
+                    shape = RoundedCornerShape(bottomStart = 10.dp),
                     color = colorScheme.secondary,
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
                     Text(
                         text = "SEGERA",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                         fontWeight = FontWeight.Black,
                         color = colorScheme.onSecondary,
-                        letterSpacing = 0.5.sp,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                        letterSpacing = 0.6.sp,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
             }
@@ -804,57 +807,58 @@ private fun ServiceItem(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(72.dp)
+            .width(78.dp)
             .clickable(onClick = onClick)
     ) {
         Box(contentAlignment = Alignment.Center) {
             if (!comingSoon) {
                 LocalizedGlow(
-                    modifier = Modifier.size(64.dp),
+                    modifier = Modifier.size(72.dp),
                     color = colorScheme.primary,
-                    alpha = 0.12f
+                    alpha = 0.18f
                 )
             }
             Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = colorScheme.primaryContainer.copy(alpha = if (comingSoon) 0.2f else 0.4f),
-                shadowElevation = if (comingSoon) 0.dp else 1.dp
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(18.dp),
+                color = if (comingSoon) colorScheme.surfaceVariant else colorScheme.primaryContainer.copy(alpha = 0.5f),
+                shadowElevation = if (comingSoon) 0.dp else 2.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         icon,
                         contentDescription = label,
-                        tint = if (comingSoon) colorScheme.primary.copy(alpha = 0.4f) else colorScheme.primary,
-                        modifier = Modifier.size(26.dp)
+                        tint = if (comingSoon) ProductSchoolTheme.colors.onSurfaceFaint else colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
                     )
                 }
             }
             if (comingSoon) {
                 Surface(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(8.dp),
                     color = colorScheme.secondary,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 2.dp)
+                    modifier = Modifier.align(Alignment.TopEnd).padding(end = 3.dp, top = 3.dp)
                 ) {
                     Text(
                         text = "SEGERA",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 7.sp),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                         fontWeight = FontWeight.Black,
                         color = colorScheme.onSecondary,
-                        letterSpacing = 0.3.sp,
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                        letterSpacing = 0.4.sp,
+                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
                     )
                 }
             }
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = if (comingSoon) ProductSchoolTheme.colors.onSurfaceFaint else colorScheme.onSurfaceVariant,
-            maxLines = 1
+            maxLines = 1,
+            letterSpacing = (-0.1).sp
         )
     }
 }
@@ -872,54 +876,56 @@ private fun PengumumanSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
-            padding = 20.dp
+            padding = 22.dp
         ) {
             Row {
                 Surface(
-                    modifier = Modifier.size(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    color = infoColor.copy(alpha = 0.15f)
+                    modifier = Modifier.size(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = infoColor.copy(alpha = 0.18f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             Icons.Outlined.Campaign,
                             contentDescription = "Pengumuman",
                             tint = infoColor,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(26.dp)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(18.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "PENGUMUMAN",
                         style = MaterialTheme.typography.labelSmall,
                         color = infoColor,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
+                        letterSpacing = 0.6.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.primary,
                         maxLines = 2,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        lineHeight = 24.sp
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Outlined.AccessTime,
                             contentDescription = "Waktu",
-                            modifier = Modifier.size(14.dp),
+                            modifier = Modifier.size(15.dp),
                             tint = colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         Text(
                             text = time,
                             style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.onSurfaceVariant
+                            color = colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
@@ -933,27 +939,29 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
     val colorScheme = MaterialTheme.colorScheme
     val heroContent = heroContentColor()
     val statusSuccess = statusSuccessColor()
-    val glowColor = colorScheme.secondary.copy(alpha = 0.3f)
+    val glowColor = colorScheme.secondary.copy(alpha = 0.35f)
 
     Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Canvas(modifier = Modifier.fillMaxWidth().height(180.dp).alpha(0.4f)) {
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(glowColor.copy(alpha = 0.15f), Color.Transparent),
-                            center = Offset(size.width * 0.85f, size.height * 0.15f),
-                            radius = size.width * 1.2f
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .drawBehind {
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(glowColor.copy(alpha = 0.2f), Color.Transparent),
+                                center = Offset(size.width * 0.85f, size.height * 0.12f),
+                                radius = size.width * 1.3f
+                            )
                         )
-                    )
-                }
-
-                Column(modifier = Modifier.padding(24.dp)) {
+                    }
+                    .padding(26.dp)
+            ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -961,36 +969,38 @@ private fun TabunganSekolahSection(amount: String, hasBills: Boolean, onBayarCli
                         Text(
                             text = if (hasBills) "Total Tagihan Aktif" else "Tagihan Sekolah",
                             style = MaterialTheme.typography.titleMedium,
-                            color = heroContent.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.Medium
+                            color = heroContent.copy(alpha = 0.75f),
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = (-0.2).sp
                         )
                         Surface(
-                            color = heroContent.copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(8.dp)
+                            color = heroContent.copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(10.dp)
                         ) {
                             Icon(
                                 Icons.Outlined.AccountBalanceWallet,
                                 contentDescription = "Tagihan",
                                 tint = heroContent,
-                                modifier = Modifier.padding(8.dp).size(20.dp)
+                                modifier = Modifier.padding(10.dp).size(22.dp)
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = if (hasBills) amount else "Lunas",
                         style = MaterialTheme.typography.displaySmall,
                         color = heroContent,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.5).sp
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     Sdm3Button(
                         text = if (hasBills) "Bayar Sekarang" else "Lihat Riwayat",
                         onClick = onBayarClick,
                         containerColor = statusSuccess,
                         contentColor = colorScheme.onPrimary,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(54.dp)
                     )
                 }
             }

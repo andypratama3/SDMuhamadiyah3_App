@@ -73,9 +73,9 @@ fun VerifikasiOtpScreen(
         ) {
             ScreenGlowBackground()
 
-            Spacer(modifier = Modifier.height(Spacing.xxl))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
-            Sdm3GlassIconContainer(size = 100.dp) {
+            Sdm3GlassIconContainer(size = 110.dp) {
                 Icon(
                     imageVector = when(state.step) {
                         OtpStep.REQUEST_OTP -> Icons.Outlined.Email
@@ -87,12 +87,12 @@ fun VerifikasiOtpScreen(
                         OtpStep.VERIFY_OTP -> "Verifikasi"
                         OtpStep.RESET_PASSWORD -> "Selesai"
                     },
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(44.dp),
                     tint = colorScheme.primary
                 )
             }
 
-            Spacer(modifier = Modifier.height(Spacing.xxl))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             Text(
                 text = when(state.step) {
@@ -103,10 +103,10 @@ fun VerifikasiOtpScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
-                letterSpacing = (-0.5).sp
+                letterSpacing = (-0.6).sp
             )
 
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             Text(
                 text = when (state.step) {
@@ -117,7 +117,8 @@ fun VerifikasiOtpScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 color = ProductSchoolTheme.colors.onSurfaceMuted,
                 textAlign = TextAlign.Center,
-                lineHeight = 24.sp,
+                lineHeight = 26.sp,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(horizontal = Spacing.md)
             )
 
@@ -125,7 +126,7 @@ fun VerifikasiOtpScreen(
 
             Sdm3Card(
                 modifier = Modifier.fillMaxWidth(),
-                padding = 28.dp
+                padding = 32.dp
             ) {
                 Column {
                     when (state.step) {
@@ -144,7 +145,7 @@ fun VerifikasiOtpScreen(
                                 text = "Kirim Instruksi",
                                 onClick = { viewModel.requestOtp() },
                                 isLoading = state.isLoading,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().height(56.dp)
                             )
                         }
 
@@ -155,7 +156,7 @@ fun VerifikasiOtpScreen(
                                 colorScheme = colorScheme
                             )
 
-                            Spacer(modifier = Modifier.height(Spacing.xxl))
+                            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                             if (state.countdownSeconds > 0) {
                                 Row(
@@ -163,8 +164,8 @@ fun VerifikasiOtpScreen(
                                     horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(Icons.Outlined.Timer, contentDescription = "Timer", modifier = Modifier.size(16.dp), tint = ProductSchoolTheme.colors.onSurfaceMuted)
-                                    Spacer(Modifier.width(Spacing.xs))
+                                    Icon(Icons.Outlined.Timer, contentDescription = "Timer", modifier = Modifier.size(18.dp), tint = ProductSchoolTheme.colors.onSurfaceMuted)
+                                    Spacer(Modifier.width(Spacing.sm))
                                     Text(
                                         text = "Kirim ulang dalam ${state.countdownSeconds}d",
                                         style = MaterialTheme.typography.labelLarge,
@@ -180,10 +181,10 @@ fun VerifikasiOtpScreen(
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Black,
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
+                                            .clip(RoundedCornerShape(10.dp))
                                             .clickable { viewModel.resendOtp() }
-                                            .padding(Spacing.sm),
-                                        letterSpacing = 1.sp
+                                            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                                        letterSpacing = 1.2.sp
                                     )
                                 }
                             }
@@ -195,7 +196,7 @@ fun VerifikasiOtpScreen(
                                 onClick = { viewModel.verifyOtp() },
                                 isLoading = state.isLoading,
                                 enabled = state.otpCode.length == 6,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().height(56.dp)
                             )
                         }
 
@@ -212,7 +213,7 @@ fun VerifikasiOtpScreen(
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                             )
 
-                            Spacer(modifier = Modifier.height(Spacing.lg))
+                            Spacer(modifier = Modifier.height(Spacing.xl))
 
                             Sdm3TextField(
                                 value = state.newPasswordConfirmation,
@@ -232,7 +233,7 @@ fun VerifikasiOtpScreen(
                                 text = "Simpan Perubahan",
                                 onClick = { viewModel.resetPassword() },
                                 isLoading = state.isLoading,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().height(56.dp)
                             )
                         }
                     }
@@ -316,16 +317,16 @@ private fun OtpDigitInput(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(64.dp)
-                            .clip(RoundedCornerShape(16.dp))
+                            .height(68.dp)
+                            .clip(RoundedCornerShape(18.dp))
                             .background(
-                                if (isFocused) colorScheme.primaryContainer.copy(alpha = 0.3f)
+                                if (isFocused) colorScheme.primaryContainer.copy(alpha = 0.35f)
                                 else Color.Transparent
                             )
                             .border(
-                                width = if (isFocused) 2.dp else 1.5.dp,
+                                width = if (isFocused) 2.5.dp else 1.5.dp,
                                 color = if (isFocused) colorScheme.primary else glassBorder,
-                                shape = RoundedCornerShape(16.dp)
+                                shape = RoundedCornerShape(18.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -334,10 +335,11 @@ private fun OtpDigitInput(
                                 text = digit,
                                 style = MaterialTheme.typography.displaySmall,
                                 fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary
+                                color = colorScheme.primary,
+                                letterSpacing = (-0.5).sp
                             )
                         } else if (isFocused) {
-                            Box(modifier = Modifier.size(2.dp, 24.dp).background(colorScheme.primary.copy(alpha = 0.4f)))
+                            Box(modifier = Modifier.size(2.5.dp, 26.dp).background(colorScheme.primary.copy(alpha = 0.45f)))
                         }
                     }
                 }

@@ -89,8 +89,8 @@ fun DetailInfoAnakScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm)
+                        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+                        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)
                     ) {
                         item {
                             Sdm3Card(padding = Spacing.xl) {
@@ -100,39 +100,39 @@ fun DetailInfoAnakScreen(
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(100.dp)
-                                            .clip(RoundedCornerShape(32.dp))
+                                            .size(110.dp)
+                                            .clip(RoundedCornerShape(36.dp))
                                             .shimmerEffect()
                                     )
                                     Spacer(modifier = Modifier.height(Spacing.xl))
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth(0.6f)
-                                            .height(28.dp)
+                                            .height(30.dp)
                                             .clip(RoundedCornerShape(Spacing.xs))
                                             .shimmerEffect()
                                     )
-                                    Spacer(modifier = Modifier.height(Spacing.sm))
+                                    Spacer(modifier = Modifier.height(Spacing.md))
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth(0.4f)
-                                            .height(22.dp)
+                                            .height(24.dp)
                                             .clip(RoundedCornerShape(Spacing.xs))
                                             .shimmerEffect()
                                     )
-                                    Spacer(modifier = Modifier.height(Spacing.lg))
-                                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                                    Spacer(modifier = Modifier.height(Spacing.xl))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                                         Box(
                                             modifier = Modifier
-                                                .width(120.dp)
-                                                .height(32.dp)
+                                                .width(130.dp)
+                                                .height(36.dp)
                                                 .clip(RoundedCornerShape(999.dp))
                                                 .shimmerEffect()
                                         )
                                         Box(
                                             modifier = Modifier
-                                                .width(80.dp)
-                                                .height(32.dp)
+                                                .width(90.dp)
+                                                .height(36.dp)
                                                 .clip(RoundedCornerShape(999.dp))
                                                 .shimmerEffect()
                                         )
@@ -144,15 +144,15 @@ fun DetailInfoAnakScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(24.dp)
+                                    .height(26.dp)
                                     .clip(RoundedCornerShape(Spacing.xs))
                                     .shimmerEffect()
                             )
-                            Spacer(modifier = Modifier.height(Spacing.sm))
+                            Spacer(modifier = Modifier.height(Spacing.md))
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(160.dp)
+                                    .height(180.dp)
                                     .clip(RoundedCornerShape(Spacing.md))
                                     .shimmerEffect()
                             )
@@ -161,26 +161,26 @@ fun DetailInfoAnakScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(24.dp)
+                                    .height(26.dp)
                                     .clip(RoundedCornerShape(Spacing.xs))
                                     .shimmerEffect()
                             )
-                            Spacer(modifier = Modifier.height(Spacing.sm))
+                            Spacer(modifier = Modifier.height(Spacing.md))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .height(120.dp)
+                                        .height(130.dp)
                                         .clip(RoundedCornerShape(Spacing.md))
                                         .shimmerEffect()
                                 )
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .height(120.dp)
+                                        .height(130.dp)
                                         .clip(RoundedCornerShape(Spacing.md))
                                         .shimmerEffect()
                                 )

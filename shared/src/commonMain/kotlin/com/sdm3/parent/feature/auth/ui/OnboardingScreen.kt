@@ -90,18 +90,18 @@ fun OnboardingScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = Spacing.xl, vertical = Spacing.md),
+                        .padding(horizontal = Spacing.xl, vertical = Spacing.lg),
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     TextButton(
                         onClick = onComplete,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(14.dp)
                     ) {
                         Text(
                             text = "LEWATI",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp,
+                            letterSpacing = 1.6.sp,
                             color = ProductSchoolTheme.colors.onSurfaceMuted
                         )
                     }
@@ -114,7 +114,7 @@ fun OnboardingScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = Spacing.xxl, vertical = Spacing.md),
+                            .padding(horizontal = Spacing.xxl, vertical = Spacing.lg),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -133,19 +133,20 @@ fun OnboardingScreen(
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary,
-                            letterSpacing = (-0.3).sp,
-                            lineHeight = 32.sp,
+                            letterSpacing = (-0.4).sp,
+                            lineHeight = 34.sp,
                             maxLines = 3,
                         )
 
-                        Spacer(modifier = Modifier.height(Spacing.md))
+                        Spacer(modifier = Modifier.height(Spacing.lg))
 
                         Text(
                             text = onboardingPages[page].subtitle,
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                             color = ProductSchoolTheme.colors.onSurfaceMuted,
-                            lineHeight = 26.sp
+                            lineHeight = 28.sp,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
@@ -203,7 +204,7 @@ fun OnboardingScreen(
                                 }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth().height(58.dp)
+                        modifier = Modifier.fillMaxWidth().height(60.dp)
                     )
 
                     Spacer(modifier = Modifier.height(Spacing.md))
