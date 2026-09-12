@@ -1,6 +1,7 @@
 package com.sdm3.parent.feature.guru.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,7 +54,7 @@ private fun AttendanceChip(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun GuruAbsensiScreen(
     classroomId: String,
@@ -151,7 +152,10 @@ fun GuruAbsensiScreen(
                                             color = ProductSchoolTheme.colors.onSurfaceMuted,
                                         )
                                     }
-                                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                                        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                                    ) {
                                         AttendanceStatus.teacherSelectable.forEach { option ->
                                             AttendanceChip(
                                                 label = option.label,

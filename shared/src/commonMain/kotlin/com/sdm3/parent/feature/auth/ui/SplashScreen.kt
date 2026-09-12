@@ -196,7 +196,7 @@ private fun SplashContent(
         }
         
         // Multi-Orb Animated Mesh Background
-        Canvas(modifier = Modifier.fillMaxSize().alpha(if (startAnimation) 1f else 0f)) {
+        Canvas(modifier = Modifier.fillMaxSize().alpha(logoAlphaAnim)) {
             val canvasWidth = size.width
             val canvasHeight = size.height
             val maxRadius = canvasWidth * 1.8f

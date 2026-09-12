@@ -104,24 +104,28 @@ fun KehadiranSiswaScreen(
                     }
                 }
                 is ScreenUiState.Error -> {
-                    Sdm3ErrorState(
-                        title = "Gagal Memuat Data",
-                        message = screenState.message,
-                        style = ErrorStateStyle.Generic,
-                        primaryAction = {
-                            Sdm3Button(
-                                text = "Coba Lagi",
-                                onClick = { viewModel.refresh() }
-                            )
-                        }
-                    )
+                    Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+                        Sdm3ErrorState(
+                            title = "Gagal Memuat Data",
+                            message = screenState.message,
+                            style = ErrorStateStyle.Generic,
+                            primaryAction = {
+                                Sdm3Button(
+                                    text = "Coba Lagi",
+                                    onClick = { viewModel.refresh() }
+                                )
+                            }
+                        )
+                    }
                 }
                 is ScreenUiState.Empty -> {
-                    Sdm3EmptyState(
-                        title = "Belum Ada Data Presensi",
-                        message = "Data kehadiran siswa belum tersedia.",
-                        style = EmptyStateStyle.Neutral
-                    )
+                    Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+                        Sdm3EmptyState(
+                            title = "Belum Ada Data Presensi",
+                            message = "Data kehadiran siswa belum tersedia.",
+                            style = EmptyStateStyle.Neutral
+                        )
+                    }
                 }
                 is ScreenUiState.Success -> {
                     val attendances = uiState.attendances

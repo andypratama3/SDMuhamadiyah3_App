@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
@@ -88,7 +89,9 @@ fun DetailPengumumanScreen(
 
             when (screenState) {
                 is ScreenUiState.Loading -> {
-                    ShimmerDetailPengumuman()
+                    Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+                        ShimmerDetailPengumuman()
+                    }
                 }
                 is ScreenUiState.Empty -> {
                     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -172,13 +175,29 @@ fun DetailPengumumanScreen(
                             ) {
                                 Icon(Icons.Outlined.Event, contentDescription = "Tanggal", tint = colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(Spacing.xs))
-                                Text(vmUiState.date, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+                                Text(
+                                    vmUiState.date,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
 
                                 Spacer(Modifier.width(Spacing.xl))
 
                                 Icon(Icons.Outlined.Person, contentDescription = "Penulis", tint = colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(Spacing.xs))
-                                Text(vmUiState.author, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+                                Text(
+                                    vmUiState.author,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
 
                             Spacer(modifier = Modifier.height(Spacing.xl))

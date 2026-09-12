@@ -234,7 +234,7 @@ fun ProfilAkunScreen(
                             onClick = onAccountDeletion,
                             icon = Icons.Outlined.DeleteForever,
                             contentColor = colorScheme.error,
-                            modifier = Modifier.fillMaxWidth().height(52.dp)
+                            modifier = Modifier.fillMaxWidth().height(56.dp)
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -471,7 +471,7 @@ private fun ProfileHeader(
             Box(
                 modifier = Modifier
                     .size(70.dp)
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .clickable(onClick = onAvatarClick),
             ) {
                 Surface(
@@ -479,7 +479,6 @@ private fun ProfileHeader(
                     shape = RoundedCornerShape(24.dp),
                     color = colorScheme.primaryContainer.copy(alpha = 0.3f),
                     border = BorderStroke(2.dp, colorScheme.primary.copy(alpha = 0.2f)),
-                    shadowElevation = 8.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         if (!avatarUrl.isNullOrBlank()) {

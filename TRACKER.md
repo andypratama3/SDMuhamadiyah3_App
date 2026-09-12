@@ -34,6 +34,20 @@ Legend: ✅ bersih · 🔧 fixed · ⏳ pending · ❌ bug belum fix
 - Sisa 168 `copy(alpha)` di-sweep: semua terklasifikasi **dekoratif/hero-on-navy/badge** (detail §4), bukan teks melanggar kontras.
 - Var/import mati dibersihkan: `heroContent` (NilaiRapor), reindent pill HalamanRapor.
 
+### Sesi 5 — Audit layout/overlap (4 agen paralel) + fix animasi snap & overflow
+- **Animasi intro "snap" (bukan eased) LoginScreen**: semua `graphicsLayer`/`blur` digerakkan boolean `startAnimation` yang flip instan → logo/title/kartu/tombol *pop* mendadak, `animateContentSize` tidak berfungsi. Diffix: 4 `animateFloatAsState` bernilai `revealLogo/Title/Form/Action` (tween 700, delay kaskade 0/100/200/300ms), scale `0.85→1`, blur `16→0`, `translationY` eased. `animateContentSize` dihapus.
+- SplashScreen: Canvas mesh background `alpha(if startAnimation)` pop → dipakai `logoAlphaAnim` (fade menyatu dengan logo).
+- **PilihAnak (HIGH)**: list-item terakhir tertutup island "Lanjutkan Ke Dashboard" (~122dp) — `contentPadding bottom` 56→**140.dp**.
+- **KehadiranSiswa (MED)**: state Error/Empty tidak pakai `padding` scaffold (konten tergeser ke atas) → dibungkus `Box(fillMaxSize().padding(padding))`.
+- **DetailPengumuman (MED)**: shimmer loading tanpa padding scaffold → dibungkus; row meta tanggal/penulis tanpa weight/maxLines → `weight(1f)` + `Ellipsis` + import `TextOverflow`.
+- **HalamanRapor (MED)**: hero header baris semester `titleLarge` tanpa weight → grup kiri `weight(1f)` + `Ellipsis`; baris arsip `semesterLabel • TA` → `maxLines=1` + `Ellipsis`.
+- **GuruAbsensi (MED)**: 5 `FilterChip` dalam `Row` non-wrap → terpotong di layar sempit → `FlowRow` (wrap) + `OptIn(ExperimentalLayoutApi)`.
+- **ProfilAkun (MED)**: clip 20dp vs Surface radius 24dp + `shadowElevation` terkunci oleh clip induk (bayangan mati, sudut menumpuk) → seragam 24dp, drop `shadowElevation`; dua tombol destruktif tinggi 52/56 → diseragamkan **56dp**.
+- **PilihMetodeBayar (LOW)**: "TOTAL BAYAR" nilai Rupiah tanpa batas → `weight(1f, fill=false)` + `Ellipsis` + `TextAlign.End`.
+- **DetailInfoAnak (LOW)**: judul quick-nav `maxLines=1` tanpa ellipsis → `TextOverflow.Ellipsis`.
+- Temuan yang dibiarkan (tercatat §6): glow OTP di dalam scroll-column (Visual ringan, tidak menimpa konten), Onboarding pager pendek di HP kecil, double bottom-inset KegiatanProgram, status Error/Empty self-center di layar guru.
+- Verifikasi statis: seimbang-brace seluruh 10 file diubah; import baru diverifikasi (`TextOverflow`, `TextAlign`, `FlowRow`, `ExperimentalLayoutApi`, `animateFloatAsState` via wildcard).
+
 ### Sesi 4 — Audit @Preview (40 preview, 3 agen paralel) + polish preview-safe
 - **Semua 40 @Preview**: referensi simbol masih ada (tidak ada komponen lama `IconText`/`NetworkErrorDialog`/`Sdm3ActionComponents`/`Sdm3ListItem`/`Sdm3ProgressIndicator`/`Sdm3Snackbar`/`Sdm3StatTile`), arity/tipe argumen benar, nama preview unik, semua dibungkus `SDM3Theme`.
 - **Preview-crash risk LoginScreen** (passing `koinViewModel()` langsung di preview, layar tanpa guard inspection) → `viewModel` dibuat nullable: default `if (LocalInspectionMode.current) null else koinViewModel()`; `uiState`, `LaunchedEffect(effect)`, dan semua `onIntent` diberi null-guard. NavHost tetap pass VM eksplisit (aman), preview pass apa-apa.

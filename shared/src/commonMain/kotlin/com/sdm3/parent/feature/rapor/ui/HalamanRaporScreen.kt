@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -257,7 +258,7 @@ fun HalamanRaporScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                                                 Surface(
                                                     modifier = Modifier.size(48.dp),
                                                     shape = RoundedCornerShape(14.dp),
@@ -273,7 +274,9 @@ fun HalamanRaporScreen(
                                                         ?: "Rapor Semester",
                                                     style = MaterialTheme.typography.titleLarge,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = heroContent
+                                                    color = heroContent,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                             }
                                             val statusPublished = isRaporPublished(latestRapor?.status)
@@ -399,7 +402,9 @@ fun HalamanRaporScreen(
                                             text = "${rapor.semesterLabel ?: rapor.semester} • ${rapor.academicYear}",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold,
-                                            color = colorScheme.primary
+                                            color = colorScheme.primary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                         Text(
                                             text = "Status: ${raporStatusLabel(rapor.status)}",

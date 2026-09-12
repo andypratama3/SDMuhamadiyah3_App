@@ -69,6 +69,27 @@ fun LoginScreen(
         LaunchedEffect(Unit) { startAnimation = true }
     }
 
+    val revealLogo by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(durationMillis = 700, easing = PremiumEasing),
+        label = "loginRevealLogo"
+    )
+    val revealTitle by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(durationMillis = 700, delayMillis = 100, easing = PremiumEasing),
+        label = "loginRevealTitle"
+    )
+    val revealForm by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(durationMillis = 700, delayMillis = 200, easing = PremiumEasing),
+        label = "loginRevealForm"
+    )
+    val revealAction by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(durationMillis = 700, delayMillis = 300, easing = PremiumEasing),
+        label = "loginRevealAction"
+    )
+
     if (viewModel != null) {
         LaunchedEffect(Unit) {
             viewModel.effect.collect { effect ->
@@ -121,16 +142,16 @@ fun LoginScreen(
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        scaleX = if (startAnimation) 1f else 0.85f
-                        scaleY = if (startAnimation) 1f else 0.85f
-                        alpha = if (startAnimation) 1f else 0f
-                    }
-                    .animateContentSize(tween(700, easing = PremiumEasing)),
+                        val scale = 0.85f + 0.15f * revealLogo
+                        scaleX = scale
+                        scaleY = scale
+                        alpha = revealLogo
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Sdm3GlassIconContainer(
                     size = 110.dp,
-                    modifier = Modifier.blur(if (startAnimation) 0.dp else 16.dp)
+                    modifier = Modifier.blur((16f * (1f - revealLogo)).dp)
                 ) {
                     Sdm3Logo(size = 72.dp, showBackground = false)
                 }
@@ -141,8 +162,8 @@ fun LoginScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.graphicsLayer {
-                    alpha = if (startAnimation) 1f else 0f
-                    translationY = if (startAnimation) 0f else 24f
+                    alpha = revealTitle
+                    translationY = (1f - revealTitle) * 24f
                 }
             ) {
                 Text(
@@ -161,8 +182,8 @@ fun LoginScreen(
 
             Sdm3GlassCard(
                 modifier = Modifier.graphicsLayer {
-                    alpha = if (startAnimation) 1f else 0f
-                    translationY = if (startAnimation) 0f else 48f
+                    alpha = revealForm
+                    translationY = (1f - revealForm) * 48f
                 },
                 padding = 24.dp
             ) {
@@ -229,8 +250,8 @@ fun LoginScreen(
 
             Column(
                 modifier = Modifier.graphicsLayer {
-                    alpha = if (startAnimation) 1f else 0f
-                    translationY = if (startAnimation) 0f else 60f
+                    alpha = revealAction
+                    translationY = (1f - revealAction) * 60f
                 }
             ) {
                 Sdm3Button(

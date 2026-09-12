@@ -100,7 +100,7 @@ fun PilihAnakScreen(
                                 start = Spacing.xl,
                                 end = Spacing.xl,
                                 top = Spacing.md,
-                                bottom = Spacing.xxxl
+                                bottom = 140.dp
                             ),
                             verticalArrangement = Arrangement.spacedBy(Spacing.md)
                         ) {
