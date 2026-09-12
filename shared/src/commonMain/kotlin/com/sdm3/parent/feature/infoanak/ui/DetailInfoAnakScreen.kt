@@ -3,7 +3,6 @@ package com.sdm3.parent.feature.infoanak.ui
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 
@@ -18,10 +17,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.navigation.SDM3Route
+import com.sdm3.parent.data.remote.dto.StudentDto
 import com.sdm3.parent.feature.infoanak.DetailInfoAnakViewModel
 import androidx.compose.ui.platform.LocalInspectionMode
 import org.koin.compose.viewmodel.koinViewModel
@@ -36,7 +35,27 @@ fun DetailInfoAnakScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val vmState by if (isPreview) {
-        remember { mutableStateOf(com.sdm3.parent.feature.infoanak.DetailInfoAnakUiState()) }
+        remember {
+            mutableStateOf(
+                com.sdm3.parent.feature.infoanak.DetailInfoAnakUiState(
+                    isLoading = false,
+                    isEmpty = false,
+                    student = StudentDto(
+                        id = "demo-st-1",
+                        name = "Ahmad Zaki",
+                        nisn = "0123456789",
+                        nis = "12345",
+                        gender = "L",
+                        birthPlace = "Samarinda",
+                        birthDate = "2014-03-15",
+                        className = "5A",
+                        waliKelas = "Ust. Budi Santoso, S.Pd.",
+                        spp = 250000,
+                        dpp = 500000
+                    )
+                )
+            )
+        }
     } else {
         viewModel.uiState.collectAsState()
     }

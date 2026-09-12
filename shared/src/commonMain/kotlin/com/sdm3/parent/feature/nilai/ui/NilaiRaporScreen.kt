@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.sdm3.parent.core.designsystem.component.*
-import com.sdm3.parent.core.designsystem.component.AtmosphericGlow
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.data.remote.dto.GradeDto
@@ -70,7 +69,43 @@ fun NilaiRaporScreen(
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
     val vmState by if (isPreview) {
-        remember { mutableStateOf(NilaiRaporUiState()) }
+        remember {
+            mutableStateOf(
+                NilaiRaporUiState(
+                    grades = listOf(
+                        GradeDto(
+                            id = "demo-g-1",
+                            subjectId = "demo-s-1",
+                            subjectName = "Matematika",
+                            score = 92.0,
+                            predicate = "SANGAT BAIK",
+                            narrative = "Penguasaan konsep sangat baik.",
+                            semester = "ganjil"
+                        ),
+                        GradeDto(
+                            id = "demo-g-2",
+                            subjectId = "demo-s-2",
+                            subjectName = "Bahasa Indonesia",
+                            score = 84.0,
+                            predicate = "BAIK",
+                            narrative = "Pemahaman teks baik.",
+                            semester = "ganjil"
+                        )
+                    ),
+                    formatifGrades = listOf(
+                        FormatifGradeItem(code = "FORM-1", description = "Pengukuran Sudut", score = 88),
+                        FormatifGradeItem(code = "FORM-2", description = "Operasi Hitung", score = 95)
+                    ),
+                    projekGrades = listOf(
+                        ProjekGradeItem(tema = "Projek 1", deskripsi = "Rancang Bangun Jembatan", nilai = 78, predikat = "CUKUP"),
+                        ProjekGradeItem(tema = "Projek 2", deskripsi = "Pameran Sains", nilai = 90, predikat = "SANGAT BAIK")
+                    ),
+                    isEmpty = false,
+                    semester = "ganjil",
+                    availableSemesters = listOf("ganjil", "genap")
+                )
+            )
+        }
     } else {
         viewModel.uiState.collectAsState()
     }

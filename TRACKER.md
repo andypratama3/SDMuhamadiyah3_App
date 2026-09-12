@@ -34,6 +34,17 @@ Legend: ✅ bersih · 🔧 fixed · ⏳ pending · ❌ bug belum fix
 - Sisa 168 `copy(alpha)` di-sweep: semua terklasifikasi **dekoratif/hero-on-navy/badge** (detail §4), bukan teks melanggar kontras.
 - Var/import mati dibersihkan: `heroContent` (NilaiRapor), reindent pill HalamanRapor.
 
+### Sesi 4 — Audit @Preview (40 preview, 3 agen paralel) + polish preview-safe
+- **Semua 40 @Preview**: referensi simbol masih ada (tidak ada komponen lama `IconText`/`NetworkErrorDialog`/`Sdm3ActionComponents`/`Sdm3ListItem`/`Sdm3ProgressIndicator`/`Sdm3Snackbar`/`Sdm3StatTile`), arity/tipe argumen benar, nama preview unik, semua dibungkus `SDM3Theme`.
+- **Preview-crash risk LoginScreen** (passing `koinViewModel()` langsung di preview, layar tanpa guard inspection) → `viewModel` dibuat nullable: default `if (LocalInspectionMode.current) null else koinViewModel()`; `uiState`, `LaunchedEffect(effect)`, dan semua `onIntent` diberi null-guard. NavHost tetap pass VM eksplisit (aman), preview pass apa-apa.
+- **Preview isi-kosong → ditampilkan konten**: `NilaiRaporScreen` preview di-seed data (2 GradeDto, formatif, projek, `isEmpty=false`, semesters) sehingga hero + pill predikat + tab ter-render; `DetailBuktiBayarScreen` preview di-seed `PaymentDto(status="settlement")` sehingga kwitansi ter-render; `DetailInfoAnakScreen` preview di-seed `StudentDto` (bukan lagi skeleton loading).
+- **Alpha-hack teks (SectionHeader) dihapus** (tombol deck teks pada permukaan terang): ProfilAkun `Modifier.alpha(0.5f)` ×2, PengaturanNotifikasi `Modifier.alpha(0.5f)` ×2, VerifikasiQr `Modifier.alpha(0.5f)`, DetailPengumuman row tanggal/penulis `Modifier.alpha(0.6f)`. Tinggal shimmer-skeleton `.alpha(0.5f)` (bukan teks) — dibiarkan.
+- Label disabled switch `primary@0.3` → `onSurfaceFaint` (PengaturanNotifikasi L268).
+- **Dead imports dibersihkan (±30 baris di 18 file)**: design-system (Sdm3Button×3, Sdm3Card×2, Sdm3EmptyState×1, Sdm3ErrorState×1, Sdm3GlassCard×5, Sdm3TextField×1), auth (Login×5, Onboarding×2, PilihAnak×4, PilihAnakBottomSheet×1, AccountDeletion×1, VerifikasiOtp×5), home (HomeScreen×5), nilai (DetailNilaiMapel×3, NilaiRapor×1), rapor (HalamanRapor×2, VerifikasiQr×1), pembayaran (PilihMetodeBayar×1, DetailBuktiBayar×0), notifikasi (DetailPengumuman×1), profil (ProfilAkun×1), infoanak (DetailInfoAnak×2). Semua diverifikasi 0 pemakaian sebelum dihapus.
+- Preview fn `Sdm3Button` & `Sdm3TextField` → `private` (konsisten).
+- `StatusChip` dianalisis: pakai `color@0.1` fill + teks solid warna sama — TAPI semua pemakaian aktual memakai status color/primary (kontras ≥4.5:1), tidak pernah `secondary`; kategori "diterima", dicatat §6.
+- Verifikasi statis penuh (tabel §4-Sesi 4).
+
 ---
 
 ## 2. Temuan Audit (LENGKAP, sebelum fix)
@@ -281,6 +292,19 @@ Legend: ✅ bersih · 🔧 fixed · ⏳ pending · ❌ bug belum fix
 | Import `ProductSchoolTheme` di semua file yang memakainya | OK (wildcard `theme.*` atau eksplisit) |
 | Sweep sisa `copy(alpha)` (ruang awal 168) | Semua **dekoratif** — bg ikon-badge 5%, sheen hero, glow navy, badge `statusColor@0.12` (diterima §6), drag-handle, switch disabled. Tidak ada teks melanggar kontras. |
 
+### Sesi 4 (preview & polish)
+| Pemeriksaan | Hasil |
+|---|---|
+| 40 `@Preview` — simbol mati (7 komponen lama dihapus, DTO/state berubah) | **0** → semua referensi valid |
+| 40 `@Preview` — arity/tipe argumen vs signature layar | OK — semua cocok |
+| 40 `@Preview` — dibungkus `SDM3Theme` & nama unik | OK |
+| Preview crash-risk `koinViewModel()` (LoginScreen eksplisit) | **Fixed** — nullable VM + guard inspection; NavHost pass eksplisit |
+| Preview tampil konten (bukan kosong/loading saja) — NilaiRapor, DetailBuktiBayar, DetailInfoAnak | **Fixed** — seed data & `isEmpty=false` |
+| Alpha-hack teks `SectionHeader`/row detail (`Modifier.alpha(0.5/0.6)`) permukaan terang | **0** → dihapus semua; sisa `.alpha` = shimmer skeleton |
+| Dead import (dihapus, tiap-file divalidasi 0 pemakaian) | **±30** baris/18 file, verifikasi lintas-simbol PASS |
+| Preview fn non-private (Sdm3Button, Sdm3TextField) | → `private` |
+| `StatusChip` pola fill `color@0.1`+teks solid-sama | Diterima — pemakaian aktual = statusColor/primary (≥4.5:1); tak pernah gold |
+
 ---
 
 ## 5. Cleanup MD
@@ -299,6 +323,9 @@ Dipertahankan: `README.md`. **Jangan dibuat ulang** (kontrak di `AGENTS.md`).
   - Label/ikon `heroContent.copy(alpha)` di atas navy (kontras ok).
   - Switch off/disabled (`PengaturanNotifikasi` disable color `onSurface@0.38/0.12`), drag-handle `primary@0.1`, cursor OTP `primary@0.4` (dekoratif non-teks).
   - Ikon empty-state `primary@0.2` (icon, bukan teks).
+- Diterima sesi 4:
+  - `StatusChip` (fill `color@0.1` + teks solid): seluruh pemakaian aktual memakai `statusSuccess/Warning/Danger` atau `primary` (kontras ≥4.5:1, tak pernah `secondary`/gold). Hanya preview-nya yang menampilkan `primary`.
+  - Shimmer skeleton `Modifier.alpha(0.5f)` (placeholder non-teks) di ProfilAkun/PengaturanNotifikasi.
 - Konsiderasi disengaja: sisa `color.copy(alpha=0.05..0.4f)` adalah **fill dekoratif** — bukan bug kontras, dibiarkan.
 
 ---

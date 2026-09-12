@@ -15,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import com.sdm3.parent.core.network.sanitizeUserFacingMessage
@@ -306,7 +305,7 @@ fun VerifikasiQrRaporScreen(
                                             }
 
                                             Spacer(modifier = Modifier.height(24.dp))
-                                            SectionHeader(title = "Detail Siswa", modifier = Modifier.alpha(0.5f))
+                                            SectionHeader(title = "Detail Siswa")
                                             Spacer(modifier = Modifier.height(12.dp))
 
                                             result.studentName?.let { VerifInfoRow("NAMA LENGKAP", it) }

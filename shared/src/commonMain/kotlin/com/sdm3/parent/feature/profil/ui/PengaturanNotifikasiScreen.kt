@@ -122,7 +122,7 @@ fun PengaturanNotifikasiScreen(
                     ) {
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        SectionHeader(title = "KONTROL UTAMA", modifier = Modifier.alpha(0.5f))
+                        SectionHeader(title = "KONTROL UTAMA")
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Sdm3Card(padding = 12.dp) {
@@ -131,7 +131,7 @@ fun PengaturanNotifikasiScreen(
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        SectionHeader(title = "KATEGORI INFORMASI", modifier = Modifier.alpha(0.5f))
+                        SectionHeader(title = "KATEGORI INFORMASI")
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Sdm3Card(padding = 8.dp) {
@@ -265,7 +265,7 @@ private fun ToggleRow(
             text = label,
             style = if (isMaster) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium,
             fontWeight = if (isMaster) FontWeight.Bold else FontWeight.Medium,
-            color = if (enabled) colorScheme.primary else colorScheme.primary.copy(alpha = 0.3f),
+            color = if (enabled) colorScheme.primary else ProductSchoolTheme.colors.onSurfaceFaint,
             modifier = Modifier.weight(1f)
         )
         Switch(

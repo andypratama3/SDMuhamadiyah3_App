@@ -15,21 +15,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.theme.CardShape
 import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
-import com.sdm3.parent.core.designsystem.theme.Spacing
 
 @Composable
 fun Sdm3GlassCard(

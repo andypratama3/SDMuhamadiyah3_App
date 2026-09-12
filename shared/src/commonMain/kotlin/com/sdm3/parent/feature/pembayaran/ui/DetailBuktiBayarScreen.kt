@@ -8,7 +8,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.FileDownload
@@ -42,6 +41,8 @@ import com.sdm3.parent.core.designsystem.component.ScreenUiState
 import com.sdm3.parent.core.designsystem.component.StatusChip
 import com.sdm3.parent.core.designsystem.component.resolveScreenState
 import com.sdm3.parent.core.designsystem.theme.*
+import com.sdm3.parent.data.remote.dto.PaymentDto
+import com.sdm3.parent.data.remote.dto.PaymentTitleDto
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarUiState
 import com.sdm3.parent.feature.pembayaran.DetailBuktiBayarViewModel
 import com.sdm3.parent.platform.PlatformActions
@@ -56,7 +57,26 @@ fun DetailBuktiBayarScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val vmState by if (isPreview) {
-        remember { mutableStateOf(DetailBuktiBayarUiState()) }
+        remember {
+            mutableStateOf(
+                DetailBuktiBayarUiState(
+                    payment = PaymentDto(
+                        id = "demo-pay-1",
+                        orderId = "INV/2024/0001",
+                        grossAmount = 250000.0,
+                        paymentType = "Bank Transfer",
+                        status = "settlement",
+                        vaNumber = "9888001122334455",
+                        studentName = "Ahmad Zaki",
+                        studentClass = "5A",
+                        studentNisn = "0123456789",
+                        paymentTitle = PaymentTitleDto(id = "fee-1", name = "SPP Bulan Januari"),
+                        paidAt = "2024-02-01T09:00:00Z",
+                        createdAt = "2024-01-15T08:00:00Z"
+                    )
+                )
+            )
+        }
     } else {
         viewModel.uiState.collectAsState()
     }

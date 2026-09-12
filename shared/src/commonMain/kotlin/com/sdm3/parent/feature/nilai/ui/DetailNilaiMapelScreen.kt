@@ -1,7 +1,6 @@
 package com.sdm3.parent.feature.nilai.ui
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -26,7 +24,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
-import com.sdm3.parent.core.designsystem.component.AtmosphericGlow
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.core.designsystem.theme.Spacing
 import androidx.compose.ui.platform.LocalInspectionMode

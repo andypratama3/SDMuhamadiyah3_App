@@ -12,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -169,8 +168,7 @@ fun DetailPengumumanScreen(
 
                         Column(modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm)) {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.alpha(0.6f)
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(Icons.Outlined.Event, contentDescription = "Tanggal", tint = colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(Spacing.xs))

@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,7 +25,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import com.sdm3.parent.core.designsystem.theme.CardShape
 import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
-import com.sdm3.parent.core.designsystem.theme.Spacing
 
 @Composable
 fun Sdm3Card(

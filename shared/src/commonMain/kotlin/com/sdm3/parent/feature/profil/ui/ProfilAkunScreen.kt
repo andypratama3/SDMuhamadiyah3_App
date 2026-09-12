@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -177,7 +176,7 @@ fun ProfilAkunScreen(
                         val activeStudent = uiState.students.firstOrNull { it.id == selectedStudentId }
                             ?: uiState.students.firstOrNull()
                         val canSwitch = uiState.students.size > 1
-                        SectionHeader(title = "IDENTITAS AKADEMIK", modifier = Modifier.alpha(0.5f))
+                        SectionHeader(title = "IDENTITAS AKADEMIK")
                         Spacer(modifier = Modifier.height(12.dp))
                         StudentMiniCard(
                             student = activeStudent,
@@ -188,7 +187,7 @@ fun ProfilAkunScreen(
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        SectionHeader(title = "PENGATURAN SISTEM", modifier = Modifier.alpha(0.5f))
+                        SectionHeader(title = "PENGATURAN SISTEM")
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Sdm3Card(padding = 8.dp) {

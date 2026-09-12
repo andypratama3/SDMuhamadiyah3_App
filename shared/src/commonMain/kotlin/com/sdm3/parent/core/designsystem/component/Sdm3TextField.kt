@@ -23,7 +23,6 @@ import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
 import com.sdm3.parent.core.designsystem.theme.SDM3Theme
 import com.sdm3.parent.core.designsystem.theme.glassBorderColor
 import com.sdm3.parent.core.designsystem.theme.glassSurfaceColor
-import com.sdm3.parent.core.designsystem.theme.Spacing
 import com.sdm3.parent.getPlatformName
 
 @Composable
@@ -144,7 +143,7 @@ fun Sdm3TextField(
 
 @Preview
 @Composable
-fun Sdm3TextFieldPreview() {
+private fun Sdm3TextFieldPreview() {
     SDM3Theme {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Sdm3TextField(value = "", onValueChange = {}, label = "Email Address", placeholder = "name@school.com", leadingIcon = Icons.Outlined.Email)

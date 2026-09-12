@@ -6,8 +6,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -17,10 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
@@ -38,6 +33,7 @@ import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import com.sdm3.parent.feature.auth.LoginEffect
 import com.sdm3.parent.feature.auth.LoginIntent
+import com.sdm3.parent.feature.auth.LoginUiState
 import com.sdm3.parent.feature.auth.LoginViewModel
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -50,7 +46,8 @@ private val PremiumEasing = CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel,
+    viewModel: LoginViewModel? = if (LocalInspectionMode.current) null
+    else org.koin.compose.viewmodel.koinViewModel(),
     onLoginSuccess: () -> Unit,
     onForgotPassword: (String) -> Unit
 ) {
@@ -58,7 +55,11 @@ fun LoginScreen(
     val haptic = LocalHapticFeedback.current
     val colorScheme = MaterialTheme.colorScheme
 
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by if (viewModel != null) {
+        viewModel.uiState.collectAsState()
+    } else {
+        remember { mutableStateOf(LoginUiState()) }
+    }
 
     var isPasswordVisible by remember { mutableStateOf(false) }
 
@@ -68,12 +69,14 @@ fun LoginScreen(
         LaunchedEffect(Unit) { startAnimation = true }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                LoginEffect.LoginSuccess -> {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onLoginSuccess()
+    if (viewModel != null) {
+        LaunchedEffect(Unit) {
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    LoginEffect.LoginSuccess -> {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onLoginSuccess()
+                    }
                 }
             }
         }
@@ -81,7 +84,7 @@ fun LoginScreen(
 
     val handleLogin: () -> Unit = {
         focusManager.clearFocus()
-        viewModel.onIntent(LoginIntent.Login)
+        viewModel?.onIntent(LoginIntent.Login)
     }
 
     Box(
@@ -166,7 +169,7 @@ fun LoginScreen(
                 Column {
                     Sdm3TextField(
                         value = uiState.email,
-                        onValueChange = { viewModel.onIntent(LoginIntent.EmailChanged(it)) },
+                        onValueChange = { viewModel?.onIntent(LoginIntent.EmailChanged(it)) },
                         label = "Email Institusi",
                         placeholder = "nama@sekolah.id",
                         leadingIcon = Icons.Outlined.Email,
@@ -180,7 +183,7 @@ fun LoginScreen(
 
                     Sdm3TextField(
                         value = uiState.password,
-                        onValueChange = { viewModel.onIntent(LoginIntent.PasswordChanged(it)) },
+                        onValueChange = { viewModel?.onIntent(LoginIntent.PasswordChanged(it)) },
                         label = "Kunci Akses",
                         placeholder = "••••••••",
                         leadingIcon = Icons.Outlined.Lock,
@@ -242,7 +245,7 @@ fun LoginScreen(
 
                     Sdm3OutlinedButton(
                         text = "Gunakan Biometrik",
-                        onClick = { viewModel.onIntent(LoginIntent.BiometricLogin) },
+                        onClick = { viewModel?.onIntent(LoginIntent.BiometricLogin) },
                         icon = Icons.Outlined.Fingerprint,
                         contentColor = colorScheme.primary
                     )
@@ -266,10 +269,9 @@ fun LoginScreen(
 
 @Preview
 @Composable
-fun LoginScreenPreview() {
+private fun LoginScreenPreview() {
     SDM3Theme {
         LoginScreen(
-            viewModel = org.koin.compose.viewmodel.koinViewModel(),
             onLoginSuccess = {},
             onForgotPassword = {}
         )
