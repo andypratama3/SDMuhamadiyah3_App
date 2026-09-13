@@ -42,7 +42,7 @@
 		<false/>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>sdmuhammadiyah3smd.cloud</key>
+			<key>app.sdmuhammadiyah3smd.com</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<false/>
@@ -55,7 +55,7 @@
 		<!--
 		SSL CERTIFICATE PINNING (Identity Pinning)
 		To enable certificate pinning for enhanced security:
-		1. Get the server certificate: openssl s_client -showcerts -connect sdmuhammadiyah3smd.cloud:443
+		1. Get the server certificate: openssl s_client -showcerts -connect app.sdmuhammadiyah3smd.com:443
 		2. Extract the CA certificate from the chain
 		3. Calculate SPKI-SHA256-BASE64 hash: openssl x509 -in ca.pem -pubkey -noout | openssl rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
 		4. Add the hash below in NSPinnedCAIdentities array
@@ -63,7 +63,7 @@
 		
 		<key>NSPinnedDomains</key>
 		<dict>
-			<key>sdmuhammadiyah3smd.cloud</key>
+			<key>app.sdmuhammadiyah3smd.com</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>
 				<true/>
