@@ -198,7 +198,7 @@ fun ProfilAkunScreen(
                                 )
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 16.dp),
-                                    color = colorScheme.primary.copy(alpha = 0.05f)
+                                    color = colorScheme.outline
                                 )
                                 val settingsItems = buildList {
                                     if (hasTeacherAccess && onOpenTeacherPanel != null) {
@@ -218,7 +218,7 @@ fun ProfilAkunScreen(
                                     if (index < settingsItems.lastIndex) {
                                         HorizontalDivider(
                                             modifier = Modifier.padding(horizontal = 16.dp),
-                                            color = colorScheme.primary.copy(alpha = 0.05f)
+                                            color = colorScheme.outline
                                         )
                                     }
                                 }
@@ -433,7 +433,7 @@ private fun ShimmerProfil() {
                     if (index < 4) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
-                            color = colorScheme.primary.copy(alpha = 0.05f)
+                            color = colorScheme.outline
                         )
                     }
                 }
@@ -478,7 +478,7 @@ private fun ProfileHeader(
                     modifier = Modifier.fillMaxSize(),
                     shape = RoundedCornerShape(24.dp),
                     color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                    border = BorderStroke(2.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                    border = BorderStroke(2.dp, colorScheme.outline),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         if (!avatarUrl.isNullOrBlank()) {
@@ -572,7 +572,7 @@ private fun StudentMiniCard(
                     modifier = Modifier.size(60.dp),
                     shape = CircleShape,
                     color = colorScheme.primaryContainer.copy(alpha = 0.4f),
-                    border = BorderStroke(2.5.dp, colorScheme.primary.copy(alpha = 0.3f)),
+                    border = BorderStroke(2.5.dp, colorScheme.outline),
                     shadowElevation = 4.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {

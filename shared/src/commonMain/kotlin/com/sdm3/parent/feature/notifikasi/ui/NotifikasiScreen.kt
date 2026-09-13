@@ -25,10 +25,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sdm3.parent.core.designsystem.component.*
-import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
+
 import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
 import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
-import com.sdm3.parent.core.designsystem.component.EmptyStateStyle
+
 import com.sdm3.parent.core.designsystem.component.ScreenUiState
 import com.sdm3.parent.core.designsystem.component.resolveScreenState
 import com.sdm3.parent.core.designsystem.component.Sdm3IconBadge
@@ -387,7 +387,7 @@ private fun EmptyNotifikasiState() {
             modifier = Modifier.size(100.dp),
             shape = RoundedCornerShape(32.dp),
             color = colorScheme.primary.copy(alpha = 0.05f),
-            border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+            border = BorderStroke(1.dp, colorScheme.outline)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(

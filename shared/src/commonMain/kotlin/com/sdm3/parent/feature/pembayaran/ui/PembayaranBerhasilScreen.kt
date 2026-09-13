@@ -4,7 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.CircleShape
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
@@ -14,13 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -187,7 +187,7 @@ fun PembayaranBerhasilScreen(
                                     modifier = Modifier.size(130.dp),
                                     shape = RoundedCornerShape(36.dp),
                                     color = colorScheme.primaryContainer.copy(alpha = 0.35f),
-                                    border = BorderStroke(3.dp, colorScheme.primary.copy(alpha = 0.35f)),
+                                    border = BorderStroke(3.dp, colorScheme.outline),
                                     shadowElevation = 14.dp
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {

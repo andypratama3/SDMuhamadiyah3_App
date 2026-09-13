@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
+
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -229,7 +229,7 @@ private fun ShimmerPengaturanNotif() {
                 if (index < 4) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = colorScheme.primary.copy(alpha = 0.05f)
+                        color = colorScheme.outline
                     )
                 }
             }
@@ -274,7 +274,7 @@ private fun ToggleRow(
             enabled = enabled,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = colorScheme.onPrimary,
-                checkedTrackColor = colorScheme.secondary,
+                checkedTrackColor = colorScheme.primary,
                 uncheckedThumbColor = colorScheme.outline,
                 uncheckedTrackColor = colorScheme.surfaceContainerHighest,
                 disabledCheckedThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),

@@ -111,13 +111,13 @@ fun PilihAnakBottomSheet(
                                 Surface(
                                     modifier = Modifier.size(28.dp),
                                     shape = RoundedCornerShape(100),
-                                    color = colorScheme.secondary
+                                    color = colorScheme.primary
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             Icons.Outlined.Check,
                                             contentDescription = "Terpilih",
-                                            tint = MaterialTheme.colorScheme.onSecondary,
+                                            tint = MaterialTheme.colorScheme.onPrimary,
                                             modifier = Modifier.size(16.dp)
                                         )
                                     }

@@ -192,7 +192,7 @@ fun PengumumanSekolahScreen(
                                                 modifier = Modifier.size(52.dp, 60.dp),
                                                 shape = RoundedCornerShape(12.dp),
                                                 color = colorScheme.primary.copy(alpha = 0.05f),
-                                                border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.1f))
+                                                border = BorderStroke(1.dp, colorScheme.outline)
                                             ) {
                                                 Column(
                                                     horizontalAlignment = Alignment.CenterHorizontally,

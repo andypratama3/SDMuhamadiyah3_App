@@ -24,7 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,7 +63,7 @@ fun PilihAnakScreen(
                 uiState.isLoading == true -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 3.dp
                     )
                 }
@@ -190,7 +190,7 @@ private fun StudentItem(
     val glassBorder = ProductSchoolTheme.colors.liquidGlassBorder
 
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.secondary else glassBorder,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else glassBorder,
         animationSpec = tween(durationMillis = 400, easing = PremiumEasing),
         label = "borderColor"
     )
@@ -234,7 +234,7 @@ private fun StudentItem(
                         .size(68.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(2.5.dp, if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), CircleShape),
+                        .border(2.5.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     if (student.photo != null) {
@@ -287,14 +287,14 @@ private fun StudentItem(
                     Surface(
                         modifier = Modifier.size(36.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.primary,
                         shadowElevation = 5.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 contentDescription = "Terpilih",
-                                tint = MaterialTheme.colorScheme.onSecondary,
+                                tint = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.size(22.dp)
                             )
                         }

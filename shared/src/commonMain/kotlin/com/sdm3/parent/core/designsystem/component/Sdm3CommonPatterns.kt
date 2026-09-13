@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,7 +42,7 @@ fun Sdm3ErrorBanner(
         modifier = modifier.fillMaxWidth(),
         color = colorScheme.errorContainer,
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.3f)),
+        border = BorderStroke(1.dp, colorScheme.error),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -53,13 +52,13 @@ fun Sdm3ErrorBanner(
             Icon(
                 Icons.Outlined.ErrorOutline,
                 contentDescription = "Error",
-                tint = colorScheme.error,
+                tint = colorScheme.onErrorContainer,
                 modifier = Modifier.size(20.dp),
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = message,
-                color = colorScheme.error,
+                color = colorScheme.onErrorContainer,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -130,8 +129,8 @@ fun Sdm3IconBadge(
     size: Dp = 48.dp,
     iconSize: Dp = 24.dp,
     iconTint: Color = MaterialTheme.colorScheme.primary,
-    backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-    borderColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+    backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    borderColor: Color = MaterialTheme.colorScheme.outline,
 ) {
     Surface(
         modifier = modifier.size(size),

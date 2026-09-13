@@ -238,7 +238,7 @@ private fun Sdm3DrawerContent(
                     Icon(
                         imageVector = item.icon,
                         contentDescription = item.label,
-                        tint = if (selected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        tint = if (selected) colorScheme.primary else ProductSchoolTheme.colors.onSurfaceMuted
                     )
                 },
                 label = {

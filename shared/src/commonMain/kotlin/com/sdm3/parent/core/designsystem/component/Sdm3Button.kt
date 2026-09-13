@@ -135,7 +135,7 @@ fun Sdm3OutlinedButton(
         shape = ButtonShape,
         border = BorderStroke(
             1.5.dp,
-            finalContentColor.copy(alpha = 0.2f)
+            MaterialTheme.colorScheme.outline
         ),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = containerColor,

@@ -4,7 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 
@@ -14,7 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,8 +41,6 @@ fun PilihMetodeBayarScreen(
 ) {
     val isPreview = LocalInspectionMode.current
     val colorScheme = MaterialTheme.colorScheme
-    val liquidGlassSurface = ProductSchoolTheme.colors.liquidGlassSurface
-    val liquidGlassBorder = ProductSchoolTheme.colors.liquidGlassBorder
     var selectedMethod by remember { mutableStateOf<String?>(null) }
     val viewModel: PilihMetodeBayarViewModel = koinViewModel()
     val vmState by if (isPreview) {
@@ -247,7 +245,7 @@ fun PilihMetodeBayarScreen(
                                         modifier = Modifier.size(52.dp),
                                         shape = RoundedCornerShape(14.dp),
                                         color = if (isSelected) colorScheme.primary else colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                        border = BorderStroke(1.5.dp, if (isSelected) colorScheme.primary else colorScheme.primary.copy(alpha = 0.2f)),
+                                        border = BorderStroke(1.5.dp, if (isSelected) colorScheme.primary else colorScheme.outline),
                                         shadowElevation = if (isSelected) 8.dp else 4.dp
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {

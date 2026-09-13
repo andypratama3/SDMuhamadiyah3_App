@@ -1,11 +1,9 @@
 package com.sdm3.parent.feature.guru.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.ChevronRight
@@ -21,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.sdm3.parent.core.designsystem.component.*
 import com.sdm3.parent.core.designsystem.theme.*
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sdm3.parent.data.remote.dto.TeacherClassroomDto
 import com.sdm3.parent.feature.guru.TeacherHomeViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -139,8 +138,8 @@ private fun TeacherAbsensiSayaCard(onClick: () -> Unit) {
                 icon = Icons.Outlined.LocationOn,
                 size = 60.dp,
                 iconSize = 30.dp,
-                iconTint = colorScheme.secondary,
-                backgroundColor = colorScheme.secondaryContainer.copy(alpha = 0.35f),
+                iconTint = colorScheme.primary,
+                backgroundColor = colorScheme.primaryContainer.copy(alpha = 0.35f),
                 borderColor = Color.Unspecified,
             )
             Spacer(modifier = Modifier.width(Spacing.lg))

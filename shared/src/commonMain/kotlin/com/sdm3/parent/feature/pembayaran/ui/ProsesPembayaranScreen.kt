@@ -8,20 +8,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Phone
+
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -195,7 +195,7 @@ fun ProsesPembayaranScreen(
                                     modifier = Modifier.size(64.dp),
                                     shape = RoundedCornerShape(16.dp),
                                     color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                    border = BorderStroke(2.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                                    border = BorderStroke(2.dp, colorScheme.outline),
                                     shadowElevation = 8.dp
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {

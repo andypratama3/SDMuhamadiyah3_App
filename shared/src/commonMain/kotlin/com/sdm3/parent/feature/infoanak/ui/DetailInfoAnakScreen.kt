@@ -247,7 +247,7 @@ fun DetailInfoAnakScreen(
                                         modifier = Modifier.size(110.dp),
                                         shape = RoundedCornerShape(32.dp),
                                         color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                        border = BorderStroke(2.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                                        border = BorderStroke(2.dp, colorScheme.outline),
                                         shadowElevation = 8.dp
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {

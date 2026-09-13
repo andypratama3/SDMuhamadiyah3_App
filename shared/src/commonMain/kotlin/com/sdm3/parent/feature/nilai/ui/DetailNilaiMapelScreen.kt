@@ -192,7 +192,7 @@ fun DetailNilaiMapelScreen(
                             item { KomponenBar("Sumatif", sumatifAvg.toFloat(), 100f, colorScheme.primary) }
                         }
                         if (componentGroups.containsKey("formatif")) {
-                            item { KomponenBar("Formatif", formatifAvg.toFloat(), 100f, colorScheme.secondary) }
+                            item { KomponenBar("Formatif", formatifAvg.toFloat(), 100f, colorScheme.primary) }
                         }
                         if (componentGroups.containsKey("projek")) {
                             item { KomponenBar("Projek", projekAvg.toFloat(), 100f, statusSuccess) }

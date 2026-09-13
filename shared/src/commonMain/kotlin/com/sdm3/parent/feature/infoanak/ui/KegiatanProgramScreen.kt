@@ -225,7 +225,7 @@ fun KegiatanProgramScreen(
                                                     size = 52.dp,
                                                     iconTint = colorScheme.primary,
                                                     backgroundColor = colorScheme.primary.copy(alpha = 0.05f),
-                                                    borderColor = colorScheme.primary.copy(alpha = 0.1f),
+                                                    borderColor = colorScheme.outline,
                                                 )
                                                 Spacer(modifier = Modifier.width(Spacing.md))
                                                 Column(modifier = Modifier.weight(1f)) {
@@ -370,7 +370,7 @@ fun KegiatanProgramScreen(
                                                     Icon(
                                                         Icons.Outlined.Update,
                                                         contentDescription = "Aktivitas terakhir",
-                                                        tint = colorScheme.primary.copy(alpha = 0.3f),
+                                                        tint = ProductSchoolTheme.colors.onSurfaceMuted,
                                                         modifier = Modifier.size(16.dp),
                                                     )
                                                     Spacer(modifier = Modifier.width(Spacing.xs))

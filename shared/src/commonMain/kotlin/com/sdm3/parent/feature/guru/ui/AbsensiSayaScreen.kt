@@ -33,7 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -239,9 +239,9 @@ fun AbsensiSayaScreen(
 private fun CheckInStatusBadge(status: String) {
     val colorScheme = MaterialTheme.colorScheme
     val (label, container, content) = when (status) {
-        "tepat_waktu" -> Triple("Tepat Waktu", colorScheme.primaryContainer, colorScheme.onPrimaryContainer)
-        "terlambat" -> Triple("Terlambat", colorScheme.tertiaryContainer, colorScheme.onTertiaryContainer)
-        "alpha" -> Triple("Alpha", colorScheme.errorContainer, colorScheme.onErrorContainer)
+        "tepat_waktu" -> Triple("Tepat Waktu", statusSuccessColor().copy(alpha = 0.12f), statusSuccessColor())
+        "terlambat" -> Triple("Terlambat", statusWarningColor().copy(alpha = 0.12f), statusWarningColor())
+        "alpha" -> Triple("Alpha", statusDangerColor().copy(alpha = 0.12f), statusDangerColor())
         else -> Triple(status.replace('_', ' '), colorScheme.surfaceVariant, colorScheme.onSurfaceVariant)
     }
     Surface(color = container, shape = MaterialTheme.shapes.small) {

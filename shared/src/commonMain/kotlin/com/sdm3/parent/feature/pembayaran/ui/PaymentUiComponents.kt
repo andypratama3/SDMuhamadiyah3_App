@@ -121,7 +121,7 @@ fun PaymentHeroCard(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                colorScheme.inversePrimary.copy(alpha = 0.4f),
+                                colorScheme.inversePrimary.copy(alpha = 0.35f),
                             ),
                         ),
                     )

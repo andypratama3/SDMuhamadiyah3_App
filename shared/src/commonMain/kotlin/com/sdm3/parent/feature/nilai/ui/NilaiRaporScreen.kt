@@ -144,7 +144,7 @@ fun NilaiRaporScreen(
                                 color = if (selected) colorScheme.primary else colorScheme.secondaryContainer.copy(alpha = 0.3f),
                                 border = BorderStroke(
                                     1.5.dp,
-                                    if (selected) colorScheme.secondary else colorScheme.primary.copy(alpha = 0.2f)
+                                    if (selected) colorScheme.primary else colorScheme.outline
                                 ),
                                 modifier = Modifier.clickable(enabled = !selected) { viewModel.selectSemester(opt) }
                             ) {
@@ -541,7 +541,7 @@ private fun SubjectCard(
                 modifier = Modifier.size(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                border = BorderStroke(1.5.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                border = BorderStroke(1.5.dp, colorScheme.outline),
                 shadowElevation = 4.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {

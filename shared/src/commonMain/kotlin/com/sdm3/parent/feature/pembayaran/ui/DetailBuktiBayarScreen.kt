@@ -416,7 +416,7 @@ fun DetailBuktiBayarScreen(
                                     modifier = Modifier.size(52.dp),
                                     shape = CircleShape,
                                     color = colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                    border = BorderStroke(2.dp, colorScheme.primary.copy(alpha = 0.2f)),
+                                    border = BorderStroke(2.dp, colorScheme.outline),
                                     shadowElevation = 4.dp
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {

@@ -16,7 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+
 import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
@@ -187,7 +187,7 @@ fun VerifikasiQrRaporScreen(
                                         .size(220.dp)
                                         .clip(RoundedCornerShape(32.dp))
                                         .background(colorScheme.primary.copy(alpha = 0.03f))
-                                        .border(2.dp, colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                                        .border(2.dp, colorScheme.outline, RoundedCornerShape(32.dp))
                                         .then(if (qrScanSupported) Modifier.clickable(onClick = launchQrScan) else Modifier),
                                     contentAlignment = Alignment.Center
                                 ) {

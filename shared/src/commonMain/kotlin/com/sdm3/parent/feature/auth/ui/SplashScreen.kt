@@ -339,7 +339,7 @@ private fun SplashContent(
 
             Text(
                 text = AppBranding.SCHOOL_NAME.uppercase(),
-                color = heroContent.copy(alpha = if (isDark) 0.5f else 0.35f),
+                color = colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.labelSmall.copy(
                     letterSpacing = if (isCompact) 1.sp else 2.5.sp,
                     fontWeight = FontWeight.Black
