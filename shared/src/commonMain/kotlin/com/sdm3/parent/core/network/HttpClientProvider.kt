@@ -25,7 +25,10 @@ import io.ktor.http.encodedPath
 import com.sdm3.parent.core.event.SessionEventBus
 import com.sdm3.parent.core.network.sanitizeUserFacingMessage
 import com.sdm3.parent.isDebugBuild
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+@OptIn(ExperimentalAtomicApi::class)
 class HttpClientProvider(
     private val baseUrl: String,
     private val tokenProvider: suspend () -> String?,
@@ -81,13 +84,21 @@ class HttpClientProvider(
         }
     }
 
+    private val isHandlingSessionExpired = AtomicBoolean(false)
+
     internal suspend fun handleSessionExpiredIfNeeded(response: HttpResponse) {
         val path = response.call.request.url.encodedPath
         if (path in PUBLIC_API_PATHS) return
+        if (path in NO_SESSION_EXPIRY_API_PATHS) return
 
         if (response.status.value == 419 || response.status.value == 401) {
-            onSessionExpired()
-            SessionEventBus.emit()
+            if (!isHandlingSessionExpired.compareAndSet(expected = false, newValue = true)) return
+            try {
+                onSessionExpired()
+                SessionEventBus.emit()
+            } finally {
+                isHandlingSessionExpired.store(false)
+            }
         }
     }
 
@@ -97,6 +108,9 @@ class HttpClientProvider(
             "/api/forgot-password",
             "/api/verify-otp",
             "/api/reset-password",
+        )
+        val NO_SESSION_EXPIRY_API_PATHS = setOf(
+            "/api/parent/fcm/unregister",
         )
     }
 }
