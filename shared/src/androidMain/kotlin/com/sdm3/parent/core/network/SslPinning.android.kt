@@ -11,10 +11,5 @@ actual fun HttpClientEngineConfig.applyPlatformSslPinning(pins: List<String>) {
     pins.forEach { pin ->
         pinner.add("app.sdmuhammadiyah3smd.com", pin)
     }
-    val existing = config.preconfigured
-    if (existing != null) {
-        config.preconfigured = existing.newBuilder()
-            .certificatePinner(pinner.build())
-            .build()
-    }
+    config.config { certificatePinner(pinner.build()) }
 }
