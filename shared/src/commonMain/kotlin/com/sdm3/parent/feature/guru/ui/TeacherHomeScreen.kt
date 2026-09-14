@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.sdm3.parent.core.designsystem.component.*
+import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
+import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
 import com.sdm3.parent.core.designsystem.theme.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,11 +73,12 @@ fun TeacherHomeScreen(
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 errorMessage != null -> {
-                    Sdm3EmptyState(
-                        title = "Gagal Memuat",
+                    Sdm3ErrorState(
+                        title = "Gagal Memuat Data",
                         message = errorMessage,
+                        style = ErrorStateStyle.Generic,
                         modifier = Modifier.align(Alignment.Center),
-                        action = {
+                        primaryAction = {
                             Sdm3Button(text = "Coba Lagi", onClick = { viewModel.load() })
                         },
                     )

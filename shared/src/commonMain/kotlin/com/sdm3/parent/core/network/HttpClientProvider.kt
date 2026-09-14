@@ -92,7 +92,7 @@ class HttpClientProvider(
         if (path in NO_SESSION_EXPIRY_API_PATHS) return
 
         if (response.status.value == 419 || response.status.value == 401) {
-            if (!isHandlingSessionExpired.compareAndSet(expected = false, newValue = true)) return
+            if (!isHandlingSessionExpired.compareAndSet(false, true)) return
             try {
                 onSessionExpired()
                 SessionEventBus.emit()

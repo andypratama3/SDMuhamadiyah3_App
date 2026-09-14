@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.Sdm3Card
 import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
+import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
+import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
 import com.sdm3.parent.core.designsystem.component.ScreenGlowBackground
 import com.sdm3.parent.core.designsystem.component.ScreenScaffold
 import com.sdm3.parent.core.designsystem.theme.ProductSchoolTheme
@@ -114,11 +116,12 @@ fun GuruAbsensiScreen(
                     }
                 }
                 errorMessage != null -> {
-                    Sdm3EmptyState(
-                        title = "Gagal Memuat",
+                    Sdm3ErrorState(
+                        title = "Gagal Memuat Data",
                         message = errorMessage,
+                        style = ErrorStateStyle.Generic,
                         modifier = Modifier.fillMaxSize().padding(padding),
-                        action = {
+                        primaryAction = {
                             Sdm3Button(text = "Coba Lagi", onClick = { viewModel.loadRoster() })
                         },
                     )

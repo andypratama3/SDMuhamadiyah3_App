@@ -40,6 +40,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.sdm3.parent.core.designsystem.component.Sdm3Button
 import com.sdm3.parent.core.designsystem.component.Sdm3Card
 import com.sdm3.parent.core.designsystem.component.Sdm3EmptyState
+import com.sdm3.parent.core.designsystem.component.Sdm3ErrorState
+import com.sdm3.parent.core.designsystem.component.ErrorStateStyle
 import com.sdm3.parent.core.designsystem.component.Sdm3OutlinedButton
 import com.sdm3.parent.core.designsystem.component.ScreenGlowBackground
 import com.sdm3.parent.core.designsystem.component.ScreenScaffold
@@ -105,16 +107,17 @@ fun AbsensiSayaScreen(
                 state.isEmployeeProfileMissing -> {
                     Sdm3EmptyState(
                         title = "Profil Pegawai Belum Tersedia",
-                        message = errorMessage.orEmpty(),
+                        message = errorMessage ?: "Data profil pegawai tidak ditemukan. Silakan hubungi admin sekolah.",
                         modifier = Modifier.align(Alignment.Center),
                     )
                 }
                 errorMessage != null && state.employeeName.isBlank() -> {
-                    Sdm3EmptyState(
-                        title = "Gagal Memuat",
+                    Sdm3ErrorState(
+                        title = "Gagal Memuat Data",
                         message = errorMessage,
+                        style = ErrorStateStyle.Generic,
                         modifier = Modifier.align(Alignment.Center),
-                        action = {
+                        primaryAction = {
                             Sdm3Button(text = "Coba Lagi", onClick = { viewModel.load() })
                         },
                     )
